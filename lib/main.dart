@@ -65,8 +65,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late SearchBar searchBar;
-  List<String> myList = ['hello', 'world', 'how', 'are', 'you'];
-  int _counter = 0;
+  CarouselController carouselController = CarouselController();
+  List<String> queries = [''];
+  int currPaneIndex = 0;
 
   _MyHomePageState() {
     searchBar = SearchBar(
@@ -85,14 +86,18 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _incrementCounter() {
+  void _addNewPane() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      currPaneIndex++;
+      queries = queries.sublist(0, currPaneIndex);
+      queries.add('$currPaneIndex is the currPaneIndex after pane added');
+    });
+    carouselController.animateToPage(currPaneIndex);
+  }
+
+  void _onPageChanged(int index, CarouselPageChangedReason reason) {
+    setState(() {
+      currPaneIndex = index;
     });
   }
 
@@ -101,20 +106,24 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: searchBar.build(context),
       body: CarouselSlider(
-          options: CarouselOptions(),
-          items: myList
+          options: CarouselOptions(
+            enableInfiniteScroll: false,
+            onPageChanged: _onPageChanged,
+          ),
+          carouselController: carouselController,
+          items: queries
               .map(
                 (item) => Builder(builder: (BuildContext context) {
                   return Container(
                     child:
-                        Center(child: Text('$item and counter is $_counter')),
+                        Center(child: Text('currPaneIndex is $currPaneIndex')),
                     color: Colors.green,
                   );
                 }),
               )
               .toList()),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _addNewPane,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
