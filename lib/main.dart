@@ -66,6 +66,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late SearchBar searchBar;
   CarouselController carouselController = CarouselController();
+  TextEditingController searchController = TextEditingController();
   List<String> queries = [''];
   int currPaneIndex = 0;
 
@@ -74,8 +75,9 @@ class _MyHomePageState extends State<MyHomePage> {
         inBar: false,
         setState: setState,
         onChanged: _onChanged,
-        onClosed: _onClosed,
+        showClearButton: false,
         clearOnSubmit: false,
+        controller: searchController,
         buildDefaultAppBar: buildAppBar);
   }
 
@@ -104,18 +106,14 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       queries[currPaneIndex] = query;
     });
-  }
-
-  void _onClosed() {
-    setState(() {
-      queries[currPaneIndex] = '';
-    });
+    searchController.text = queries[currPaneIndex];
   }
 
   void _onPageChanged(int index, CarouselPageChangedReason reason) {
     setState(() {
       currPaneIndex = index;
     });
+    searchController.text = queries[currPaneIndex];
   }
 
   @override
