@@ -73,13 +73,18 @@ class _MyHomePageState extends State<MyHomePage> {
     searchBar = SearchBar(
         inBar: false,
         setState: setState,
-        onSubmitted: print,
+        onChanged: _onChanged,
+        onClosed: _onClosed,
+        clearOnSubmit: false,
         buildDefaultAppBar: buildAppBar);
   }
 
   AppBar buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text('Search Bar'),
+      title: Column(children: [
+        const Text('Fleeting Notes', style: TextStyle(fontSize: 16)),
+        Text(queries[currPaneIndex], style: const TextStyle(fontSize: 12))
+      ]),
       actions: <Widget>[
         searchBar.getSearchAction(context),
       ],
@@ -93,6 +98,18 @@ class _MyHomePageState extends State<MyHomePage> {
       queries.add('$currPaneIndex is the currPaneIndex after pane added');
     });
     carouselController.animateToPage(currPaneIndex);
+  }
+
+  void _onChanged(query) {
+    setState(() {
+      queries[currPaneIndex] = query;
+    });
+  }
+
+  void _onClosed() {
+    setState(() {
+      queries[currPaneIndex] = '';
+    });
   }
 
   void _onPageChanged(int index, CarouselPageChangedReason reason) {
