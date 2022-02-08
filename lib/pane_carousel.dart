@@ -32,6 +32,7 @@ class PaneCarousel extends StatelessWidget {
         enableInfiniteScroll: false,
         onPageChanged: onPageChanged,
         viewportFraction: 0.95,
+        scrollPhysics: const PageScrollPhysics(),
       ),
       carouselController: carouselController,
     );
