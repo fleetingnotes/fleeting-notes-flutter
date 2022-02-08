@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
+import 'pane.dart';
+
 class PaneCarousel extends StatefulWidget {
   const PaneCarousel(
       {Key? key,
@@ -31,11 +33,7 @@ class _PaneCarouselState extends State<PaneCarousel> {
         items: widget.paneQueries
             .map(
               (item) => Builder(builder: (BuildContext context) {
-                return Container(
-                  child: Center(
-                      child: Text('currPaneIndex is $widget.currPaneIndex')),
-                  color: Colors.green,
-                );
+                return Pane(query: item);
               }),
             )
             .toList());

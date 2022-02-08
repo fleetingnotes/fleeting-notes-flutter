@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
     searchBar = SearchBar(
         inBar: false,
         setState: setState,
-        onChanged: _onChanged,
+        onChanged: _onSearchChanged,
         showClearButton: false,
         clearOnSubmit: false,
         controller: searchController,
@@ -84,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
     carouselController.animateToPage(currPaneIndex);
   }
 
-  void _onChanged(query) {
+  void _onSearchChanged(query) {
     setState(() {
       paneQueries[currPaneIndex] = query;
     });
