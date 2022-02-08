@@ -19,18 +19,18 @@ class PaneCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CarouselSlider(
-        options: CarouselOptions(
-          enableInfiniteScroll: false,
-          onPageChanged: onPageChanged,
-        ),
-        carouselController: carouselController,
-        items: paneQueries
-            .map(
-              (item) => Builder(builder: (BuildContext context) {
-                return Pane(query: item);
-              }),
-            )
-            .toList());
+    return CarouselSlider.builder(
+      itemCount: paneQueries.length,
+      itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) =>
+          Pane(
+        query: paneQueries[itemIndex],
+        visible: itemIndex == currPaneIndex,
+      ),
+      options: CarouselOptions(
+        enableInfiniteScroll: false,
+        onPageChanged: onPageChanged,
+      ),
+      carouselController: carouselController,
+    );
   }
 }
