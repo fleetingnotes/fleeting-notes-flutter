@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
+import 'pane_carousel.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -67,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late SearchBar searchBar;
   CarouselController carouselController = CarouselController();
   TextEditingController searchController = TextEditingController();
-  List<String> queries = [''];
+  List<String> paneQueries = [''];
   int currPaneIndex = 0;
 
   _MyHomePageState() {
@@ -85,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return AppBar(
       title: Column(children: [
         const Text('Fleeting Notes', style: TextStyle(fontSize: 16)),
-        Text(queries[currPaneIndex], style: const TextStyle(fontSize: 12))
+        Text(paneQueries[currPaneIndex], style: const TextStyle(fontSize: 12))
       ]),
       actions: <Widget>[
         searchBar.getSearchAction(context),
@@ -93,53 +95,41 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _addNewPane() {
+  void _addNewPane(query) {
     setState(() {
       currPaneIndex++;
-      queries = queries.sublist(0, currPaneIndex);
-      queries.add('$currPaneIndex is the currPaneIndex after pane added');
+      paneQueries = paneQueries.sublist(0, currPaneIndex);
+      paneQueries.add(query);
     });
     carouselController.animateToPage(currPaneIndex);
   }
 
   void _onChanged(query) {
     setState(() {
-      queries[currPaneIndex] = query;
+      paneQueries[currPaneIndex] = query;
     });
-    searchController.text = queries[currPaneIndex];
   }
 
   void _onPageChanged(int index, CarouselPageChangedReason reason) {
     setState(() {
       currPaneIndex = index;
     });
-    searchController.text = queries[currPaneIndex];
+    searchController.text = paneQueries[currPaneIndex];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: searchBar.build(context),
-      body: CarouselSlider(
-          options: CarouselOptions(
-            enableInfiniteScroll: false,
-            onPageChanged: _onPageChanged,
-          ),
-          carouselController: carouselController,
-          items: queries
-              .map(
-                (item) => Builder(builder: (BuildContext context) {
-                  return Container(
-                    child:
-                        Center(child: Text('currPaneIndex is $currPaneIndex')),
-                    color: Colors.green,
-                  );
-                }),
-              )
-              .toList()),
+      body: PaneCarousel(
+        paneQueries: paneQueries,
+        currPaneIndex: currPaneIndex,
+        onPageChanged: _onPageChanged,
+        carouselController: carouselController,
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addNewPane,
-        tooltip: 'Increment',
+        onPressed: () => _addNewPane(''),
+        tooltip: 'Add New Pane',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
