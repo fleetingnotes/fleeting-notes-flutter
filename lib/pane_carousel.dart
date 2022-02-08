@@ -19,6 +19,7 @@ class PaneCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double height = MediaQuery.of(context).size.height;
     return CarouselSlider.builder(
       itemCount: paneQueries.length,
       itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) =>
@@ -27,8 +28,10 @@ class PaneCarousel extends StatelessWidget {
         visible: itemIndex == currPaneIndex,
       ),
       options: CarouselOptions(
+        height: height,
         enableInfiniteScroll: false,
         onPageChanged: onPageChanged,
+        viewportFraction: 0.95,
       ),
       carouselController: carouselController,
     );
