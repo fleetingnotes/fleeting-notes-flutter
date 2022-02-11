@@ -26,7 +26,7 @@ class PaneCarousel extends StatelessWidget {
     return CarouselSlider.builder(
       itemCount: paneQueries.length,
       itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) =>
-          Pane(
+          ListOfNotes(
         query: paneQueries[itemIndex],
         visible: itemIndex == currPaneIndex,
         getNotes: db.getNotes,

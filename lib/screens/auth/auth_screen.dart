@@ -51,30 +51,30 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextField(
-            decoration: const InputDecoration(
-              hintText: 'Email',
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              decoration: const InputDecoration(
+                hintText: 'Email',
+              ),
+              onChanged: (String val) {
+                setState(() {
+                  email = val;
+                });
+              },
             ),
-            onChanged: (String val) {
-              setState(() {
-                email = val;
-              });
-            },
-          ),
-          TextField(
-            decoration: const InputDecoration(
-              hintText: 'Password',
+            TextField(
+              decoration: const InputDecoration(
+                hintText: 'Password',
+              ),
+              onChanged: (String val) {
+                setState(() {
+                  password = val;
+                });
+              },
             ),
-            onChanged: (String val) {
-              setState(() {
-                password = val;
-              });
-            },
-          ),
-          Container(
+            Container(
               margin: EdgeInsets.only(top: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -87,9 +87,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () => _register(context),
                   ),
                 ],
-              )),
-        ],
-      )),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

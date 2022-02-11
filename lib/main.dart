@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import 'screens/auth/auth_screen.dart';
+import 'screens/main/components/note_card.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

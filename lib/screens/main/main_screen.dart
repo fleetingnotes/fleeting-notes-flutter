@@ -5,6 +5,7 @@ import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 
 import '../../realm_db.dart';
 import 'components/pane_carousel.dart';
+import 'components/list_of_notes.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.db}) : super(key: key);
@@ -70,20 +71,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: searchBar.build(context),
-      body: PaneCarousel(
-        db: widget.db,
-        paneQueries: paneQueries,
-        currPaneIndex: currPaneIndex,
-        onPageChanged: _onPageChanged,
-        carouselController: carouselController,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _addNewPane(''),
-        tooltip: 'Add New Pane',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+    return ListOfNotes(query: '', visible: true, getNotes: widget.db.getNotes);
+    // Scaffold(
+    //   appBar: searchBar.build(context),
+    //   body: PaneCarousel(
+    //     db: widget.db,
+    //     paneQueries: paneQueries,
+    //     currPaneIndex: currPaneIndex,
+    //     onPageChanged: _onPageChanged,
+    //     carouselController: carouselController,
+    //   ),
+    //   floatingActionButton: FloatingActionButton(
+    //     onPressed: () => _addNewPane(''),
+    //     tooltip: 'Add New Pane',
+    //     child: const Icon(Icons.add),
+    //   ), // This trailing comma makes auto-formatting nicer for build methods.
+    // );
   }
 }

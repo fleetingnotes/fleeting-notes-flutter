@@ -1,77 +1,98 @@
 import 'package:flutter/material.dart';
+import '../../../constants.dart';
+import '../../../extensions.dart';
+import '../../../models/Note.dart';
 
 class NoteCard extends StatelessWidget {
-  const NoteCard({Key? key, required this.title, required this.content})
-      : super(key: key);
+  const NoteCard({
+    Key? key,
+    required this.note,
+    this.isActive = false,
+  }) : super(key: key);
 
-  final String title;
-  final String content;
+  final bool isActive;
+  final Note note;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: ListTile(
-        title: Text(title),
-        subtitle: Text(content),
-      ),
-    );
+    return Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: kDefaultPadding, vertical: kDefaultPadding / 2),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(15),
+          onTap: () {},
+          child: Stack(children: [
+            Container(
+              padding: EdgeInsets.all(kDefaultPadding),
+              decoration: BoxDecoration(
+                color: isActive ? kPrimaryColor : kBgDarkColor,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (note.title != '')
+                                Text(
+                                  note.title,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: isActive ? Colors.white : kTextColor,
+                                  ),
+                                ),
+                              if (note.content != '')
+                                Text(
+                                  note.content,
+                                  maxLines: 2,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText2!
+                                      .copyWith(
+                                        color: isActive
+                                            ? Colors.white
+                                            : kTextColor,
+                                      ),
+                                ),
+                            ]),
+                      ),
+                      SizedBox(width: kDefaultPadding),
+                      Column(
+                        children: [
+                          Text(
+                            note.getDateTime(),
+                            style:
+                                Theme.of(context).textTheme.caption!.copyWith(
+                                      color: isActive ? Colors.white70 : null,
+                                    ),
+                          ),
+                          SizedBox(height: 5),
+                          if (note.hasAttachment) // TODO: Add attachment
+                            Icon(
+                              Icons.attachment,
+                              size: 15,
+                              color: isActive ? Colors.white70 : kGrayColor,
+                            ),
+                        ],
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ).addNeumorphism(
+              blurRadius: 15,
+              borderRadius: 15,
+              offset: Offset(5, 5),
+              topShadowColor: Colors.white60,
+              bottomShadowColor: Color(0xFF234395).withOpacity(0.15),
+            ),
+          ]),
+        ));
   }
 }
-
-// class NoteCard extends StatelessWidget {
-//   const NoteCard(
-//       {Key? key, required this.id, required this.title, required this.content})
-//       : super(key: key);
-
-//   final String id;
-//   final String title;
-//   final String content;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//         shape: RoundedRectangleBorder(
-//           borderRadius: BorderRadius.circular(5),
-//         ),
-//         child: Container(
-//             alignment: Alignment.centerLeft,
-//             padding: const EdgeInsets.symmetric(
-//               horizontal: 10,
-//               vertical: 5,
-//             ),
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 TextField(
-//                   style: const TextStyle(fontSize: 16),
-//                   controller: TextEditingController(text: title),
-//                   decoration: const InputDecoration(
-//                     hintText: "Title",
-//                     border: InputBorder.none,
-//                   ),
-//                 ),
-//                 TextField(
-//                   autofocus: true,
-//                   controller: TextEditingController(text: content),
-//                   minLines: 5,
-//                   maxLines: 10,
-//                   style: const TextStyle(fontSize: 14),
-//                   decoration: const InputDecoration(
-//                     hintText: "Note",
-//                     border: InputBorder.none,
-//                   ),
-//                 ),
-//                 Text(
-//                   id,
-//                   style: const TextStyle(
-//                       fontSize: 12, fontWeight: FontWeight.w100),
-//                   // textAlign: TextAlign.left,
-//                 ),
-//               ],
-//             )));
-//   }
-// }
