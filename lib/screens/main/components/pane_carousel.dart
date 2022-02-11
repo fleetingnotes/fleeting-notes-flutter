@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
-import 'pane.dart';
-import 'realm_db.dart';
+import 'list_of_notes.dart';
+import '../../../realm_db.dart';
 
 class PaneCarousel extends StatelessWidget {
   const PaneCarousel(
