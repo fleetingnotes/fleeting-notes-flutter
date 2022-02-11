@@ -1,13 +1,16 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 
 class Pane extends StatefulWidget {
-  const Pane({Key? key, required this.query, required this.visible})
+  const Pane(
+      {Key? key,
+      required this.query,
+      required this.visible,
+      required this.getNotes})
       : super(key: key);
 
   final String query;
   final bool visible;
+  final Function getNotes;
 
   @override
   State<Pane> createState() => _PaneState();
@@ -15,20 +18,19 @@ class Pane extends StatefulWidget {
 
 class _PaneState extends State<Pane> {
   final ScrollController scrollController = ScrollController();
-  late List<Map<String, String>> notes;
+  late List<Map<String, String>> notes = [];
 
-  _PaneState() {
-    // function to get notes from realm here
-    notes = [
-      {"id": "0", "title": "hello", "content": "world"},
-      {"id": "0", "title": "hello", "content": "world"},
-      {"id": "0", "title": "hello", "content": "world"},
-      {"id": "0", "title": "hello", "content": "world"},
-      {"id": "0", "title": "hello", "content": "world"},
-      {"id": "0", "title": "hello", "content": "world"},
-      {"id": "0", "title": "hello", "content": "world"},
-      {"id": "0", "title": "hello", "content": "world"},
-    ];
+  Future<void> loadNotes() async {
+    var tempNotes = await widget.getNotes();
+    setState(() {
+      notes = tempNotes;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadNotes();
   }
 
   @override
