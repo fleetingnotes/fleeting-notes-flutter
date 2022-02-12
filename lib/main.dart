@@ -1,25 +1,12 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import 'screens/auth/auth_screen.dart';
-import 'screens/main/components/note_card.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await RealmApp.init("fleeting-notes-knojs");
 
   runApp(const MyApp());
-}
-
-// https://docs.flutter.dev/release/breaking-changes/default-scroll-behavior-drag
-class MyCustomScrollBehavior extends MaterialScrollBehavior {
-  // Override behavior methods and getters like dragDevices
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        // etc.
-      };
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      scrollBehavior: MyCustomScrollBehavior(),
+      // scrollBehavior: MyCustomScrollBehavior(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           primarySwatch: Colors.blue,

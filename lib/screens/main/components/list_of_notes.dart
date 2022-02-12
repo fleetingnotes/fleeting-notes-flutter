@@ -124,18 +124,5 @@ class _ListOfNotesState extends State<ListOfNotes> {
         ),
       ),
     );
-    // Card(
-    //   color: Theme.of(context).colorScheme.background,
-    //   shape: RoundedRectangleBorder(
-    //     borderRadius: BorderRadius.circular(10),
-    //   ),
-    //   child: ListView.builder(
-    //     itemCount: notes.length,
-    //     itemBuilder: (context, index) {
-    //       return NoteCard(note: notes[index]);
-    //     },
-    //     controller: scrollController,
-    //   ),
-    // );
   }
 }

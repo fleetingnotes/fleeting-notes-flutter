@@ -1,10 +1,12 @@
+import 'package:fleeting_notes_flutter/responsive.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 
 import '../../realm_db.dart';
-import 'components/pane_carousel.dart';
+import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'components/list_of_notes.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -71,21 +73,39 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListOfNotes(query: '', visible: true, getNotes: widget.db.getNotes);
-    // Scaffold(
-    //   appBar: searchBar.build(context),
-    //   body: PaneCarousel(
-    //     db: widget.db,
-    //     paneQueries: paneQueries,
-    //     currPaneIndex: currPaneIndex,
-    //     onPageChanged: _onPageChanged,
-    //     carouselController: carouselController,
-    //   ),
-    //   floatingActionButton: FloatingActionButton(
-    //     onPressed: () => _addNewPane(''),
-    //     tooltip: 'Add New Pane',
-    //     child: const Icon(Icons.add),
-    //   ), // This trailing comma makes auto-formatting nicer for build methods.
-    // );
+    return Scaffold(
+      body: Responsive(
+        mobile:
+            ListOfNotes(query: '', visible: true, getNotes: widget.db.getNotes),
+        tablet: Row(
+          children: [
+            Expanded(
+              flex: 6,
+              child: ListOfNotes(
+                  query: '', visible: true, getNotes: widget.db.getNotes),
+            ),
+            Expanded(
+                flex: 9,
+                child: NoteScreen(
+                    note: Note(
+                        id: '', title: 'i am title', content: 'i am content'))),
+          ],
+        ),
+        desktop: Row(
+          children: [
+            Expanded(
+              flex: 6,
+              child: ListOfNotes(
+                  query: '', visible: true, getNotes: widget.db.getNotes),
+            ),
+            Expanded(
+                flex: 9,
+                child: NoteScreen(
+                    note: Note(
+                        id: '', title: 'i am title', content: 'i am content'))),
+          ],
+        ),
+      ),
+    );
   }
 }
