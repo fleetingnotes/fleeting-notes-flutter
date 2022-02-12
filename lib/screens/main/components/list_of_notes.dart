@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:flutter/material.dart';
 
 import 'note_card.dart';
@@ -8,16 +9,14 @@ import '../../../responsive.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ListOfNotes extends StatefulWidget {
-  const ListOfNotes(
-      {Key? key,
-      required this.query,
-      required this.visible,
-      required this.getNotes})
-      : super(key: key);
+  const ListOfNotes({
+    Key? key,
+    required this.query,
+    required this.db,
+  }) : super(key: key);
 
   final String query;
-  final bool visible;
-  final Function getNotes;
+  final RealmDB db;
 
   @override
   State<ListOfNotes> createState() => _ListOfNotesState();
@@ -28,7 +27,7 @@ class _ListOfNotesState extends State<ListOfNotes> {
   late List<Note> notes = [];
 
   Future<void> loadNotes() async {
-    var tempNotes = await widget.getNotes();
+    var tempNotes = await widget.db.getNotes();
     setState(() {
       notes = tempNotes;
     });
@@ -114,6 +113,7 @@ class _ListOfNotesState extends State<ListOfNotes> {
               SizedBox(height: kDefaultPadding),
               Expanded(
                 child: ListView.builder(
+                  controller: scrollController,
                   itemCount: notes.length,
                   itemBuilder: (context, index) =>
                       NoteCard(note: notes[index], isActive: false),

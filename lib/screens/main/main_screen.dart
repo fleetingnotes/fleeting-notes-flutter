@@ -75,34 +75,39 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Responsive(
-        mobile:
-            ListOfNotes(query: '', visible: true, getNotes: widget.db.getNotes),
+        mobile: ListOfNotes(query: '', db: widget.db),
         tablet: Row(
           children: [
             Expanded(
               flex: 6,
-              child: ListOfNotes(
-                  query: '', visible: true, getNotes: widget.db.getNotes),
+              child: ListOfNotes(query: '', db: widget.db),
             ),
             Expanded(
-                flex: 9,
-                child: NoteScreen(
-                    note: Note(
-                        id: '', title: 'i am title', content: 'i am content'))),
+              flex: 9,
+              child: NoteScreen(
+                note: Note(
+                  id: '0123',
+                  title: 'i am title',
+                  content: 'i am content',
+                ),
+                db: widget.db,
+              ),
+            ),
           ],
         ),
         desktop: Row(
           children: [
             Expanded(
               flex: 6,
-              child: ListOfNotes(
-                  query: '', visible: true, getNotes: widget.db.getNotes),
+              child: ListOfNotes(query: '', db: widget.db),
             ),
             Expanded(
                 flex: 9,
                 child: NoteScreen(
-                    note: Note(
-                        id: '', title: 'i am title', content: 'i am content'))),
+                  note: Note(
+                      id: '123', title: 'i am title', content: 'i am content'),
+                  db: widget.db,
+                )),
           ],
         ),
       ),
