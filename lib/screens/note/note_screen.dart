@@ -73,7 +73,12 @@ class NoteScreen extends StatelessWidget {
                       Text("Backlinks", style: TextStyle(fontSize: 12)),
                       Divider(thickness: 1),
                       SizedBox(height: kDefaultPadding / 2),
-                      ...backlinkNotes.map((note) => NoteCard(note: note)),
+                      ...backlinkNotes.map((note) => NoteCard(
+                            note: note,
+                            press: () {
+                              db.navigateToNote(note);
+                            },
+                          )),
                     ],
                   ),
                 ),

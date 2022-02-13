@@ -84,14 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Expanded(
               flex: 9,
-              child: NoteScreen(
-                note: Note(
-                  id: '0123',
-                  title: 'i am title',
-                  content: 'i am content',
-                ),
-                db: widget.db,
-              ),
+              child: NoteScreenNavigator(db: widget.db),
             ),
           ],
         ),
@@ -102,13 +95,37 @@ class _MyHomePageState extends State<MyHomePage> {
               child: ListOfNotes(query: '', db: widget.db),
             ),
             Expanded(
-                flex: 9,
-                child: NoteScreen(
-                  note: Note(
-                      id: '123', title: 'i am title', content: 'i am content'),
-                  db: widget.db,
-                )),
+              flex: 9,
+              child: NoteScreenNavigator(db: widget.db),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class NoteScreenNavigator extends StatelessWidget {
+  const NoteScreenNavigator({
+    Key? key,
+    required this.db,
+  }) : super(key: key);
+
+  final RealmDB db;
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: db.navigatorKey,
+      onGenerateRoute: (route) => PageRouteBuilder(
+        settings: route,
+        pageBuilder: (context, _, __) => NoteScreen(
+          note: Note(
+            id: '0123',
+            title: 'i am title',
+            content: 'i am content',
+          ),
+          db: db,
         ),
       ),
     );

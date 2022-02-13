@@ -25,6 +25,7 @@ class ListOfNotes extends StatefulWidget {
 class _ListOfNotesState extends State<ListOfNotes> {
   final ScrollController scrollController = ScrollController();
   late List<Note> notes = [];
+  int activeNoteIndex = 0;
 
   Future<void> loadNotes() async {
     var tempNotes = await widget.db.getNotes();
@@ -37,6 +38,14 @@ class _ListOfNotesState extends State<ListOfNotes> {
   void initState() {
     super.initState();
     loadNotes();
+  }
+
+  void _pressNote(int index) {
+    setState(() {
+      activeNoteIndex = index;
+    });
+    widget.db.popAllRoutes();
+    widget.db.navigateToNote(notes[index]);
   }
 
   @override
@@ -113,10 +122,18 @@ class _ListOfNotesState extends State<ListOfNotes> {
               SizedBox(height: kDefaultPadding),
               Expanded(
                 child: ListView.builder(
+                  key: PageStorageKey('ListOfNotes'),
                   controller: scrollController,
                   itemCount: notes.length,
-                  itemBuilder: (context, index) =>
-                      NoteCard(note: notes[index], isActive: false),
+                  itemBuilder: (context, index) => NoteCard(
+                    note: notes[index],
+                    isActive: Responsive.isMobile(context)
+                        ? false
+                        : index == activeNoteIndex,
+                    press: () {
+                      _pressNote(index);
+                    },
+                  ),
                 ),
               ),
             ],
