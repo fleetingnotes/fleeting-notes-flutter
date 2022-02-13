@@ -68,7 +68,7 @@ class NoteCard extends StatelessWidget {
                       Column(
                         children: [
                           Text(
-                            note.getDateTime(),
+                            note.getShortDateTimeStr(),
                             style:
                                 Theme.of(context).textTheme.caption!.copyWith(
                                       color: isActive ? Colors.white70 : null,

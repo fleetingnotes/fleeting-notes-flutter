@@ -44,7 +44,7 @@ class NoteScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Today at 15:32", // TODO: get created time
+                        note.getDateTimeStr(),
                         style: Theme.of(context).textTheme.caption,
                       ),
                       TextField(

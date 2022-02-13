@@ -37,6 +37,7 @@ dependencies:
   flutter_search_bar: ^3.0.0-dev.1
   carousel_slider: ^4.0.0
   flutter_mongodb_realm: ^1.2.6
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
