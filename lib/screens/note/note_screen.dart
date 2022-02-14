@@ -3,6 +3,7 @@ import '../../models/Note.dart';
 
 import 'package:fleeting_notes_flutter/screens/main/components/note_card.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import '../../constants.dart';
 
 class NoteScreen extends StatelessWidget {
@@ -34,8 +35,11 @@ class NoteScreen extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
-              AppBar(),
-              Divider(thickness: 1),
+              Header(
+                onSave: () {},
+                onDelete: () {},
+              ),
+              const Divider(thickness: 1),
               Expanded(
                 child: SingleChildScrollView(
                   controller: ScrollController(),
@@ -71,7 +75,7 @@ class NoteScreen extends StatelessWidget {
                       ),
                       SizedBox(height: kDefaultPadding),
                       Text("Backlinks", style: TextStyle(fontSize: 12)),
-                      Divider(thickness: 1),
+                      Divider(thickness: 1, height: 1),
                       SizedBox(height: kDefaultPadding / 2),
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
