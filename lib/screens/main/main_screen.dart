@@ -1,13 +1,12 @@
-import 'package:fleeting_notes_flutter/responsive.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_search_bar/flutter_search_bar.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 
-import '../../realm_db.dart';
+import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'components/list_of_notes.dart';
+import 'package:fleeting_notes_flutter/screens/main/components/list_of_notes.dart';
+import 'package:fleeting_notes_flutter/components/side_menu.dart';
+import 'package:fleeting_notes_flutter/responsive.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.db}) : super(key: key);
@@ -18,8 +17,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final RealmApp app = RealmApp();
-  CarouselController carouselController = CarouselController();
   TextEditingController searchController = TextEditingController();
 
   @override
@@ -28,8 +25,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 250),
-        child: Text('hello from drawer'),
+        constraints: const BoxConstraints(maxWidth: 250),
+        child: SideMenu(db: widget.db),
       ),
       body: Responsive(
         mobile: ListOfNotes(
@@ -55,8 +52,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         desktop: Row(
           children: [
+            // Expanded(
+            //   flex: 3,
+            //   child: SideMenu(db: widget.db),
+            // ),
             Expanded(
-              flex: 6,
+              flex: 3,
               child: ListOfNotes(
                 query: '',
                 db: widget.db,

@@ -4,13 +4,13 @@ import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import '../../realm_db.dart';
 import '../main/main_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class AuthScreen extends StatefulWidget {
+  const AuthScreen({Key? key}) : super(key: key);
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _AuthScreenState createState() => _AuthScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _AuthScreenState extends State<AuthScreen> {
   final RealmApp app = RealmApp();
   String email = '';
   String password = '';
@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     MongoRealmClient client = MongoRealmClient();
     MongoCollection collection =
         client.getDatabase("todo").getCollection("Note");
-    RealmDB db = RealmDB(collection: collection);
+    RealmDB db = RealmDB(collection: collection, app: app);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => MyHomePage(db: db)),

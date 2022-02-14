@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
               .copyWith(background: const Color(0xECECECEC))),
-      home: LoginScreen(),
+      home: const AuthScreen(),
     );
   }
 }
