@@ -13,10 +13,12 @@ class ListOfNotes extends StatefulWidget {
     Key? key,
     required this.query,
     required this.db,
+    required this.openDrawer,
   }) : super(key: key);
 
   final String query;
   final RealmDB db;
+  final VoidCallback? openDrawer;
 
   @override
   State<ListOfNotes> createState() => _ListOfNotesState();
@@ -50,13 +52,7 @@ class _ListOfNotesState extends State<ListOfNotes> {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 250),
-        child: Text('hello from drawer'),
-      ),
       body: Container(
         padding: EdgeInsets.only(top: kIsWeb ? kDefaultPadding : 0),
         color: kBgDarkColor,
@@ -75,9 +71,7 @@ class _ListOfNotesState extends State<ListOfNotes> {
                     if (!Responsive.isDesktop(context))
                       IconButton(
                         icon: Icon(Icons.menu),
-                        onPressed: () {
-                          _scaffoldKey.currentState?.openDrawer();
-                        },
+                        onPressed: widget.openDrawer,
                       ),
                     if (!Responsive.isDesktop(context)) SizedBox(width: 5),
                     Expanded(

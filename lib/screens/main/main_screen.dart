@@ -19,68 +19,33 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final RealmApp app = RealmApp();
-  late String userId;
-  late SearchBar searchBar;
   CarouselController carouselController = CarouselController();
   TextEditingController searchController = TextEditingController();
-  List<String> paneQueries = [''];
-  int currPaneIndex = 0;
-
-  _MyHomePageState() {
-    searchBar = SearchBar(
-        inBar: false,
-        setState: setState,
-        onChanged: _onSearchChanged,
-        showClearButton: false,
-        clearOnSubmit: false,
-        controller: searchController,
-        buildDefaultAppBar: buildAppBar);
-  }
-
-  AppBar buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Column(children: [
-        const Text('Fleeting Notes', style: TextStyle(fontSize: 16)),
-        Text(paneQueries[currPaneIndex], style: const TextStyle(fontSize: 12))
-      ]),
-      actions: <Widget>[
-        searchBar.getSearchAction(context),
-      ],
-    );
-  }
-
-  void _addNewPane(query) {
-    setState(() {
-      currPaneIndex++;
-      paneQueries = paneQueries.sublist(0, currPaneIndex);
-      paneQueries.add(query);
-    });
-    carouselController.animateToPage(currPaneIndex);
-  }
-
-  void _onSearchChanged(query) {
-    setState(() {
-      paneQueries[currPaneIndex] = query;
-    });
-  }
-
-  void _onPageChanged(int index, CarouselPageChangedReason reason) {
-    setState(() {
-      currPaneIndex = index;
-    });
-    searchController.text = paneQueries[currPaneIndex];
-  }
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 250),
+        child: Text('hello from drawer'),
+      ),
       body: Responsive(
-        mobile: ListOfNotes(query: '', db: widget.db),
+        mobile: ListOfNotes(
+          query: '',
+          db: widget.db,
+          openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
         tablet: Row(
           children: [
             Expanded(
               flex: 6,
-              child: ListOfNotes(query: '', db: widget.db),
+              child: ListOfNotes(
+                query: '',
+                db: widget.db,
+                openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+              ),
             ),
             Expanded(
               flex: 9,
@@ -92,7 +57,11 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Expanded(
               flex: 6,
-              child: ListOfNotes(query: '', db: widget.db),
+              child: ListOfNotes(
+                query: '',
+                db: widget.db,
+                openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+              ),
             ),
             Expanded(
               flex: 9,
