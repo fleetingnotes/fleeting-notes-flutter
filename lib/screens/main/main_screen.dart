@@ -1,13 +1,12 @@
-import 'package:fleeting_notes_flutter/responsive.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_search_bar/flutter_search_bar.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 
-import '../../realm_db.dart';
+import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'components/list_of_notes.dart';
+import 'package:fleeting_notes_flutter/screens/main/components/list_of_notes.dart';
+import 'package:fleeting_notes_flutter/components/side_menu.dart';
+import 'package:fleeting_notes_flutter/responsive.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.db}) : super(key: key);
@@ -18,69 +17,32 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final RealmApp app = RealmApp();
-  late String userId;
-  late SearchBar searchBar;
-  CarouselController carouselController = CarouselController();
   TextEditingController searchController = TextEditingController();
-  List<String> paneQueries = [''];
-  int currPaneIndex = 0;
-
-  _MyHomePageState() {
-    searchBar = SearchBar(
-        inBar: false,
-        setState: setState,
-        onChanged: _onSearchChanged,
-        showClearButton: false,
-        clearOnSubmit: false,
-        controller: searchController,
-        buildDefaultAppBar: buildAppBar);
-  }
-
-  AppBar buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Column(children: [
-        const Text('Fleeting Notes', style: TextStyle(fontSize: 16)),
-        Text(paneQueries[currPaneIndex], style: const TextStyle(fontSize: 12))
-      ]),
-      actions: <Widget>[
-        searchBar.getSearchAction(context),
-      ],
-    );
-  }
-
-  void _addNewPane(query) {
-    setState(() {
-      currPaneIndex++;
-      paneQueries = paneQueries.sublist(0, currPaneIndex);
-      paneQueries.add(query);
-    });
-    carouselController.animateToPage(currPaneIndex);
-  }
-
-  void _onSearchChanged(query) {
-    setState(() {
-      paneQueries[currPaneIndex] = query;
-    });
-  }
-
-  void _onPageChanged(int index, CarouselPageChangedReason reason) {
-    setState(() {
-      currPaneIndex = index;
-    });
-    searchController.text = paneQueries[currPaneIndex];
-  }
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 250),
+        child: SideMenu(db: widget.db),
+      ),
       body: Responsive(
-        mobile: ListOfNotes(query: '', db: widget.db),
+        mobile: ListOfNotes(
+          query: '',
+          db: widget.db,
+          openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
         tablet: Row(
           children: [
             Expanded(
               flex: 6,
-              child: ListOfNotes(query: '', db: widget.db),
+              child: ListOfNotes(
+                query: '',
+                db: widget.db,
+                openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+              ),
             ),
             Expanded(
               flex: 9,
@@ -90,9 +52,17 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         desktop: Row(
           children: [
+            // Expanded(
+            //   flex: 3,
+            //   child: SideMenu(db: widget.db),
+            // ),
             Expanded(
-              flex: 6,
-              child: ListOfNotes(query: '', db: widget.db),
+              flex: 3,
+              child: ListOfNotes(
+                query: '',
+                db: widget.db,
+                openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+              ),
             ),
             Expanded(
               flex: 9,

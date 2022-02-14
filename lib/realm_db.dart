@@ -5,8 +5,9 @@ import 'models/Note.dart';
 
 class RealmDB {
   // TODO: pass collection as parameter
-  RealmDB({required this.collection});
+  RealmDB({required this.collection, required this.app});
 
+  final RealmApp app;
   final MongoCollection collection;
   final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -21,6 +22,10 @@ class RealmDB {
             ))
         .toList();
     return notes;
+  }
+
+  void logout() {
+    app.logout();
   }
 
   void navigateToNote(Note note) {
