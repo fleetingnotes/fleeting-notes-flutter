@@ -6,8 +6,8 @@ import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import '../../constants.dart';
 
-class NoteScreen extends StatelessWidget {
-  NoteScreen({
+class NoteScreen extends StatefulWidget {
+  const NoteScreen({
     Key? key,
     required this.note,
     required this.db,
@@ -15,17 +15,22 @@ class NoteScreen extends StatelessWidget {
 
   final Note note;
   final RealmDB db;
-  final List<Note> backlinkNotes = [
-    Note(id: '0', title: 'backlink Note', content: 'backlink Note'),
-    Note(id: '0', title: 'backlink Note', content: 'backlink Note'),
-    Note(id: '0', title: 'backlink Note', content: 'backlink Note'),
-    Note(id: '0', title: 'backlink Note', content: 'backlink Note'),
-    Note(id: '0', title: 'backlink Note', content: 'backlink Note'),
-    Note(id: '0', title: 'backlink Note', content: 'backlink Note'),
-    Note(id: '0', title: 'backlink Note', content: 'backlink Note'),
-    Note(id: '0', title: 'backlink Note', content: 'backlink Note'),
-    Note(id: '0', title: 'backlink Note', content: 'backlink Note'),
-  ];
+  @override
+  _NoteScreenState createState() => _NoteScreenState();
+}
+
+class _NoteScreenState extends State<NoteScreen> {
+  List<Note> backlinkNotes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    widget.db.getBacklinkNotes(widget.note).then((notes) {
+      setState(() {
+        backlinkNotes = notes;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +53,7 @@ class NoteScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        note.getDateTimeStr(),
+                        widget.note.getDateTimeStr(),
                         style: Theme.of(context).textTheme.caption,
                       ),
                       TextField(
@@ -56,7 +61,8 @@ class NoteScreen extends StatelessWidget {
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
-                        controller: TextEditingController(text: note.title),
+                        controller:
+                            TextEditingController(text: widget.note.title),
                         decoration: const InputDecoration(
                           hintText: "Title",
                           border: InputBorder.none,
@@ -64,7 +70,8 @@ class NoteScreen extends StatelessWidget {
                       ),
                       TextField(
                         autofocus: true,
-                        controller: TextEditingController(text: note.content),
+                        controller:
+                            TextEditingController(text: widget.note.content),
                         minLines: 5,
                         maxLines: 10,
                         style: Theme.of(context).textTheme.bodyText2,
@@ -80,7 +87,7 @@ class NoteScreen extends StatelessWidget {
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             press: () {
-                              db.navigateToNote(note);
+                              widget.db.navigateToNote(note);
                             },
                           )),
                     ],
