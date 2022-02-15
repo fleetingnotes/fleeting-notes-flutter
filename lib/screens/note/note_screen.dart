@@ -21,10 +21,14 @@ class NoteScreen extends StatefulWidget {
 
 class _NoteScreenState extends State<NoteScreen> {
   List<Note> backlinkNotes = [];
+  late TextEditingController titleController;
+  late TextEditingController contentController;
 
   @override
   void initState() {
     super.initState();
+    titleController = TextEditingController(text: widget.note.title);
+    contentController = TextEditingController(text: widget.note.content);
     widget.db.getBacklinkNotes(widget.note).then((notes) {
       setState(() {
         backlinkNotes = notes;
@@ -61,8 +65,7 @@ class _NoteScreenState extends State<NoteScreen> {
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
-                        controller:
-                            TextEditingController(text: widget.note.title),
+                        controller: titleController,
                         decoration: const InputDecoration(
                           hintText: "Title",
                           border: InputBorder.none,
@@ -70,8 +73,7 @@ class _NoteScreenState extends State<NoteScreen> {
                       ),
                       TextField(
                         autofocus: true,
-                        controller:
-                            TextEditingController(text: widget.note.content),
+                        controller: contentController,
                         minLines: 5,
                         maxLines: 10,
                         style: Theme.of(context).textTheme.bodyText2,
