@@ -2,16 +2,19 @@ import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import 'models/Note.dart';
+import 'dart:convert';
 
 class RealmDB {
   // TODO: pass collection as parameter
-  RealmDB({required this.collection, required this.app});
+  RealmDB({required this.app});
 
   final RealmApp app;
-  final MongoCollection collection;
+  final MongoRealmClient client = MongoRealmClient();
   final navigatorKey = GlobalKey<NavigatorState>();
 
   Future<List<Note>> getNotes() async {
+    MongoCollection collection =
+        client.getDatabase("todo").getCollection("Note");
     List<MongoDocument> docs = await collection.find();
 
     var notes = docs
@@ -26,6 +29,21 @@ class RealmDB {
 
   void logout() {
     app.logout();
+  }
+
+  Future<List<Note>> getBacklinkNotes(Note note) async {
+    var notesStr =
+        await client.callFunction("getBacklinkNotes", args: [note.title]);
+    var noteList = jsonDecode(notesStr);
+    var notes = noteList.map((item) {
+      return Note(
+        id: item["_id"].toString(),
+        title: item["title"].toString(),
+        content: item["content"].toString(),
+      );
+    }).toList();
+
+    return List<Note>.from(notes);
   }
 
   void navigateToNote(Note note) {

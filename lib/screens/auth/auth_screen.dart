@@ -28,11 +28,7 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
     var user = await app.login(Credentials.emailPassword(email, password));
-    // TODO: Add check for user to ensure its valid
-    MongoRealmClient client = MongoRealmClient();
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    RealmDB db = RealmDB(collection: collection, app: app);
+    RealmDB db = RealmDB(app: app);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => MyHomePage(db: db)),
