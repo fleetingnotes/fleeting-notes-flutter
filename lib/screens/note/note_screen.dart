@@ -21,6 +21,7 @@ class NoteScreen extends StatefulWidget {
 
 class _NoteScreenState extends State<NoteScreen> {
   List<Note> backlinkNotes = [];
+  bool hasNewChanges = false;
   late TextEditingController titleController;
   late TextEditingController contentController;
 
@@ -36,6 +37,48 @@ class _NoteScreenState extends State<NoteScreen> {
     });
   }
 
+  Future<String> checkTitle(id, title) async {
+    String errMessage = '';
+    if (title == '') return errMessage;
+
+    RegExp r = RegExp(r'[\[\]\#\*]');
+    final invalidMatch = r.firstMatch(titleController.text);
+    final titleExists =
+        await widget.db.titleExists(widget.note.id, titleController.text);
+
+    if (invalidMatch != null) {
+      errMessage = 'Title cannot contain [, ], #, *';
+      titleController.text = widget.note.title;
+    } else if (titleExists) {
+      errMessage = 'Title `${titleController.text}` already exists';
+      titleController.text = widget.note.title;
+    }
+    return errMessage;
+  }
+
+  Future<String> _saveNote() async {
+    Note updatedNote = Note(
+      id: widget.note.id,
+      title: titleController.text,
+      content: contentController.text,
+    );
+    String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
+    if (errMessage == '') {
+      widget.db.updateNote(updatedNote);
+      widget.db.streamController.add(updatedNote);
+      setState(() {
+        hasNewChanges = false;
+      });
+    }
+    return errMessage;
+  }
+
+  void _onChanged(text) {
+    setState(() {
+      hasNewChanges = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +88,7 @@ class _NoteScreenState extends State<NoteScreen> {
           child: Column(
             children: [
               Header(
-                onSave: () {},
+                onSave: (hasNewChanges) ? _saveNote : null,
                 onDelete: () {},
               ),
               const Divider(thickness: 1),
@@ -70,6 +113,7 @@ class _NoteScreenState extends State<NoteScreen> {
                           hintText: "Title",
                           border: InputBorder.none,
                         ),
+                        onChanged: _onChanged,
                       ),
                       TextField(
                         autofocus: true,
@@ -81,6 +125,7 @@ class _NoteScreenState extends State<NoteScreen> {
                           hintText: "Note",
                           border: InputBorder.none,
                         ),
+                        onChanged: _onChanged,
                       ),
                       SizedBox(height: kDefaultPadding),
                       Text("Backlinks", style: TextStyle(fontSize: 12)),

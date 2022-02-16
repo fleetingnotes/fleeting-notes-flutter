@@ -27,7 +27,7 @@ class ListOfNotes extends StatefulWidget {
 class _ListOfNotesState extends State<ListOfNotes> {
   final ScrollController scrollController = ScrollController();
   late List<Note> notes = [];
-  int activeNoteIndex = 0;
+  int activeNoteIndex = -1;
 
   Future<void> loadNotes() async {
     var tempNotes = await widget.db.getNotes();
@@ -36,10 +36,21 @@ class _ListOfNotesState extends State<ListOfNotes> {
     });
   }
 
+  void updateNote(Note updatedNote) {
+    notes.asMap().forEach((i, note) {
+      if (note.id == updatedNote.id) {
+        setState(() {
+          notes[i] = updatedNote;
+        });
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     loadNotes();
+    widget.db.listenNoteChange(updateNote);
   }
 
   void _pressNote(int index) {

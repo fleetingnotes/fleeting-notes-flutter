@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import 'models/Note.dart';
 import 'dart:convert';
+import 'dart:async';
 
 class RealmDB {
   // TODO: pass collection as parameter
@@ -11,6 +12,7 @@ class RealmDB {
   final RealmApp app;
   final MongoRealmClient client = MongoRealmClient();
   final navigatorKey = GlobalKey<NavigatorState>();
+  final StreamController streamController = StreamController();
 
   Future<List<Note>> getNotes() async {
     MongoCollection collection =
@@ -25,6 +27,28 @@ class RealmDB {
             ))
         .toList();
     return notes;
+  }
+
+  Future<bool> titleExists(id, title) async {
+    MongoCollection collection =
+        client.getDatabase("todo").getCollection("Note");
+    List<MongoDocument> docs = await collection.find(filter: {
+      "title": title,
+      "_id": QueryOperator.ne(int.parse(id)),
+    });
+
+    return docs.isNotEmpty;
+  }
+
+  void updateNote(Note note) {
+    var collection = client.getDatabase("todo").getCollection("Note");
+    collection.updateOne(
+      filter: {"_id": int.parse(note.id)},
+      update: UpdateOperator.set({
+        "title": note.title,
+        "content": note.content,
+      }),
+    );
   }
 
   void logout() {
@@ -51,6 +75,13 @@ class RealmDB {
       PageRouteBuilder(
           pageBuilder: (context, _, __) => NoteScreen(db: this, note: note)),
     );
+  }
+
+  void listenNoteChange(Function callback) {
+    Stream stream = streamController.stream;
+    stream.listen((note) {
+      callback(note);
+    });
   }
 
   void popAllRoutes() {
