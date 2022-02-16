@@ -44,6 +44,7 @@ class _NoteScreenState extends State<NoteScreen> {
       content: contentController.text,
     );
     widget.db.updateNote(updatedNote);
+    widget.db.streamController.add(updatedNote);
     setState(() {
       hasNewChanges = false;
     });

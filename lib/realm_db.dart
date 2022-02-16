@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import 'models/Note.dart';
 import 'dart:convert';
+import 'dart:async';
 
 class RealmDB {
   // TODO: pass collection as parameter
@@ -11,6 +12,7 @@ class RealmDB {
   final RealmApp app;
   final MongoRealmClient client = MongoRealmClient();
   final navigatorKey = GlobalKey<NavigatorState>();
+  final StreamController streamController = StreamController();
 
   Future<List<Note>> getNotes() async {
     MongoCollection collection =
@@ -27,9 +29,9 @@ class RealmDB {
     return notes;
   }
 
-  void updateNote(Note note) async {
+  void updateNote(Note note) {
     var collection = client.getDatabase("todo").getCollection("Note");
-    var updated = await collection.updateOne(
+    collection.updateOne(
       filter: {"_id": int.parse(note.id)},
       update: UpdateOperator.set({
         "title": note.title,
@@ -62,6 +64,13 @@ class RealmDB {
       PageRouteBuilder(
           pageBuilder: (context, _, __) => NoteScreen(db: this, note: note)),
     );
+  }
+
+  void listenNoteChange(Function callback) {
+    Stream stream = streamController.stream;
+    stream.listen((note) {
+      callback(note);
+    });
   }
 
   void popAllRoutes() {
