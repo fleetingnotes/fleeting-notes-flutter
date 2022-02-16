@@ -29,6 +29,17 @@ class RealmDB {
     return notes;
   }
 
+  Future<bool> titleExists(id, title) async {
+    MongoCollection collection =
+        client.getDatabase("todo").getCollection("Note");
+    List<MongoDocument> docs = await collection.find(filter: {
+      "title": title,
+      "_id": QueryOperator.ne(int.parse(id)),
+    });
+
+    return docs.isNotEmpty;
+  }
+
   void updateNote(Note note) {
     var collection = client.getDatabase("todo").getCollection("Note");
     collection.updateOne(

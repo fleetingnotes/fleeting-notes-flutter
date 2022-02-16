@@ -10,7 +10,7 @@ class Header extends StatelessWidget {
     this.title = '',
   }) : super(key: key);
 
-  final VoidCallback? onSave;
+  final Function? onSave;
   final VoidCallback onDelete;
   final String title;
 
@@ -19,6 +19,16 @@ class Header extends StatelessWidget {
       onSave!();
     }
     Navigator.of(context).pop();
+  }
+
+  void newSave(context) async {
+    String errMessage = await onSave!();
+    if (errMessage != '') {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(errMessage),
+        duration: Duration(seconds: 2),
+      ));
+    }
   }
 
   @override
@@ -47,7 +57,7 @@ class Header extends StatelessWidget {
           ElevatedButton.icon(
             icon: const Icon(Icons.save),
             label: const Text("Save"),
-            onPressed: onSave,
+            onPressed: onSave == null ? null : () => newSave(context),
           ),
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),

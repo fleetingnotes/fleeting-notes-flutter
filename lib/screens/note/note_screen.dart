@@ -37,17 +37,40 @@ class _NoteScreenState extends State<NoteScreen> {
     });
   }
 
-  void _saveNote() {
+  Future<String> checkTitle(id, title) async {
+    String errMessage = '';
+    if (title == '') return errMessage;
+
+    RegExp r = RegExp(r'[\[\]\#\*]');
+    final invalidMatch = r.firstMatch(titleController.text);
+    final titleExists =
+        await widget.db.titleExists(widget.note.id, titleController.text);
+
+    if (invalidMatch != null) {
+      errMessage = 'Title cannot contain [, ], #, *';
+      titleController.text = widget.note.title;
+    } else if (titleExists) {
+      errMessage = 'Title `${titleController.text}` already exists';
+      titleController.text = widget.note.title;
+    }
+    return errMessage;
+  }
+
+  Future<String> _saveNote() async {
     Note updatedNote = Note(
       id: widget.note.id,
       title: titleController.text,
       content: contentController.text,
     );
-    widget.db.updateNote(updatedNote);
-    widget.db.streamController.add(updatedNote);
-    setState(() {
-      hasNewChanges = false;
-    });
+    String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
+    if (errMessage == '') {
+      widget.db.updateNote(updatedNote);
+      widget.db.streamController.add(updatedNote);
+      setState(() {
+        hasNewChanges = false;
+      });
+    }
+    return errMessage;
   }
 
   void _onChanged(text) {
