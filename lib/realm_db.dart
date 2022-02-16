@@ -27,6 +27,17 @@ class RealmDB {
     return notes;
   }
 
+  void updateNote(Note note) async {
+    var collection = client.getDatabase("todo").getCollection("Note");
+    var updated = await collection.updateOne(
+      filter: {"_id": int.parse(note.id)},
+      update: UpdateOperator.set({
+        "title": note.title,
+        "content": note.content,
+      }),
+    );
+  }
+
   void logout() {
     app.logout();
   }

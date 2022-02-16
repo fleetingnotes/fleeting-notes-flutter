@@ -21,6 +21,7 @@ class NoteScreen extends StatefulWidget {
 
 class _NoteScreenState extends State<NoteScreen> {
   List<Note> backlinkNotes = [];
+  bool hasNewChanges = false;
   late TextEditingController titleController;
   late TextEditingController contentController;
 
@@ -36,6 +37,24 @@ class _NoteScreenState extends State<NoteScreen> {
     });
   }
 
+  void _saveNote() {
+    Note updatedNote = Note(
+      id: widget.note.id,
+      title: titleController.text,
+      content: contentController.text,
+    );
+    widget.db.updateNote(updatedNote);
+    setState(() {
+      hasNewChanges = false;
+    });
+  }
+
+  void _onChanged(text) {
+    setState(() {
+      hasNewChanges = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +64,7 @@ class _NoteScreenState extends State<NoteScreen> {
           child: Column(
             children: [
               Header(
-                onSave: () {},
+                onSave: (hasNewChanges) ? _saveNote : null,
                 onDelete: () {},
               ),
               const Divider(thickness: 1),
@@ -70,6 +89,7 @@ class _NoteScreenState extends State<NoteScreen> {
                           hintText: "Title",
                           border: InputBorder.none,
                         ),
+                        onChanged: _onChanged,
                       ),
                       TextField(
                         autofocus: true,
@@ -81,6 +101,7 @@ class _NoteScreenState extends State<NoteScreen> {
                           hintText: "Note",
                           border: InputBorder.none,
                         ),
+                        onChanged: _onChanged,
                       ),
                       SizedBox(height: kDefaultPadding),
                       Text("Backlinks", style: TextStyle(fontSize: 12)),

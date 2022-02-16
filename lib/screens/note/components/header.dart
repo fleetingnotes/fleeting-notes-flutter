@@ -47,14 +47,14 @@ class Header extends StatelessWidget {
           ElevatedButton.icon(
             icon: const Icon(Icons.save),
             label: const Text("Save"),
-            onPressed: () {},
+            onPressed: onSave,
           ),
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),
             itemBuilder: (context) => [
               PopupMenuItem(
                 child: const Text("Delete"),
-                onTap: () {},
+                onTap: onDelete,
               ),
             ],
           ),
