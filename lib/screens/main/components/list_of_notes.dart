@@ -39,9 +39,10 @@ class _ListOfNotesState extends State<ListOfNotes> {
   void updateNote(Note updatedNote) {
     setState(() {
       if (updatedNote.isDeleted) {
-        int prevLen = notes.length;
-        notes.removeWhere((note) => note.isDeleted);
-        if (prevLen != notes.length) {
+        Note? activeNote =
+            (activeNoteIndex >= 0) ? notes[activeNoteIndex] : null;
+        notes.removeWhere((note) => note.id == updatedNote.id);
+        if (activeNote != null && activeNote.id == updatedNote.id) {
           activeNoteIndex = -1;
         }
       } else {
