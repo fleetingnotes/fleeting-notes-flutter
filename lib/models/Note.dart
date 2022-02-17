@@ -6,10 +6,13 @@ import 'package:intl/intl.dart';
 class Note {
   final String id, title, content;
   final bool hasAttachment;
+  bool isDeleted;
+
   Note({
     required this.id,
     required this.title,
     required this.content,
+    this.isDeleted = false,
     this.hasAttachment = false,
   });
 

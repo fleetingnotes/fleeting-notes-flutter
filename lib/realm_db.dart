@@ -17,7 +17,11 @@ class RealmDB {
   Future<List<Note>> getNotes() async {
     MongoCollection collection =
         client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find();
+    List<MongoDocument> docs = await collection.find(
+        filter: LogicalQueryOperator.or([
+      {"_isDeleted": false},
+      {"_isDeleted": QueryOperator.notExists()},
+    ]));
 
     var notes = docs
         .map((item) => Note(
@@ -53,6 +57,16 @@ class RealmDB {
       filter: {"_id": int.parse(note.id)},
       update: UpdateOperator.set({
         "content": note.content,
+      }),
+    );
+  }
+
+  void deleteNote(Note note) {
+    var collection = client.getDatabase("todo").getCollection("Note");
+    collection.updateOne(
+      filter: {"_id": int.parse(note.id)},
+      update: UpdateOperator.set({
+        "_isDeleted": true,
       }),
     );
   }
