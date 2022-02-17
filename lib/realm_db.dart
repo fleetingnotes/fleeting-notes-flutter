@@ -42,10 +42,16 @@ class RealmDB {
 
   void updateNote(Note note) {
     var collection = client.getDatabase("todo").getCollection("Note");
+    // Can't update in both fields in one `updateOne` call
     collection.updateOne(
       filter: {"_id": int.parse(note.id)},
       update: UpdateOperator.set({
         "title": note.title,
+      }),
+    );
+    collection.updateOne(
+      filter: {"_id": int.parse(note.id)},
+      update: UpdateOperator.set({
         "content": note.content,
       }),
     );
