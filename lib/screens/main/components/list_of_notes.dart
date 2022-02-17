@@ -37,10 +37,19 @@ class _ListOfNotesState extends State<ListOfNotes> {
   }
 
   void updateNote(Note updatedNote) {
-    notes.asMap().forEach((i, note) {
-      if (note.id == updatedNote.id) {
-        setState(() {
-          notes[i] = updatedNote;
+    setState(() {
+      if (updatedNote.isDeleted) {
+        Note? activeNote =
+            (activeNoteIndex >= 0) ? notes[activeNoteIndex] : null;
+        notes.removeWhere((note) => note.id == updatedNote.id);
+        if (activeNote != null && activeNote.id == updatedNote.id) {
+          activeNoteIndex = -1;
+        }
+      } else {
+        notes.asMap().forEach((i, note) {
+          if (note.id == updatedNote.id) {
+            notes[i] = updatedNote;
+          }
         });
       }
     });

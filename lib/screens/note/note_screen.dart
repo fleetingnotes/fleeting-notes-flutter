@@ -56,6 +56,14 @@ class _NoteScreenState extends State<NoteScreen> {
     return errMessage;
   }
 
+  void _deleteNote() {
+    Note deletedNote = widget.note;
+    deletedNote.isDeleted = true;
+    widget.db.deleteNote(widget.note);
+    widget.db.streamController.add(deletedNote);
+    Navigator.pop(context);
+  }
+
   Future<String> _saveNote() async {
     Note updatedNote = Note(
       id: widget.note.id,
@@ -89,7 +97,7 @@ class _NoteScreenState extends State<NoteScreen> {
             children: [
               Header(
                 onSave: (hasNewChanges) ? _saveNote : null,
-                onDelete: () {},
+                onDelete: _deleteNote,
               ),
               const Divider(thickness: 1),
               Expanded(
