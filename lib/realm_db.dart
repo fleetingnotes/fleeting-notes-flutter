@@ -28,6 +28,7 @@ class RealmDB {
               id: item.get("_id").toString(),
               title: item.get("title").toString(),
               content: item.get("content").toString(),
+              timestamp: item.get("timestamp").toString(),
             ))
         .toList();
     return notes;
@@ -38,7 +39,7 @@ class RealmDB {
         client.getDatabase("todo").getCollection("Note");
     List<MongoDocument> docs = await collection.find(filter: {
       "title": title,
-      "_id": QueryOperator.ne(int.parse(id)),
+      "_id": QueryOperator.ne(id),
     });
 
     return docs.isNotEmpty;
@@ -54,7 +55,7 @@ class RealmDB {
     return docs.isNotEmpty;
   }
 
-  void upserNote(Note note) async {
+  void upsertNote(Note note) async {
     bool isNoteInDb = await noteExists(note);
     if (isNoteInDb) {
       updateNote(note);
@@ -66,11 +67,14 @@ class RealmDB {
   void insertNote(Note note) async {
     var collection = client.getDatabase("todo").getCollection("Note");
     var userId = await app.getUserId();
-    var inserted = await collection.insertOne(MongoDocument({
-      "_id": int.parse(note.id),
+
+    // throws TypeError but insert still works...
+    collection.insertOne(MongoDocument({
+      "_id": note.id,
       "_partition": userId,
       "title": note.title,
       "content": note.content,
+      "timestamp": note.timestamp,
       "_isDeleted": note.isDeleted,
     }));
   }
@@ -79,13 +83,13 @@ class RealmDB {
     var collection = client.getDatabase("todo").getCollection("Note");
     // Can't update in both fields in one `updateOne` call
     collection.updateOne(
-      filter: {"_id": int.parse(note.id)},
+      filter: {"_id": note.id},
       update: UpdateOperator.set({
         "title": note.title,
       }),
     );
     collection.updateOne(
-      filter: {"_id": int.parse(note.id)},
+      filter: {"_id": note.id},
       update: UpdateOperator.set({
         "content": note.content,
       }),
@@ -95,7 +99,7 @@ class RealmDB {
   void deleteNote(Note note) {
     var collection = client.getDatabase("todo").getCollection("Note");
     collection.updateOne(
-      filter: {"_id": int.parse(note.id)},
+      filter: {"_id": note.id},
       update: UpdateOperator.set({
         "_isDeleted": true,
       }),
@@ -115,6 +119,7 @@ class RealmDB {
         id: item["_id"].toString(),
         title: item["title"].toString(),
         content: item["content"].toString(),
+        timestamp: item["timestamp"].toString(),
       );
     }).toList();
 

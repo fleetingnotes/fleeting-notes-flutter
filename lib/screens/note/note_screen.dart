@@ -65,15 +65,12 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   Future<String> _saveNote() async {
-    Note updatedNote = Note(
-      id: widget.note.id,
-      title: titleController.text,
-      content: contentController.text,
-      // timestamp: widget.note.timestamp,
-    );
+    Note updatedNote = widget.note;
+    updatedNote.title = titleController.text;
+    updatedNote.content = contentController.text;
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
-      widget.db.upserNote(updatedNote);
+      widget.db.upsertNote(updatedNote);
       widget.db.streamController.add(updatedNote);
       setState(() {
         hasNewChanges = false;

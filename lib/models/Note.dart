@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-// import 'package:intl/date_symbol_data_local.dart';
-// initializeDateFormatting('fr_FR', null).then((_) => runMyCode());
+import 'package:uuid/uuid.dart';
 
 class Note {
-  final String id, title, content;
+  final String id, timestamp;
+  String title, content;
   final bool hasAttachment;
   bool isDeleted;
 
@@ -12,38 +11,26 @@ class Note {
     required this.id,
     required this.title,
     required this.content,
+    required this.timestamp,
     this.isDeleted = false,
     this.hasAttachment = false,
   });
 
   static Note empty() {
-    String dateId = DateTime.now()
-        .toIso8601String()
-        .replaceAllMapped(RegExp(r'[^0-9]'), (match) => "")
-        .substring(0, 14);
+    Uuid uuid = const Uuid();
+    String dateStr = DateTime.now().toIso8601String();
     return Note(
-      id: dateId,
+      id: uuid.v1(),
       title: '',
       content: '',
+      timestamp: dateStr,
       isDeleted: false,
       hasAttachment: false,
     );
   }
 
   DateTime getDateTime() {
-    try {
-      var date = DateTime(
-        int.parse(id.substring(0, 4)),
-        int.parse(id.substring(4, 6)),
-        int.parse(id.substring(6, 8)),
-        int.parse(id.substring(8, 10)),
-        int.parse(id.substring(10, 12)),
-        int.parse(id.substring(12, 14)),
-      );
-      return date;
-    } catch (e) {
-      return DateTime.now();
-    }
+    return DateTime.parse(timestamp);
   }
 
   String getShortDateTimeStr() {

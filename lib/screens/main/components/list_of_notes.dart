@@ -46,11 +46,16 @@ class _ListOfNotesState extends State<ListOfNotes> {
           activeNoteIndex = -1;
         }
       } else {
+        bool isUpdated = false;
         notes.asMap().forEach((i, note) {
           if (note.id == updatedNote.id) {
             notes[i] = updatedNote;
+            isUpdated = true;
           }
         });
+        if (!isUpdated) {
+          notes.add(updatedNote);
+        }
       }
     });
   }
