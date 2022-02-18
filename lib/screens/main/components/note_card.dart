@@ -25,7 +25,7 @@ class NoteCard extends StatelessWidget {
           onTap: press,
           child: Stack(children: [
             Container(
-              padding: EdgeInsets.all(kDefaultPadding),
+              padding: const EdgeInsets.all(kDefaultPadding),
               decoration: BoxDecoration(
                 color: isActive ? kPrimaryColor : kBgDarkColor,
                 borderRadius: BorderRadius.circular(15),
@@ -64,7 +64,7 @@ class NoteCard extends StatelessWidget {
                                 ),
                             ]),
                       ),
-                      SizedBox(width: kDefaultPadding),
+                      const SizedBox(width: kDefaultPadding),
                       Column(
                         children: [
                           Text(
@@ -74,7 +74,7 @@ class NoteCard extends StatelessWidget {
                                       color: isActive ? Colors.white70 : null,
                                     ),
                           ),
-                          SizedBox(height: 5),
+                          const SizedBox(height: 5),
                           if (note.hasAttachment) // TODO: Add attachment
                             Icon(
                               Icons.attachment,
@@ -90,9 +90,9 @@ class NoteCard extends StatelessWidget {
             ).addNeumorphism(
               blurRadius: 15,
               borderRadius: 15,
-              offset: Offset(5, 5),
+              offset: const Offset(5, 5),
               topShadowColor: Colors.white60,
-              bottomShadowColor: Color(0xFF234395).withOpacity(0.15),
+              bottomShadowColor: const Color(0xFF234395).withOpacity(0.15),
             ),
           ]),
         ));
