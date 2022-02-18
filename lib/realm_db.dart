@@ -44,6 +44,37 @@ class RealmDB {
     return docs.isNotEmpty;
   }
 
+  Future<bool> noteExists(Note note) async {
+    MongoCollection collection =
+        client.getDatabase("todo").getCollection("Note");
+    List<MongoDocument> docs = await collection.find(filter: {
+      "_id": note.id,
+    });
+
+    return docs.isNotEmpty;
+  }
+
+  void upserNote(Note note) async {
+    bool isNoteInDb = await noteExists(note);
+    if (isNoteInDb) {
+      updateNote(note);
+    } else {
+      insertNote(note);
+    }
+  }
+
+  void insertNote(Note note) async {
+    var collection = client.getDatabase("todo").getCollection("Note");
+    var userId = await app.getUserId();
+    var inserted = await collection.insertOne(MongoDocument({
+      "_id": int.parse(note.id),
+      "_partition": userId,
+      "title": note.title,
+      "content": note.content,
+      "_isDeleted": note.isDeleted,
+    }));
+  }
+
   void updateNote(Note note) {
     var collection = client.getDatabase("todo").getCollection("Note");
     // Can't update in both fields in one `updateOne` call

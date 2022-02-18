@@ -69,10 +69,11 @@ class _NoteScreenState extends State<NoteScreen> {
       id: widget.note.id,
       title: titleController.text,
       content: contentController.text,
+      // timestamp: widget.note.timestamp,
     );
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
-      widget.db.updateNote(updatedNote);
+      widget.db.upserNote(updatedNote);
       widget.db.streamController.add(updatedNote);
       setState(() {
         hasNewChanges = false;
