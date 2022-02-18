@@ -71,7 +71,7 @@ class _AuthScreenState extends State<AuthScreen> {
               },
             ),
             Container(
-              margin: EdgeInsets.only(top: 20),
+              margin: const EdgeInsets.only(top: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

@@ -26,7 +26,7 @@ class Header extends StatelessWidget {
     if (errMessage != '') {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(errMessage),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ));
     }
   }
@@ -39,11 +39,11 @@ class Header extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed:
                 (Navigator.canPop(context)) ? () => _onBack(context) : null,
           ),
-          SizedBox(width: kDefaultPadding / 2),
+          const SizedBox(width: kDefaultPadding / 2),
           Text(
             title,
             style: const TextStyle(

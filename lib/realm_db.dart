@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'dart:async';
 
 class RealmDB {
-  // TODO: pass collection as parameter
   RealmDB({required this.app});
 
   final RealmApp app;

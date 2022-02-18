@@ -79,7 +79,7 @@ class _ListOfNotesState extends State<ListOfNotes> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.only(top: kIsWeb ? kDefaultPadding : 0),
+        padding: const EdgeInsets.only(top: kIsWeb ? kDefaultPadding : 0),
         color: kBgDarkColor,
         child: SafeArea(
           right: false,
@@ -95,10 +95,11 @@ class _ListOfNotesState extends State<ListOfNotes> {
                     // Also we want to hide this menu icon on desktop
                     if (!Responsive.isDesktop(context))
                       IconButton(
-                        icon: Icon(Icons.menu),
+                        icon: const Icon(Icons.menu),
                         onPressed: widget.openDrawer,
                       ),
-                    if (!Responsive.isDesktop(context)) SizedBox(width: 5),
+                    if (!Responsive.isDesktop(context))
+                      const SizedBox(width: 5),
                     Expanded(
                       child: TextField(
                         onChanged: (value) {},
@@ -106,7 +107,7 @@ class _ListOfNotesState extends State<ListOfNotes> {
                           hintText: 'Search',
                           fillColor: kBgLightColor,
                           filled: true,
-                          suffixIcon: Icon(Icons.search),
+                          suffixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide: BorderSide.none,
@@ -117,31 +118,31 @@ class _ListOfNotesState extends State<ListOfNotes> {
                   ],
                 ),
               ),
-              SizedBox(height: kDefaultPadding),
+              const SizedBox(height: kDefaultPadding),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Row(
                   children: [
-                    Icon(Icons.arrow_drop_down, size: 16),
-                    SizedBox(width: 5),
-                    Text(
+                    const Icon(Icons.arrow_drop_down, size: 16),
+                    const SizedBox(width: 5),
+                    const Text(
                       "Sort by date",
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     MaterialButton(
                       minWidth: 20,
                       onPressed: () {},
-                      child: Icon(Icons.sort, size: 16),
+                      child: const Icon(Icons.sort, size: 16),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: kDefaultPadding),
+              const SizedBox(height: kDefaultPadding),
               Expanded(
                 child: ListView.builder(
-                  key: PageStorageKey('ListOfNotes'),
+                  key: const PageStorageKey('ListOfNotes'),
                   controller: scrollController,
                   itemCount: notes.length,
                   itemBuilder: (context, index) => NoteCard(

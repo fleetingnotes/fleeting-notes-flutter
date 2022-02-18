@@ -101,7 +101,7 @@ class _NoteScreenState extends State<NoteScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   controller: ScrollController(),
-                  padding: EdgeInsets.all(kDefaultPadding),
+                  padding: const EdgeInsets.all(kDefaultPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -133,10 +133,10 @@ class _NoteScreenState extends State<NoteScreen> {
                         ),
                         onChanged: _onChanged,
                       ),
-                      SizedBox(height: kDefaultPadding),
-                      Text("Backlinks", style: TextStyle(fontSize: 12)),
-                      Divider(thickness: 1, height: 1),
-                      SizedBox(height: kDefaultPadding / 2),
+                      const SizedBox(height: kDefaultPadding),
+                      const Text("Backlinks", style: TextStyle(fontSize: 12)),
+                      const Divider(thickness: 1, height: 1),
+                      const SizedBox(height: kDefaultPadding / 2),
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             press: () {
