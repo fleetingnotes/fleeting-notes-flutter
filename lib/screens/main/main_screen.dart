@@ -28,6 +28,13 @@ class _MyHomePageState extends State<MyHomePage> {
         constraints: const BoxConstraints(maxWidth: 250),
         child: SideMenu(db: widget.db),
       ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        tooltip: 'Add note',
+        onPressed: () {
+          widget.db.navigateToNote(Note.empty());
+        },
+      ),
       body: Responsive(
         mobile: ListOfNotes(
           query: '',
@@ -90,11 +97,7 @@ class NoteScreenNavigator extends StatelessWidget {
       onGenerateRoute: (route) => PageRouteBuilder(
         settings: route,
         pageBuilder: (context, _, __) => NoteScreen(
-          note: Note(
-            id: '0123',
-            title: 'i am title',
-            content: 'i am content',
-          ),
+          note: Note.empty(),
           db: db,
         ),
       ),

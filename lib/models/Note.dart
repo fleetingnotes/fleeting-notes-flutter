@@ -16,6 +16,20 @@ class Note {
     this.hasAttachment = false,
   });
 
+  static Note empty() {
+    String dateId = DateTime.now()
+        .toIso8601String()
+        .replaceAllMapped(RegExp(r'[^0-9]'), (match) => "")
+        .substring(0, 14);
+    return Note(
+      id: dateId,
+      title: '',
+      content: '',
+      isDeleted: false,
+      hasAttachment: false,
+    );
+  }
+
   DateTime getDateTime() {
     try {
       var date = DateTime(
