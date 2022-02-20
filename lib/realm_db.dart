@@ -13,24 +13,10 @@ class RealmDB {
   final navigatorKey = GlobalKey<NavigatorState>();
   final StreamController streamController = StreamController();
 
-  Future<List<Note>> getNotes() async {
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find(
-        filter: LogicalQueryOperator.or([
-      {"_isDeleted": false},
-      {"_isDeleted": QueryOperator.notExists()},
-    ]));
-
-    var notes = docs
-        .map((item) => Note(
-              id: item.get("_id").toString(),
-              title: item.get("title").toString(),
-              content: item.get("content").toString(),
-              timestamp: item.get("timestamp").toString(),
-            ))
-        .toList();
-    return notes;
+  Future<List<Note>> getSearchNotes(queryRegex) async {
+    var notesStr =
+        await client.callFunction("getSearchNotes", args: [queryRegex]);
+    return jsonStringToNote(notesStr);
   }
 
   Future<bool> titleExists(id, title) async {
@@ -112,17 +98,7 @@ class RealmDB {
   Future<List<Note>> getBacklinkNotes(Note note) async {
     var notesStr =
         await client.callFunction("getBacklinkNotes", args: [note.title]);
-    var noteList = jsonDecode(notesStr);
-    var notes = noteList.map((item) {
-      return Note(
-        id: item["_id"].toString(),
-        title: item["title"].toString(),
-        content: item["content"].toString(),
-        timestamp: item["timestamp"].toString(),
-      );
-    }).toList();
-
-    return List<Note>.from(notes);
+    return jsonStringToNote(notesStr);
   }
 
   void navigateToNote(Note note) {
@@ -141,5 +117,19 @@ class RealmDB {
 
   void popAllRoutes() {
     navigatorKey.currentState!.popUntil((route) => false);
+  }
+
+  static List<Note> jsonStringToNote(jsonString) {
+    var noteList = jsonDecode(jsonString);
+    var notes = noteList.map((item) {
+      return Note(
+        id: item["_id"].toString(),
+        title: item["title"].toString(),
+        content: item["content"].toString(),
+        timestamp: item["timestamp"].toString(),
+      );
+    }).toList();
+
+    return List<Note>.from(notes);
   }
 }
