@@ -29,8 +29,8 @@ class _ListOfNotesState extends State<ListOfNotes> {
   late List<Note> notes = [];
   int activeNoteIndex = -1;
 
-  Future<void> loadNotes() async {
-    var tempNotes = await widget.db.getNotes();
+  Future<void> loadNotes(queryRegex) async {
+    var tempNotes = await widget.db.getSearchNotes(queryRegex);
     setState(() {
       notes = tempNotes;
     });
@@ -63,7 +63,7 @@ class _ListOfNotesState extends State<ListOfNotes> {
   @override
   void initState() {
     super.initState();
-    loadNotes();
+    loadNotes('');
     widget.db.listenNoteChange(updateNote);
   }
 
@@ -102,7 +102,7 @@ class _ListOfNotesState extends State<ListOfNotes> {
                       const SizedBox(width: 5),
                     Expanded(
                       child: TextField(
-                        onChanged: (value) {},
+                        onChanged: loadNotes,
                         decoration: InputDecoration(
                           hintText: 'Search',
                           fillColor: kBgLightColor,
