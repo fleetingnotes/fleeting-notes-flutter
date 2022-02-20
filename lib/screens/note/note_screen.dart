@@ -81,6 +81,7 @@ class _NoteScreenState extends State<NoteScreen> {
 
   Future<String> _saveNote() async {
     Note updatedNote = widget.note;
+    String prevTitle = widget.note.title;
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
@@ -90,6 +91,8 @@ class _NoteScreenState extends State<NoteScreen> {
       setState(() {
         hasNewChanges = false;
       });
+    } else {
+      titleController.text = prevTitle;
     }
     return errMessage;
   }
