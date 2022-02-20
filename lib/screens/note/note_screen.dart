@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../models/Note.dart';
+import 'package:fleeting_notes_flutter/models/Note.dart';
+
+import 'package:fleeting_notes_flutter/components/stylable_textfield_controller.dart';
+import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
+import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
 import 'package:fleeting_notes_flutter/screens/main/components/note_card.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
-import '../../constants.dart';
+import 'package:fleeting_notes_flutter/constants.dart';
 
 class NoteScreen extends StatefulWidget {
   const NoteScreen({
@@ -29,7 +33,18 @@ class _NoteScreenState extends State<NoteScreen> {
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.note.title);
-    contentController = TextEditingController(text: widget.note.content);
+    contentController = StyleableTextFieldController(
+      styles: TextPartStyleDefinitions(definitionList: [
+        TextPartStyleDefinition(
+            pattern: Note.linkRegex,
+            style: const TextStyle(
+              color: Color.fromARGB(255, 138, 180, 248),
+              decoration: TextDecoration.underline,
+            ))
+      ]),
+    );
+    contentController.text = widget.note.content;
+
     widget.db.getBacklinkNotes(widget.note).then((notes) {
       setState(() {
         backlinkNotes = notes;
@@ -41,7 +56,7 @@ class _NoteScreenState extends State<NoteScreen> {
     String errMessage = '';
     if (title == '') return errMessage;
 
-    RegExp r = RegExp(r'[\[\]\#\*]');
+    RegExp r = RegExp('[${Note.invalidChars}]');
     final invalidMatch = r.firstMatch(titleController.text);
     final titleExists =
         await widget.db.titleExists(widget.note.id, titleController.text);

@@ -6,6 +6,8 @@ class Note {
   String title, content;
   final bool hasAttachment;
   bool isDeleted;
+  static const String invalidChars = r'\[\]\#\*';
+  static const String linkRegex = "\\[\\[[^$invalidChars]+?\\]\\]";
 
   Note({
     required this.id,
