@@ -28,6 +28,11 @@ class _NoteScreenState extends State<NoteScreen> {
   bool hasNewChanges = false;
   late TextEditingController titleController;
   late TextEditingController contentController;
+  final FocusNode contentFocusNode = FocusNode();
+  final GlobalKey _scaffoldKey = GlobalKey();
+  late OverlayEntry overlayFollowLinkEntry = OverlayEntry(
+    builder: (context) => Container(),
+  );
 
   @override
   void initState() {
@@ -103,9 +108,60 @@ class _NoteScreenState extends State<NoteScreen> {
     });
   }
 
+  Offset getScaffoldOffset(GlobalKey key) {
+    final RenderBox box = key.currentContext!.findRenderObject() as RenderBox;
+    final Offset offset = box.localToGlobal(Offset.zero);
+    return offset;
+  }
+
+  Offset getCaretPositionTextField(TextEditingController textController,
+      TextStyle textStyle, FocusNode focusNode) {
+    String beforeCaretText =
+        textController.text.substring(0, textController.selection.baseOffset);
+
+    TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: TextSpan(
+        style: textStyle,
+        text: beforeCaretText,
+      ),
+    );
+    painter.layout();
+
+    return Offset(
+      focusNode.offset.dx + painter.width,
+      focusNode.offset.dy + painter.height,
+    );
+  }
+
+  void showFollowLinkOverlay(context) async {
+    if (overlayFollowLinkEntry.mounted) {
+      overlayFollowLinkEntry.remove();
+    }
+
+    // init overlay entry
+    OverlayState? overlayState = Overlay.of(context);
+    Offset caretPosition = getCaretPositionTextField(
+      contentController,
+      Theme.of(context).textTheme.bodyText2!,
+      contentFocusNode,
+    );
+    Offset scaffoldOffset = getScaffoldOffset(_scaffoldKey);
+    overlayFollowLinkEntry = OverlayEntry(builder: (context) {
+      return FollowLink(caretPosition: caretPosition - scaffoldOffset);
+    });
+
+    // show overlay
+    contentController.text;
+    if (overlayState != null) {
+      overlayState.insert(overlayFollowLinkEntry);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: Container(
         color: Colors.white,
         child: SafeArea(
@@ -140,6 +196,7 @@ class _NoteScreenState extends State<NoteScreen> {
                         onChanged: _onChanged,
                       ),
                       TextField(
+                        focusNode: contentFocusNode,
                         autofocus: true,
                         controller: contentController,
                         minLines: 5,
@@ -150,6 +207,7 @@ class _NoteScreenState extends State<NoteScreen> {
                           border: InputBorder.none,
                         ),
                         onChanged: _onChanged,
+                        onTap: () => showFollowLinkOverlay(context),
                       ),
                       const SizedBox(height: kDefaultPadding),
                       const Text("Backlinks", style: TextStyle(fontSize: 12)),
@@ -169,6 +227,37 @@ class _NoteScreenState extends State<NoteScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class FollowLink extends StatelessWidget {
+  const FollowLink({
+    Key? key,
+    required this.caretPosition,
+    // required this.onTap,
+  }) : super(key: key);
+
+  final Offset caretPosition;
+  // final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      // Decides where to place FollowLink on the screen.
+      top: caretPosition.dy,
+      left: caretPosition.dx,
+
+      // Tag code.
+      child: Material(
+          elevation: 4.0,
+          color: Colors.lightBlueAccent,
+          child: Text(
+            'Follow Link',
+            style: TextStyle(
+              fontSize: 15,
+            ),
+          )),
     );
   }
 }
