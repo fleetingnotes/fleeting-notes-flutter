@@ -144,22 +144,29 @@ class _NoteScreenState extends State<NoteScreen> {
       overlayFollowLinkEntry.remove();
     }
 
-    // init overlay entry
-    OverlayState? overlayState = Overlay.of(context);
-    Offset caretPosition = getCaretPositionTextField(
-      contentController,
-      Theme.of(context).textTheme.bodyText2!,
-      contentFocusNode,
-    );
-    Offset scaffoldOffset = getScaffoldOffset(_scaffoldKey);
-    overlayFollowLinkEntry = OverlayEntry(builder: (context) {
-      return FollowLink(caretPosition: caretPosition - scaffoldOffset);
-    });
+    // check if caretOffset is in a link
+    var caretOffset = contentController.selection.baseOffset;
+    var matches = RegExp(Note.linkRegex).allMatches(contentController.text);
+    bool caretInLink =
+        matches.any((m) => m.start < caretOffset && m.end > caretOffset);
 
-    // show overlay
-    contentController.text;
-    if (overlayState != null) {
-      overlayState.insert(overlayFollowLinkEntry);
+    if (caretInLink) {
+      // init overlay entry
+      OverlayState? overlayState = Overlay.of(context);
+      Offset caretPosition = getCaretPositionTextField(
+        contentController,
+        Theme.of(context).textTheme.bodyText2!,
+        contentFocusNode,
+      );
+      Offset scaffoldOffset = getScaffoldOffset(_scaffoldKey);
+      overlayFollowLinkEntry = OverlayEntry(builder: (context) {
+        return FollowLink(caretPosition: caretPosition - scaffoldOffset);
+      });
+
+      // show overlay
+      if (overlayState != null) {
+        overlayState.insert(overlayFollowLinkEntry);
+      }
     }
   }
 
