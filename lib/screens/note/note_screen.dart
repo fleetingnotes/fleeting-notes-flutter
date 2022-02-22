@@ -56,7 +56,7 @@ class _NoteScreenState extends State<NoteScreen> {
       });
     });
     contentFocusNode.addListener(() {
-      if (contentFocusNode.hasFocus && overlayFollowLinkEntry.mounted) {
+      if (overlayFollowLinkEntry.mounted) {
         overlayFollowLinkEntry.remove();
       }
     });
@@ -147,10 +147,18 @@ class _NoteScreenState extends State<NoteScreen> {
     // check if caretOffset is in a link
     var caretOffset = contentController.selection.baseOffset;
     var matches = RegExp(Note.linkRegex).allMatches(contentController.text);
-    bool caretInLink =
-        matches.any((m) => m.start < caretOffset && m.end > caretOffset);
+    Iterable<dynamic> filteredMatches =
+        matches.where((m) => m.start < caretOffset && m.end > caretOffset);
 
-    if (caretInLink) {
+    if (filteredMatches.isNotEmpty) {
+      String title = filteredMatches.first.group(1);
+
+      void _onTap() async {
+        Note? note = await widget.db.getNoteByTitle(title);
+        note ??= Note.empty(title: title);
+        widget.db.navigateToNote(note);
+      }
+
       // init overlay entry
       OverlayState? overlayState = Overlay.of(context);
       Offset caretPosition = getCaretPositionTextField(
@@ -160,7 +168,8 @@ class _NoteScreenState extends State<NoteScreen> {
       );
       Offset scaffoldOffset = getScaffoldOffset(_scaffoldKey);
       overlayFollowLinkEntry = OverlayEntry(builder: (context) {
-        return FollowLink(caretPosition: caretPosition - scaffoldOffset);
+        return FollowLink(
+            caretPosition: caretPosition - scaffoldOffset, onTap: _onTap);
       });
 
       // show overlay
@@ -247,11 +256,11 @@ class FollowLink extends StatelessWidget {
   const FollowLink({
     Key? key,
     required this.caretPosition,
-    // required this.onTap,
+    required this.onTap,
   }) : super(key: key);
 
   final Offset caretPosition;
-  // final VoidCallback onTap;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -261,9 +270,8 @@ class FollowLink extends StatelessWidget {
       left: caretPosition.dx,
 
       // Tag code.
-      child: Material(
-          elevation: 4.0,
-          color: Colors.lightBlueAccent,
+      child: OutlinedButton(
+          onPressed: onTap,
           child: Text(
             'Follow Link',
             style: TextStyle(
