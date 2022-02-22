@@ -55,6 +55,11 @@ class _NoteScreenState extends State<NoteScreen> {
         backlinkNotes = notes;
       });
     });
+    contentFocusNode.addListener(() {
+      if (contentFocusNode.hasFocus && overlayFollowLinkEntry.mounted) {
+        overlayFollowLinkEntry.remove();
+      }
+    });
   }
 
   Future<String> checkTitle(id, title) async {
