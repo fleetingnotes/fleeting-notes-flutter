@@ -7,7 +7,7 @@ class Note {
   final bool hasAttachment;
   bool isDeleted;
   static const String invalidChars = r'\[\]\#\*';
-  static const String linkRegex = "\\[\\[[^$invalidChars]+?\\]\\]";
+  static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
 
   Note({
     required this.id,
@@ -18,13 +18,13 @@ class Note {
     this.hasAttachment = false,
   });
 
-  static Note empty() {
+  static Note empty({String title = '', String content = ''}) {
     Uuid uuid = const Uuid();
     String dateStr = DateTime.now().toIso8601String();
     return Note(
       id: uuid.v1(),
-      title: '',
-      content: '',
+      title: title,
+      content: content,
       timestamp: dateStr,
       isDeleted: false,
       hasAttachment: false,

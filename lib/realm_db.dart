@@ -19,6 +19,18 @@ class RealmDB {
     return jsonStringToNote(notesStr);
   }
 
+  Future<Note?> getNoteByTitle(title) async {
+    MongoCollection collection =
+        client.getDatabase("todo").getCollection("Note");
+    List<MongoDocument> docs = await collection.find(filter: {
+      "title": title,
+    });
+    if (docs.isEmpty) {
+      return null;
+    }
+    return mongoDocToNote(docs.first);
+  }
+
   Future<bool> titleExists(id, title) async {
     MongoCollection collection =
         client.getDatabase("todo").getCollection("Note");
@@ -119,7 +131,7 @@ class RealmDB {
     navigatorKey.currentState!.popUntil((route) => false);
   }
 
-  static List<Note> jsonStringToNote(jsonString) {
+  static List<Note> jsonStringToNote(String jsonString) {
     var noteList = jsonDecode(jsonString);
     var notes = noteList.map((item) {
       return Note(
@@ -131,5 +143,16 @@ class RealmDB {
     }).toList();
 
     return List<Note>.from(notes);
+  }
+
+  static Note mongoDocToNote(MongoDocument mongoDoc) {
+    var note = Note(
+      id: mongoDoc.get("_id").toString(),
+      title: mongoDoc.get("title").toString(),
+      content: mongoDoc.get("content").toString(),
+      timestamp: mongoDoc.get("timestamp").toString(),
+    );
+
+    return note;
   }
 }

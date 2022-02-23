@@ -6,6 +6,7 @@ import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
 import 'package:fleeting_notes_flutter/screens/main/components/note_card.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
@@ -28,6 +29,11 @@ class _NoteScreenState extends State<NoteScreen> {
   bool hasNewChanges = false;
   late TextEditingController titleController;
   late TextEditingController contentController;
+  final LayerLink layerLink = LayerLink();
+  final FocusNode contentFocusNode = FocusNode();
+  late OverlayEntry overlayFollowLinkEntry = OverlayEntry(
+    builder: (context) => Container(),
+  );
 
   @override
   void initState() {
@@ -49,6 +55,11 @@ class _NoteScreenState extends State<NoteScreen> {
       setState(() {
         backlinkNotes = notes;
       });
+    });
+    contentFocusNode.addListener(() {
+      if (overlayFollowLinkEntry.mounted) {
+        overlayFollowLinkEntry.remove();
+      }
     });
   }
 
@@ -103,6 +114,67 @@ class _NoteScreenState extends State<NoteScreen> {
     });
   }
 
+  Offset getCaretOffset(
+      TextEditingController textController, TextStyle textStyle) {
+    String beforeCaretText =
+        textController.text.substring(0, textController.selection.baseOffset);
+
+    TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: TextSpan(
+        style: textStyle,
+        text: beforeCaretText,
+      ),
+    );
+    painter.layout();
+
+    return Offset(
+      painter.width,
+      painter.height + 10,
+    );
+  }
+
+  void showFollowLinkOverlay(context) async {
+    if (overlayFollowLinkEntry.mounted) {
+      overlayFollowLinkEntry.remove();
+    }
+
+    // check if caretOffset is in a link
+    var caretIndex = contentController.selection.baseOffset;
+    var matches = RegExp(Note.linkRegex).allMatches(contentController.text);
+    Iterable<dynamic> filteredMatches =
+        matches.where((m) => m.start < caretIndex && m.end > caretIndex);
+
+    if (filteredMatches.isNotEmpty) {
+      String title = filteredMatches.first.group(1);
+
+      void _onTap() async {
+        Note? note = await widget.db.getNoteByTitle(title);
+        note ??= Note.empty(title: title);
+        widget.db.navigateToNote(note);
+      }
+
+      // init overlay entry
+      OverlayState? overlayState = Overlay.of(context);
+      Offset caretOffset = getCaretOffset(
+        contentController,
+        Theme.of(context).textTheme.bodyText2!,
+      );
+      overlayFollowLinkEntry = OverlayEntry(builder: (context) {
+        return FollowLink(
+          caretOffset: caretOffset,
+          onTap: _onTap,
+          layerLink: layerLink,
+        );
+      });
+
+      // show overlay
+      if (overlayState != null) {
+        overlayState.insert(overlayFollowLinkEntry);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,17 +211,22 @@ class _NoteScreenState extends State<NoteScreen> {
                         ),
                         onChanged: _onChanged,
                       ),
-                      TextField(
-                        autofocus: true,
-                        controller: contentController,
-                        minLines: 5,
-                        maxLines: 10,
-                        style: Theme.of(context).textTheme.bodyText2,
-                        decoration: const InputDecoration(
-                          hintText: "Note",
-                          border: InputBorder.none,
+                      CompositedTransformTarget(
+                        link: layerLink,
+                        child: TextField(
+                          focusNode: contentFocusNode,
+                          autofocus: true,
+                          controller: contentController,
+                          minLines: 5,
+                          maxLines: 10,
+                          style: Theme.of(context).textTheme.bodyText2,
+                          decoration: const InputDecoration(
+                            hintText: "Note",
+                            border: InputBorder.none,
+                          ),
+                          onChanged: _onChanged,
+                          onTap: () => showFollowLinkOverlay(context),
                         ),
-                        onChanged: _onChanged,
                       ),
                       const SizedBox(height: kDefaultPadding),
                       const Text("Backlinks", style: TextStyle(fontSize: 12)),
