@@ -6,6 +6,7 @@ import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
 import 'package:fleeting_notes_flutter/screens/main/components/note_card.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
@@ -129,7 +130,7 @@ class _NoteScreenState extends State<NoteScreen> {
 
     return Offset(
       painter.width,
-      painter.height + 8,
+      painter.height + 10,
     );
   }
 
@@ -139,10 +140,10 @@ class _NoteScreenState extends State<NoteScreen> {
     }
 
     // check if caretOffset is in a link
-    var caretOffset = contentController.selection.baseOffset;
+    var caretIndex = contentController.selection.baseOffset;
     var matches = RegExp(Note.linkRegex).allMatches(contentController.text);
     Iterable<dynamic> filteredMatches =
-        matches.where((m) => m.start < caretOffset && m.end > caretOffset);
+        matches.where((m) => m.start < caretIndex && m.end > caretIndex);
 
     if (filteredMatches.isNotEmpty) {
       String title = filteredMatches.first.group(1);
@@ -155,13 +156,13 @@ class _NoteScreenState extends State<NoteScreen> {
 
       // init overlay entry
       OverlayState? overlayState = Overlay.of(context);
-      Offset caretPosition = getCaretOffset(
+      Offset caretOffset = getCaretOffset(
         contentController,
         Theme.of(context).textTheme.bodyText2!,
       );
       overlayFollowLinkEntry = OverlayEntry(builder: (context) {
         return FollowLink(
-          caretPosition: caretPosition,
+          caretOffset: caretOffset,
           onTap: _onTap,
           layerLink: layerLink,
         );
@@ -244,38 +245,6 @@ class _NoteScreenState extends State<NoteScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class FollowLink extends StatelessWidget {
-  const FollowLink({
-    Key? key,
-    required this.caretPosition,
-    required this.onTap,
-    required this.layerLink,
-  }) : super(key: key);
-
-  final Offset caretPosition;
-  final VoidCallback onTap;
-  final LayerLink layerLink;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      width: 125,
-      child: CompositedTransformFollower(
-        link: layerLink,
-        offset: caretPosition,
-        child: OutlinedButton(
-            onPressed: onTap,
-            child: const Text(
-              'Follow Link',
-              style: TextStyle(
-                fontSize: 15,
-              ),
-            )),
       ),
     );
   }
