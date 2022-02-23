@@ -28,8 +28,8 @@ class _NoteScreenState extends State<NoteScreen> {
   bool hasNewChanges = false;
   late TextEditingController titleController;
   late TextEditingController contentController;
+  final LayerLink layerLink = LayerLink();
   final FocusNode contentFocusNode = FocusNode();
-  final GlobalKey _scaffoldKey = GlobalKey();
   late OverlayEntry overlayFollowLinkEntry = OverlayEntry(
     builder: (context) => Container(),
   );
@@ -113,14 +113,8 @@ class _NoteScreenState extends State<NoteScreen> {
     });
   }
 
-  Offset getScaffoldOffset(GlobalKey key) {
-    final RenderBox box = key.currentContext!.findRenderObject() as RenderBox;
-    final Offset offset = box.localToGlobal(Offset.zero);
-    return offset;
-  }
-
-  Offset getCaretPositionTextField(TextEditingController textController,
-      TextStyle textStyle, FocusNode focusNode) {
+  Offset getCaretOffset(
+      TextEditingController textController, TextStyle textStyle) {
     String beforeCaretText =
         textController.text.substring(0, textController.selection.baseOffset);
 
@@ -134,8 +128,8 @@ class _NoteScreenState extends State<NoteScreen> {
     painter.layout();
 
     return Offset(
-      focusNode.offset.dx + painter.width,
-      focusNode.offset.dy + painter.height,
+      painter.width,
+      painter.height + 8,
     );
   }
 
@@ -161,15 +155,16 @@ class _NoteScreenState extends State<NoteScreen> {
 
       // init overlay entry
       OverlayState? overlayState = Overlay.of(context);
-      Offset caretPosition = getCaretPositionTextField(
+      Offset caretPosition = getCaretOffset(
         contentController,
         Theme.of(context).textTheme.bodyText2!,
-        contentFocusNode,
       );
-      Offset scaffoldOffset = getScaffoldOffset(_scaffoldKey);
       overlayFollowLinkEntry = OverlayEntry(builder: (context) {
         return FollowLink(
-            caretPosition: caretPosition - scaffoldOffset, onTap: _onTap);
+          caretPosition: caretPosition,
+          onTap: _onTap,
+          layerLink: layerLink,
+        );
       });
 
       // show overlay
@@ -182,7 +177,6 @@ class _NoteScreenState extends State<NoteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       body: Container(
         color: Colors.white,
         child: SafeArea(
@@ -216,19 +210,22 @@ class _NoteScreenState extends State<NoteScreen> {
                         ),
                         onChanged: _onChanged,
                       ),
-                      TextField(
-                        focusNode: contentFocusNode,
-                        autofocus: true,
-                        controller: contentController,
-                        minLines: 5,
-                        maxLines: 10,
-                        style: Theme.of(context).textTheme.bodyText2,
-                        decoration: const InputDecoration(
-                          hintText: "Note",
-                          border: InputBorder.none,
+                      CompositedTransformTarget(
+                        link: layerLink,
+                        child: TextField(
+                          focusNode: contentFocusNode,
+                          autofocus: true,
+                          controller: contentController,
+                          minLines: 5,
+                          maxLines: 10,
+                          style: Theme.of(context).textTheme.bodyText2,
+                          decoration: const InputDecoration(
+                            hintText: "Note",
+                            border: InputBorder.none,
+                          ),
+                          onChanged: _onChanged,
+                          onTap: () => showFollowLinkOverlay(context),
                         ),
-                        onChanged: _onChanged,
-                        onTap: () => showFollowLinkOverlay(context),
                       ),
                       const SizedBox(height: kDefaultPadding),
                       const Text("Backlinks", style: TextStyle(fontSize: 12)),
@@ -257,27 +254,29 @@ class FollowLink extends StatelessWidget {
     Key? key,
     required this.caretPosition,
     required this.onTap,
+    required this.layerLink,
   }) : super(key: key);
 
   final Offset caretPosition;
   final VoidCallback onTap;
+  final LayerLink layerLink;
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      // Decides where to place FollowLink on the screen.
-      top: caretPosition.dy,
-      left: caretPosition.dx,
-
-      // Tag code.
-      child: OutlinedButton(
-          onPressed: onTap,
-          child: Text(
-            'Follow Link',
-            style: TextStyle(
-              fontSize: 15,
-            ),
-          )),
+      width: 125,
+      child: CompositedTransformFollower(
+        link: layerLink,
+        offset: caretPosition,
+        child: OutlinedButton(
+            onPressed: onTap,
+            child: const Text(
+              'Follow Link',
+              style: TextStyle(
+                fontSize: 15,
+              ),
+            )),
+      ),
     );
   }
 }
