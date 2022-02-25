@@ -5,13 +5,14 @@ import '../../realm_db.dart';
 import '../main/main_screen.dart';
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({Key? key}) : super(key: key);
+  const AuthScreen({Key? key, required this.db}) : super(key: key);
+
+  final RealmDB db;
   @override
   _AuthScreenState createState() => _AuthScreenState();
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final RealmApp app = RealmApp();
   String email = '';
   String password = '';
 
@@ -27,11 +28,10 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!validPassword() || !validEmail()) {
       return;
     }
-    var user = await app.login(Credentials.emailPassword(email, password));
-    RealmDB db = RealmDB(app: app);
+    await widget.db.login(email, password);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => MyHomePage(db: db)),
+      MaterialPageRoute(builder: (context) => MyHomePage(db: widget.db)),
     );
   }
 
@@ -39,7 +39,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!validPassword() || !validEmail()) {
       return;
     }
-    await app.registerUser(email, password);
+    await widget.db.registerUser(email, password);
     _login(context);
   }
 

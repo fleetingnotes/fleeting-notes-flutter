@@ -86,7 +86,7 @@ class NoteScreenNavigator extends StatelessWidget {
   }) : super(key: key);
 
   final RealmDB db;
-  final String content = (kIsWeb) ? "\n---\n${Uri.base.toString()}" : '';
+  final content = (kIsWeb) ? "\n---\n${Uri.base.toString()}" : '';
 
   @override
   Widget build(BuildContext context) {

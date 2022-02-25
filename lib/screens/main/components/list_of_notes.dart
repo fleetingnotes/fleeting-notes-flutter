@@ -67,6 +67,12 @@ class _ListOfNotesState extends State<ListOfNotes> {
     widget.db.listenNoteChange(updateNote);
   }
 
+  @override
+  void dispose() {
+    widget.db.unlistenNoteChange();
+    super.dispose();
+  }
+
   void _pressNote(int index) {
     setState(() {
       activeNoteIndex = index;

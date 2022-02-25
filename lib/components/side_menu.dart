@@ -39,7 +39,7 @@ class SideMenu extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AuthScreen(),
+                      builder: (context) => AuthScreen(db: db),
                     ),
                   );
                   db.logout();
