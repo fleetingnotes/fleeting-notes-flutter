@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../realm_db.dart';
 import '../main/main_screen.dart';
@@ -11,9 +12,22 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final RealmApp app = RealmApp();
+  final RealmDB db = RealmDB(app: RealmApp());
   String email = '';
   String password = '';
+
+  @override
+  initState() {
+    super.initState();
+    db.loginWithStorage().then((user) {
+      if (user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MyHomePage(db: db)),
+        );
+      }
+    });
+  }
 
   bool validEmail() {
     return email.isNotEmpty;
@@ -27,8 +41,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!validPassword() || !validEmail()) {
       return;
     }
-    var user = await app.login(Credentials.emailPassword(email, password));
-    RealmDB db = RealmDB(app: app);
+    await db.login(email, password);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => MyHomePage(db: db)),
@@ -39,7 +52,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!validPassword() || !validEmail()) {
       return;
     }
-    await app.registerUser(email, password);
+    await db.registerUser(email, password);
     _login(context);
   }
 

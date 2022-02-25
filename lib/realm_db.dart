@@ -1,6 +1,7 @@
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'models/Note.dart';
 import 'dart:convert';
 import 'dart:async';
@@ -12,6 +13,7 @@ class RealmDB {
   final MongoRealmClient client = MongoRealmClient();
   final navigatorKey = GlobalKey<NavigatorState>();
   final StreamController streamController = StreamController();
+  static const storage = FlutterSecureStorage();
 
   Future<List<Note>> getSearchNotes(queryRegex) async {
     var notesStr =
@@ -68,7 +70,7 @@ class RealmDB {
     // throws TypeError but insert still works...
     collection.insertOne(MongoDocument({
       "_id": note.id,
-      "_partition": userId,
+      "_partition": userId.toString(),
       "title": note.title,
       "content": note.content,
       "timestamp": note.timestamp,
@@ -103,8 +105,38 @@ class RealmDB {
     );
   }
 
-  void logout() {
+  Future<bool> registerUser(String email, String password) async {
+    return await app.registerUser(email, password);
+  }
+
+  void logout() async {
+    await storage.delete(key: 'email');
+    await storage.delete(key: 'password');
     app.logout();
+  }
+
+  Future<CoreRealmUser?> loginWithStorage() async {
+    String? email;
+    String? password;
+    try {
+      email = await storage.read(key: 'email');
+      password = await storage.read(key: 'password');
+    } catch (e) {
+      print(e);
+      return null;
+    }
+
+    if (email == null || password == null) {
+      return null;
+    }
+    return app.login(Credentials.emailPassword(email, password));
+  }
+
+  Future<CoreRealmUser?> login(String email, String password) async {
+    await storage.write(key: 'email', value: email);
+    await storage.write(key: 'password', value: password);
+    var user = await app.login(Credentials.emailPassword(email, password));
+    return user;
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
