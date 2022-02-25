@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
-import 'screens/auth/auth_screen.dart';
+import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -9,8 +11,24 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final RealmDB db = RealmDB(app: RealmApp());
+
+  Future<String> _navigateScreen() async {
+    var user = await db.loginWithStorage();
+    if (user == null) {
+      return 'auth';
+    } else {
+      return 'main';
+    }
+  }
 
   // This widget is the root of your application.
   @override
@@ -23,7 +41,20 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
               .copyWith(background: const Color(0xECECECEC))),
-      home: const AuthScreen(),
+      home: FutureBuilder<String>(
+        future: _navigateScreen(),
+        builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data == 'auth') {
+              return AuthScreen(db: db);
+            } else {
+              return MyHomePage(db: db);
+            }
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
     );
   }
 }

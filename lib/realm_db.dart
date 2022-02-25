@@ -12,7 +12,7 @@ class RealmDB {
   final RealmApp app;
   final MongoRealmClient client = MongoRealmClient();
   final navigatorKey = GlobalKey<NavigatorState>();
-  final StreamController streamController = StreamController();
+  StreamController streamController = StreamController();
   static const storage = FlutterSecureStorage();
 
   Future<List<Note>> getSearchNotes(queryRegex) async {
@@ -112,7 +112,7 @@ class RealmDB {
   void logout() async {
     await storage.delete(key: 'email');
     await storage.delete(key: 'password');
-    app.logout();
+    await app.logout();
   }
 
   Future<CoreRealmUser?> loginWithStorage() async {
@@ -157,6 +157,11 @@ class RealmDB {
     stream.listen((note) {
       callback(note);
     });
+  }
+
+  void unlistenNoteChange() {
+    streamController.close();
+    streamController = StreamController();
   }
 
   void popAllRoutes() {

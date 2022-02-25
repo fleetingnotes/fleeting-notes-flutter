@@ -1,33 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../realm_db.dart';
 import '../main/main_screen.dart';
 
 class AuthScreen extends StatefulWidget {
-  const AuthScreen({Key? key}) : super(key: key);
+  const AuthScreen({Key? key, required this.db}) : super(key: key);
+
+  final RealmDB db;
   @override
   _AuthScreenState createState() => _AuthScreenState();
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final RealmDB db = RealmDB(app: RealmApp());
   String email = '';
   String password = '';
-
-  @override
-  initState() {
-    super.initState();
-    db.loginWithStorage().then((user) {
-      if (user != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MyHomePage(db: db)),
-        );
-      }
-    });
-  }
 
   bool validEmail() {
     return email.isNotEmpty;
@@ -41,10 +28,10 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!validPassword() || !validEmail()) {
       return;
     }
-    await db.login(email, password);
+    await widget.db.login(email, password);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => MyHomePage(db: db)),
+      MaterialPageRoute(builder: (context) => MyHomePage(db: widget.db)),
     );
   }
 
@@ -52,7 +39,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!validPassword() || !validEmail()) {
       return;
     }
-    await db.registerUser(email, password);
+    await widget.db.registerUser(email, password);
     _login(context);
   }
 
