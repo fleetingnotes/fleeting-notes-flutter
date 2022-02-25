@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 
@@ -59,10 +60,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         desktop: Row(
           children: [
-            // Expanded(
-            //   flex: 3,
-            //   child: SideMenu(db: widget.db),
-            // ),
             Expanded(
               flex: 3,
               child: ListOfNotes(
@@ -83,12 +80,13 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class NoteScreenNavigator extends StatelessWidget {
-  const NoteScreenNavigator({
+  NoteScreenNavigator({
     Key? key,
     required this.db,
   }) : super(key: key);
 
   final RealmDB db;
+  final String content = (kIsWeb) ? "\n---\n${Uri.base.toString()}" : '';
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +95,7 @@ class NoteScreenNavigator extends StatelessWidget {
       onGenerateRoute: (route) => PageRouteBuilder(
         settings: route,
         pageBuilder: (context, _, __) => NoteScreen(
-          note: Note.empty(),
+          note: Note.empty(content: content),
           db: db,
         ),
       ),
