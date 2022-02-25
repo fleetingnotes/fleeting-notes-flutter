@@ -215,7 +215,7 @@ class _NoteScreenState extends State<NoteScreen> {
                         link: layerLink,
                         child: TextField(
                           focusNode: contentFocusNode,
-                          // autofocus: true,
+                          autofocus: true,
                           controller: contentController,
                           minLines: 5,
                           maxLines: 10,

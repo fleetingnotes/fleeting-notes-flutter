@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 
@@ -86,7 +85,6 @@ class NoteScreenNavigator extends StatelessWidget {
   }) : super(key: key);
 
   final RealmDB db;
-  final content = (kIsWeb) ? "\n---\n${Uri.base.toString()}" : '';
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +93,7 @@ class NoteScreenNavigator extends StatelessWidget {
       onGenerateRoute: (route) => PageRouteBuilder(
         settings: route,
         pageBuilder: (context, _, __) => NoteScreen(
-          note: Note.empty(content: content),
+          note: Note.empty(),
           db: db,
         ),
       ),
