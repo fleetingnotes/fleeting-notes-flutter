@@ -54,7 +54,7 @@ class _ListOfNotesState extends State<ListOfNotes> {
           }
         });
         if (!isUpdated) {
-          notes.add(updatedNote);
+          notes.insert(0, updatedNote);
         }
       }
     });
@@ -129,18 +129,18 @@ class _ListOfNotesState extends State<ListOfNotes> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Row(
-                  children: [
-                    const Icon(Icons.arrow_drop_down, size: 16),
-                    const SizedBox(width: 5),
-                    const Text(
+                  children: const [
+                    Icon(Icons.arrow_drop_down, size: 16),
+                    SizedBox(width: 5),
+                    Text(
                       "Sort by date",
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
-                    const Spacer(),
+                    Spacer(),
                     MaterialButton(
                       minWidth: 20,
-                      onPressed: () {},
-                      child: const Icon(Icons.sort, size: 16),
+                      onPressed: null,
+                      child: Icon(Icons.sort, size: 16),
                     ),
                   ],
                 ),
