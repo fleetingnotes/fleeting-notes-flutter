@@ -38,6 +38,7 @@ dependencies:
   flutter_secure_storage: ^5.0.2
   intl: ^0.17.0
   uuid: ^3.0.5
+  mocktail: ^0.2.0
 
 dependency_overrides:
   plugin_platform_interface: ^2.0.1
