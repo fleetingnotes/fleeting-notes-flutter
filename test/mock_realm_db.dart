@@ -11,10 +11,10 @@ class MockRealmDB extends Mock implements RealmDB {
   @override
   StreamController streamController = StreamController();
 
-  @override
-  Future<List<Note>> getSearchNotes(queryRegex) async {
-    return Future.value([]);
-  }
+  // @override
+  // Future<List<Note>> getSearchNotes(queryRegex) async {
+  //   return Future.value([]);
+  // }
 
   @override
   Future<List<Note>> getBacklinkNotes(title) async {
