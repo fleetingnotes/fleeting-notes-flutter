@@ -20,22 +20,10 @@ samples, guidance on mobile development, and a full API reference.
 flutter run --no-sound-null-safety
 ```
 
-## Building Web Extension
+## Building Web Extension for dev
 
-1. Checkout web extension branch and rebase with main
+Simply run the build script.
 ```
-git checkout web_ext
-git rebase main
+./build_chrome_extension.sh
 ```
-2. Build the web application
-```
-flutter build web --web-renderer html --csp --no-sound-null-safety
-```
-3. Navigate to `build/web/main.dart.js` and search / replace the following:
-```
-# Note: `../` is an actual path
-
-../stitch.js -> stitch/stitch.js
-../stitchUtils.js -> stitch/stitchUtils.js
-```
-4. Go to browser and `Load unpacked`
+Then go to chrome and click `Load unpacked` from the extensions page, following instructions to select the `build/web` folder and loading the extension in dev mode.
