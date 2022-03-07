@@ -4,7 +4,7 @@
 // utility that Flutter provides. For example, you can send tap and scroll
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
-
+@TestOn('browser')
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +14,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
+import 'package:fleeting_notes_flutter/components/note_card.dart';
 import 'mock_realm_db.dart';
 
 // Currently Only Testing Web
@@ -60,7 +61,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
     await tester.pump();
-    await tester.tap(find.widgetWithText(ListOfNotes, 'Click me note!'));
+    await tester.tap(find.widgetWithText(NoteCard, 'Click me note!'));
     await tester.pumpAndSettle(); // Wait for animation to finish
     expect(find.widgetWithText(NoteScreen, 'Click me note!'), findsOneWidget);
     expect(
@@ -102,7 +103,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
     await tester.pump();
-    await tester.tap(find.widgetWithText(ListOfNotes, 'Test delete note!'));
+    await tester.tap(find.widgetWithText(NoteCard, 'Test delete note!'));
     await tester.pumpAndSettle(); // Wait for animation to finish
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();

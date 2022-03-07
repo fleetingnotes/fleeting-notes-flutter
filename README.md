@@ -20,6 +20,11 @@ samples, guidance on mobile development, and a full API reference.
 flutter run --no-sound-null-safety
 ```
 
+## Testing Applications on browser
+```
+flutter test --platform chrome
+```
+
 ## Building Web Extension for dev
 
 Simply run the build script.
