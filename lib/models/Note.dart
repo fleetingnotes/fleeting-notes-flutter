@@ -31,6 +31,15 @@ class Note {
     );
   }
 
+  toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'content': content,
+      'timestamp': timestamp,
+    };
+  }
+
   DateTime getDateTime() {
     return DateTime.parse(timestamp);
   }
