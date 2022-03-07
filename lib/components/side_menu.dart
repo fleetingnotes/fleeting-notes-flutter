@@ -26,8 +26,11 @@ class SideMenu extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Text("Fleeting Notes"),
-                  const Spacer(),
+                  const Expanded(
+                    child: Text(
+                      "Fleeting Notes",
+                    ),
+                  ),
                   if (!Responsive.isDesktop(context)) const CloseButton(),
                 ],
               ),
