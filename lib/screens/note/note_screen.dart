@@ -1,4 +1,6 @@
+import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
 import 'package:fleeting_notes_flutter/components/stylable_textfield_controller.dart';
@@ -31,7 +33,7 @@ class _NoteScreenState extends State<NoteScreen> {
   late TextEditingController contentController;
   final LayerLink layerLink = LayerLink();
   final FocusNode contentFocusNode = FocusNode();
-  late OverlayEntry overlayFollowLinkEntry = OverlayEntry(
+  late OverlayEntry overlayEntry = OverlayEntry(
     builder: (context) => Container(),
   );
 
@@ -57,8 +59,8 @@ class _NoteScreenState extends State<NoteScreen> {
       });
     });
     contentFocusNode.addListener(() {
-      if (overlayFollowLinkEntry.mounted) {
-        overlayFollowLinkEntry.remove();
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
       }
     });
   }
@@ -108,10 +110,26 @@ class _NoteScreenState extends State<NoteScreen> {
     return errMessage;
   }
 
-  void _onChanged(text) {
-    setState(() {
-      hasNewChanges = true;
-    });
+  showTitleLinksOverlay(context, BoxConstraints size) {
+    if (overlayEntry.mounted) {
+      overlayEntry.remove();
+    }
+    int caretPos = contentController.selection.baseOffset;
+    Offset caretOffset = getCaretOffset(
+      contentController,
+      Theme.of(context).textTheme.bodyText2!,
+      size,
+    );
+    TitleLinks builder(context) {
+      return TitleLinks(
+        caretOffset: caretOffset,
+        titles: [],
+        onTap: () {},
+        layerLink: layerLink,
+      );
+    }
+
+    overlayContent(builder);
   }
 
   Offset getCaretOffset(TextEditingController textController,
@@ -134,9 +152,18 @@ class _NoteScreenState extends State<NoteScreen> {
     );
   }
 
-  void showFollowLinkOverlay(context, size) async {
-    if (overlayFollowLinkEntry.mounted) {
-      overlayFollowLinkEntry.remove();
+  void overlayContent(builder) {
+    OverlayState? overlayState = Overlay.of(context);
+    overlayEntry = OverlayEntry(builder: builder);
+    // show overlay
+    if (overlayState != null) {
+      overlayState.insert(overlayEntry);
+    }
+  }
+
+  void showFollowLinkOverlay(context, BoxConstraints size) async {
+    if (overlayEntry.mounted) {
+      overlayEntry.remove();
     }
 
     // check if caretOffset is in a link
@@ -155,25 +182,27 @@ class _NoteScreenState extends State<NoteScreen> {
       }
 
       // init overlay entry
-      OverlayState? overlayState = Overlay.of(context);
       Offset caretOffset = getCaretOffset(
         contentController,
         Theme.of(context).textTheme.bodyText2!,
         size,
       );
-      overlayFollowLinkEntry = OverlayEntry(builder: (context) {
+      FollowLink builder(context) {
         return FollowLink(
           caretOffset: caretOffset,
           onTap: _onTap,
           layerLink: layerLink,
         );
-      });
-
-      // show overlay
-      if (overlayState != null) {
-        overlayState.insert(overlayFollowLinkEntry);
       }
+
+      overlayContent(builder);
     }
+  }
+
+  bool isTitleLinksVisible(text) {
+    int i = text.lastIndexOf('[[');
+    if (i == -1) return false;
+    return !text.substring(i, text.length).contains(']');
   }
 
   @override
@@ -210,7 +239,11 @@ class _NoteScreenState extends State<NoteScreen> {
                           hintText: "Title",
                           border: InputBorder.none,
                         ),
-                        onChanged: _onChanged,
+                        onChanged: (text) {
+                          setState(() {
+                            hasNewChanges = true;
+                          });
+                        },
                       ),
                       CompositedTransformTarget(
                         link: layerLink,
@@ -226,7 +259,22 @@ class _NoteScreenState extends State<NoteScreen> {
                               hintText: "Note",
                               border: InputBorder.none,
                             ),
-                            onChanged: _onChanged,
+                            onChanged: (text) {
+                              setState(() {
+                                hasNewChanges = true;
+                              });
+                              var caretIndex =
+                                  contentController.selection.baseOffset;
+
+                              if (isTitleLinksVisible(
+                                  text.substring(0, caretIndex))) {
+                                showTitleLinksOverlay(context, size);
+                              } else {
+                                if (overlayEntry.mounted) {
+                                  overlayEntry.remove();
+                                }
+                              }
+                            },
                             onTap: () => showFollowLinkOverlay(context, size),
                           );
                         }),
