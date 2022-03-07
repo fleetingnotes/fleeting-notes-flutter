@@ -249,3 +249,26 @@ class _NoteScreenState extends State<NoteScreen> {
     );
   }
 }
+
+class NoteScreenNavigator extends StatelessWidget {
+  NoteScreenNavigator({
+    Key? key,
+    required this.db,
+  }) : super(key: key);
+
+  final RealmDB db;
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: db.navigatorKey,
+      onGenerateRoute: (route) => PageRouteBuilder(
+        settings: route,
+        pageBuilder: (context, _, __) => NoteScreen(
+          note: Note.empty(),
+          db: db,
+        ),
+      ),
+    );
+  }
+}

@@ -26,6 +26,8 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
         .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
     expect(find.byType(NoteScreen), findsOneWidget);
     expect(find.byType(ListOfNotes), findsOneWidget);
@@ -36,6 +38,8 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
     await tester.tap(find.byIcon(Icons.add));
@@ -51,6 +55,8 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
         .thenAnswer((_) async => Future.value([newNote]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
     await tester.pump();
     await tester.tap(find.widgetWithText(ListOfNotes, 'Click me note!'));
@@ -65,6 +71,8 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.titleExists(any(), any()))
         .thenAnswer((_) async => Future.value(false));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
     await tester.enterText(find.bySemanticsLabel('Title'), 'Test save note!');
     await tester.pump();
@@ -80,6 +88,8 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
         .thenAnswer((_) async => Future.value([newNote]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
     await tester.pump();
     await tester.tap(find.widgetWithText(ListOfNotes, 'Test delete note!'));
@@ -96,6 +106,8 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
     await tester.tap(find.byIcon(Icons.menu));
