@@ -21,6 +21,13 @@ class RealmDB {
     return jsonStringToNote(notesStr);
   }
 
+  Future<List<Note>> getAllNotes() async {
+    MongoCollection collection =
+        client.getDatabase("todo").getCollection("Note");
+    List<MongoDocument> docs = await collection.find();
+    return docs.map((mongoDoc) => mongoDocToNote(mongoDoc)).toList();
+  }
+
   Future<Note?> getNoteByTitle(title) async {
     MongoCollection collection =
         client.getDatabase("todo").getCollection("Note");

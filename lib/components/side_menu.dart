@@ -43,7 +43,7 @@ class SideMenu extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SettingsScreen(),
+                      builder: (context) => SettingsScreen(db: db),
                     ),
                   );
                 },
