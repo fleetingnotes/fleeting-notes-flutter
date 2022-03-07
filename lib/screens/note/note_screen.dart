@@ -5,7 +5,7 @@ import 'package:fleeting_notes_flutter/components/stylable_textfield_controller.
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
-import 'package:fleeting_notes_flutter/screens/main/components/note_card.dart';
+import 'package:fleeting_notes_flutter/components/note_card.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';

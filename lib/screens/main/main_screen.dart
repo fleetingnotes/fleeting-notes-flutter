@@ -3,7 +3,7 @@ import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/main/components/list_of_notes.dart';
+import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/components/side_menu.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';

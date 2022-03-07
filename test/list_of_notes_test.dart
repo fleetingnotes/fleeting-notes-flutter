@@ -5,12 +5,12 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:fleeting_notes_flutter/screens/main/components/note_card.dart';
+import 'package:fleeting_notes_flutter/components/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/main/components/list_of_notes.dart';
+import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'mock_realm_db.dart';
 
 void main() {

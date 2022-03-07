@@ -1,10 +1,10 @@
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:flutter/material.dart';
 
-import 'note_card.dart';
-import '../../../models/Note.dart';
-import '../../../constants.dart';
-import '../../../responsive.dart';
+import '../../components/note_card.dart';
+import '../../models/Note.dart';
+import '../../constants.dart';
+import '../../responsive.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
