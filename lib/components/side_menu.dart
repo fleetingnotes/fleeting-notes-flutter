@@ -1,4 +1,4 @@
-import 'package:fleeting_notes_flutter/screens/settings/setting_screen.dart';
+import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fleeting_notes_flutter/constants.dart';
