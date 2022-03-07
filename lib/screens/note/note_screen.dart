@@ -114,8 +114,8 @@ class _NoteScreenState extends State<NoteScreen> {
     });
   }
 
-  Offset getCaretOffset(
-      TextEditingController textController, TextStyle textStyle) {
+  Offset getCaretOffset(TextEditingController textController,
+      TextStyle textStyle, BoxConstraints size) {
     String beforeCaretText =
         textController.text.substring(0, textController.selection.baseOffset);
 
@@ -126,15 +126,15 @@ class _NoteScreenState extends State<NoteScreen> {
         text: beforeCaretText,
       ),
     );
-    painter.layout();
+    painter.layout(maxWidth: size.maxWidth);
 
     return Offset(
-      painter.width,
+      painter.computeLineMetrics().last.width,
       painter.height + 10,
     );
   }
 
-  void showFollowLinkOverlay(context) async {
+  void showFollowLinkOverlay(context, size) async {
     if (overlayFollowLinkEntry.mounted) {
       overlayFollowLinkEntry.remove();
     }
@@ -159,6 +159,7 @@ class _NoteScreenState extends State<NoteScreen> {
       Offset caretOffset = getCaretOffset(
         contentController,
         Theme.of(context).textTheme.bodyText2!,
+        size,
       );
       overlayFollowLinkEntry = OverlayEntry(builder: (context) {
         return FollowLink(
@@ -213,20 +214,22 @@ class _NoteScreenState extends State<NoteScreen> {
                       ),
                       CompositedTransformTarget(
                         link: layerLink,
-                        child: TextField(
-                          focusNode: contentFocusNode,
-                          autofocus: true,
-                          controller: contentController,
-                          minLines: 5,
-                          maxLines: 10,
-                          style: Theme.of(context).textTheme.bodyText2,
-                          decoration: const InputDecoration(
-                            hintText: "Note",
-                            border: InputBorder.none,
-                          ),
-                          onChanged: _onChanged,
-                          onTap: () => showFollowLinkOverlay(context),
-                        ),
+                        child: LayoutBuilder(builder: (context, size) {
+                          return TextField(
+                            focusNode: contentFocusNode,
+                            autofocus: true,
+                            controller: contentController,
+                            minLines: 5,
+                            maxLines: 10,
+                            style: Theme.of(context).textTheme.bodyText2,
+                            decoration: const InputDecoration(
+                              hintText: "Note",
+                              border: InputBorder.none,
+                            ),
+                            onChanged: _onChanged,
+                            onTap: () => showFollowLinkOverlay(context, size),
+                          );
+                        }),
                       ),
                       const SizedBox(height: kDefaultPadding),
                       const Text("Backlinks", style: TextStyle(fontSize: 12)),
