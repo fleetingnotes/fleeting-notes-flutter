@@ -9,6 +9,8 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  String exportOption = 'Markdown';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,6 +43,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
               thickness: 1,
               height: 1,
             ),
+            SingleChildScrollView(
+                controller: ScrollController(),
+                padding: const EdgeInsets.all(kDefaultPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Export Notes", style: TextStyle(fontSize: 12)),
+                    const Divider(thickness: 1, height: 1),
+                    Padding(
+                      padding: const EdgeInsets.all(kDefaultPadding / 2),
+                      child: Row(children: [
+                        DropdownButton(
+                          underline: SizedBox(),
+                          value: exportOption,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              exportOption = newValue!;
+                            });
+                          },
+                          items: const [
+                            DropdownMenuItem(
+                              child: Text('Markdown'),
+                              value: 'Markdown',
+                            ),
+                            DropdownMenuItem(
+                              child: Text('JSON'),
+                              value: 'JSON',
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        ElevatedButton(onPressed: () {}, child: Text('Export')),
+                      ]),
+                    ),
+                  ],
+                ))
           ],
         ),
       ),
