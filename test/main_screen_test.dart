@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:fleeting_notes_flutter/screens/settings/setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -125,5 +126,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(MyHomePage), findsNothing);
     expect(find.byType(AuthScreen), findsOneWidget);
+  });
+
+  testWidgets('Settings changes to settings screen',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getSearchNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MyHomePage), findsNothing);
+    expect(find.byType(SettingsScreen), findsOneWidget);
   });
 }

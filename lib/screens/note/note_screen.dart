@@ -187,7 +187,7 @@ class _NoteScreenState extends State<NoteScreen> {
                 onSave: (hasNewChanges) ? _saveNote : null,
                 onDelete: _deleteNote,
               ),
-              const Divider(thickness: 1),
+              const Divider(thickness: 1, height: 1),
               Expanded(
                 child: SingleChildScrollView(
                   controller: ScrollController(),
