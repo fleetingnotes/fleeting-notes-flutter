@@ -48,7 +48,7 @@ void main() {
     expect(find.byType(ListOfNotes), findsOneWidget);
   });
 
-  testWidgets('Clicking NoteCard populates NoteScreen',
+  testWidgets('Clicking NoteCard populates NoteScreen and sets active note',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
     Note newNote = Note.empty(content: 'Click me note!');
@@ -62,6 +62,15 @@ void main() {
     await tester.tap(find.widgetWithText(ListOfNotes, 'Click me note!'));
     await tester.pumpAndSettle(); // Wait for animation to finish
     expect(find.widgetWithText(NoteScreen, 'Click me note!'), findsOneWidget);
+    expect(
+        tester
+            .widget<Text>(find.descendant(
+              of: find.byType(ListOfNotes),
+              matching: find.text('Click me note!'),
+            ))
+            .style!
+            .color,
+        Colors.white);
   });
 
   testWidgets('Save note updates list of notes', (WidgetTester tester) async {

@@ -6,17 +6,12 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
-import 'package:fleeting_notes_flutter/screens/main/components/list_of_notes.dart';
-import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
 import 'mock_realm_db.dart';
 
-// Currently Only Testing Web
 void main() {
   setUpAll(() {
     registerFallbackValue(Note.empty());
