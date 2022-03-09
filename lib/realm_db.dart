@@ -16,8 +16,17 @@ class RealmDB {
   static const storage = FlutterSecureStorage();
 
   Future<List<Note>> getSearchNotes(queryRegex) async {
+    String escapedQuery = '';
+    queryRegex.runes.forEach((int rune) {
+      var character = String.fromCharCode(rune);
+      if (character.contains(RegExp('[a-zA-Z0-9]'))) {
+        escapedQuery += character;
+      } else {
+        escapedQuery += '\\$character';
+      }
+    });
     var notesStr =
-        await client.callFunction("getSearchNotes", args: [queryRegex]);
+        await client.callFunction("getSearchNotes", args: [escapedQuery]);
     return jsonStringToNote(notesStr);
   }
 
