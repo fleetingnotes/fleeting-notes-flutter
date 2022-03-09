@@ -138,6 +138,7 @@ class _NoteScreenState extends State<NoteScreen> {
                       t.substring(caretI, t.length);
                   contentController.selection = TextSelection.fromPosition(
                       TextPosition(offset: linkIndex + link.length + 4));
+                  titleLinkQuery.value = '';
                   if (overlayEntry.mounted) {
                     overlayEntry.remove();
                   }
