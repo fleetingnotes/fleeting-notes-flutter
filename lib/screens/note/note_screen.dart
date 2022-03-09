@@ -1,6 +1,5 @@
 import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
 import 'package:fleeting_notes_flutter/components/stylable_textfield_controller.dart';
