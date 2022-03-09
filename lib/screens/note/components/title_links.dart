@@ -1,34 +1,46 @@
 import 'package:flutter/material.dart';
 
 class TitleLinks extends StatelessWidget {
-  const TitleLinks({
+  TitleLinks({
     Key? key,
     required this.caretOffset,
     required this.titles,
-    required this.onTap,
+    required this.query,
+    required this.onLinkSelect,
     required this.layerLink,
   }) : super(key: key);
 
   final Offset caretOffset;
   final List titles;
-  final VoidCallback onTap;
+  final String query;
+  final Function onLinkSelect;
   final LayerLink layerLink;
+
+  List filterTitles(query) {
+    return titles
+        .where((title) => title.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
       width: 125,
+      height: 400,
       child: CompositedTransformFollower(
         link: layerLink,
         offset: caretOffset,
-        child: OutlinedButton(
-            onPressed: onTap,
-            child: const Text(
-              'List of links',
-              style: TextStyle(
-                fontSize: 15,
-              ),
-            )),
+        child: ListView.builder(
+          itemCount: filterTitles(query).length,
+          itemBuilder: (context, index) {
+            List filteredTitles = filterTitles(query);
+            final String item = filteredTitles[index];
+
+            return ListTile(
+              title: Text(item),
+            );
+          },
+        ),
       ),
     );
   }

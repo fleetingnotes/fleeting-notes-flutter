@@ -32,6 +32,8 @@ class _NoteScreenState extends State<NoteScreen> {
   late TextEditingController titleController;
   late TextEditingController contentController;
   final LayerLink layerLink = LayerLink();
+  bool titleLinksVisible = false;
+  final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
   final FocusNode contentFocusNode = FocusNode();
   late OverlayEntry overlayEntry = OverlayEntry(
     builder: (context) => Container(),
@@ -111,21 +113,26 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   showTitleLinksOverlay(context, BoxConstraints size) {
-    if (overlayEntry.mounted) {
-      overlayEntry.remove();
-    }
     int caretPos = contentController.selection.baseOffset;
     Offset caretOffset = getCaretOffset(
       contentController,
       Theme.of(context).textTheme.bodyText2!,
       size,
     );
-    TitleLinks builder(context) {
-      return TitleLinks(
-        caretOffset: caretOffset,
-        titles: [],
-        onTap: () {},
-        layerLink: layerLink,
+
+    Widget builder(context) {
+      return Container(
+        child: ValueListenableBuilder(
+            valueListenable: titleLinkQuery,
+            builder: (context, value, child) {
+              return TitleLinks(
+                caretOffset: caretOffset,
+                titles: ['hello', 'world', 'how', 'areo', 'you'],
+                query: titleLinkQuery.value,
+                onLinkSelect: (link) {},
+                layerLink: layerLink,
+              );
+            }),
       );
     }
 
@@ -266,10 +273,20 @@ class _NoteScreenState extends State<NoteScreen> {
                               var caretIndex =
                                   contentController.selection.baseOffset;
 
-                              if (isTitleLinksVisible(
-                                  text.substring(0, caretIndex))) {
-                                showTitleLinksOverlay(context, size);
+                              bool isVisible = isTitleLinksVisible(
+                                  text.substring(0, caretIndex));
+
+                              if (isVisible) {
+                                if (!titleLinksVisible) {
+                                  showTitleLinksOverlay(context, size);
+                                  titleLinksVisible = true;
+                                } else {
+                                  String query = text.substring(
+                                      text.lastIndexOf('[[') + 2, text.length);
+                                  titleLinkQuery.value = query;
+                                }
                               } else {
+                                titleLinksVisible = false;
                                 if (overlayEntry.mounted) {
                                   overlayEntry.remove();
                                 }
