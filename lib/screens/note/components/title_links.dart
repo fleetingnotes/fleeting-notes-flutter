@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TitleLinks extends StatelessWidget {
-  TitleLinks({
+  const TitleLinks({
     Key? key,
     required this.caretOffset,
     required this.allLinks,
