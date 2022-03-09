@@ -112,8 +112,7 @@ class _NoteScreenState extends State<NoteScreen> {
     return errMessage;
   }
 
-  showTitleLinksOverlay(context, BoxConstraints size) {
-    int caretPos = contentController.selection.baseOffset;
+  void showTitleLinksOverlay(context, BoxConstraints size) {
     Offset caretOffset = getCaretOffset(
       contentController,
       Theme.of(context).textTheme.bodyText2!,
@@ -129,7 +128,20 @@ class _NoteScreenState extends State<NoteScreen> {
                 caretOffset: caretOffset,
                 titles: ['hello', 'world', 'how', 'areo', 'you'],
                 query: titleLinkQuery.value,
-                onLinkSelect: (link) {},
+                onLinkSelect: (String link) {
+                  String t = contentController.text;
+                  int caretI = contentController.selection.baseOffset;
+                  String beforeCaretText = t.substring(0, caretI);
+                  int linkIndex = beforeCaretText.lastIndexOf('[[');
+                  contentController.text = t.substring(0, linkIndex) +
+                      '[[$link]]' +
+                      t.substring(caretI, t.length);
+                  contentController.selection = TextSelection.fromPosition(
+                      TextPosition(offset: linkIndex + link.length + 4));
+                  if (overlayEntry.mounted) {
+                    overlayEntry.remove();
+                  }
+                },
                 layerLink: layerLink,
               );
             }),
@@ -272,17 +284,20 @@ class _NoteScreenState extends State<NoteScreen> {
                               });
                               var caretIndex =
                                   contentController.selection.baseOffset;
+                              String beforeCaretText = text.substring(
+                                  0, contentController.selection.baseOffset);
 
                               bool isVisible = isTitleLinksVisible(
-                                  text.substring(0, caretIndex));
+                                  beforeCaretText.substring(0, caretIndex));
 
                               if (isVisible) {
                                 if (!titleLinksVisible) {
                                   showTitleLinksOverlay(context, size);
                                   titleLinksVisible = true;
                                 } else {
-                                  String query = text.substring(
-                                      text.lastIndexOf('[[') + 2, text.length);
+                                  String query = beforeCaretText.substring(
+                                      beforeCaretText.lastIndexOf('[[') + 2,
+                                      beforeCaretText.length);
                                   titleLinkQuery.value = query;
                                 }
                               } else {

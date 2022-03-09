@@ -25,8 +25,8 @@ class TitleLinks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      width: 125,
-      height: 400,
+      width: 300,
+      height: 100,
       child: CompositedTransformFollower(
         link: layerLink,
         offset: caretOffset,
@@ -38,6 +38,9 @@ class TitleLinks extends StatelessWidget {
 
             return ListTile(
               title: Text(item),
+              onTap: () {
+                onLinkSelect(item);
+              },
             );
           },
         ),
