@@ -61,9 +61,7 @@ class _NoteScreenState extends State<NoteScreen> {
       });
     });
     contentFocusNode.addListener(() {
-      if (overlayEntry.mounted) {
-        overlayEntry.remove();
-      }
+      removeOverlay();
     });
   }
 
@@ -113,6 +111,7 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   void showTitleLinksOverlay(context, BoxConstraints size) async {
+    removeOverlay();
     Offset caretOffset = getCaretOffset(
       contentController,
       Theme.of(context).textTheme.bodyText2!,
@@ -184,11 +183,15 @@ class _NoteScreenState extends State<NoteScreen> {
     }
   }
 
-  void showFollowLinkOverlay(context, BoxConstraints size) async {
+  void removeOverlay() {
     if (overlayEntry.mounted) {
       overlayEntry.remove();
+      titleLinkQuery.value = '';
     }
+  }
 
+  void showFollowLinkOverlay(context, BoxConstraints size) async {
+    removeOverlay();
     // check if caretOffset is in a link
     var caretIndex = contentController.selection.baseOffset;
     var matches = RegExp(Note.linkRegex).allMatches(contentController.text);
@@ -223,9 +226,12 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   bool isTitleLinksVisible(text) {
-    int i = text.lastIndexOf('[[');
+    var caretIndex = contentController.selection.baseOffset;
+    int i = text.substring(0, caretIndex).lastIndexOf('[[');
     if (i == -1) return false;
-    return !text.substring(i, text.length).contains(']');
+    int nextI = text.indexOf('[', i + 2);
+    nextI = (nextI > 0) ? nextI : text.length;
+    return !text.substring(i, nextI).contains(']');
   }
 
   @override
@@ -291,9 +297,7 @@ class _NoteScreenState extends State<NoteScreen> {
                               String beforeCaretText = text.substring(
                                   0, contentController.selection.baseOffset);
 
-                              bool isVisible = isTitleLinksVisible(
-                                  beforeCaretText.substring(0, caretIndex));
-
+                              bool isVisible = isTitleLinksVisible(text);
                               if (isVisible) {
                                 if (!titleLinksVisible) {
                                   showTitleLinksOverlay(context, size);
@@ -306,9 +310,7 @@ class _NoteScreenState extends State<NoteScreen> {
                                 }
                               } else {
                                 titleLinksVisible = false;
-                                if (overlayEntry.mounted) {
-                                  overlayEntry.remove();
-                                }
+                                removeOverlay();
                               }
                             },
                             onTap: () => showFollowLinkOverlay(context, size),
