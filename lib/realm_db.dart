@@ -51,6 +51,11 @@ class RealmDB {
     return docs.isNotEmpty;
   }
 
+  Future<List> getAllLinks() async {
+    var notesStr = await client.callFunction("findAllLinks");
+    return notesStr;
+  }
+
   Future<bool> noteExists(Note note) async {
     MongoCollection collection =
         client.getDatabase("todo").getCollection("Note");

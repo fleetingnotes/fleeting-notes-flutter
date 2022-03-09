@@ -112,12 +112,14 @@ class _NoteScreenState extends State<NoteScreen> {
     return errMessage;
   }
 
-  void showTitleLinksOverlay(context, BoxConstraints size) {
+  void showTitleLinksOverlay(context, BoxConstraints size) async {
     Offset caretOffset = getCaretOffset(
       contentController,
       Theme.of(context).textTheme.bodyText2!,
       size,
     );
+
+    List allLinks = await widget.db.getAllLinks();
 
     Widget builder(context) {
       return Container(
@@ -126,7 +128,7 @@ class _NoteScreenState extends State<NoteScreen> {
             builder: (context, value, child) {
               return TitleLinks(
                 caretOffset: caretOffset,
-                titles: ['hello', 'world', 'how', 'areo', 'you'],
+                allLinks: allLinks,
                 query: titleLinkQuery.value,
                 onLinkSelect: (String link) {
                   String t = contentController.text;

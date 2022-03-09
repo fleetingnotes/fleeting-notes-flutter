@@ -4,20 +4,20 @@ class TitleLinks extends StatelessWidget {
   TitleLinks({
     Key? key,
     required this.caretOffset,
-    required this.titles,
+    required this.allLinks,
     required this.query,
     required this.onLinkSelect,
     required this.layerLink,
   }) : super(key: key);
 
   final Offset caretOffset;
-  final List titles;
+  final List allLinks;
   final String query;
   final Function onLinkSelect;
   final LayerLink layerLink;
 
   List filterTitles(query) {
-    return titles
+    return allLinks
         .where((title) => title.toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
