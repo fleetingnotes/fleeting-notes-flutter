@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -41,6 +42,21 @@ void main() {
     await tester.pump();
 
     expect(find.text('Follow Link'), findsOneWidget);
+  });
+
+  testWidgets('TitleLinks list appears on `[[` type',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getAllLinks())
+        .thenAnswer((_) async => Future.value(['hello']));
+    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.enterText(find.bySemanticsLabel('Note'), '[[');
+    await tester.pump();
+
+    expect(find.byType(TitleLinks), findsOneWidget);
   });
 
   testWidgets('Backlinks are populated', (WidgetTester tester) async {

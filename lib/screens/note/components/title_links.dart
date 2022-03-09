@@ -26,23 +26,25 @@ class TitleLinks extends StatelessWidget {
   Widget build(BuildContext context) {
     return Positioned(
       width: 300,
-      height: 100,
+      height: 150,
       child: CompositedTransformFollower(
         link: layerLink,
         offset: caretOffset,
-        child: ListView.builder(
-          itemCount: filterTitles(query).length,
-          itemBuilder: (context, index) {
-            List filteredTitles = filterTitles(query);
-            final String item = filteredTitles[index];
+        child: Material(
+          child: ListView.builder(
+            itemCount: filterTitles(query).length,
+            itemBuilder: (context, index) {
+              List filteredTitles = filterTitles(query);
+              final String item = filteredTitles[index];
 
-            return ListTile(
-              title: Text(item),
-              onTap: () {
-                onLinkSelect(item);
-              },
-            );
-          },
+              return ListTile(
+                title: Text(item),
+                onTap: () {
+                  onLinkSelect(item);
+                },
+              );
+            },
+          ),
         ),
       ),
     );

@@ -130,21 +130,7 @@ class _NoteScreenState extends State<NoteScreen> {
                 caretOffset: caretOffset,
                 allLinks: allLinks,
                 query: titleLinkQuery.value,
-                onLinkSelect: (String link) {
-                  String t = contentController.text;
-                  int caretI = contentController.selection.baseOffset;
-                  String beforeCaretText = t.substring(0, caretI);
-                  int linkIndex = beforeCaretText.lastIndexOf('[[');
-                  contentController.text = t.substring(0, linkIndex) +
-                      '[[$link]]' +
-                      t.substring(caretI, t.length);
-                  contentController.selection = TextSelection.fromPosition(
-                      TextPosition(offset: linkIndex + link.length + 4));
-                  titleLinkQuery.value = '';
-                  if (overlayEntry.mounted) {
-                    overlayEntry.remove();
-                  }
-                },
+                onLinkSelect: _onLinkSelect,
                 layerLink: layerLink,
               );
             }),
@@ -152,6 +138,21 @@ class _NoteScreenState extends State<NoteScreen> {
     }
 
     overlayContent(builder);
+  }
+
+  _onLinkSelect(String link) {
+    String t = contentController.text;
+    int caretI = contentController.selection.baseOffset;
+    String beforeCaretText = t.substring(0, caretI);
+    int linkIndex = beforeCaretText.lastIndexOf('[[');
+    contentController.text =
+        t.substring(0, linkIndex) + '[[$link]]' + t.substring(caretI, t.length);
+    contentController.selection = TextSelection.fromPosition(
+        TextPosition(offset: linkIndex + link.length + 4));
+    titleLinkQuery.value = '';
+    if (overlayEntry.mounted) {
+      overlayEntry.remove();
+    }
   }
 
   Offset getCaretOffset(TextEditingController textController,
