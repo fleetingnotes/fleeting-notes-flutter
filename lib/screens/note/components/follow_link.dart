@@ -19,14 +19,16 @@ class FollowLink extends StatelessWidget {
       child: CompositedTransformFollower(
         link: layerLink,
         offset: caretOffset,
-        child: OutlinedButton(
-            onPressed: onTap,
-            child: const Text(
-              'Follow Link',
-              style: TextStyle(
-                fontSize: 15,
-              ),
-            )),
+        child: Material(
+          child: OutlinedButton(
+              onPressed: onTap,
+              child: const Text(
+                'Follow Link',
+                style: TextStyle(
+                  fontSize: 15,
+                ),
+              )),
+        ),
       ),
     );
   }

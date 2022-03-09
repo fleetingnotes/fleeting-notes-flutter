@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
@@ -30,8 +31,10 @@ class _NoteScreenState extends State<NoteScreen> {
   late TextEditingController titleController;
   late TextEditingController contentController;
   final LayerLink layerLink = LayerLink();
+  bool titleLinksVisible = false;
+  final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
   final FocusNode contentFocusNode = FocusNode();
-  late OverlayEntry overlayFollowLinkEntry = OverlayEntry(
+  late OverlayEntry overlayEntry = OverlayEntry(
     builder: (context) => Container(),
   );
 
@@ -57,12 +60,97 @@ class _NoteScreenState extends State<NoteScreen> {
       });
     });
     contentFocusNode.addListener(() {
-      if (overlayFollowLinkEntry.mounted) {
-        overlayFollowLinkEntry.remove();
-      }
+      removeOverlay();
     });
   }
 
+  // Overlay Functions
+  void showTitleLinksOverlay(context, BoxConstraints size) async {
+    _onLinkSelect(String link) {
+      String t = contentController.text;
+      int caretI = contentController.selection.baseOffset;
+      String beforeCaretText = t.substring(0, caretI);
+      int linkIndex = beforeCaretText.lastIndexOf('[[');
+      contentController.text = t.substring(0, linkIndex) +
+          '[[$link]]' +
+          t.substring(caretI, t.length);
+      contentController.selection = TextSelection.fromPosition(
+          TextPosition(offset: linkIndex + link.length + 4));
+      titleLinkQuery.value = '';
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
+    }
+
+    removeOverlay();
+    Offset caretOffset = getCaretOffset(
+      contentController,
+      Theme.of(context).textTheme.bodyText2!,
+      size,
+    );
+    List allLinks = await widget.db.getAllLinks();
+
+    Widget builder(context) {
+      return Container(
+        child: ValueListenableBuilder(
+            valueListenable: titleLinkQuery,
+            builder: (context, value, child) {
+              return TitleLinks(
+                caretOffset: caretOffset,
+                allLinks: allLinks,
+                query: titleLinkQuery.value,
+                onLinkSelect: _onLinkSelect,
+                layerLink: layerLink,
+              );
+            }),
+      );
+    }
+
+    overlayContent(builder);
+  }
+
+  void showFollowLinkOverlay(context, String title, BoxConstraints size) async {
+    void _onFollowLinkTap() async {
+      Note? note = await widget.db.getNoteByTitle(title);
+      note ??= Note.empty(title: title);
+      widget.db.navigateToNote(note);
+    }
+
+    // init overlay entry
+    removeOverlay();
+    Offset caretOffset = getCaretOffset(
+      contentController,
+      Theme.of(context).textTheme.bodyText2!,
+      size,
+    );
+    FollowLink builder(context) {
+      return FollowLink(
+        caretOffset: caretOffset,
+        onTap: _onFollowLinkTap,
+        layerLink: layerLink,
+      );
+    }
+
+    overlayContent(builder);
+  }
+
+  void overlayContent(builder) {
+    OverlayState? overlayState = Overlay.of(context);
+    overlayEntry = OverlayEntry(builder: builder);
+    // show overlay
+    if (overlayState != null) {
+      overlayState.insert(overlayEntry);
+    }
+  }
+
+  void removeOverlay() {
+    if (overlayEntry.mounted) {
+      overlayEntry.remove();
+      titleLinkQuery.value = '';
+    }
+  }
+
+  // Helper functions
   Future<String> checkTitle(id, title) async {
     String errMessage = '';
     if (title == '') return errMessage;
@@ -80,6 +168,74 @@ class _NoteScreenState extends State<NoteScreen> {
       titleController.text = widget.note.title;
     }
     return errMessage;
+  }
+
+  bool isTitleLinksVisible(text) {
+    var caretIndex = contentController.selection.baseOffset;
+    int i = text.substring(0, caretIndex).lastIndexOf('[[');
+    if (i == -1) return false;
+    int nextI = text.indexOf('[', i + 2);
+    nextI = (nextI > 0) ? nextI : text.length;
+    return !text.substring(i, nextI).contains(']');
+  }
+
+  Offset getCaretOffset(TextEditingController textController,
+      TextStyle textStyle, BoxConstraints size) {
+    String beforeCaretText =
+        textController.text.substring(0, textController.selection.baseOffset);
+
+    TextPainter painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: TextSpan(
+        style: textStyle,
+        text: beforeCaretText,
+      ),
+    );
+    painter.layout(maxWidth: size.maxWidth);
+
+    return Offset(
+      painter.computeLineMetrics().last.width,
+      painter.height + 10,
+    );
+  }
+
+  // Widget Functions
+  void _onContentTap(context, BoxConstraints size) async {
+    removeOverlay();
+    // check if caretOffset is in a link
+    var caretIndex = contentController.selection.baseOffset;
+    var matches = RegExp(Note.linkRegex).allMatches(contentController.text);
+    Iterable<dynamic> filteredMatches =
+        matches.where((m) => m.start < caretIndex && m.end > caretIndex);
+
+    if (filteredMatches.isNotEmpty) {
+      String title = filteredMatches.first.group(1);
+
+      showFollowLinkOverlay(context, title, size);
+    }
+  }
+
+  void _onContentChanged(context, text, size) {
+    setState(() {
+      hasNewChanges = true;
+    });
+    String beforeCaretText =
+        text.substring(0, contentController.selection.baseOffset);
+
+    bool isVisible = isTitleLinksVisible(text);
+    if (isVisible) {
+      if (!titleLinksVisible) {
+        showTitleLinksOverlay(context, size);
+        titleLinksVisible = true;
+      } else {
+        String query = beforeCaretText.substring(
+            beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
+        titleLinkQuery.value = query;
+      }
+    } else {
+      titleLinksVisible = false;
+      removeOverlay();
+    }
   }
 
   void _deleteNote() {
@@ -106,74 +262,6 @@ class _NoteScreenState extends State<NoteScreen> {
       titleController.text = prevTitle;
     }
     return errMessage;
-  }
-
-  void _onChanged(text) {
-    setState(() {
-      hasNewChanges = true;
-    });
-  }
-
-  Offset getCaretOffset(TextEditingController textController,
-      TextStyle textStyle, BoxConstraints size) {
-    String beforeCaretText =
-        textController.text.substring(0, textController.selection.baseOffset);
-
-    TextPainter painter = TextPainter(
-      textDirection: TextDirection.ltr,
-      text: TextSpan(
-        style: textStyle,
-        text: beforeCaretText,
-      ),
-    );
-    painter.layout(maxWidth: size.maxWidth);
-
-    return Offset(
-      painter.computeLineMetrics().last.width,
-      painter.height + 10,
-    );
-  }
-
-  void showFollowLinkOverlay(context, size) async {
-    if (overlayFollowLinkEntry.mounted) {
-      overlayFollowLinkEntry.remove();
-    }
-
-    // check if caretOffset is in a link
-    var caretIndex = contentController.selection.baseOffset;
-    var matches = RegExp(Note.linkRegex).allMatches(contentController.text);
-    Iterable<dynamic> filteredMatches =
-        matches.where((m) => m.start < caretIndex && m.end > caretIndex);
-
-    if (filteredMatches.isNotEmpty) {
-      String title = filteredMatches.first.group(1);
-
-      void _onTap() async {
-        Note? note = await widget.db.getNoteByTitle(title);
-        note ??= Note.empty(title: title);
-        widget.db.navigateToNote(note);
-      }
-
-      // init overlay entry
-      OverlayState? overlayState = Overlay.of(context);
-      Offset caretOffset = getCaretOffset(
-        contentController,
-        Theme.of(context).textTheme.bodyText2!,
-        size,
-      );
-      overlayFollowLinkEntry = OverlayEntry(builder: (context) {
-        return FollowLink(
-          caretOffset: caretOffset,
-          onTap: _onTap,
-          layerLink: layerLink,
-        );
-      });
-
-      // show overlay
-      if (overlayState != null) {
-        overlayState.insert(overlayFollowLinkEntry);
-      }
-    }
   }
 
   @override
@@ -210,7 +298,11 @@ class _NoteScreenState extends State<NoteScreen> {
                           hintText: "Title",
                           border: InputBorder.none,
                         ),
-                        onChanged: _onChanged,
+                        onChanged: (text) {
+                          setState(() {
+                            hasNewChanges = true;
+                          });
+                        },
                       ),
                       CompositedTransformTarget(
                         link: layerLink,
@@ -226,8 +318,9 @@ class _NoteScreenState extends State<NoteScreen> {
                               hintText: "Note",
                               border: InputBorder.none,
                             ),
-                            onChanged: _onChanged,
-                            onTap: () => showFollowLinkOverlay(context, size),
+                            onChanged: (text) =>
+                                _onContentChanged(context, text, size),
+                            onTap: () => _onContentTap(context, size),
                           );
                         }),
                       ),
