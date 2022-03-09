@@ -64,51 +64,7 @@ class _NoteScreenState extends State<NoteScreen> {
     });
   }
 
-  Future<String> checkTitle(id, title) async {
-    String errMessage = '';
-    if (title == '') return errMessage;
-
-    RegExp r = RegExp('[${Note.invalidChars}]');
-    final invalidMatch = r.firstMatch(titleController.text);
-    final titleExists =
-        await widget.db.titleExists(widget.note.id, titleController.text);
-
-    if (invalidMatch != null) {
-      errMessage = 'Title cannot contain [, ], #, *';
-      titleController.text = widget.note.title;
-    } else if (titleExists) {
-      errMessage = 'Title `${titleController.text}` already exists';
-      titleController.text = widget.note.title;
-    }
-    return errMessage;
-  }
-
-  void _deleteNote() {
-    Note deletedNote = widget.note;
-    deletedNote.isDeleted = true;
-    widget.db.deleteNote(widget.note);
-    widget.db.streamController.add(deletedNote);
-    Navigator.pop(context);
-  }
-
-  Future<String> _saveNote() async {
-    Note updatedNote = widget.note;
-    String prevTitle = widget.note.title;
-    updatedNote.title = titleController.text;
-    updatedNote.content = contentController.text;
-    String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
-    if (errMessage == '') {
-      widget.db.upsertNote(updatedNote);
-      widget.db.streamController.add(updatedNote);
-      setState(() {
-        hasNewChanges = false;
-      });
-    } else {
-      titleController.text = prevTitle;
-    }
-    return errMessage;
-  }
-
+  // Overlay Functions
   void showTitleLinksOverlay(context, BoxConstraints size) async {
     _onLinkSelect(String link) {
       String t = contentController.text;
@@ -153,7 +109,7 @@ class _NoteScreenState extends State<NoteScreen> {
     overlayContent(builder);
   }
 
-  void showFollowLinkEntry(context, String title, BoxConstraints size) async {
+  void showFollowLinkOverlay(context, String title, BoxConstraints size) async {
     void _onFollowLinkTap() async {
       Note? note = await widget.db.getNoteByTitle(title);
       note ??= Note.empty(title: title);
@@ -178,6 +134,51 @@ class _NoteScreenState extends State<NoteScreen> {
     overlayContent(builder);
   }
 
+  void overlayContent(builder) {
+    OverlayState? overlayState = Overlay.of(context);
+    overlayEntry = OverlayEntry(builder: builder);
+    // show overlay
+    if (overlayState != null) {
+      overlayState.insert(overlayEntry);
+    }
+  }
+
+  void removeOverlay() {
+    if (overlayEntry.mounted) {
+      overlayEntry.remove();
+      titleLinkQuery.value = '';
+    }
+  }
+
+  // Helper functions
+  Future<String> checkTitle(id, title) async {
+    String errMessage = '';
+    if (title == '') return errMessage;
+
+    RegExp r = RegExp('[${Note.invalidChars}]');
+    final invalidMatch = r.firstMatch(titleController.text);
+    final titleExists =
+        await widget.db.titleExists(widget.note.id, titleController.text);
+
+    if (invalidMatch != null) {
+      errMessage = 'Title cannot contain [, ], #, *';
+      titleController.text = widget.note.title;
+    } else if (titleExists) {
+      errMessage = 'Title `${titleController.text}` already exists';
+      titleController.text = widget.note.title;
+    }
+    return errMessage;
+  }
+
+  bool isTitleLinksVisible(text) {
+    var caretIndex = contentController.selection.baseOffset;
+    int i = text.substring(0, caretIndex).lastIndexOf('[[');
+    if (i == -1) return false;
+    int nextI = text.indexOf('[', i + 2);
+    nextI = (nextI > 0) ? nextI : text.length;
+    return !text.substring(i, nextI).contains(']');
+  }
+
   Offset getCaretOffset(TextEditingController textController,
       TextStyle textStyle, BoxConstraints size) {
     String beforeCaretText =
@@ -198,22 +199,7 @@ class _NoteScreenState extends State<NoteScreen> {
     );
   }
 
-  void overlayContent(builder) {
-    OverlayState? overlayState = Overlay.of(context);
-    overlayEntry = OverlayEntry(builder: builder);
-    // show overlay
-    if (overlayState != null) {
-      overlayState.insert(overlayEntry);
-    }
-  }
-
-  void removeOverlay() {
-    if (overlayEntry.mounted) {
-      overlayEntry.remove();
-      titleLinkQuery.value = '';
-    }
-  }
-
+  // Widget Functions
   void _onContentTap(context, BoxConstraints size) async {
     removeOverlay();
     // check if caretOffset is in a link
@@ -225,17 +211,8 @@ class _NoteScreenState extends State<NoteScreen> {
     if (filteredMatches.isNotEmpty) {
       String title = filteredMatches.first.group(1);
 
-      showFollowLinkEntry(context, title, size);
+      showFollowLinkOverlay(context, title, size);
     }
-  }
-
-  bool isTitleLinksVisible(text) {
-    var caretIndex = contentController.selection.baseOffset;
-    int i = text.substring(0, caretIndex).lastIndexOf('[[');
-    if (i == -1) return false;
-    int nextI = text.indexOf('[', i + 2);
-    nextI = (nextI > 0) ? nextI : text.length;
-    return !text.substring(i, nextI).contains(']');
   }
 
   void _onContentChanged(context, text, size) {
@@ -259,6 +236,32 @@ class _NoteScreenState extends State<NoteScreen> {
       titleLinksVisible = false;
       removeOverlay();
     }
+  }
+
+  void _deleteNote() {
+    Note deletedNote = widget.note;
+    deletedNote.isDeleted = true;
+    widget.db.deleteNote(widget.note);
+    widget.db.streamController.add(deletedNote);
+    Navigator.pop(context);
+  }
+
+  Future<String> _saveNote() async {
+    Note updatedNote = widget.note;
+    String prevTitle = widget.note.title;
+    updatedNote.title = titleController.text;
+    updatedNote.content = contentController.text;
+    String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
+    if (errMessage == '') {
+      widget.db.upsertNote(updatedNote);
+      widget.db.streamController.add(updatedNote);
+      setState(() {
+        hasNewChanges = false;
+      });
+    } else {
+      titleController.text = prevTitle;
+    }
+    return errMessage;
   }
 
   @override
