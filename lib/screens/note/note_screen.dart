@@ -1,4 +1,10 @@
+@JS()
+library main;
+
 import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
+import 'package:flutter/foundation.dart';
+import 'package:js/js.dart';
+import 'dart:js_util';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
@@ -11,6 +17,12 @@ import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart'
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
+
+@JS('chrome.tabs.query')
+external dynamic queryTabs(dynamic queryInfo);
+
+@JS()
+external dynamic getCurrentTabUrl();
 
 class NoteScreen extends StatefulWidget {
   const NoteScreen({
@@ -27,10 +39,12 @@ class NoteScreen extends StatefulWidget {
 
 class _NoteScreenState extends State<NoteScreen> {
   List<Note> backlinkNotes = [];
-  bool hasNewChanges = false;
+  bool hasNewChanges = true;
   late TextEditingController titleController;
   late TextEditingController contentController;
+  late TextEditingController sourceController;
   final LayerLink layerLink = LayerLink();
+  bool sourceFieldVisible = false;
   bool titleLinksVisible = false;
   final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
   final FocusNode contentFocusNode = FocusNode();
@@ -42,6 +56,10 @@ class _NoteScreenState extends State<NoteScreen> {
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.note.title);
+    sourceController = TextEditingController(text: widget.note.source);
+    setState(() {
+      sourceFieldVisible = widget.note.source.isNotEmpty || !kIsWeb;
+    });
     contentController = StyleableTextFieldController(
       styles: TextPartStyleDefinitions(definitionList: [
         TextPartStyleDefinition(
@@ -199,6 +217,19 @@ class _NoteScreenState extends State<NoteScreen> {
     );
   }
 
+  Future<String> getSourceUrl({String defaultText = ''}) async {
+    try {
+      var queryOptions = jsify({
+        'active': true,
+      });
+      dynamic tabs = await promiseToFuture(queryTabs(queryOptions));
+      return getProperty(tabs[0], 'url');
+    } catch (e) {
+      print(e);
+      return defaultText;
+    }
+  }
+
   // Widget Functions
   void _onContentTap(context, BoxConstraints size) async {
     removeOverlay();
@@ -251,6 +282,7 @@ class _NoteScreenState extends State<NoteScreen> {
     String prevTitle = widget.note.title;
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
+    updatedNote.source = sourceController.text;
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
       widget.db.upsertNote(updatedNote);
@@ -324,6 +356,26 @@ class _NoteScreenState extends State<NoteScreen> {
                           );
                         }),
                       ),
+                      (sourceFieldVisible)
+                          ? TextField(
+                              style: Theme.of(context).textTheme.bodyText2,
+                              controller: sourceController,
+                              decoration: const InputDecoration(
+                                hintText: "Source",
+                                border: InputBorder.none,
+                              ),
+                            )
+                          : TextButton(
+                              onPressed: () async {
+                                sourceController.text = await getSourceUrl(
+                                    defaultText: sourceController.text);
+                                setState(() {
+                                  sourceFieldVisible = true;
+                                  hasNewChanges = true;
+                                });
+                              },
+                              child: const Text('Add Source URL'),
+                            ),
                       const SizedBox(height: kDefaultPadding),
                       const Text("Backlinks", style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
