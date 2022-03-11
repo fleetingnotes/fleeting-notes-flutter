@@ -167,10 +167,20 @@ class RealmDB {
   }
 
   void navigateToNote(Note note) {
-    navigatorKey.currentState!.push(
-      PageRouteBuilder(
-          pageBuilder: (context, _, __) => NoteScreen(db: this, note: note)),
-    );
+    navigatorKey.currentState!.push(PageRouteBuilder(
+        pageBuilder: (context, _, __) => NoteScreen(db: this, note: note),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(0.0, 1.0);
+          const end = Offset.zero;
+          const curve = Curves.ease;
+
+          final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final offsetAnimation = animation.drive(tween);
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        }));
   }
 
   void listenNoteChange(Function callback) {
