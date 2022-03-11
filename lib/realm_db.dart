@@ -94,6 +94,7 @@ class RealmDB {
       "_partition": userId.toString(),
       "title": note.title,
       "content": note.content,
+      "source": note.source,
       "timestamp": note.timestamp,
       "_isDeleted": note.isDeleted,
     }));
@@ -112,6 +113,12 @@ class RealmDB {
       filter: {"_id": note.id},
       update: UpdateOperator.set({
         "content": note.content,
+      }),
+    );
+    collection.updateOne(
+      filter: {"_id": note.id},
+      update: UpdateOperator.set({
+        "source": note.source,
       }),
     );
   }
@@ -206,6 +213,7 @@ class RealmDB {
         id: item["_id"].toString(),
         title: item["title"].toString(),
         content: item["content"].toString(),
+        source: item["source"].toString(),
         timestamp: item["timestamp"].toString(),
       );
     }).toList();
@@ -218,6 +226,7 @@ class RealmDB {
       id: mongoDoc.get("_id").toString(),
       title: mongoDoc.get("title").toString(),
       content: mongoDoc.get("content").toString(),
+      source: mongoDoc.get("source").toString(),
       timestamp: mongoDoc.get("timestamp").toString(),
     );
 

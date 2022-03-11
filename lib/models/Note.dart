@@ -3,7 +3,7 @@ import 'package:uuid/uuid.dart';
 
 class Note {
   final String id, timestamp;
-  String title, content;
+  String title, content, source;
   final bool hasAttachment;
   bool isDeleted;
   static const String invalidChars = r'\[\]\#\*';
@@ -14,6 +14,7 @@ class Note {
     required this.title,
     required this.content,
     required this.timestamp,
+    this.source = '',
     this.isDeleted = false,
     this.hasAttachment = false,
   });
@@ -36,6 +37,7 @@ class Note {
       'id': id,
       'title': title,
       'content': content,
+      'source': source,
       'timestamp': timestamp,
     };
   }
