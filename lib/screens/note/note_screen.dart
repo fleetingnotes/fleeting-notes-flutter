@@ -21,9 +21,6 @@ import 'package:fleeting_notes_flutter/constants.dart';
 @JS('chrome.tabs.query')
 external dynamic queryTabs(dynamic queryInfo);
 
-@JS()
-external dynamic getCurrentTabUrl();
-
 class NoteScreen extends StatefulWidget {
   const NoteScreen({
     Key? key,
