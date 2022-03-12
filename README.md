@@ -32,3 +32,11 @@ Simply run the build script.
 ./build_chrome_extension.sh
 ```
 Then go to chrome and click `Load unpacked` from the extensions page, following instructions to select the `build/web` folder and loading the extension in dev mode.
+
+## Bumpversion for release
+Run the bumpversion script and specify version number
+```
+./bumpversion.sh 1.2.3
+git push
+git push --tags
+```
