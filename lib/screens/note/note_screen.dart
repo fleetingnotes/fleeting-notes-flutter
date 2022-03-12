@@ -218,6 +218,7 @@ class _NoteScreenState extends State<NoteScreen> {
     try {
       var queryOptions = jsify({
         'active': true,
+        'currentWindow': true
       });
       dynamic tabs = await promiseToFuture(queryTabs(queryOptions));
       return getProperty(tabs[0], 'url');
