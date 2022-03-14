@@ -5,6 +5,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart'
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 import 'dart:js_util';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
@@ -216,10 +217,7 @@ class _NoteScreenState extends State<NoteScreen> {
 
   Future<String> getSourceUrl({String defaultText = ''}) async {
     try {
-      var queryOptions = jsify({
-        'active': true,
-        'currentWindow': true
-      });
+      var queryOptions = jsify({'active': true, 'currentWindow': true});
       dynamic tabs = await promiseToFuture(queryTabs(queryOptions));
       return getProperty(tabs[0], 'url');
     } catch (e) {
@@ -294,6 +292,32 @@ class _NoteScreenState extends State<NoteScreen> {
     return errMessage;
   }
 
+  void launchURLBrowser(String url) async {
+    void _failUrlSnackbar(String message) {
+      var snackBar = SnackBar(
+        content: Text(message),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+
+    Uri? uri = Uri.tryParse(url);
+    String newUrl = '';
+    if (uri == null) {
+      String errText = 'Could not launch `$url`';
+      _failUrlSnackbar(errText);
+      return;
+    }
+    newUrl =
+        (uri.scheme.isEmpty) ? 'https://' + uri.toString() : uri.toString();
+
+    if (await canLaunch(newUrl)) {
+      await launch(newUrl);
+    } else {
+      String errText = 'Could not launch `$url`';
+      _failUrlSnackbar(errText);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -358,9 +382,15 @@ class _NoteScreenState extends State<NoteScreen> {
                           ? TextField(
                               style: Theme.of(context).textTheme.bodyText2,
                               controller: sourceController,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 hintText: "Source",
                                 border: InputBorder.none,
+                                suffixIcon: IconButton(
+                                  tooltip: 'Open URL',
+                                  icon: const Icon(Icons.open_in_new),
+                                  onPressed: () =>
+                                      launchURLBrowser(sourceController.text),
+                                ),
                               ),
                             )
                           : TextButton(
