@@ -28,37 +28,6 @@ void main() {
     expect(find.bySemanticsLabel('Note'), findsOneWidget);
   });
 
-  testWidgets('Follow link button appears on link tap',
-      (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
-    when(() => mockDb.getBacklinkNotes(any()))
-        .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
-    await tester.enterText(find.bySemanticsLabel('Note'), '[[test]]');
-    await tester.pump();
-    await tester.tapAt(
-        tester.getTopLeft(find.bySemanticsLabel('Note')).translate(20, 10));
-    await tester.pump();
-
-    expect(find.text('Follow Link'), findsOneWidget);
-  });
-
-  testWidgets('TitleLinks list appears on `[[` type',
-      (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
-    when(() => mockDb.getBacklinkNotes(any()))
-        .thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.getAllLinks())
-        .thenAnswer((_) async => Future.value(['hello']));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
-    await tester.enterText(find.bySemanticsLabel('Note'), '[[');
-    await tester.pump();
-
-    expect(find.byType(TitleLinks), findsOneWidget);
-  });
-
   testWidgets('Backlinks are populated', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockRealmDB mockDb = MockRealmDB();

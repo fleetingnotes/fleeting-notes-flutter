@@ -7,12 +7,12 @@ import 'package:fleeting_notes_flutter/realm_db.dart';
 class ContentField extends StatefulWidget {
   const ContentField({
     Key? key,
-    required this.contentController,
+    required this.controller,
     required this.onChanged,
     required this.db,
   }) : super(key: key);
 
-  final TextEditingController contentController;
+  final TextEditingController controller;
   final RealmDB db;
   final VoidCallback onChanged;
 
@@ -42,9 +42,8 @@ class _ContentFieldState extends State<ContentField> {
   void _onContentTap(context, BoxConstraints size) async {
     removeOverlay();
     // check if caretOffset is in a link
-    var caretIndex = widget.contentController.selection.baseOffset;
-    var matches =
-        RegExp(Note.linkRegex).allMatches(widget.contentController.text);
+    var caretIndex = widget.controller.selection.baseOffset;
+    var matches = RegExp(Note.linkRegex).allMatches(widget.controller.text);
     Iterable<dynamic> filteredMatches =
         matches.where((m) => m.start < caretIndex && m.end > caretIndex);
 
@@ -58,7 +57,7 @@ class _ContentFieldState extends State<ContentField> {
   void _onContentChanged(context, text, size) {
     widget.onChanged();
     String beforeCaretText =
-        text.substring(0, widget.contentController.selection.baseOffset);
+        text.substring(0, widget.controller.selection.baseOffset);
 
     bool isVisible = isTitleLinksVisible(text);
     if (isVisible) {
@@ -78,7 +77,7 @@ class _ContentFieldState extends State<ContentField> {
 
   // Helper Functions
   bool isTitleLinksVisible(text) {
-    var caretIndex = widget.contentController.selection.baseOffset;
+    var caretIndex = widget.controller.selection.baseOffset;
     int i = text.substring(0, caretIndex).lastIndexOf('[[');
     if (i == -1) return false;
     int nextI = text.indexOf('[', i + 2);
@@ -109,14 +108,14 @@ class _ContentFieldState extends State<ContentField> {
   // Overlay Functions
   void showTitleLinksOverlay(context, BoxConstraints size) async {
     _onLinkSelect(String link) {
-      String t = widget.contentController.text;
-      int caretI = widget.contentController.selection.baseOffset;
+      String t = widget.controller.text;
+      int caretI = widget.controller.selection.baseOffset;
       String beforeCaretText = t.substring(0, caretI);
       int linkIndex = beforeCaretText.lastIndexOf('[[');
-      widget.contentController.text = t.substring(0, linkIndex) +
+      widget.controller.text = t.substring(0, linkIndex) +
           '[[$link]]' +
           t.substring(caretI, t.length);
-      widget.contentController.selection = TextSelection.fromPosition(
+      widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: linkIndex + link.length + 4));
       titleLinkQuery.value = '';
       if (overlayEntry.mounted) {
@@ -126,7 +125,7 @@ class _ContentFieldState extends State<ContentField> {
 
     removeOverlay();
     Offset caretOffset = getCaretOffset(
-      widget.contentController,
+      widget.controller,
       Theme.of(context).textTheme.bodyText2!,
       size,
     );
@@ -161,7 +160,7 @@ class _ContentFieldState extends State<ContentField> {
     // init overlay entry
     removeOverlay();
     Offset caretOffset = getCaretOffset(
-      widget.contentController,
+      widget.controller,
       Theme.of(context).textTheme.bodyText2!,
       size,
     );
@@ -200,7 +199,7 @@ class _ContentFieldState extends State<ContentField> {
         return TextField(
           focusNode: contentFocusNode,
           autofocus: true,
-          controller: widget.contentController,
+          controller: widget.controller,
           minLines: 5,
           maxLines: 10,
           style: Theme.of(context).textTheme.bodyText2,

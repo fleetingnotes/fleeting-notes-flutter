@@ -194,7 +194,7 @@ class _NoteScreenState extends State<NoteScreen> {
                           ),
                           onChanged: (text) => onChanged()),
                       ContentField(
-                        contentController: contentController,
+                        controller: contentController,
                         db: widget.db,
                         onChanged: onChanged,
                       ),
