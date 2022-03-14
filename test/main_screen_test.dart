@@ -32,7 +32,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
     expect(find.byType(NoteScreen), findsOneWidget);
-    expect(find.byType(ListOfNotes), findsOneWidget);
+    expect(find.byType(SearchScreen), findsOneWidget);
   });
 
   testWidgets('Press new note button adds new note',
@@ -47,7 +47,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
     expect(find.byType(NoteScreen), findsNWidgets(2));
-    expect(find.byType(ListOfNotes), findsOneWidget);
+    expect(find.byType(SearchScreen), findsOneWidget);
   });
 
   testWidgets('Clicking NoteCard populates NoteScreen and sets active note',
@@ -67,7 +67,7 @@ void main() {
     expect(
         tester
             .widget<Text>(find.descendant(
-              of: find.byType(ListOfNotes),
+              of: find.byType(SearchScreen),
               matching: find.text('Click me note!'),
             ))
             .style!
@@ -89,7 +89,8 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Save'));
     await tester.pump();
-    expect(find.widgetWithText(ListOfNotes, 'Test save note!'), findsOneWidget);
+    expect(
+        find.widgetWithText(SearchScreen, 'Test save note!'), findsOneWidget);
     expect(find.byType(NoteScreen), findsOneWidget);
   });
 
@@ -109,7 +110,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(ListOfNotes, 'Test delete note!'), findsNothing);
+    expect(
+        find.widgetWithText(SearchScreen, 'Test delete note!'), findsNothing);
     expect(find.byType(NoteScreen), findsNothing);
   });
 
@@ -145,4 +147,17 @@ void main() {
     expect(find.byType(MyHomePage), findsNothing);
     expect(find.byType(SettingsScreen), findsOneWidget);
   });
+
+  // testWidgets('Resize screen works properly', (WidgetTester tester) async {
+  //   tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
+  //   MockRealmDB mockDb = MockRealmDB();
+  //   when(() => mockDb.getSearchNotes(any()))
+  //       .thenAnswer((_) async => Future.value([]));
+  //   when(() => mockDb.getBacklinkNotes(any()))
+  //       .thenAnswer((_) async => Future.value([]));
+  //   await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
+
+  //   tester.binding.window.physicalSizeTestValue = const Size(500, 1000);
+  //   await tester.pumpAndSettle();
+  // });
 }

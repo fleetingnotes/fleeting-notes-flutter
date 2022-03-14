@@ -8,8 +8,8 @@ import '../../responsive.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-class ListOfNotes extends StatefulWidget {
-  const ListOfNotes({
+class SearchScreen extends StatefulWidget {
+  const SearchScreen({
     Key? key,
     required this.query,
     required this.db,
@@ -21,10 +21,10 @@ class ListOfNotes extends StatefulWidget {
   final VoidCallback? openDrawer;
 
   @override
-  State<ListOfNotes> createState() => _ListOfNotesState();
+  State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _ListOfNotesState extends State<ListOfNotes> {
+class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
   late List<Note> notes = [];
   int activeNoteIndex = -1;
@@ -65,12 +65,6 @@ class _ListOfNotesState extends State<ListOfNotes> {
     super.initState();
     loadNotes('');
     widget.db.listenNoteChange(updateNote);
-  }
-
-  @override
-  void dispose() {
-    widget.db.unlistenNoteChange();
-    super.dispose();
   }
 
   void _pressNote(int index) {
