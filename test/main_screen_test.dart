@@ -24,7 +24,8 @@ void main() {
   });
 
   testWidgets('Render Main Screen', (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
         .thenAnswer((_) async => Future.value([]));
@@ -37,7 +38,8 @@ void main() {
 
   testWidgets('Press new note button adds new note',
       (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
         .thenAnswer((_) async => Future.value([]));
@@ -52,7 +54,7 @@ void main() {
 
   testWidgets('Clicking NoteCard populates NoteScreen and sets active note',
       (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     Note newNote = Note.empty(content: 'Click me note!');
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
@@ -76,7 +78,8 @@ void main() {
   });
 
   testWidgets('Save note updates list of notes', (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
         .thenAnswer((_) async => Future.value([]));
@@ -95,7 +98,8 @@ void main() {
   });
 
   testWidgets('Delete note updates list of notes', (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     Note newNote = Note.empty(content: 'Test delete note!');
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
@@ -116,7 +120,8 @@ void main() {
   });
 
   testWidgets('Logout changes to auth screen', (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
         .thenAnswer((_) async => Future.value([]));
@@ -133,7 +138,8 @@ void main() {
 
   testWidgets('Settings changes to settings screen',
       (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
         .thenAnswer((_) async => Future.value([]));
@@ -147,17 +153,4 @@ void main() {
     expect(find.byType(MyHomePage), findsNothing);
     expect(find.byType(SettingsScreen), findsOneWidget);
   });
-
-  // testWidgets('Resize screen works properly', (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(3000, 1000);
-  //   MockRealmDB mockDb = MockRealmDB();
-  //   when(() => mockDb.getSearchNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
-
-  //   tester.binding.window.physicalSizeTestValue = const Size(500, 1000);
-  //   await tester.pumpAndSettle();
-  // });
 }
