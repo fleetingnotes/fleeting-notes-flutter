@@ -1,10 +1,3 @@
-@JS()
-library main;
-
-import 'package:flutter/foundation.dart';
-import 'package:js/js.dart';
-import 'dart:js_util';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
@@ -17,10 +10,8 @@ import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
-
-@JS('chrome.tabs.query')
-external dynamic queryTabs(dynamic queryInfo);
 
 class NoteScreen extends StatefulWidget {
   const NoteScreen({
@@ -41,7 +32,6 @@ class _NoteScreenState extends State<NoteScreen> {
   late TextEditingController titleController;
   late TextEditingController contentController;
   late TextEditingController sourceController;
-  bool sourceFieldVisible = false;
 
   @override
   void initState() {
@@ -59,9 +49,6 @@ class _NoteScreenState extends State<NoteScreen> {
       ]),
     );
     contentController.text = widget.note.content;
-    setState(() {
-      sourceFieldVisible = widget.note.source.isNotEmpty || !kIsWeb;
-    });
     widget.db.getBacklinkNotes(widget.note).then((notes) {
       setState(() {
         backlinkNotes = notes;
@@ -89,17 +76,6 @@ class _NoteScreenState extends State<NoteScreen> {
     return errMessage;
   }
 
-  Future<String> getSourceUrl({String defaultText = ''}) async {
-    try {
-      var queryOptions = jsify({'active': true, 'currentWindow': true});
-      dynamic tabs = await promiseToFuture(queryTabs(queryOptions));
-      return getProperty(tabs[0], 'url');
-    } catch (e) {
-      print(e);
-      return defaultText;
-    }
-  }
-
   void _deleteNote() {
     Note deletedNote = widget.note;
     deletedNote.isDeleted = true;
@@ -125,32 +101,6 @@ class _NoteScreenState extends State<NoteScreen> {
       titleController.text = prevTitle;
     }
     return errMessage;
-  }
-
-  void launchURLBrowser(String url) async {
-    void _failUrlSnackbar(String message) {
-      var snackBar = SnackBar(
-        content: Text(message),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
-
-    Uri? uri = Uri.tryParse(url);
-    String newUrl = '';
-    if (uri == null) {
-      String errText = 'Could not launch `$url`';
-      _failUrlSnackbar(errText);
-      return;
-    }
-    newUrl =
-        (uri.scheme.isEmpty) ? 'https://' + uri.toString() : uri.toString();
-
-    if (await canLaunch(newUrl)) {
-      await launch(newUrl);
-    } else {
-      String errText = 'Could not launch `$url`';
-      _failUrlSnackbar(errText);
-    }
   }
 
   void onChanged() {
@@ -183,38 +133,19 @@ class _NoteScreenState extends State<NoteScreen> {
                         widget.note.getDateTimeStr(),
                         style: Theme.of(context).textTheme.caption,
                       ),
-                      TitleField(controller: titleController),
+                      TitleField(
+                        controller: titleController,
+                        onChanged: onChanged,
+                      ),
                       ContentField(
                         controller: contentController,
                         db: widget.db,
                         onChanged: onChanged,
                       ),
-                      (sourceFieldVisible)
-                          ? TextField(
-                              style: Theme.of(context).textTheme.bodyText2,
-                              controller: sourceController,
-                              decoration: InputDecoration(
-                                hintText: "Source",
-                                border: InputBorder.none,
-                                suffixIcon: IconButton(
-                                  tooltip: 'Open URL',
-                                  icon: const Icon(Icons.open_in_new),
-                                  onPressed: () =>
-                                      launchURLBrowser(sourceController.text),
-                                ),
-                              ),
-                            )
-                          : TextButton(
-                              onPressed: () async {
-                                sourceController.text = await getSourceUrl(
-                                    defaultText: sourceController.text);
-                                setState(() {
-                                  sourceFieldVisible = true;
-                                  hasNewChanges = true;
-                                });
-                              },
-                              child: const Text('Add Source URL'),
-                            ),
+                      SourceContainer(
+                        controller: sourceController,
+                        onChanged: onChanged,
+                      ),
                       const SizedBox(height: kDefaultPadding),
                       const Text("Backlinks", style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
