@@ -8,8 +8,8 @@ import '../../responsive.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-class ListOfNotes extends StatefulWidget {
-  const ListOfNotes({
+class SearchScreen extends StatefulWidget {
+  const SearchScreen({
     Key? key,
     required this.query,
     required this.db,
@@ -21,10 +21,10 @@ class ListOfNotes extends StatefulWidget {
   final VoidCallback? openDrawer;
 
   @override
-  State<ListOfNotes> createState() => _ListOfNotesState();
+  State<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _ListOfNotesState extends State<ListOfNotes> {
+class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
   late List<Note> notes = [];
   int activeNoteIndex = -1;
@@ -67,12 +67,6 @@ class _ListOfNotesState extends State<ListOfNotes> {
     widget.db.listenNoteChange(updateNote);
   }
 
-  @override
-  void dispose() {
-    widget.db.unlistenNoteChange();
-    super.dispose();
-  }
-
   void _pressNote(int index) {
     setState(() {
       activeNoteIndex = index;
@@ -97,15 +91,11 @@ class _ListOfNotesState extends State<ListOfNotes> {
                     const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Row(
                   children: [
-                    // Once user click the menu icon the menu shows like drawer
-                    // Also we want to hide this menu icon on desktop
-                    if (!Responsive.isDesktop(context))
-                      IconButton(
-                        icon: const Icon(Icons.menu),
-                        onPressed: widget.openDrawer,
-                      ),
-                    if (!Responsive.isDesktop(context))
-                      const SizedBox(width: 5),
+                    IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: widget.openDrawer,
+                    ),
+                    const SizedBox(width: 5),
                     Expanded(
                       child: TextField(
                         onChanged: loadNotes,
