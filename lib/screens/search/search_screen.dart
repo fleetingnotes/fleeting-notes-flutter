@@ -27,7 +27,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
   late List<Note> notes = [];
-  int activeNoteIndex = -1;
+  String activeNoteId = '';
 
   Future<void> loadNotes(queryRegex) async {
     var tempNotes = await widget.db.getSearchNotes(queryRegex);
@@ -39,12 +39,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void updateNote(Note updatedNote) {
     setState(() {
       if (updatedNote.isDeleted) {
-        Note? activeNote =
-            (activeNoteIndex >= 0) ? notes[activeNoteIndex] : null;
         notes.removeWhere((note) => note.id == updatedNote.id);
-        if (activeNote != null && activeNote.id == updatedNote.id) {
-          activeNoteIndex = -1;
-        }
       } else {
         bool isUpdated = false;
         notes.asMap().forEach((i, note) {
@@ -67,12 +62,12 @@ class _SearchScreenState extends State<SearchScreen> {
     widget.db.listenNoteChange(updateNote);
   }
 
-  void _pressNote(int index) {
+  void _pressNote(Note note) {
     setState(() {
-      activeNoteIndex = index;
+      activeNoteId = note.id;
     });
     widget.db.popAllRoutes();
-    widget.db.navigateToNote(notes[index]);
+    widget.db.navigateToNote(note);
   }
 
   @override
@@ -145,9 +140,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     note: notes[index],
                     isActive: Responsive.isMobile(context)
                         ? false
-                        : index == activeNoteIndex,
+                        : notes[index].id == activeNoteId,
                     press: () {
-                      _pressNote(index);
+                      _pressNote(notes[index]);
                     },
                   ),
                 ),
