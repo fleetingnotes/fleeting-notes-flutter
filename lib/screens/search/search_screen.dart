@@ -91,15 +91,11 @@ class _SearchScreenState extends State<SearchScreen> {
                     const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Row(
                   children: [
-                    // Once user click the menu icon the menu shows like drawer
-                    // Also we want to hide this menu icon on desktop
-                    if (!Responsive.isDesktop(context))
-                      IconButton(
-                        icon: const Icon(Icons.menu),
-                        onPressed: widget.openDrawer,
-                      ),
-                    if (!Responsive.isDesktop(context))
-                      const SizedBox(width: 5),
+                    IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: widget.openDrawer,
+                    ),
+                    const SizedBox(width: 5),
                     Expanded(
                       child: TextField(
                         onChanged: loadNotes,
