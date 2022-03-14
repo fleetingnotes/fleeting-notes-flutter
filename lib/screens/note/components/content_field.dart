@@ -8,13 +8,13 @@ class ContentField extends StatefulWidget {
   const ContentField({
     Key? key,
     required this.controller,
-    required this.onChanged,
     required this.db,
+    this.onChanged,
   }) : super(key: key);
 
   final TextEditingController controller;
   final RealmDB db;
-  final VoidCallback onChanged;
+  final VoidCallback? onChanged;
 
   @override
   State<ContentField> createState() => _ContentFieldState();
@@ -55,7 +55,9 @@ class _ContentFieldState extends State<ContentField> {
   }
 
   void _onContentChanged(context, text, size) {
-    widget.onChanged();
+    if (widget.onChanged != null) {
+      widget.onChanged!();
+    }
     String beforeCaretText =
         text.substring(0, widget.controller.selection.baseOffset);
 
