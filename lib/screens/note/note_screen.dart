@@ -15,6 +15,7 @@ import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 import 'package:fleeting_notes_flutter/components/note_card.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
 
@@ -182,17 +183,7 @@ class _NoteScreenState extends State<NoteScreen> {
                         widget.note.getDateTimeStr(),
                         style: Theme.of(context).textTheme.caption,
                       ),
-                      TextField(
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          controller: titleController,
-                          decoration: const InputDecoration(
-                            hintText: "Title",
-                            border: InputBorder.none,
-                          ),
-                          onChanged: (text) => onChanged()),
+                      TitleField(controller: titleController),
                       ContentField(
                         controller: contentController,
                         db: widget.db,
