@@ -1,7 +1,6 @@
 @JS()
 library main;
 
-import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
 import 'dart:js_util';
@@ -14,9 +13,9 @@ import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
 import 'package:fleeting_notes_flutter/components/note_card.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
 
 @JS('chrome.tabs.query')
@@ -41,23 +40,13 @@ class _NoteScreenState extends State<NoteScreen> {
   late TextEditingController titleController;
   late TextEditingController contentController;
   late TextEditingController sourceController;
-  final LayerLink layerLink = LayerLink();
   bool sourceFieldVisible = false;
-  bool titleLinksVisible = false;
-  final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
-  final FocusNode contentFocusNode = FocusNode();
-  late OverlayEntry overlayEntry = OverlayEntry(
-    builder: (context) => Container(),
-  );
 
   @override
   void initState() {
     super.initState();
     titleController = TextEditingController(text: widget.note.title);
     sourceController = TextEditingController(text: widget.note.source);
-    setState(() {
-      sourceFieldVisible = widget.note.source.isNotEmpty || !kIsWeb;
-    });
     contentController = StyleableTextFieldController(
       styles: TextPartStyleDefinitions(definitionList: [
         TextPartStyleDefinition(
@@ -69,101 +58,14 @@ class _NoteScreenState extends State<NoteScreen> {
       ]),
     );
     contentController.text = widget.note.content;
-
+    setState(() {
+      sourceFieldVisible = widget.note.source.isNotEmpty || !kIsWeb;
+    });
     widget.db.getBacklinkNotes(widget.note).then((notes) {
       setState(() {
         backlinkNotes = notes;
       });
     });
-    contentFocusNode.addListener(() {
-      removeOverlay();
-    });
-  }
-
-  // Overlay Functions
-  void showTitleLinksOverlay(context, BoxConstraints size) async {
-    _onLinkSelect(String link) {
-      String t = contentController.text;
-      int caretI = contentController.selection.baseOffset;
-      String beforeCaretText = t.substring(0, caretI);
-      int linkIndex = beforeCaretText.lastIndexOf('[[');
-      contentController.text = t.substring(0, linkIndex) +
-          '[[$link]]' +
-          t.substring(caretI, t.length);
-      contentController.selection = TextSelection.fromPosition(
-          TextPosition(offset: linkIndex + link.length + 4));
-      titleLinkQuery.value = '';
-      if (overlayEntry.mounted) {
-        overlayEntry.remove();
-      }
-    }
-
-    removeOverlay();
-    Offset caretOffset = getCaretOffset(
-      contentController,
-      Theme.of(context).textTheme.bodyText2!,
-      size,
-    );
-    List allLinks = await widget.db.getAllLinks();
-
-    Widget builder(context) {
-      return Container(
-        child: ValueListenableBuilder(
-            valueListenable: titleLinkQuery,
-            builder: (context, value, child) {
-              return TitleLinks(
-                caretOffset: caretOffset,
-                allLinks: allLinks,
-                query: titleLinkQuery.value,
-                onLinkSelect: _onLinkSelect,
-                layerLink: layerLink,
-              );
-            }),
-      );
-    }
-
-    overlayContent(builder);
-  }
-
-  void showFollowLinkOverlay(context, String title, BoxConstraints size) async {
-    void _onFollowLinkTap() async {
-      Note? note = await widget.db.getNoteByTitle(title);
-      note ??= Note.empty(title: title);
-      widget.db.navigateToNote(note);
-    }
-
-    // init overlay entry
-    removeOverlay();
-    Offset caretOffset = getCaretOffset(
-      contentController,
-      Theme.of(context).textTheme.bodyText2!,
-      size,
-    );
-    FollowLink builder(context) {
-      return FollowLink(
-        caretOffset: caretOffset,
-        onTap: _onFollowLinkTap,
-        layerLink: layerLink,
-      );
-    }
-
-    overlayContent(builder);
-  }
-
-  void overlayContent(builder) {
-    OverlayState? overlayState = Overlay.of(context);
-    overlayEntry = OverlayEntry(builder: builder);
-    // show overlay
-    if (overlayState != null) {
-      overlayState.insert(overlayEntry);
-    }
-  }
-
-  void removeOverlay() {
-    if (overlayEntry.mounted) {
-      overlayEntry.remove();
-      titleLinkQuery.value = '';
-    }
   }
 
   // Helper functions
@@ -186,35 +88,6 @@ class _NoteScreenState extends State<NoteScreen> {
     return errMessage;
   }
 
-  bool isTitleLinksVisible(text) {
-    var caretIndex = contentController.selection.baseOffset;
-    int i = text.substring(0, caretIndex).lastIndexOf('[[');
-    if (i == -1) return false;
-    int nextI = text.indexOf('[', i + 2);
-    nextI = (nextI > 0) ? nextI : text.length;
-    return !text.substring(i, nextI).contains(']');
-  }
-
-  Offset getCaretOffset(TextEditingController textController,
-      TextStyle textStyle, BoxConstraints size) {
-    String beforeCaretText =
-        textController.text.substring(0, textController.selection.baseOffset);
-
-    TextPainter painter = TextPainter(
-      textDirection: TextDirection.ltr,
-      text: TextSpan(
-        style: textStyle,
-        text: beforeCaretText,
-      ),
-    );
-    painter.layout(maxWidth: size.maxWidth);
-
-    return Offset(
-      painter.computeLineMetrics().last.width,
-      painter.height + 10,
-    );
-  }
-
   Future<String> getSourceUrl({String defaultText = ''}) async {
     try {
       var queryOptions = jsify({'active': true, 'currentWindow': true});
@@ -223,45 +96,6 @@ class _NoteScreenState extends State<NoteScreen> {
     } catch (e) {
       print(e);
       return defaultText;
-    }
-  }
-
-  // Widget Functions
-  void _onContentTap(context, BoxConstraints size) async {
-    removeOverlay();
-    // check if caretOffset is in a link
-    var caretIndex = contentController.selection.baseOffset;
-    var matches = RegExp(Note.linkRegex).allMatches(contentController.text);
-    Iterable<dynamic> filteredMatches =
-        matches.where((m) => m.start < caretIndex && m.end > caretIndex);
-
-    if (filteredMatches.isNotEmpty) {
-      String title = filteredMatches.first.group(1);
-
-      showFollowLinkOverlay(context, title, size);
-    }
-  }
-
-  void _onContentChanged(context, text, size) {
-    setState(() {
-      hasNewChanges = true;
-    });
-    String beforeCaretText =
-        text.substring(0, contentController.selection.baseOffset);
-
-    bool isVisible = isTitleLinksVisible(text);
-    if (isVisible) {
-      if (!titleLinksVisible) {
-        showTitleLinksOverlay(context, size);
-        titleLinksVisible = true;
-      } else {
-        String query = beforeCaretText.substring(
-            beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
-        titleLinkQuery.value = query;
-      }
-    } else {
-      titleLinksVisible = false;
-      removeOverlay();
     }
   }
 
@@ -318,6 +152,12 @@ class _NoteScreenState extends State<NoteScreen> {
     }
   }
 
+  void onChanged() {
+    setState(() {
+      hasNewChanges = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -343,40 +183,20 @@ class _NoteScreenState extends State<NoteScreen> {
                         style: Theme.of(context).textTheme.caption,
                       ),
                       TextField(
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        controller: titleController,
-                        decoration: const InputDecoration(
-                          hintText: "Title",
-                          border: InputBorder.none,
-                        ),
-                        onChanged: (text) {
-                          setState(() {
-                            hasNewChanges = true;
-                          });
-                        },
-                      ),
-                      CompositedTransformTarget(
-                        link: layerLink,
-                        child: LayoutBuilder(builder: (context, size) {
-                          return TextField(
-                            focusNode: contentFocusNode,
-                            autofocus: true,
-                            controller: contentController,
-                            minLines: 5,
-                            maxLines: 10,
-                            style: Theme.of(context).textTheme.bodyText2,
-                            decoration: const InputDecoration(
-                              hintText: "Note",
-                              border: InputBorder.none,
-                            ),
-                            onChanged: (text) =>
-                                _onContentChanged(context, text, size),
-                            onTap: () => _onContentTap(context, size),
-                          );
-                        }),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          controller: titleController,
+                          decoration: const InputDecoration(
+                            hintText: "Title",
+                            border: InputBorder.none,
+                          ),
+                          onChanged: (text) => onChanged()),
+                      ContentField(
+                        contentController: contentController,
+                        db: widget.db,
+                        onChanged: onChanged,
                       ),
                       (sourceFieldVisible)
                           ? TextField(
