@@ -22,8 +22,9 @@ void main() {
   setUpAll(() {
     registerFallbackValue(Note.empty());
   });
-
-  testWidgets('Render Main Screen', (WidgetTester tester) async {
+  // Desktop / Tablet Tests
+  testWidgets('Render Main Screen (Desktop/Tablet)',
+      (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockRealmDB mockDb = MockRealmDB();
@@ -55,6 +56,7 @@ void main() {
   testWidgets('Clicking NoteCard populates NoteScreen and sets active note',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
     Note newNote = Note.empty(content: 'Click me note!');
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(any()))
@@ -119,6 +121,37 @@ void main() {
     expect(find.byType(NoteScreen), findsNothing);
   });
 
+  // Mobile Tests
+  testWidgets('Render Main Screen (Mobile)', (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(300, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getSearchNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
+    expect(find.byType(NoteScreen), findsNothing);
+    expect(find.byType(SearchScreen), findsOneWidget);
+  });
+
+  testWidgets('Clicking NoteCard navigates to NoteScreen (Mobile)',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(300, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    Note newNote = Note.empty(content: 'Click me note!');
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getSearchNotes(any()))
+        .thenAnswer((_) async => Future.value([newNote]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(NoteCard, 'Click me note!'));
+    await tester.pumpAndSettle(); // Wait for animation to finish
+    expect(find.widgetWithText(NoteScreen, 'Click me note!'), findsOneWidget);
+    expect(find.byType(SearchScreen), findsNothing);
+  });
+
+  // Universal Tests
   testWidgets('Logout changes to auth screen', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;

@@ -7,11 +7,13 @@ class Header extends StatelessWidget {
     Key? key,
     required this.onSave,
     required this.onDelete,
+    required this.onSearch,
     this.title = '',
   }) : super(key: key);
 
   final Function? onSave;
   final VoidCallback onDelete;
+  final VoidCallback onSearch;
   final String title;
 
   void _onBack(context) {
@@ -52,13 +54,13 @@ class Header extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          if (Responsive.isMobile(context))
-            IconButton(icon: const Icon(Icons.search), onPressed: () {}),
           ElevatedButton.icon(
             icon: const Icon(Icons.save),
             label: const Text("Save"),
             onPressed: onSave == null ? null : () => newSave(context),
           ),
+          if (Responsive.isMobile(context))
+            IconButton(icon: const Icon(Icons.search), onPressed: onSearch),
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),
             itemBuilder: (context) => [

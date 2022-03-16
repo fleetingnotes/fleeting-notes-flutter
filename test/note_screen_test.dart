@@ -23,7 +23,8 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.pumpWidget(
+        MaterialApp(home: NoteScreenNavigator(db: mockDb, note: Note.empty())));
     expect(find.bySemanticsLabel('Title'), findsOneWidget);
     expect(find.bySemanticsLabel('Note'), findsOneWidget);
   });
@@ -33,7 +34,8 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: 'backlink note')]));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.pumpWidget(
+        MaterialApp(home: NoteScreenNavigator(db: mockDb, note: Note.empty())));
     await tester.pumpAndSettle();
 
     expect(find.text('backlink note'), findsOneWidget);
@@ -45,7 +47,8 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.pumpWidget(
+        MaterialApp(home: NoteScreenNavigator(db: mockDb, note: Note.empty())));
     await tester.enterText(find.bySemanticsLabel('Note'), 'new note');
     await tester.pump();
 
@@ -67,7 +70,8 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.pumpWidget(
+        MaterialApp(home: NoteScreenNavigator(db: mockDb, note: Note.empty())));
     await tester.enterText(find.bySemanticsLabel('Note'), 'new note');
     await tester.pump();
     await tester.tap(find.text('Save'));

@@ -1,4 +1,5 @@
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
+import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -12,6 +13,7 @@ class RealmDB {
   final RealmApp app;
   final MongoRealmClient client = MongoRealmClient();
   final navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   StreamController streamController = StreamController();
   static const storage = FlutterSecureStorage();
 
@@ -173,22 +175,41 @@ class RealmDB {
     return jsonStringToNote(notesStr);
   }
 
+  void navigateToSearch(String query) {
+    navigatorKey.currentState!.push(
+      PageRouteBuilder(
+        pageBuilder: (context, _, __) => SearchScreen(
+          query: query,
+          db: this,
+        ),
+        transitionsBuilder: _transitionBuilder,
+      ),
+    );
+  }
+
+  SlideTransition _transitionBuilder(
+      context, animation, secondaryAnimation, child) {
+    const begin = Offset(0.0, 1.0);
+    const end = Offset.zero;
+    const curve = Curves.ease;
+
+    final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+    final offsetAnimation = animation.drive(tween);
+    return SlideTransition(
+      position: offsetAnimation,
+      child: child,
+    );
+  }
+
   void navigateToNote(Note note) {
     navigatorKey.currentState!.push(PageRouteBuilder(
-        pageBuilder: (context, _, __) => NoteScreen(db: this, note: note),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(0.0, 1.0);
-          const end = Offset.zero;
-          const curve = Curves.ease;
+      pageBuilder: (context, _, __) => NoteScreen(db: this, note: note),
+      transitionsBuilder: _transitionBuilder,
+    ));
+  }
 
-          final tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          final offsetAnimation = animation.drive(tween);
-          return SlideTransition(
-            position: offsetAnimation,
-            child: child,
-          );
-        }));
+  void openDrawer() {
+    scaffoldKey.currentState?.openDrawer();
   }
 
   void listenNoteChange(Function callback) {

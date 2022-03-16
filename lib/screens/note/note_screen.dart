@@ -109,6 +109,11 @@ class _NoteScreenState extends State<NoteScreen> {
     });
   }
 
+  void onSearchNavigate(BuildContext context) {
+    widget.db.popAllRoutes();
+    widget.db.navigateToSearch('');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,9 +123,9 @@ class _NoteScreenState extends State<NoteScreen> {
           child: Column(
             children: [
               Header(
-                onSave: (hasNewChanges) ? _saveNote : null,
-                onDelete: _deleteNote,
-              ),
+                  onSave: (hasNewChanges) ? _saveNote : null,
+                  onDelete: _deleteNote,
+                  onSearch: () => onSearchNavigate(context)),
               const Divider(thickness: 1, height: 1),
               Expanded(
                 child: SingleChildScrollView(
@@ -172,9 +177,11 @@ class NoteScreenNavigator extends StatelessWidget {
   NoteScreenNavigator({
     Key? key,
     required this.db,
+    required this.note,
   }) : super(key: key);
 
   final RealmDB db;
+  final Note note;
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +190,7 @@ class NoteScreenNavigator extends StatelessWidget {
       onGenerateRoute: (route) => PageRouteBuilder(
         settings: route,
         pageBuilder: (context, _, __) => NoteScreen(
-          note: Note.empty(),
+          note: note,
           db: db,
         ),
       ),

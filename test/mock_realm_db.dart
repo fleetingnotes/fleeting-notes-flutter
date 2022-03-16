@@ -9,6 +9,8 @@ class MockRealmDB extends Mock implements RealmDB {
   @override
   final navigatorKey = GlobalKey<NavigatorState>();
   @override
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  @override
   StreamController streamController = StreamController();
 
   // not ideal that i have to copy below from the real class
@@ -37,5 +39,10 @@ class MockRealmDB extends Mock implements RealmDB {
   @override
   void popAllRoutes() {
     navigatorKey.currentState!.popUntil((route) => false);
+  }
+
+  @override
+  void openDrawer() {
+    scaffoldKey.currentState?.openDrawer();
   }
 }
