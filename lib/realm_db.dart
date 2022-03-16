@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'models/Note.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'package:dio/dio.dart';
+import 'package:path/path.dart' as Path;
 
 class RealmDB {
   RealmDB({required this.app});
@@ -16,6 +20,11 @@ class RealmDB {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   StreamController streamController = StreamController();
   static const storage = FlutterSecureStorage();
+  String? _email;
+  String? _password;
+  String apiUrl =
+      'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
+  Dio dio = Dio();
 
   Future<List<Note>> getSearchNotes(queryRegex) async {
     String escapedQuery = '';
@@ -142,10 +151,11 @@ class RealmDB {
   void logout() async {
     await storage.delete(key: 'email');
     await storage.delete(key: 'password');
-    await app.logout();
+    _email = null;
+    _password = null;
   }
 
-  Future<CoreRealmUser?> loginWithStorage() async {
+  Future<bool> loginWithStorage() async {
     String? email;
     String? password;
     try {
@@ -153,20 +163,42 @@ class RealmDB {
       password = await storage.read(key: 'password');
     } catch (e) {
       print(e);
-      return null;
+      return false;
     }
 
     if (email == null || password == null) {
-      return null;
+      return false;
     }
-    return app.login(Credentials.emailPassword(email, password));
+    bool validCredentials = await checkAndSetCredentials(email, password);
+    return validCredentials;
   }
 
-  Future<CoreRealmUser?> login(String email, String password) async {
+  Future<bool> login(String email, String password) async {
     await storage.write(key: 'email', value: email);
     await storage.write(key: 'password', value: password);
-    var user = await app.login(Credentials.emailPassword(email, password));
-    return user;
+    bool validCredentials = await checkAndSetCredentials(email, password);
+    return validCredentials;
+  }
+
+  Future<bool> checkAndSetCredentials(String email, String password) async {
+    try {
+      var authUrl = Path.join(apiUrl, 'auth/providers/local-userpass/login');
+      await Dio().post(
+        authUrl,
+        options: Options(headers: {
+          HttpHeaders.contentTypeHeader: "application/json",
+        }),
+        data: jsonEncode({
+          "username": email,
+          "password": password,
+        }),
+      );
+      _email = email;
+      _password = password;
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {

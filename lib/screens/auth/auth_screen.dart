@@ -28,11 +28,18 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!validPassword() || !validEmail()) {
       return;
     }
-    await widget.db.login(email, password);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => MyHomePage(db: widget.db)),
-    );
+    bool isLoggedIn = await widget.db.login(email, password);
+    if (isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MyHomePage(db: widget.db)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Login failed'),
+        duration: const Duration(seconds: 2),
+      ));
+    }
   }
 
   Future<void> _register(BuildContext context) async {

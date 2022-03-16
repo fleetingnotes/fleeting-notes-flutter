@@ -22,8 +22,8 @@ class _MyAppState extends State<MyApp> {
   final RealmDB db = RealmDB(app: RealmApp());
 
   Future<String> _navigateScreen() async {
-    var user = await db.loginWithStorage();
-    if (user == null) {
+    bool user = await db.loginWithStorage();
+    if (!user) {
       return 'auth';
     } else {
       return 'main';

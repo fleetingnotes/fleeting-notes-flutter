@@ -41,6 +41,7 @@ dependencies:
   archive: ^3.2.1
   js: ^0.6.3
   url_launcher: ^6.0.20
+  dio: ^4.0.4
 
 dependency_overrides:
   plugin_platform_interface: ^2.0.1
