@@ -21,9 +21,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
-      key: _scaffoldKey,
+      key: widget.db.scaffoldKey,
       drawer: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 250),
         child: SideMenu(db: widget.db),
@@ -39,7 +38,6 @@ class _MyHomePageState extends State<MyHomePage> {
         mobile: SearchScreenNavigator(
           query: '',
           db: widget.db,
-          openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         tablet: Row(
           children: [
@@ -48,7 +46,6 @@ class _MyHomePageState extends State<MyHomePage> {
               child: SearchScreen(
                 query: '',
                 db: widget.db,
-                openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
               ),
             ),
             Expanded(
@@ -64,7 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
               child: SearchScreen(
                 query: '',
                 db: widget.db,
-                openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
               ),
             ),
             Expanded(

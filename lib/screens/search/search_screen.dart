@@ -14,12 +14,10 @@ class SearchScreen extends StatefulWidget {
     Key? key,
     required this.query,
     required this.db,
-    required this.openDrawer,
   }) : super(key: key);
 
   final String query;
   final RealmDB db;
-  final VoidCallback? openDrawer;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -63,7 +61,7 @@ class _SearchScreenState extends State<SearchScreen> {
     widget.db.listenNoteChange(updateNote);
   }
 
-  void _pressNote(Note note) {
+  void _pressNote(BuildContext context, Note note) {
     setState(() {
       activeNoteId = note.id;
     });
@@ -91,7 +89,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.menu),
-                      onPressed: widget.openDrawer,
+                      onPressed: widget.db.openDrawer,
                     ),
                     const SizedBox(width: 5),
                     Expanded(
@@ -145,7 +143,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         ? false
                         : notes[index].id == activeNoteId,
                     press: () {
-                      _pressNote(notes[index]);
+                      _pressNote(context, notes[index]);
                     },
                   ),
                 ),
@@ -163,12 +161,10 @@ class SearchScreenNavigator extends StatelessWidget {
     Key? key,
     required this.db,
     required this.query,
-    required this.openDrawer,
   }) : super(key: key);
 
   final RealmDB db;
   final String query;
-  final VoidCallback? openDrawer;
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +175,6 @@ class SearchScreenNavigator extends StatelessWidget {
         pageBuilder: (context, _, __) => SearchScreen(
           db: db,
           query: query,
-          openDrawer: openDrawer,
         ),
       ),
     );
