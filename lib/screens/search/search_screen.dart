@@ -1,4 +1,5 @@
 import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../components/note_card.dart';
@@ -66,7 +67,9 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       activeNoteId = note.id;
     });
-    widget.db.popAllRoutes();
+    if (!Responsive.isMobile(context)) {
+      widget.db.popAllRoutes();
+    }
     widget.db.navigateToNote(note);
   }
 
@@ -149,6 +152,34 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class SearchScreenNavigator extends StatelessWidget {
+  SearchScreenNavigator({
+    Key? key,
+    required this.db,
+    required this.query,
+    required this.openDrawer,
+  }) : super(key: key);
+
+  final RealmDB db;
+  final String query;
+  final VoidCallback? openDrawer;
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: db.navigatorKey,
+      onGenerateRoute: (route) => PageRouteBuilder(
+        settings: route,
+        pageBuilder: (context, _, __) => SearchScreen(
+          db: db,
+          query: query,
+          openDrawer: openDrawer,
         ),
       ),
     );

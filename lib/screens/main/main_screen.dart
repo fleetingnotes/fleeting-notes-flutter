@@ -36,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
       body: Responsive(
-        mobile: SearchScreen(
+        mobile: SearchScreenNavigator(
           query: '',
           db: widget.db,
           openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Expanded(
               flex: 9,
-              child: NoteScreenNavigator(db: widget.db),
+              child: NoteScreenNavigator(db: widget.db, note: Note.empty()),
             ),
           ],
         ),
@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Expanded(
               flex: 9,
-              child: NoteScreenNavigator(db: widget.db),
+              child: NoteScreenNavigator(db: widget.db, note: Note.empty()),
             ),
           ],
         ),
