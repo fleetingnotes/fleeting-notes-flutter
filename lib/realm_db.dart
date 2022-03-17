@@ -1,5 +1,6 @@
 import 'dart:html';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
@@ -22,10 +23,9 @@ class RealmDB {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   StreamController streamController = StreamController();
   static const storage = FlutterSecureStorage();
-  String? _email;
-  String? _password;
   String? _userId;
   String? _token;
+  DateTime _expirationDate = DateTime.now();
   String apiUrl =
       'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
   Dio dio = Dio();
@@ -43,11 +43,14 @@ class RealmDB {
           r.hasMatch(note.source);
     }).toList();
 
-    return notes;
+    return notes.sublist(0, min(notes.length, 50));
   }
 
   Future<dynamic> graphQLRequest(query) async {
-    // TODO: Refresh token if expired
+    if (DateTime.now().isAfter(_expirationDate)) {
+      // TODO: refresh token here
+      loginWithStorage();
+    }
     try {
       var url = Path.join(apiUrl, 'graphql');
       var res = await Dio().post(
@@ -151,14 +154,14 @@ class RealmDB {
   }
 
   Future<bool> registerUser(String email, String password) async {
+    // TODO: remove `flutter_mongodb_realm` dependency only used here.
     return await app.registerUser(email, password);
   }
 
   void logout() async {
     await storage.delete(key: 'email');
     await storage.delete(key: 'password');
-    _email = null;
-    _password = null;
+    _token = null;
   }
 
   Future<bool> loginWithStorage() async {
@@ -199,10 +202,10 @@ class RealmDB {
           "password": password,
         }),
       );
-      _email = email;
-      _password = password;
       _token = res.data['access_token'];
       _userId = res.data['user_id'];
+      DateTime currentTime = DateTime.now();
+      _expirationDate = currentTime.add(const Duration(minutes: 30));
       return true;
     } catch (e) {
       return false;
