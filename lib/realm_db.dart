@@ -22,8 +22,11 @@ class RealmDB {
   static const storage = FlutterSecureStorage();
   String? _email;
   String? _password;
+  String? _token;
   String apiUrl =
       'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
+  String endpointUrl =
+      'https://data.mongodb-api.com/app/fleeting-notes-knojs/endpoint/';
   Dio dio = Dio();
 
   Future<List<Note>> getSearchNotes(queryRegex) async {
@@ -36,16 +39,40 @@ class RealmDB {
         escapedQuery += '\\$character';
       }
     });
-    var notesStr =
-        await client.callFunction("getSearchNotes", args: [escapedQuery]);
-    return jsonStringToNote(notesStr);
+    var notesStr = await getAllNotes();
+
+    return notesStr;
+    // return jsonStringToNote(notesStr);
   }
 
   Future<List<Note>> getAllNotes() async {
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find();
-    return docs.map((mongoDoc) => mongoDocToNote(mongoDoc)).toList();
+    try {
+      var url = Path.join(apiUrl, 'graphql');
+      var query =
+          '{"query":"query {  notes(query: {_isDeleted_ne: true}) {_id  title  content  source  timestamp}}"}';
+      var res = await Dio().post(
+        url,
+        options: Options(headers: {
+          HttpHeaders.contentTypeHeader: "application/json",
+          "Authorization": "Bearer $_token",
+        }),
+        data: query,
+      );
+      List<Note> notes = [];
+      var noteMapList = jsonDecode(res.toString())['data']['notes'];
+      noteMapList.forEach((noteMap) {
+        notes.add(Note.fromMap(noteMap));
+      });
+      return notes;
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
+
+  Future<List<Note>> queryNotes(
+      RegExp title, RegExp content, RegExp source) async {
+    return await getAllNotes();
   }
 
   Future<Note?> getNoteByTitle(title) async {
@@ -183,7 +210,7 @@ class RealmDB {
   Future<bool> checkAndSetCredentials(String email, String password) async {
     try {
       var authUrl = Path.join(apiUrl, 'auth/providers/local-userpass/login');
-      await Dio().post(
+      var res = await Dio().post(
         authUrl,
         options: Options(headers: {
           HttpHeaders.contentTypeHeader: "application/json",
@@ -195,6 +222,7 @@ class RealmDB {
       );
       _email = email;
       _password = password;
+      _token = res.data['access_token'];
       return true;
     } catch (e) {
       return false;
@@ -202,9 +230,12 @@ class RealmDB {
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
-    var notesStr =
-        await client.callFunction("getBacklinkNotes", args: [note.title]);
-    return jsonStringToNote(notesStr);
+    // var notesStr =
+    //     await client.callFunction("getBacklinkNotes", args: [note.title]);
+    // var notesStr =
+    //     await callFunctionEndpoint("getBacklinkNotes", data: note.title);
+    // return jsonStringToNote(notesStr);
+    return [];
   }
 
   void navigateToSearch(String query) {
@@ -259,21 +290,6 @@ class RealmDB {
 
   void popAllRoutes() {
     navigatorKey.currentState!.popUntil((route) => false);
-  }
-
-  static List<Note> jsonStringToNote(String jsonString) {
-    var noteList = jsonDecode(jsonString);
-    var notes = noteList.map((item) {
-      return Note(
-        id: item["_id"].toString(),
-        title: item["title"].toString(),
-        content: item["content"].toString(),
-        source: item["source"].toString(),
-        timestamp: item["timestamp"].toString(),
-      );
-    }).toList();
-
-    return List<Note>.from(notes);
   }
 
   static Note mongoDocToNote(MongoDocument mongoDoc) {

@@ -42,6 +42,17 @@ class Note {
     };
   }
 
+  static Note fromMap(dynamic note) {
+    Map noteMap = Map.from(note);
+    return Note(
+      id: noteMap["_id"].toString(),
+      title: noteMap["title"].toString(),
+      content: noteMap["content"].toString(),
+      source: noteMap["source"].toString(),
+      timestamp: noteMap["timestamp"].toString(),
+    );
+  }
+
   DateTime getDateTime() {
     return DateTime.parse(timestamp);
   }
