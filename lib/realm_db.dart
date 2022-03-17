@@ -24,11 +24,10 @@ class RealmDB {
   static const storage = FlutterSecureStorage();
   String? _email;
   String? _password;
+  String? _userId;
   String? _token;
   String apiUrl =
       'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
-  String endpointUrl =
-      'https://data.mongodb-api.com/app/fleeting-notes-knojs/endpoint/';
   Dio dio = Dio();
 
   Future<List<Note>> getSearchNotes(queryRegex) async {
@@ -47,19 +46,32 @@ class RealmDB {
     return notes;
   }
 
-  Future<List<Note>> getAllNotes() async {
+  Future<dynamic> graphQLRequest(query) async {
+    // TODO: Refresh token if expired
     try {
       var url = Path.join(apiUrl, 'graphql');
-      var query =
-          '{"query":"query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}"}';
       var res = await Dio().post(
         url,
         options: Options(headers: {
           HttpHeaders.contentTypeHeader: "application/json",
           "Authorization": "Bearer $_token",
         }),
-        data: query,
+        data: jsonEncode({
+          "query": query,
+        }),
       );
+      return res;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<List<Note>> getAllNotes() async {
+    var query =
+        'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
+    try {
+      var res = await graphQLRequest(query);
       List<Note> notes = [];
       var noteMapList = jsonDecode(res.toString())['data']['notes'];
       noteMapList.forEach((noteMap) {
@@ -67,7 +79,6 @@ class RealmDB {
       });
       return notes;
     } catch (e) {
-      print(e);
       return [];
     }
   }
@@ -121,53 +132,22 @@ class RealmDB {
     }
   }
 
-  void insertNote(Note note) async {
-    var collection = client.getDatabase("todo").getCollection("Note");
-    var userId = await app.getUserId();
-
-    // throws TypeError but insert still works...
-    collection.insertOne(MongoDocument({
-      "_id": note.id,
-      "_partition": userId.toString(),
-      "title": note.title,
-      "content": note.content,
-      "source": note.source,
-      "timestamp": note.timestamp,
-      "_isDeleted": note.isDeleted,
-    }));
+  void insertNote(Note note) {
+    var query =
+        'mutation { insertOneNote(data: {_id: "${note.id}", _partition: "$_userId",title: "${note.title}", content: "${note.content}", source: "${note.source}", timestamp: "${note.timestamp}", _isDeleted: ${note.isDeleted}}) { _id }}';
+    graphQLRequest(query);
   }
 
   void updateNote(Note note) {
-    var collection = client.getDatabase("todo").getCollection("Note");
-    // Can't update in both fields in one `updateOne` call
-    collection.updateOne(
-      filter: {"_id": note.id},
-      update: UpdateOperator.set({
-        "title": note.title,
-      }),
-    );
-    collection.updateOne(
-      filter: {"_id": note.id},
-      update: UpdateOperator.set({
-        "content": note.content,
-      }),
-    );
-    collection.updateOne(
-      filter: {"_id": note.id},
-      update: UpdateOperator.set({
-        "source": note.source,
-      }),
-    );
+    var query =
+        'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {title: "${note.title}", content: "${note.content}", source: "${note.source}"}) { _id }}';
+    graphQLRequest(query);
   }
 
   void deleteNote(Note note) {
-    var collection = client.getDatabase("todo").getCollection("Note");
-    collection.updateOne(
-      filter: {"_id": note.id},
-      update: UpdateOperator.set({
-        "_isDeleted": true,
-      }),
-    );
+    var query =
+        'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {_isDeleted: true}) { _id }}';
+    graphQLRequest(query);
   }
 
   Future<bool> registerUser(String email, String password) async {
@@ -222,6 +202,7 @@ class RealmDB {
       _email = email;
       _password = password;
       _token = res.data['access_token'];
+      _userId = res.data['user_id'];
       return true;
     } catch (e) {
       return false;
