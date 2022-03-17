@@ -30,26 +30,26 @@ class RealmDB {
   Dio dio = Dio();
 
   Future<List<Note>> getSearchNotes(queryRegex) async {
-    String escapedQuery = '';
-    queryRegex.runes.forEach((int rune) {
-      var character = String.fromCharCode(rune);
-      if (character.contains(RegExp('[a-zA-Z0-9]'))) {
-        escapedQuery += character;
-      } else {
-        escapedQuery += '\\$character';
-      }
+    String escapedQuery =
+        queryRegex.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
+      return '\\${match.group(0)}';
     });
-    var notesStr = await getAllNotes();
+    RegExp r = RegExp(escapedQuery, multiLine: true);
+    var allNotes = await getAllNotes();
+    var notes = allNotes.where((note) {
+      return r.hasMatch(note.title) ||
+          r.hasMatch(note.content) ||
+          r.hasMatch(note.source);
+    }).toList();
 
-    return notesStr;
-    // return jsonStringToNote(notesStr);
+    return notes;
   }
 
   Future<List<Note>> getAllNotes() async {
     try {
       var url = Path.join(apiUrl, 'graphql');
       var query =
-          '{"query":"query {  notes(query: {_isDeleted_ne: true}) {_id  title  content  source  timestamp}}"}';
+          '{"query":"query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}"}';
       var res = await Dio().post(
         url,
         options: Options(headers: {
@@ -68,11 +68,6 @@ class RealmDB {
       print(e);
       return [];
     }
-  }
-
-  Future<List<Note>> queryNotes(
-      RegExp title, RegExp content, RegExp source) async {
-    return await getAllNotes();
   }
 
   Future<Note?> getNoteByTitle(title) async {
@@ -230,12 +225,15 @@ class RealmDB {
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
-    // var notesStr =
-    //     await client.callFunction("getBacklinkNotes", args: [note.title]);
-    // var notesStr =
-    //     await callFunctionEndpoint("getBacklinkNotes", data: note.title);
-    // return jsonStringToNote(notesStr);
-    return [];
+    if (note.title == '' || RegExp(Note.invalidChars).hasMatch(note.title)) {
+      return [];
+    }
+    var allNotes = await getAllNotes();
+    RegExp r = RegExp('\\[\\[${note.title}\\]\\]', multiLine: true);
+    var notes = allNotes.where((note) {
+      return r.hasMatch(note.content);
+    }).toList();
+    return notes;
   }
 
   void navigateToSearch(String query) {
