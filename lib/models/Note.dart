@@ -34,7 +34,7 @@ class Note {
 
   toJson() {
     return {
-      'id': id,
+      '_id': id,
       'title': title,
       'content': content,
       'source': source,

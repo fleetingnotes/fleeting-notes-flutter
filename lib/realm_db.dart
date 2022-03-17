@@ -7,6 +7,7 @@ import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
 import 'models/Note.dart';
 import 'dart:convert';
 import 'dart:async';
@@ -74,9 +75,15 @@ class RealmDB {
     var query =
         'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
     try {
-      var res = await graphQLRequest(query);
+      var box = await Hive.openBox('testBox');
+      var noteMapList = box.get('notes');
+      if (noteMapList == null) {
+        // TODO: store notes individually by id into box
+        var res = await graphQLRequest(query);
+        noteMapList = jsonDecode(res.toString())['data']['notes'];
+        await box.put('notes', noteMapList);
+      }
       List<Note> notes = [];
-      var noteMapList = jsonDecode(res.toString())['data']['notes'];
       noteMapList.forEach((noteMap) {
         notes.add(Note.fromMap(noteMap));
       });
