@@ -1,3 +1,4 @@
+import 'dart:html';
 import 'dart:io';
 
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
@@ -9,6 +10,7 @@ import 'models/Note.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:collection/collection.dart';
 import 'package:path/path.dart' as Path;
 
 class RealmDB {
@@ -71,41 +73,43 @@ class RealmDB {
   }
 
   Future<Note?> getNoteByTitle(title) async {
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find(filter: {
-      "title": title,
+    var allNotes = await getAllNotes();
+    Note? note = allNotes.firstWhereOrNull((note) {
+      return note.title == title;
     });
-    if (docs.isEmpty) {
-      return null;
-    }
-    return mongoDocToNote(docs.first);
+    return note;
   }
 
   Future<bool> titleExists(id, title) async {
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find(filter: {
-      "title": title,
-      "_id": QueryOperator.ne(id),
+    var allNotes = await getAllNotes();
+    Note? note = allNotes.firstWhereOrNull((note) {
+      return note.title == title && note.id != id;
     });
-
-    return docs.isNotEmpty;
+    return note != null;
   }
 
   Future<List> getAllLinks() async {
-    var notesStr = await client.callFunction("findAllLinks");
-    return notesStr;
+    var allNotes = await getAllNotes();
+    RegExp linkRegex = RegExp(Note.linkRegex, multiLine: true);
+    var linkSet = Set();
+    for (var note in allNotes) {
+      linkSet.add(note.title);
+      var matches = linkRegex.allMatches(note.content);
+      for (var match in matches) {
+        String link = match.group(0).toString();
+        linkSet.add(link.substring(2, link.length - 2));
+      }
+    }
+    linkSet.remove('');
+    return linkSet.toList();
   }
 
   Future<bool> noteExists(Note note) async {
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find(filter: {
-      "_id": note.id,
+    var allNotes = await getAllNotes();
+    Note? filteredNote = allNotes.firstWhereOrNull((n) {
+      return n.id == note.id;
     });
-
-    return docs.isNotEmpty;
+    return filteredNote != null;
   }
 
   void upsertNote(Note note) async {
