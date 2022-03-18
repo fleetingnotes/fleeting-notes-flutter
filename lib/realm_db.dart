@@ -71,12 +71,12 @@ class RealmDB {
     }
   }
 
-  Future<List<Note>> getAllNotes() async {
+  Future<List<Note>> getAllNotes({forceSync = false}) async {
     var query =
         'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
     try {
       var box = await Hive.openBox(hiveKey);
-      if (box.isEmpty) {
+      if (box.isEmpty || forceSync) {
         var res = await graphQLRequest(query);
         var noteMapList = res['data']['notes'];
         Map<String, Note> noteIdMap = {
@@ -304,17 +304,5 @@ class RealmDB {
 
   void popAllRoutes() {
     navigatorKey.currentState!.popUntil((route) => false);
-  }
-
-  static Note mongoDocToNote(MongoDocument mongoDoc) {
-    var note = Note(
-      id: mongoDoc.get("_id").toString(),
-      title: mongoDoc.get("title").toString(),
-      content: mongoDoc.get("content").toString(),
-      source: mongoDoc.get("source").toString(),
-      timestamp: mongoDoc.get("timestamp").toString(),
-    );
-
-    return note;
   }
 }
