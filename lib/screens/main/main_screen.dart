@@ -43,10 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Expanded(
               flex: 6,
-              child: SearchScreen(
-                query: '',
-                db: widget.db,
-              ),
+              child: SearchScreen(db: widget.db),
             ),
             Expanded(
               flex: 9,
@@ -58,10 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Expanded(
               flex: 3,
-              child: SearchScreen(
-                query: '',
-                db: widget.db,
-              ),
+              child: SearchScreen(db: widget.db),
             ),
             Expanded(
               flex: 9,

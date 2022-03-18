@@ -1,11 +1,19 @@
+import 'dart:html';
+import 'dart:io';
+import 'dart:math';
+
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
 import 'models/Note.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'package:dio/dio.dart';
+import 'package:collection/collection.dart';
+import 'package:path/path.dart' as Path;
 
 class RealmDB {
   RealmDB({required this.app});
@@ -14,67 +22,118 @@ class RealmDB {
   final MongoRealmClient client = MongoRealmClient();
   final navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  StreamController streamController = StreamController();
   static const storage = FlutterSecureStorage();
+  String? _userId;
+  String? _token;
+  DateTime _expirationDate = DateTime.now();
+  String apiUrl =
+      'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
+  Dio dio = Dio();
+  static String hiveKey = 'notes';
 
   Future<List<Note>> getSearchNotes(queryRegex) async {
-    String escapedQuery = '';
-    queryRegex.runes.forEach((int rune) {
-      var character = String.fromCharCode(rune);
-      if (character.contains(RegExp('[a-zA-Z0-9]'))) {
-        escapedQuery += character;
-      } else {
-        escapedQuery += '\\$character';
-      }
+    String escapedQuery =
+        queryRegex.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
+      return '\\${match.group(0)}';
     });
-    var notesStr =
-        await client.callFunction("getSearchNotes", args: [escapedQuery]);
-    return jsonStringToNote(notesStr);
+    RegExp r = RegExp(escapedQuery, multiLine: true);
+    var allNotes = await getAllNotes();
+    var notes = allNotes.where((note) {
+      return r.hasMatch(note.title) ||
+          r.hasMatch(note.content) ||
+          r.hasMatch(note.source);
+    }).toList();
+
+    return notes.sublist(0, min(notes.length, 50));
   }
 
-  Future<List<Note>> getAllNotes() async {
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find();
-    return docs.map((mongoDoc) => mongoDocToNote(mongoDoc)).toList();
+  Future<dynamic> graphQLRequest(query) async {
+    if (DateTime.now().isAfter(_expirationDate)) {
+      // TODO: refresh token here
+      loginWithStorage();
+    }
+    try {
+      var url = Path.join(apiUrl, 'graphql');
+      var res = await Dio().post(
+        url,
+        options: Options(headers: {
+          HttpHeaders.contentTypeHeader: "application/json",
+          "Authorization": "Bearer $_token",
+        }),
+        data: jsonEncode({
+          "query": query,
+        }),
+      );
+      return jsonDecode(res.toString());
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<List<Note>> getAllNotes({forceSync = false}) async {
+    var query =
+        'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
+    try {
+      var box = await Hive.openBox(hiveKey);
+      if (box.isEmpty || forceSync) {
+        var res = await graphQLRequest(query);
+        var noteMapList = res['data']['notes'];
+        Map<String, Note> noteIdMap = {
+          for (var note in noteMapList) note['_id']: Note.fromMap(note)
+        };
+        await box.putAll(noteIdMap);
+      }
+      List<Note> notes = [];
+      for (var note in box.values) {
+        notes.add(note as Note);
+      }
+      notes.sort((n1, n2) => n2.timestamp.compareTo(n1.timestamp));
+      return notes;
+    } catch (e) {
+      print(e);
+      return [];
+    }
   }
 
   Future<Note?> getNoteByTitle(title) async {
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find(filter: {
-      "title": title,
+    var allNotes = await getAllNotes();
+    Note? note = allNotes.firstWhereOrNull((note) {
+      return note.title == title;
     });
-    if (docs.isEmpty) {
-      return null;
-    }
-    return mongoDocToNote(docs.first);
+    return note;
   }
 
   Future<bool> titleExists(id, title) async {
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find(filter: {
-      "title": title,
-      "_id": QueryOperator.ne(id),
+    var allNotes = await getAllNotes();
+    Note? note = allNotes.firstWhereOrNull((note) {
+      return note.title == title && note.id != id;
     });
-
-    return docs.isNotEmpty;
+    return note != null;
   }
 
   Future<List> getAllLinks() async {
-    var notesStr = await client.callFunction("findAllLinks");
-    return notesStr;
+    var allNotes = await getAllNotes();
+    RegExp linkRegex = RegExp(Note.linkRegex, multiLine: true);
+    var linkSet = Set();
+    for (var note in allNotes) {
+      linkSet.add(note.title);
+      var matches = linkRegex.allMatches(note.content);
+      for (var match in matches) {
+        String link = match.group(0).toString();
+        linkSet.add(link.substring(2, link.length - 2));
+      }
+    }
+    linkSet.remove('');
+    return linkSet.toList();
   }
 
   Future<bool> noteExists(Note note) async {
-    MongoCollection collection =
-        client.getDatabase("todo").getCollection("Note");
-    List<MongoDocument> docs = await collection.find(filter: {
-      "_id": note.id,
+    var allNotes = await getAllNotes();
+    Note? filteredNote = allNotes.firstWhereOrNull((n) {
+      return n.id == note.id;
     });
-
-    return docs.isNotEmpty;
+    return filteredNote != null;
   }
 
   void upsertNote(Note note) async {
@@ -86,66 +145,63 @@ class RealmDB {
     }
   }
 
-  void insertNote(Note note) async {
-    var collection = client.getDatabase("todo").getCollection("Note");
-    var userId = await app.getUserId();
-
-    // throws TypeError but insert still works...
-    collection.insertOne(MongoDocument({
-      "_id": note.id,
-      "_partition": userId.toString(),
-      "title": note.title,
-      "content": note.content,
-      "source": note.source,
-      "timestamp": note.timestamp,
-      "_isDeleted": note.isDeleted,
-    }));
+  Future<bool> insertNote(Note note) async {
+    try {
+      var query =
+          'mutation { insertOneNote(data: {_id: "${note.id}", _partition: "$_userId",title: "${note.title}", content: "${note.content}", source: "${note.source}", timestamp: "${note.timestamp}", _isDeleted: ${note.isDeleted}}) {_id  title  content  source  timestamp}}';
+      var res = await graphQLRequest(query);
+      Note insertedNote = Note.fromMap(res["data"]["insertOneNote"]);
+      var box = await Hive.openBox(hiveKey);
+      box.put(insertedNote.id, insertedNote);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 
-  void updateNote(Note note) {
-    var collection = client.getDatabase("todo").getCollection("Note");
-    // Can't update in both fields in one `updateOne` call
-    collection.updateOne(
-      filter: {"_id": note.id},
-      update: UpdateOperator.set({
-        "title": note.title,
-      }),
-    );
-    collection.updateOne(
-      filter: {"_id": note.id},
-      update: UpdateOperator.set({
-        "content": note.content,
-      }),
-    );
-    collection.updateOne(
-      filter: {"_id": note.id},
-      update: UpdateOperator.set({
-        "source": note.source,
-      }),
-    );
+  Future<bool> updateNote(Note note) async {
+    try {
+      var query =
+          'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {title: "${note.title}", content: "${note.content}", source: "${note.source}"}) {_id  title  content  source  timestamp}}';
+      var res = await graphQLRequest(query);
+      Note updatedNote = Note.fromMap(res["data"]["updateOneNote"]);
+      var box = await Hive.openBox(hiveKey);
+      box.put(updatedNote.id, updatedNote);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 
-  void deleteNote(Note note) {
-    var collection = client.getDatabase("todo").getCollection("Note");
-    collection.updateOne(
-      filter: {"_id": note.id},
-      update: UpdateOperator.set({
-        "_isDeleted": true,
-      }),
-    );
+  Future<bool> deleteNote(Note note) async {
+    try {
+      var query =
+          'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {_isDeleted: true}) {_id  title  content  source  timestamp}}';
+      var res = await graphQLRequest(query);
+      Note deletedNote = Note.fromMap(res["data"]["updateOneNote"]);
+      var box = await Hive.openBox(hiveKey);
+      box.delete(deletedNote.id);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 
   Future<bool> registerUser(String email, String password) async {
+    // TODO: remove `flutter_mongodb_realm` dependency only used here.
     return await app.registerUser(email, password);
   }
 
   void logout() async {
     await storage.delete(key: 'email');
     await storage.delete(key: 'password');
-    await app.logout();
+    _token = null;
   }
 
-  Future<CoreRealmUser?> loginWithStorage() async {
+  Future<bool> loginWithStorage() async {
     String? email;
     String? password;
     try {
@@ -153,35 +209,62 @@ class RealmDB {
       password = await storage.read(key: 'password');
     } catch (e) {
       print(e);
-      return null;
+      return false;
     }
 
     if (email == null || password == null) {
-      return null;
+      return false;
     }
-    return app.login(Credentials.emailPassword(email, password));
+    bool validCredentials = await checkAndSetCredentials(email, password);
+    return validCredentials;
   }
 
-  Future<CoreRealmUser?> login(String email, String password) async {
+  Future<bool> login(String email, String password) async {
     await storage.write(key: 'email', value: email);
     await storage.write(key: 'password', value: password);
-    var user = await app.login(Credentials.emailPassword(email, password));
-    return user;
+    bool validCredentials = await checkAndSetCredentials(email, password);
+    return validCredentials;
+  }
+
+  Future<bool> checkAndSetCredentials(String email, String password) async {
+    try {
+      var authUrl = Path.join(apiUrl, 'auth/providers/local-userpass/login');
+      var res = await Dio().post(
+        authUrl,
+        options: Options(headers: {
+          HttpHeaders.contentTypeHeader: "application/json",
+        }),
+        data: jsonEncode({
+          "username": email,
+          "password": password,
+        }),
+      );
+      _token = res.data['access_token'];
+      _userId = res.data['user_id'];
+      DateTime currentTime = DateTime.now();
+      _expirationDate = currentTime.add(const Duration(minutes: 30));
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
-    var notesStr =
-        await client.callFunction("getBacklinkNotes", args: [note.title]);
-    return jsonStringToNote(notesStr);
+    if (note.title == '' || RegExp(Note.invalidChars).hasMatch(note.title)) {
+      return [];
+    }
+    var allNotes = await getAllNotes();
+    RegExp r = RegExp('\\[\\[${note.title}\\]\\]', multiLine: true);
+    var notes = allNotes.where((note) {
+      return r.hasMatch(note.content);
+    }).toList();
+    return notes;
   }
 
   void navigateToSearch(String query) {
     navigatorKey.currentState!.push(
       PageRouteBuilder(
-        pageBuilder: (context, _, __) => SearchScreen(
-          query: query,
-          db: this,
-        ),
+        pageBuilder: (context, _, __) => SearchScreen(db: this),
         transitionsBuilder: _transitionBuilder,
       ),
     );
@@ -212,47 +295,14 @@ class RealmDB {
     scaffoldKey.currentState?.openDrawer();
   }
 
-  void listenNoteChange(Function callback) {
-    unlistenNoteChange();
-    Stream stream = streamController.stream;
-    stream.listen((note) {
-      callback(note);
+  void listenNoteChange(Function callback) async {
+    var box = await Hive.openBox(hiveKey);
+    box.watch().listen((event) {
+      callback(event);
     });
-  }
-
-  void unlistenNoteChange() {
-    streamController.close();
-    streamController = StreamController();
   }
 
   void popAllRoutes() {
     navigatorKey.currentState!.popUntil((route) => false);
-  }
-
-  static List<Note> jsonStringToNote(String jsonString) {
-    var noteList = jsonDecode(jsonString);
-    var notes = noteList.map((item) {
-      return Note(
-        id: item["_id"].toString(),
-        title: item["title"].toString(),
-        content: item["content"].toString(),
-        source: item["source"].toString(),
-        timestamp: item["timestamp"].toString(),
-      );
-    }).toList();
-
-    return List<Note>.from(notes);
-  }
-
-  static Note mongoDocToNote(MongoDocument mongoDoc) {
-    var note = Note(
-      id: mongoDoc.get("_id").toString(),
-      title: mongoDoc.get("title").toString(),
-      content: mongoDoc.get("content").toString(),
-      source: mongoDoc.get("source").toString(),
-      timestamp: mongoDoc.get("timestamp").toString(),
-    );
-
-    return note;
   }
 }

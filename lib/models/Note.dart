@@ -1,10 +1,24 @@
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+part 'Note.g.dart';
+
+@HiveType(typeId: 1)
 class Note {
-  final String id, timestamp;
-  String title, content, source;
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final String timestamp;
+  @HiveField(2)
+  String title;
+  @HiveField(3)
+  String content;
+  @HiveField(4)
+  String source;
+  @HiveField(5)
   final bool hasAttachment;
+  @HiveField(6)
   bool isDeleted;
   static const String invalidChars = r'\[\]\#\*';
   static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
@@ -34,12 +48,23 @@ class Note {
 
   toJson() {
     return {
-      'id': id,
+      '_id': id,
       'title': title,
       'content': content,
       'source': source,
       'timestamp': timestamp,
     };
+  }
+
+  static Note fromMap(dynamic note) {
+    Map noteMap = Map.from(note);
+    return Note(
+      id: noteMap["_id"].toString(),
+      title: noteMap["title"].toString(),
+      content: noteMap["content"].toString(),
+      source: noteMap["source"].toString(),
+      timestamp: noteMap["timestamp"].toString(),
+    );
   }
 
   DateTime getDateTime() {

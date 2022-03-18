@@ -80,7 +80,6 @@ class _NoteScreenState extends State<NoteScreen> {
     Note deletedNote = widget.note;
     deletedNote.isDeleted = true;
     widget.db.deleteNote(widget.note);
-    widget.db.streamController.add(deletedNote);
     Navigator.pop(context);
   }
 
@@ -93,7 +92,6 @@ class _NoteScreenState extends State<NoteScreen> {
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
       widget.db.upsertNote(updatedNote);
-      widget.db.streamController.add(updatedNote);
       setState(() {
         hasNewChanges = false;
       });

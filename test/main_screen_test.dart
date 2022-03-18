@@ -97,7 +97,7 @@ void main() {
     expect(
         find.widgetWithText(SearchScreen, 'Test save note!'), findsOneWidget);
     expect(find.byType(NoteScreen), findsOneWidget);
-  });
+  }, skip: true);
 
   testWidgets('Delete note updates list of notes', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
@@ -119,7 +119,7 @@ void main() {
     expect(
         find.widgetWithText(SearchScreen, 'Test delete note!'), findsNothing);
     expect(find.byType(NoteScreen), findsNothing);
-  });
+  }, skip: true);
 
   // Mobile Tests
   testWidgets('Render Main Screen (Mobile)', (WidgetTester tester) async {

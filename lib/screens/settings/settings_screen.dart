@@ -139,6 +139,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: const Text('Export')),
                       ]),
                     ),
+                    const SizedBox(height: kDefaultPadding / 2),
+                    const Text("Sync", style: TextStyle(fontSize: 12)),
+                    const Divider(thickness: 1, height: 1),
+                    Padding(
+                      padding: const EdgeInsets.all(kDefaultPadding / 2),
+                      child: ElevatedButton(
+                          onPressed: () =>
+                              widget.db.getAllNotes(forceSync: true),
+                          child: const Text('Force Sync')),
+                    ),
                   ],
                 ))
           ],
