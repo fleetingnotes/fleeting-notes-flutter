@@ -4,11 +4,14 @@ import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:fleeting_notes_flutter/models/Note.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await RealmApp.init("fleeting-notes-knojs");
-  await Hive.initFlutter();
+  await Hive
+    ..initFlutter()
+    ..registerAdapter(NoteAdapter());
 
   runApp(const MyApp());
 }

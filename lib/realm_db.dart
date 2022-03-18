@@ -64,7 +64,7 @@ class RealmDB {
           "query": query,
         }),
       );
-      return res;
+      return jsonDecode(res.toString());
     } catch (e) {
       print(e);
       return null;
@@ -75,20 +75,22 @@ class RealmDB {
     var query =
         'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
     try {
-      var box = await Hive.openBox('testBox');
-      var noteMapList = box.get('notes');
-      if (noteMapList == null) {
-        // TODO: store notes individually by id into box
+      var box = await Hive.openBox('notesBox');
+      if (box.isEmpty) {
         var res = await graphQLRequest(query);
-        noteMapList = jsonDecode(res.toString())['data']['notes'];
-        await box.put('notes', noteMapList);
+        var noteMapList = res['data']['notes'];
+        Map<String, Note> noteIdMap = {
+          for (var note in noteMapList) note['_id']: Note.fromMap(note)
+        };
+        await box.putAll(noteIdMap);
       }
       List<Note> notes = [];
-      noteMapList.forEach((noteMap) {
-        notes.add(Note.fromMap(noteMap));
-      });
+      for (var note in box.values) {
+        notes.add(note as Note);
+      }
       return notes;
     } catch (e) {
+      print(e);
       return [];
     }
   }
@@ -142,22 +144,49 @@ class RealmDB {
     }
   }
 
-  void insertNote(Note note) {
-    var query =
-        'mutation { insertOneNote(data: {_id: "${note.id}", _partition: "$_userId",title: "${note.title}", content: "${note.content}", source: "${note.source}", timestamp: "${note.timestamp}", _isDeleted: ${note.isDeleted}}) { _id }}';
-    graphQLRequest(query);
+  Future<bool> insertNote(Note note) async {
+    try {
+      var query =
+          'mutation { insertOneNote(data: {_id: "${note.id}", _partition: "$_userId",title: "${note.title}", content: "${note.content}", source: "${note.source}", timestamp: "${note.timestamp}", _isDeleted: ${note.isDeleted}}) {_id  title  content  source  timestamp}}';
+      var res = await graphQLRequest(query);
+      Note insertedNote = Note.fromMap(res["data"]["insertOneNote"]);
+      var box = await Hive.openBox('notesBox');
+      box.put(insertedNote.id, insertedNote);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 
-  void updateNote(Note note) {
-    var query =
-        'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {title: "${note.title}", content: "${note.content}", source: "${note.source}"}) { _id }}';
-    graphQLRequest(query);
+  Future<bool> updateNote(Note note) async {
+    try {
+      var query =
+          'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {title: "${note.title}", content: "${note.content}", source: "${note.source}"}) {_id  title  content  source  timestamp}}';
+      var res = await graphQLRequest(query);
+      Note updatedNote = Note.fromMap(res["data"]["updateOneNote"]);
+      var box = await Hive.openBox('notesBox');
+      box.put(updatedNote.id, updatedNote);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 
-  void deleteNote(Note note) {
-    var query =
-        'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {_isDeleted: true}) { _id }}';
-    graphQLRequest(query);
+  Future<bool> deleteNote(Note note) async {
+    try {
+      var query =
+          'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {_isDeleted: true}) {_id  title  content  source  timestamp}}';
+      var res = await graphQLRequest(query);
+      Note deletedNote = Note.fromMap(res["data"]["updateOneNote"]);
+      var box = await Hive.openBox('notesBox');
+      box.delete(deletedNote.id);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 
   Future<bool> registerUser(String email, String password) async {
