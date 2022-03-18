@@ -23,8 +23,7 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getSearchNotes(''))
         .thenAnswer((_) async => Future.value([Note.empty()]));
-    await tester
-        .pumpWidget(MaterialApp(home: SearchScreen(query: '', db: mockDb)));
+    await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Search'), findsOneWidget);
     expect(find.byIcon(Icons.menu), findsOneWidget);
@@ -38,8 +37,7 @@ void main() {
         .thenAnswer((_) async => Future.value([Note.empty()]));
     when(() => mockDb.getSearchNotes('hello'))
         .thenAnswer((_) async => Future.value([]));
-    await tester
-        .pumpWidget(MaterialApp(home: SearchScreen(query: '', db: mockDb)));
+    await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
     await tester.pumpAndSettle();
     expect(find.byType(NoteCard), findsOneWidget);
     await tester.enterText(find.bySemanticsLabel('Search'), 'hello');

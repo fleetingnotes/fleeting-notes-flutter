@@ -12,11 +12,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class SearchScreen extends StatefulWidget {
   const SearchScreen({
     Key? key,
-    required this.query,
     required this.db,
   }) : super(key: key);
 
-  final String query;
   final RealmDB db;
 
   @override
@@ -25,6 +23,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
+  final TextEditingController queryController = TextEditingController();
   late List<Note> notes = [];
   String activeNoteId = '';
 
@@ -35,30 +34,15 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  void updateNote(Note updatedNote) {
-    setState(() {
-      if (updatedNote.isDeleted) {
-        notes.removeWhere((note) => note.id == updatedNote.id);
-      } else {
-        bool isUpdated = false;
-        notes.asMap().forEach((i, note) {
-          if (note.id == updatedNote.id) {
-            notes[i] = updatedNote;
-            isUpdated = true;
-          }
-        });
-        if (!isUpdated) {
-          notes.insert(0, updatedNote);
-        }
-      }
-    });
+  void listenCallback(event) {
+    loadNotes(queryController.text);
   }
 
   @override
   void initState() {
     super.initState();
-    loadNotes('');
-    widget.db.listenNoteChange(updateNote);
+    loadNotes(queryController.text);
+    widget.db.listenNoteChange(listenCallback);
   }
 
   void _pressNote(BuildContext context, Note note) {
@@ -94,6 +78,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     const SizedBox(width: 5),
                     Expanded(
                       child: TextField(
+                        controller: queryController,
                         onChanged: loadNotes,
                         decoration: InputDecoration(
                           hintText: 'Search',
@@ -174,7 +159,6 @@ class SearchScreenNavigator extends StatelessWidget {
         settings: route,
         pageBuilder: (context, _, __) => SearchScreen(
           db: db,
-          query: query,
         ),
       ),
     );

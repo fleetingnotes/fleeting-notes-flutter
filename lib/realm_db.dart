@@ -22,7 +22,6 @@ class RealmDB {
   final MongoRealmClient client = MongoRealmClient();
   final navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  StreamController streamController = StreamController();
   static const storage = FlutterSecureStorage();
   String? _userId;
   String? _token;
@@ -30,6 +29,7 @@ class RealmDB {
   String apiUrl =
       'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
   Dio dio = Dio();
+  static String hiveKey = 'notes';
 
   Future<List<Note>> getSearchNotes(queryRegex) async {
     String escapedQuery =
@@ -75,7 +75,7 @@ class RealmDB {
     var query =
         'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
     try {
-      var box = await Hive.openBox('notesBox');
+      var box = await Hive.openBox(hiveKey);
       if (box.isEmpty) {
         var res = await graphQLRequest(query);
         var noteMapList = res['data']['notes'];
@@ -88,6 +88,7 @@ class RealmDB {
       for (var note in box.values) {
         notes.add(note as Note);
       }
+      notes.sort((n1, n2) => n2.timestamp.compareTo(n1.timestamp));
       return notes;
     } catch (e) {
       print(e);
@@ -150,7 +151,7 @@ class RealmDB {
           'mutation { insertOneNote(data: {_id: "${note.id}", _partition: "$_userId",title: "${note.title}", content: "${note.content}", source: "${note.source}", timestamp: "${note.timestamp}", _isDeleted: ${note.isDeleted}}) {_id  title  content  source  timestamp}}';
       var res = await graphQLRequest(query);
       Note insertedNote = Note.fromMap(res["data"]["insertOneNote"]);
-      var box = await Hive.openBox('notesBox');
+      var box = await Hive.openBox(hiveKey);
       box.put(insertedNote.id, insertedNote);
       return true;
     } catch (e) {
@@ -165,7 +166,7 @@ class RealmDB {
           'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {title: "${note.title}", content: "${note.content}", source: "${note.source}"}) {_id  title  content  source  timestamp}}';
       var res = await graphQLRequest(query);
       Note updatedNote = Note.fromMap(res["data"]["updateOneNote"]);
-      var box = await Hive.openBox('notesBox');
+      var box = await Hive.openBox(hiveKey);
       box.put(updatedNote.id, updatedNote);
       return true;
     } catch (e) {
@@ -180,7 +181,7 @@ class RealmDB {
           'mutation { updateOneNote(query: {_id: "${note.id}"}, set: {_isDeleted: true}) {_id  title  content  source  timestamp}}';
       var res = await graphQLRequest(query);
       Note deletedNote = Note.fromMap(res["data"]["updateOneNote"]);
-      var box = await Hive.openBox('notesBox');
+      var box = await Hive.openBox(hiveKey);
       box.delete(deletedNote.id);
       return true;
     } catch (e) {
@@ -263,10 +264,7 @@ class RealmDB {
   void navigateToSearch(String query) {
     navigatorKey.currentState!.push(
       PageRouteBuilder(
-        pageBuilder: (context, _, __) => SearchScreen(
-          query: query,
-          db: this,
-        ),
+        pageBuilder: (context, _, __) => SearchScreen(db: this),
         transitionsBuilder: _transitionBuilder,
       ),
     );
@@ -297,17 +295,11 @@ class RealmDB {
     scaffoldKey.currentState?.openDrawer();
   }
 
-  void listenNoteChange(Function callback) {
-    unlistenNoteChange();
-    Stream stream = streamController.stream;
-    stream.listen((note) {
-      callback(note);
+  void listenNoteChange(Function callback) async {
+    var box = await Hive.openBox(hiveKey);
+    box.watch().listen((event) {
+      callback(event);
     });
-  }
-
-  void unlistenNoteChange() {
-    streamController.close();
-    streamController = StreamController();
   }
 
   void popAllRoutes() {
