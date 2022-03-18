@@ -20,7 +20,7 @@ class RealmDB {
 
   final RealmApp app;
   final MongoRealmClient client = MongoRealmClient();
-  final navigatorKey = GlobalKey<NavigatorState>();
+  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   static const storage = FlutterSecureStorage();
   String? _userId;

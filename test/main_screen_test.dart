@@ -151,6 +151,101 @@ void main() {
     expect(find.byType(SearchScreen), findsNothing);
   });
 
+  // Responsive Tests
+  testWidgets('Resize Desktop (note + search) -> Mobile (search)',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getSearchNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
+
+    // Change to mobile
+    tester.binding.window.physicalSizeTestValue = const Size(300, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteScreen), findsNothing);
+  });
+
+  testWidgets('Resize Desktop (note + empty) -> Mobile (search)',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getSearchNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
+
+    // Delete screen
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteScreen), findsNothing);
+
+    // Change to mobile
+    tester.binding.window.physicalSizeTestValue = const Size(300, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteScreen), findsNothing);
+  });
+
+  testWidgets('Resize Mobile (search) -> Desktop (search + note)',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(300, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getSearchNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
+
+    // Mobile on Search Screen
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteScreen), findsNothing);
+
+    // Change to Desktop
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteScreen), findsOneWidget);
+  });
+
+  testWidgets('Resize Mobile (note) -> Desktop (search + note)',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(300, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getSearchNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    await tester.pumpWidget(MaterialApp(home: MyHomePage(db: mockDb)));
+
+    // Mobile on Note Screen
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsNothing);
+    expect(find.byType(NoteScreen), findsOneWidget);
+
+    // Change to Desktop
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteScreen), findsOneWidget);
+  });
+
   // Universal Tests
   testWidgets('Logout changes to auth screen', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
