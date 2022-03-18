@@ -22,6 +22,8 @@ class RealmDB {
   final MongoRealmClient client = MongoRealmClient();
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey searchKey = GlobalKey();
+  Map<GlobalKey, Note> noteHistory = {GlobalKey(): Note.empty()};
   static const storage = FlutterSecureStorage();
   String? _userId;
   String? _token;
@@ -285,8 +287,11 @@ class RealmDB {
   }
 
   void navigateToNote(Note note) {
+    GlobalKey noteKey = GlobalKey();
+    noteHistory[noteKey] = note;
     navigatorKey.currentState!.push(PageRouteBuilder(
-      pageBuilder: (context, _, __) => NoteScreen(db: this, note: note),
+      pageBuilder: (context, _, __) =>
+          NoteScreen(key: noteKey, db: this, note: note),
       transitionsBuilder: _transitionBuilder,
     ));
   }

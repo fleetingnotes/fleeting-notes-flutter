@@ -175,23 +175,26 @@ class NoteScreenNavigator extends StatelessWidget {
   NoteScreenNavigator({
     Key? key,
     required this.db,
-    required this.note,
   }) : super(key: key);
 
   final RealmDB db;
-  final Note note;
 
   @override
   Widget build(BuildContext context) {
     db.navigatorKey = GlobalKey<NavigatorState>();
+    var last = db.noteHistory.entries.toList().last;
+
     return Navigator(
       key: db.navigatorKey,
       onGenerateRoute: (route) => PageRouteBuilder(
         settings: route,
-        pageBuilder: (context, _, __) => NoteScreen(
-          note: note,
-          db: db,
-        ),
+        pageBuilder: (context, _, __) {
+          return NoteScreen(
+            key: last.key,
+            note: last.value,
+            db: db,
+          );
+        },
       ),
     );
   }
