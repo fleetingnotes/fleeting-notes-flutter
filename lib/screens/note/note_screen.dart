@@ -81,6 +81,7 @@ class _NoteScreenState extends State<NoteScreen> {
     deletedNote.isDeleted = true;
     widget.db.deleteNote(widget.note);
     Navigator.pop(context);
+    widget.db.noteHistory.remove(widget.note);
   }
 
   Future<String> _saveNote() async {
@@ -182,16 +183,17 @@ class NoteScreenNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     db.navigatorKey = GlobalKey<NavigatorState>();
-    var last = db.noteHistory.entries.toList().last;
+    var history = db.noteHistory.entries.toList();
 
     return Navigator(
       key: db.navigatorKey,
       onGenerateRoute: (route) => PageRouteBuilder(
         settings: route,
         pageBuilder: (context, _, __) {
+          if (history.isEmpty) return Container();
           return NoteScreen(
-            key: last.key,
-            note: last.value,
+            key: history.last.value,
+            note: history.last.key,
             db: db,
           );
         },

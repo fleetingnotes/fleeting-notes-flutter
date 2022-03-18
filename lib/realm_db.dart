@@ -23,7 +23,7 @@ class RealmDB {
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey searchKey = GlobalKey();
-  Map<GlobalKey, Note> noteHistory = {GlobalKey(): Note.empty()};
+  Map<Note, GlobalKey> noteHistory = {Note.empty(): GlobalKey()};
   static const storage = FlutterSecureStorage();
   String? _userId;
   String? _token;
@@ -288,7 +288,7 @@ class RealmDB {
 
   void navigateToNote(Note note) {
     GlobalKey noteKey = GlobalKey();
-    noteHistory[noteKey] = note;
+    noteHistory[note] = noteKey;
     navigatorKey.currentState!.push(PageRouteBuilder(
       pageBuilder: (context, _, __) =>
           NoteScreen(key: noteKey, db: this, note: note),
@@ -308,6 +308,7 @@ class RealmDB {
   }
 
   void popAllRoutes() {
+    noteHistory.clear();
     navigatorKey.currentState!.popUntil((route) => false);
   }
 }

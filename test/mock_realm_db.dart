@@ -8,15 +8,20 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 
 class MockRealmDB extends Mock implements RealmDB {
   @override
+  final GlobalKey searchKey = GlobalKey();
+  @override
+  Map<Note, GlobalKey> noteHistory = {Note.empty(): GlobalKey()};
+  @override
   GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   @override
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  @override
   StreamController streamController = StreamController();
 
   // not ideal that i have to copy below from the real class
   @override
   void navigateToNote(Note note) {
+    GlobalKey noteKey = GlobalKey();
+    noteHistory[note] = noteKey;
     navigatorKey.currentState!.push(
       PageRouteBuilder(
           pageBuilder: (context, _, __) => NoteScreen(db: this, note: note)),
