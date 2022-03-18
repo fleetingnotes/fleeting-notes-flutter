@@ -2,7 +2,8 @@ import 'package:fleeting_notes_flutter/constants.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
-import 'dart:html' as html;
+import 'package:file_saver/file_saver.dart';
+// import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
@@ -38,30 +39,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
     var bytes = encoder.encode(archive,
         level: Deflate.BEST_COMPRESSION, output: outputStream);
-    downloadFileWeb("fleeting_notes_export.zip", bytes!);
+    FileSaver.instance.saveFile(
+        'fleeting_notes_export.zip', Uint8List.fromList(bytes!), 'zip');
   }
 
   _downloadNotesAsJSON(List<Note> notes) {
     var json = jsonEncode(notes);
     var bytes = utf8.encode(json);
-    downloadFileWeb("fleeting_notes_export.json", bytes);
-  }
-
-  downloadFileWeb(String fileName, List<int> bytes) {
-    final blob = html.Blob([bytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor = html.document.createElement('a') as html.AnchorElement
-      ..href = url
-      ..style.display = 'none'
-      ..download = fileName;
-    html.document.body!.children.add(anchor);
-
-    // download
-    anchor.click();
-
-    // cleanup
-    html.document.body!.children.remove(anchor);
-    html.Url.revokeObjectUrl(url);
+    FileSaver.instance.saveFile(
+        'fleeting_notes_export.json', Uint8List.fromList(bytes), 'json');
   }
 
   @override
