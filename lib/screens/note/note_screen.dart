@@ -183,6 +183,7 @@ class NoteScreenNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    db.navigatorKey = GlobalKey<NavigatorState>();
     return Navigator(
       key: db.navigatorKey,
       onGenerateRoute: (route) => PageRouteBuilder(

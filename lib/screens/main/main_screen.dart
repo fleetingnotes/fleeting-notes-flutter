@@ -35,10 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
       body: Responsive(
-        mobile: SearchScreenNavigator(
-          query: '',
-          db: widget.db,
-        ),
+        mobile: SearchScreenNavigator(db: widget.db),
         tablet: Row(
           children: [
             Expanded(

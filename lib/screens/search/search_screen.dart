@@ -145,14 +145,13 @@ class SearchScreenNavigator extends StatelessWidget {
   SearchScreenNavigator({
     Key? key,
     required this.db,
-    required this.query,
   }) : super(key: key);
 
   final RealmDB db;
-  final String query;
 
   @override
   Widget build(BuildContext context) {
+    db.navigatorKey = GlobalKey<NavigatorState>();
     return Navigator(
       key: db.navigatorKey,
       onGenerateRoute: (route) => PageRouteBuilder(
