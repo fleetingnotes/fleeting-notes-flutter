@@ -40,11 +40,11 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Expanded(
               flex: 6,
-              child: SearchScreen(db: widget.db),
+              child: SearchScreen(key: widget.db.searchKey, db: widget.db),
             ),
             Expanded(
               flex: 9,
-              child: NoteScreenNavigator(db: widget.db, note: Note.empty()),
+              child: NoteScreenNavigator(db: widget.db),
             ),
           ],
         ),
@@ -52,11 +52,11 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Expanded(
               flex: 3,
-              child: SearchScreen(db: widget.db),
+              child: SearchScreen(key: widget.db.searchKey, db: widget.db),
             ),
             Expanded(
               flex: 9,
-              child: NoteScreenNavigator(db: widget.db, note: Note.empty()),
+              child: NoteScreenNavigator(db: widget.db),
             ),
           ],
         ),

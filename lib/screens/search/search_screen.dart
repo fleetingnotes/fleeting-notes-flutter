@@ -157,6 +157,7 @@ class SearchScreenNavigator extends StatelessWidget {
       onGenerateRoute: (route) => PageRouteBuilder(
         settings: route,
         pageBuilder: (context, _, __) => SearchScreen(
+          key: db.searchKey,
           db: db,
         ),
       ),
