@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
-
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';

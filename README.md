@@ -17,7 +17,7 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Running Application for dev
 ```
-flutter run --no-sound-null-safety
+flutter run
 ```
 
 ## Testing Applications on browser
@@ -29,7 +29,7 @@ flutter test --platform chrome
 
 Simply run the build script.
 ```
-./build_chrome_extension.sh
+flutter build web --web-renderer html --csp 
 ```
 Then go to chrome and click `Load unpacked` from the extensions page, following instructions to select the `build/web` folder and loading the extension in dev mode.
 

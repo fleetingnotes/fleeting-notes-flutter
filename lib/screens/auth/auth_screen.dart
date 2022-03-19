@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
-
 import '../../realm_db.dart';
 import '../main/main_screen.dart';
 
