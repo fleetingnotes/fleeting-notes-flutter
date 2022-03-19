@@ -3,7 +3,6 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:file_saver/file_saver.dart';
-// import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
