@@ -1,5 +1,5 @@
 name: fleeting_notes_flutter
-description: A new Flutter project.
+description: Organize your ideas.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -60,11 +60,15 @@ dev_dependencies:
   hive_generator: ^1.1.2
   build_runner: ^2.1.8
   flutter_launcher_icons: ^0.9.2
+  flutter_app_name: ^0.1.0
 
 flutter_icons:
   android: true
   ios: true
   image_path: "assets/icon.png"
+
+flutter_app_name:
+  name: "Fleeting Notes"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
