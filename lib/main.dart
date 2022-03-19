@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mongodb_realm/flutter_mongo_realm.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
@@ -8,11 +7,8 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await RealmApp.init("fleeting-notes-knojs");
-  await Hive
-    ..initFlutter()
-    ..registerAdapter(NoteAdapter());
-
+  Hive.initFlutter();
+  Hive.registerAdapter(NoteAdapter());
   runApp(const MyApp());
 }
 
@@ -24,7 +20,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final RealmDB db = RealmDB(app: RealmApp());
+  final RealmDB db = RealmDB();
 
   Future<String> _navigateScreen() async {
     bool user = await db.loginWithStorage();
