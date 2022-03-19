@@ -67,7 +67,6 @@ class _SourceContainerState extends State<SourceContainer> {
       dynamic tabs = await promiseToFuture(queryTabs(queryOptions));
       return getProperty(tabs[0], 'url');
     } catch (e) {
-      print(e);
       return defaultText;
     }
   }

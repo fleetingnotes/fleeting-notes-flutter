@@ -62,7 +62,6 @@ class RealmDB {
       );
       return jsonDecode(res.toString());
     } catch (e) {
-      print(e);
       return null;
     }
   }
@@ -88,7 +87,6 @@ class RealmDB {
       notes.sort((n1, n2) => n2.timestamp.compareTo(n1.timestamp));
       return notes;
     } catch (e) {
-      print(e);
       return [];
     }
   }
@@ -152,7 +150,6 @@ class RealmDB {
       box.put(insertedNote.id, insertedNote);
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
@@ -167,7 +164,6 @@ class RealmDB {
       box.put(updatedNote.id, updatedNote);
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
@@ -182,7 +178,6 @@ class RealmDB {
       box.delete(deletedNote.id);
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
@@ -202,7 +197,6 @@ class RealmDB {
       );
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
@@ -222,7 +216,6 @@ class RealmDB {
       email = await storage.read(key: 'email');
       password = await storage.read(key: 'password');
     } catch (e) {
-      print(e);
       return false;
     }
 
