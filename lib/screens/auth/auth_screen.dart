@@ -44,8 +44,15 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!validPassword() || !validEmail()) {
       return;
     }
-    await widget.db.registerUser(email, password);
-    _login(context);
+    bool isRegistered = await widget.db.registerUser(email, password);
+    if (isRegistered) {
+      _login(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Registration failed'),
+        duration: const Duration(seconds: 2),
+      ));
+    }
   }
 
   @override
