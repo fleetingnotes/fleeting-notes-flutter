@@ -67,8 +67,8 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               // This is our Seearch bar
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: kDefaultPadding, vertical: kDefaultPadding / 2),
                 child: Row(
                   children: [
                     IconButton(
