@@ -41,6 +41,12 @@ git push
 git push --tags
 ```
 
+## Building to Android App Store
+1. Download `fn-upload-key.keystore` and `key.properties` from https://drive.google.com/file/d/1ZqQxFx9tCeaCDbaSlw0fGx-7HKxo6woI/view?usp=sharing
+2. Place `fn-upload-key.keystore` in  `android/app` folder
+3. Place `key.properties` in `android` folder
+4. Run `flutter run --release`
+
 ## Update App Name
 1. Go to `pubspec.yaml` file and edit `name` under `flutter_app_name`
 2. Run command `flutter pub run flutter_app_name`
