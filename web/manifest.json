@@ -1,7 +1,7 @@
 {
     "name": "Fleeting Notes",
     "description": "A personal knowledge management system that helps users capture and connect quick notes to promote learning",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "content_security_policy": {
       "extension_pages": "script-src 'self' ; object-src 'self'"
     },
