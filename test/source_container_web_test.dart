@@ -5,14 +5,11 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
-import 'mock_realm_db.dart';
 
 void main() {
   setUpAll(() {
