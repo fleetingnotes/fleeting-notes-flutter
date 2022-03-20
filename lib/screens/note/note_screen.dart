@@ -10,7 +10,8 @@ import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
+    if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
 
 class NoteScreen extends StatefulWidget {
