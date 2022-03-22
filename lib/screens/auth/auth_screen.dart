@@ -33,9 +33,9 @@ class _AuthScreenState extends State<AuthScreen> {
         MaterialPageRoute(builder: (context) => MyHomePage(db: widget.db)),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Login failed'),
-        duration: const Duration(seconds: 2),
+        duration: Duration(seconds: 2),
       ));
     }
   }
@@ -48,9 +48,9 @@ class _AuthScreenState extends State<AuthScreen> {
     if (isRegistered) {
       _login(context);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Registration failed'),
-        duration: const Duration(seconds: 2),
+        duration: Duration(seconds: 2),
       ));
     }
   }

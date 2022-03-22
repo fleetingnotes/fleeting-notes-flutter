@@ -3,6 +3,7 @@ library main;
 
 import 'package:flutter/foundation.dart';
 import 'package:js/js.dart';
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:js_util';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
@@ -45,7 +46,6 @@ class _SourceContainerState extends State<SourceContainer> {
       dynamic tabs = await promiseToFuture(queryTabs(queryOptions));
       return getProperty(tabs[0], 'url');
     } catch (e) {
-      print(e);
       return defaultText;
     }
   }
