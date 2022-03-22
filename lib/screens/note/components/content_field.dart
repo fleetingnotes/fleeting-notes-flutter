@@ -134,7 +134,6 @@ class _ContentFieldState extends State<ContentField> {
     List allLinks = await widget.db.getAllLinks();
 
     Widget builder(context) {
-      // ignore: avoid_unnecessary_containers
       return Container(
         child: ValueListenableBuilder(
             valueListenable: titleLinkQuery,
