@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:collection/collection.dart';
+// ignore: library_prefixes
 import 'package:path/path.dart' as Path;
 
 class RealmDB {
@@ -109,7 +110,7 @@ class RealmDB {
   Future<List> getAllLinks() async {
     var allNotes = await getAllNotes();
     RegExp linkRegex = RegExp(Note.linkRegex, multiLine: true);
-    var linkSet = Set();
+    var linkSet = <String>{};
     for (var note in allNotes) {
       linkSet.add(note.title);
       var matches = linkRegex.allMatches(note.content);

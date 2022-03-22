@@ -1,5 +1,4 @@
 import 'package:fleeting_notes_flutter/realm_db.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../components/note_card.dart';
@@ -142,7 +141,7 @@ class _SearchScreenState extends State<SearchScreen> {
 }
 
 class SearchScreenNavigator extends StatelessWidget {
-  SearchScreenNavigator({
+  const SearchScreenNavigator({
     Key? key,
     required this.db,
   }) : super(key: key);
