@@ -95,7 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         padding: const EdgeInsets.all(kDefaultPadding / 2),
                         child: Row(children: [
                           DropdownButton(
-                            underline: const SizedBox(),
+                            underline: SizedBox(),
                             value: exportOption,
                             onChanged: (String? newValue) {
                               setState(() {

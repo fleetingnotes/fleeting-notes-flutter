@@ -1,4 +1,3 @@
-// ignore_for_file: file_names
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
