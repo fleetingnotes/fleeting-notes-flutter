@@ -126,7 +126,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     isActive: Responsive.isMobile(context)
                         ? false
                         : notes[index].id == activeNoteId,
-                    press: () {
+                    onTap: () {
                       _pressNote(context, notes[index]);
                     },
                   ),

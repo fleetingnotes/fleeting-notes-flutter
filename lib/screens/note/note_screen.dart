@@ -157,7 +157,7 @@ class _NoteScreenState extends State<NoteScreen> {
                       const SizedBox(height: kDefaultPadding / 2),
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
-                            press: () {
+                            onTap: () {
                               widget.db.navigateToNote(note);
                             },
                           )),
