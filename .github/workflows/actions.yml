@@ -35,7 +35,7 @@ jobs:
         flutter-version: '2.x'
         channel: 'stable'
     - run: flutter pub get
-    - run: flutter build appbundle
+    - run: flutter build appbundle --debug
   build-ios:
     runs-on: macos-latest
     steps:
