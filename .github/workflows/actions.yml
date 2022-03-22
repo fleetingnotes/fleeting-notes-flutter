@@ -1,4 +1,4 @@
-name: Fleeting notes Web Test
+name: Fleeting Notes Actions
 on:
   # Triggers workflow on PR but only for main branch
   push:
@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: macos-latest
+  build-web:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: subosito/flutter-action@v2
@@ -22,5 +22,24 @@ jobs:
     - run: flutter analyze
     - run: flutter test --platform chrome
     - run: flutter build web --web-renderer html --csp 
-    - run: flutter build ios --release --no-codesign
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '2.x'
+        channel: 'stable'
+    - run: flutter pub get
     - run: flutter build appbundle --release
+  build-ios:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '2.x'
+        channel: 'stable'
+    - run: flutter pub get
+    - run: flutter build ios --release --no-codesign
+
