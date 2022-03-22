@@ -6,10 +6,12 @@ class SourceContainer extends StatefulWidget {
     Key? key,
     required this.controller,
     this.onChanged,
+    this.autofocus = false,
   }) : super(key: key);
 
   final TextEditingController controller;
   final VoidCallback? onChanged;
+  final bool autofocus;
 
   @override
   State<SourceContainer> createState() => _SourceContainerState();
@@ -45,6 +47,7 @@ class _SourceContainerState extends State<SourceContainer> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      autofocus: widget.autofocus,
       style: Theme.of(context).textTheme.bodyText2,
       controller: widget.controller,
       onChanged: (text) => widget.onChanged,

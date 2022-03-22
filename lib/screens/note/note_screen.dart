@@ -30,6 +30,7 @@ class NoteScreen extends StatefulWidget {
 class _NoteScreenState extends State<NoteScreen> {
   List<Note> backlinkNotes = [];
   bool hasNewChanges = true;
+  late bool autofocus;
   late TextEditingController titleController;
   late TextEditingController contentController;
   late TextEditingController sourceController;
@@ -37,6 +38,7 @@ class _NoteScreenState extends State<NoteScreen> {
   @override
   void initState() {
     super.initState();
+    autofocus = widget.note.isEmpty();
     titleController = TextEditingController(text: widget.note.title);
     sourceController = TextEditingController(text: widget.note.source);
     contentController = StyleableTextFieldController(
@@ -146,6 +148,7 @@ class _NoteScreenState extends State<NoteScreen> {
                         controller: contentController,
                         db: widget.db,
                         onChanged: onChanged,
+                        autofocus: autofocus,
                       ),
                       SourceContainer(
                         controller: sourceController,
@@ -157,7 +160,7 @@ class _NoteScreenState extends State<NoteScreen> {
                       const SizedBox(height: kDefaultPadding / 2),
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
-                            press: () {
+                            onTap: () {
                               widget.db.navigateToNote(note);
                             },
                           )),

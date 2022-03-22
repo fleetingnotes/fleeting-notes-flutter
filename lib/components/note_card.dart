@@ -7,12 +7,12 @@ class NoteCard extends StatelessWidget {
   const NoteCard({
     Key? key,
     required this.note,
-    required this.press,
+    required this.onTap,
     this.isActive = false,
   }) : super(key: key);
 
   final bool isActive;
-  final VoidCallback press;
+  final VoidCallback onTap;
   final Note note;
 
   @override
@@ -22,7 +22,7 @@ class NoteCard extends StatelessWidget {
             horizontal: kDefaultPadding, vertical: kDefaultPadding / 2),
         child: InkWell(
           borderRadius: BorderRadius.circular(15),
-          onTap: press,
+          onTap: onTap,
           child: Stack(children: [
             Container(
               padding: const EdgeInsets.all(kDefaultPadding),

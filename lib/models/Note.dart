@@ -68,6 +68,10 @@ class Note {
     );
   }
 
+  bool isEmpty() {
+    return title == '' && content == '' && source == '';
+  }
+
   DateTime getDateTime() {
     return DateTime.parse(timestamp);
   }

@@ -9,12 +9,14 @@ class ContentField extends StatefulWidget {
     Key? key,
     required this.controller,
     required this.db,
+    this.autofocus = false,
     this.onChanged,
   }) : super(key: key);
 
   final TextEditingController controller;
   final RealmDB db;
   final VoidCallback? onChanged;
+  final bool autofocus;
 
   @override
   State<ContentField> createState() => _ContentFieldState();
@@ -201,7 +203,7 @@ class _ContentFieldState extends State<ContentField> {
       child: LayoutBuilder(builder: (context, size) {
         return TextField(
           focusNode: contentFocusNode,
-          autofocus: true,
+          autofocus: widget.autofocus,
           controller: widget.controller,
           minLines: 5,
           maxLines: 10,

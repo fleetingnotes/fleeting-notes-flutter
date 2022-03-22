@@ -17,10 +17,12 @@ class SourceContainer extends StatefulWidget {
     Key? key,
     required this.controller,
     this.onChanged,
+    this.autofocus = false,
   }) : super(key: key);
 
   final TextEditingController controller;
   final VoidCallback? onChanged;
+  final bool autofocus;
 
   @override
   State<SourceContainer> createState() => _SourceContainerState();
@@ -55,7 +57,10 @@ class _SourceContainerState extends State<SourceContainer> {
     return Container(
       child: (sourceFieldVisible)
           ? sc.SourceContainer(
-              controller: widget.controller, onChanged: widget.onChanged)
+              controller: widget.controller,
+              onChanged: widget.onChanged,
+              autofocus: widget.autofocus,
+            )
           : TextButton(
               onPressed: () async {
                 widget.controller.text =

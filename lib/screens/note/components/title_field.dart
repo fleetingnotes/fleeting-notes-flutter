@@ -5,10 +5,12 @@ class TitleField extends StatelessWidget {
     Key? key,
     required this.controller,
     this.onChanged,
+    this.autofocus = false,
   }) : super(key: key);
 
   final TextEditingController controller;
   final VoidCallback? onChanged;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class TitleField extends StatelessWidget {
           onChanged!();
         }
       },
+      autofocus: autofocus,
     );
   }
 }
