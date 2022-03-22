@@ -174,7 +174,7 @@ class _NoteScreenState extends State<NoteScreen> {
 }
 
 class NoteScreenNavigator extends StatelessWidget {
-  NoteScreenNavigator({
+  const NoteScreenNavigator({
     Key? key,
     required this.db,
   }) : super(key: key);

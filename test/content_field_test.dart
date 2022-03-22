@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'mock_realm_db.dart';
 
 void main() {
