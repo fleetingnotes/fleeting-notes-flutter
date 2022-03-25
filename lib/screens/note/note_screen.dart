@@ -95,10 +95,16 @@ class _NoteScreenState extends State<NoteScreen> {
     updatedNote.source = sourceController.text;
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
-      widget.db.upsertNote(updatedNote);
       setState(() {
         hasNewChanges = false;
       });
+      bool isSaveSuccess = await widget.db.upsertNote(updatedNote);
+      if (!isSaveSuccess) {
+        errMessage = 'Failed to save note';
+        setState(() {
+          hasNewChanges = true;
+        });
+      }
     } else {
       titleController.text = prevTitle;
     }
