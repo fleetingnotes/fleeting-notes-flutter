@@ -112,9 +112,13 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   void onChanged() {
-    setState(() {
-      hasNewChanges = true;
-    });
+    if (widget.note.content != contentController.text ||
+        widget.note.title != titleController.text ||
+        widget.note.source != sourceController.text) {
+      setState(() {
+        hasNewChanges = true;
+      });
+    }
   }
 
   void onSearchNavigate(BuildContext context) {
