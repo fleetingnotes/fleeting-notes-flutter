@@ -131,12 +131,12 @@ class RealmDB {
     return filteredNote != null;
   }
 
-  void upsertNote(Note note) async {
+  Future<bool> upsertNote(Note note) async {
     bool isNoteInDb = await noteExists(note);
     if (isNoteInDb) {
-      updateNote(note);
+      return await updateNote(note);
     } else {
-      insertNote(note);
+      return await insertNote(note);
     }
   }
 

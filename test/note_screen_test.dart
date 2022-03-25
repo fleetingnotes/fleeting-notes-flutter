@@ -66,6 +66,8 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.upsertNote(any()))
+        .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
     await tester.enterText(find.bySemanticsLabel('Note'), 'new note');
     await tester.pump();
@@ -82,5 +84,39 @@ void main() {
             )
             .enabled,
         isFalse);
+  });
+
+  testWidgets('Save note button shows snackbar if save failed',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.upsertNote(any()))
+        .thenAnswer((_) async => Future.value(false));
+    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.enterText(find.bySemanticsLabel('Note'), 'new note');
+    await tester.pump();
+    expect(find.byType(SnackBar), findsNothing);
+    await tester.tap(find.text('Save'));
+    await tester.pump();
+    expect(find.byType(SnackBar), findsOneWidget);
+  });
+
+  testWidgets('Delete note shows snackbar if delete failed',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.deleteNote(any()))
+        .thenAnswer((_) async => Future.value(false));
+    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.byType(SnackBar), findsNothing);
+    await tester.tap(find.text('Delete'));
+    await tester.pump();
+    expect(find.byType(SnackBar), findsOneWidget);
   });
 }

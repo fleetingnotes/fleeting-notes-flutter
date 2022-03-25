@@ -79,12 +79,19 @@ class _NoteScreenState extends State<NoteScreen> {
     return errMessage;
   }
 
-  void _deleteNote() {
+  void _deleteNote() async {
     Note deletedNote = widget.note;
     deletedNote.isDeleted = true;
-    widget.db.deleteNote(widget.note);
-    Navigator.pop(context);
-    widget.db.noteHistory.remove(widget.note);
+    bool isSuccessDelete = await widget.db.deleteNote(widget.note);
+    if (isSuccessDelete) {
+      Navigator.pop(context);
+      widget.db.noteHistory.remove(widget.note);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Fail to delete note'),
+        duration: Duration(seconds: 2),
+      ));
+    }
   }
 
   Future<String> _saveNote() async {
@@ -95,10 +102,16 @@ class _NoteScreenState extends State<NoteScreen> {
     updatedNote.source = sourceController.text;
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
-      widget.db.upsertNote(updatedNote);
       setState(() {
         hasNewChanges = false;
       });
+      bool isSaveSuccess = await widget.db.upsertNote(updatedNote);
+      if (!isSaveSuccess) {
+        errMessage = 'Failed to save note';
+        setState(() {
+          hasNewChanges = true;
+        });
+      }
     } else {
       titleController.text = prevTitle;
     }
@@ -106,9 +119,13 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   void onChanged() {
-    setState(() {
-      hasNewChanges = true;
-    });
+    if (widget.note.content != contentController.text ||
+        widget.note.title != titleController.text ||
+        widget.note.source != sourceController.text) {
+      setState(() {
+        hasNewChanges = true;
+      });
+    }
   }
 
   void onSearchNavigate(BuildContext context) {
