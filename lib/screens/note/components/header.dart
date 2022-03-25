@@ -30,6 +30,11 @@ class Header extends StatelessWidget {
         content: Text(errMessage),
         duration: const Duration(seconds: 2),
       ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Saved'),
+        duration: Duration(seconds: 2),
+      ));
     }
   }
 

@@ -100,6 +100,7 @@ class _NoteScreenState extends State<NoteScreen> {
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     updatedNote.source = sourceController.text;
+    FocusManager.instance.primaryFocus?.unfocus();
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
       setState(() {
