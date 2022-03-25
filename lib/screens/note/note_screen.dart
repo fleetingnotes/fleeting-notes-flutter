@@ -79,12 +79,19 @@ class _NoteScreenState extends State<NoteScreen> {
     return errMessage;
   }
 
-  void _deleteNote() {
+  void _deleteNote() async {
     Note deletedNote = widget.note;
     deletedNote.isDeleted = true;
-    widget.db.deleteNote(widget.note);
-    Navigator.pop(context);
-    widget.db.noteHistory.remove(widget.note);
+    bool isSuccessDelete = await widget.db.deleteNote(widget.note);
+    if (isSuccessDelete) {
+      Navigator.pop(context);
+      widget.db.noteHistory.remove(widget.note);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Fail to delete note'),
+        duration: Duration(seconds: 2),
+      ));
+    }
   }
 
   Future<String> _saveNote() async {
