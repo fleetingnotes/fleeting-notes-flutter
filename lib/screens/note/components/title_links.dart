@@ -24,12 +24,17 @@ class TitleLinks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double width = 300;
+    Offset newCaretOffset = caretOffset;
+    if (width + caretOffset.dx > layerLink.leaderSize!.width) {
+      newCaretOffset += Offset(-width, 0);
+    }
     return Positioned(
-      width: 300,
+      width: width,
       height: 150,
       child: CompositedTransformFollower(
         link: layerLink,
-        offset: caretOffset,
+        offset: newCaretOffset,
         child: Material(
           child: ListView.builder(
             itemCount: filterTitles(query).length,

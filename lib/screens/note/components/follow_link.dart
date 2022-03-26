@@ -14,11 +14,16 @@ class FollowLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double width = 125;
+    Offset newCaretOffset = caretOffset;
+    if (width + caretOffset.dx > layerLink.leaderSize!.width) {
+      newCaretOffset += Offset(-width, 0);
+    }
     return Positioned(
-      width: 125,
+      width: width,
       child: CompositedTransformFollower(
         link: layerLink,
-        offset: caretOffset,
+        offset: newCaretOffset,
         child: Material(
           child: OutlinedButton(
               onPressed: onTap,
