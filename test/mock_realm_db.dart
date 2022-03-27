@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'dart:async';
 import 'package:mocktail/mocktail.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
 class MockRealmDB extends Mock implements RealmDB {

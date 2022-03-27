@@ -30,7 +30,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if (isLoggedIn) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MyHomePage(db: widget.db)),
+        MaterialPageRoute(builder: (context) => MainScreen(db: widget.db)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

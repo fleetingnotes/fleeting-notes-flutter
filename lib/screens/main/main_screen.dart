@@ -6,17 +6,15 @@ import 'package:fleeting_notes_flutter/components/side_menu.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.db}) : super(key: key);
+class MainScreen extends StatefulWidget {
+  const MainScreen({Key? key, required this.db}) : super(key: key);
 
   final RealmDB db;
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  TextEditingController searchController = TextEditingController();
-
+class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

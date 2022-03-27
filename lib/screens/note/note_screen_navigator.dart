@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 
 class NoteScreenNavigator extends StatelessWidget {
   const NoteScreenNavigator({

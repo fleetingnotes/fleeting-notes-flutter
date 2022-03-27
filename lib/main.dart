@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> {
             if (snapshot.data == 'auth') {
               return AuthScreen(db: db);
             } else {
-              return MyHomePage(db: db);
+              return MainScreen(db: db);
             }
           } else {
             return const Center(child: CircularProgressIndicator());
