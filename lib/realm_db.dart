@@ -27,13 +27,13 @@ class RealmDB {
       'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
   Dio dio = Dio();
 
-  Future<List<Note>> getSearchNotes(queryRegex) async {
+  Future<List<Note>> getSearchNotes(queryRegex, {forceSync = false}) async {
     String escapedQuery =
         queryRegex.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
       return '\\${match.group(0)}';
     });
     RegExp r = RegExp(escapedQuery, multiLine: true);
-    var allNotes = await getAllNotes();
+    var allNotes = await getAllNotes(forceSync: forceSync);
     var notes = allNotes.where((note) {
       return r.hasMatch(note.title) ||
           r.hasMatch(note.content) ||

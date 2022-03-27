@@ -21,7 +21,7 @@ void main() {
   testWidgets('Render List of Notes', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockRealmDB mockDb = MockRealmDB();
-    when(() => mockDb.getSearchNotes(''))
+    when(() => mockDb.getSearchNotes('', forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([Note.empty()]));
     await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
     await tester.pumpAndSettle();
@@ -33,9 +33,10 @@ void main() {
   testWidgets('Test search filters properly', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockRealmDB mockDb = MockRealmDB();
-    when(() => mockDb.getSearchNotes(''))
+    when(() => mockDb.getSearchNotes('', forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([Note.empty()]));
-    when(() => mockDb.getSearchNotes('hello'))
+    when(() =>
+            mockDb.getSearchNotes('hello', forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
     await tester.pumpAndSettle();
