@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class TitleLinks extends StatelessWidget {
@@ -29,19 +31,20 @@ class TitleLinks extends StatelessWidget {
     if (width + caretOffset.dx > layerLink.leaderSize!.width) {
       newCaretOffset += Offset(-width, 0);
     }
+    List filteredTitles = filterTitles(query);
+    double tileHeight = 50;
     return Positioned(
       width: width,
-      height: 150,
+      height: min(150, filteredTitles.length * tileHeight),
       child: CompositedTransformFollower(
         link: layerLink,
         offset: newCaretOffset,
         child: Material(
           child: ListView.builder(
-            itemCount: filterTitles(query).length,
+            itemCount: filteredTitles.length,
+            itemExtent: tileHeight,
             itemBuilder: (context, index) {
-              List filteredTitles = filterTitles(query);
               final String item = filteredTitles[index];
-
               return ListTile(
                 title: Text(item),
                 onTap: () {
