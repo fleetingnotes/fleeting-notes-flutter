@@ -26,8 +26,9 @@ class _SearchScreenState extends State<SearchScreen> {
   late List<Note> notes = [];
   String activeNoteId = '';
 
-  Future<void> loadNotes(queryRegex) async {
-    var tempNotes = await widget.db.getSearchNotes(queryRegex);
+  Future<void> loadNotes(queryRegex, {forceSync = false}) async {
+    var tempNotes =
+        await widget.db.getSearchNotes(queryRegex, forceSync: forceSync);
     setState(() {
       notes = tempNotes;
     });
@@ -40,7 +41,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    loadNotes(queryController.text);
+    loadNotes(queryController.text, forceSync: true);
     widget.db.listenNoteChange(listenCallback);
   }
 
