@@ -8,9 +8,13 @@ import 'dart:js_util';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
     as sc;
+import 'package:web_browser_detect/web_browser_detect.dart';
 
 @JS('chrome.tabs.query')
-external dynamic queryTabs(dynamic queryInfo);
+external dynamic queryTabsChrome(dynamic queryInfo);
+
+@JS('browser.tabs.query')
+external dynamic queryTabsBrowser(dynamic queryInfo);
 
 class SourceContainer extends StatefulWidget {
   const SourceContainer({
@@ -34,6 +38,7 @@ class _SourceContainerState extends State<SourceContainer> {
   @override
   void initState() {
     super.initState();
+    print(Browser().browser.toLowerCase());
     setState(() {
       sourceFieldVisible = widget.controller.text.isNotEmpty || !kIsWeb;
     });
@@ -45,7 +50,12 @@ class _SourceContainerState extends State<SourceContainer> {
     }
     try {
       var queryOptions = jsify({'active': true, 'currentWindow': true});
-      dynamic tabs = await promiseToFuture(queryTabs(queryOptions));
+      dynamic tabs;
+      if (Browser().browser == 'Chrome') {
+        tabs = await promiseToFuture(queryTabsChrome(queryOptions));
+      } else {
+        tabs = await promiseToFuture(queryTabsBrowser(queryOptions));
+      }
       return getProperty(tabs[0], 'url');
     } catch (e) {
       return defaultText;
