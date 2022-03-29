@@ -4,7 +4,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/components/side_menu.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.db}) : super(key: key);
