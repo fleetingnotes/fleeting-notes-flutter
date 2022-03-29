@@ -29,7 +29,7 @@ class NoteScreen extends StatefulWidget {
 
 class _NoteScreenState extends State<NoteScreen> {
   List<Note> backlinkNotes = [];
-  bool hasNewChanges = true;
+  bool hasNewChanges = false;
   late bool autofocus;
   late TextEditingController titleController;
   late TextEditingController contentController;
@@ -57,6 +57,12 @@ class _NoteScreenState extends State<NoteScreen> {
         backlinkNotes = notes;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    if (hasNewChanges) _saveNote(updateState: false);
+    super.dispose();
   }
 
   // Helper functions
@@ -94,7 +100,7 @@ class _NoteScreenState extends State<NoteScreen> {
     }
   }
 
-  Future<String> _saveNote() async {
+  Future<String> _saveNote({updateState = true}) async {
     Note updatedNote = widget.note;
     String prevTitle = widget.note.title;
     updatedNote.title = titleController.text;
@@ -103,15 +109,15 @@ class _NoteScreenState extends State<NoteScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
-      setState(() {
-        hasNewChanges = false;
-      });
+      if (updateState) {
+        setState(() {
+          hasNewChanges = false;
+        });
+      }
       bool isSaveSuccess = await widget.db.upsertNote(updatedNote);
       if (!isSaveSuccess) {
         errMessage = 'Failed to save note';
-        setState(() {
-          hasNewChanges = true;
-        });
+        if (updateState) onChanged();
       }
     } else {
       titleController.text = prevTitle;
@@ -125,6 +131,10 @@ class _NoteScreenState extends State<NoteScreen> {
         widget.note.source != sourceController.text) {
       setState(() {
         hasNewChanges = true;
+      });
+    } else {
+      setState(() {
+        hasNewChanges = false;
       });
     }
   }
@@ -189,36 +199,6 @@ class _NoteScreenState extends State<NoteScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class NoteScreenNavigator extends StatelessWidget {
-  const NoteScreenNavigator({
-    Key? key,
-    required this.db,
-  }) : super(key: key);
-
-  final RealmDB db;
-
-  @override
-  Widget build(BuildContext context) {
-    db.navigatorKey = GlobalKey<NavigatorState>();
-    var history = db.noteHistory.entries.toList();
-
-    return Navigator(
-      key: db.navigatorKey,
-      onGenerateRoute: (route) => PageRouteBuilder(
-        settings: route,
-        pageBuilder: (context, _, __) {
-          if (history.isEmpty) return Container();
-          return NoteScreen(
-            key: history.last.value,
-            note: history.last.key,
-            db: db,
-          );
-        },
       ),
     );
   }
