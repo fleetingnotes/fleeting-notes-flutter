@@ -27,6 +27,10 @@ class RealmDB {
       'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
   Dio dio = Dio();
 
+  bool isLoggedIn() {
+    return _userId != 'local';
+  }
+
   Future<List<Note>> getSearchNotes(queryRegex, {forceSync = false}) async {
     String escapedQuery =
         queryRegex.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
@@ -71,7 +75,7 @@ class RealmDB {
         'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
     try {
       var box = await Hive.openBox(_userId);
-      if ((box.isEmpty || forceSync) && _userId != 'local') {
+      if ((box.isEmpty || forceSync) && isLoggedIn()) {
         var res = await graphQLRequest(query);
         var noteMapList = res['data']['notes'];
         Map<String, Note> noteIdMap = {
@@ -143,7 +147,7 @@ class RealmDB {
   Future<bool> insertNote(Note note) async {
     try {
       Note encodedNote = Note.encodeNote(note);
-      if (_userId != 'local') {
+      if (isLoggedIn()) {
         var query =
             'mutation { insertOneNote(data: {_id: ${encodedNote.id}, _partition: ${jsonEncode(_userId)},title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}, timestamp: ${encodedNote.timestamp}, _isDeleted: ${encodedNote.isDeleted}}) {_id  title  content  source  timestamp}}';
         var res = await graphQLRequest(query);
@@ -161,7 +165,7 @@ class RealmDB {
   Future<bool> updateNote(Note note) async {
     try {
       Note encodedNote = Note.encodeNote(note);
-      if (_userId != 'local') {
+      if (isLoggedIn()) {
         var query =
             'mutation { updateOneNote(query: {_id: ${encodedNote.id}}, set: {title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}}) {_id  title  content  source  timestamp}}';
         var res = await graphQLRequest(query);
@@ -179,7 +183,7 @@ class RealmDB {
   Future<bool> deleteNote(Note note) async {
     try {
       Note encodedNote = Note.encodeNote(note);
-      if (_userId != 'local') {
+      if (isLoggedIn()) {
         var query =
             'mutation { updateOneNote(query: {_id: ${encodedNote.id}}, set: {_isDeleted: true}) {_id  title  content  source  timestamp}}';
         var res = await graphQLRequest(query);
@@ -219,6 +223,11 @@ class RealmDB {
     searchKey = GlobalKey();
     noteHistory = {Note.empty(): GlobalKey()};
     _token = null;
+    _userId = 'local';
+  }
+
+  Future<String?> getEmail() async {
+    return await storage.read(key: 'email');
   }
 
   Future<bool> loginWithStorage() async {

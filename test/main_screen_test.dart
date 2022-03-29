@@ -13,7 +13,7 @@ import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
-import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/components/note_card.dart';
 import 'mock_realm_db.dart';
 
@@ -263,7 +263,7 @@ void main() {
     await tester.tap(find.text('Logout'));
     await tester.pumpAndSettle();
     expect(find.byType(MyHomePage), findsNothing);
-    expect(find.byType(AuthScreen), findsOneWidget);
+    expect(find.byType(Auth), findsOneWidget);
   });
 
   testWidgets('Settings changes to settings screen',
