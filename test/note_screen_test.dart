@@ -44,6 +44,8 @@ void main() {
     MockRealmDB mockDb = MockRealmDB();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.upsertNote(any()))
+        .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
     await tester.enterText(find.bySemanticsLabel('Note'), 'new note');
     await tester.pump();
