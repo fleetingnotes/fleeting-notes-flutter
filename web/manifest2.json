@@ -1,6 +1,6 @@
 {
     "name": "Fleeting Notes",
-    "description": "A personal knowledge management system that helps users capture and connect quick notes to promote learning",
+    "description": "A place to manage and discover your ideas",
     "version": "0.0.4",
     "browser_action": {
       "default_popup": "popup.html",

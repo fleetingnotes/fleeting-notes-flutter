@@ -38,7 +38,6 @@ class _SourceContainerState extends State<SourceContainer> {
   @override
   void initState() {
     super.initState();
-    print(Browser().browser.toLowerCase());
     setState(() {
       sourceFieldVisible = widget.controller.text.isNotEmpty || !kIsWeb;
     });
