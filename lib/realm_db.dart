@@ -29,6 +29,8 @@ class RealmDB {
       'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
   Dio dio = Dio();
 
+  RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
   Future<List<Note>> getSearchNotes(queryRegex, {forceSync = false}) async {
     String escapedQuery =
         queryRegex.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
@@ -97,6 +99,15 @@ class RealmDB {
     var allNotes = await getAllNotes();
     Note? note = allNotes.firstWhereOrNull((note) {
       return note.title == title;
+    });
+    return note;
+  }
+
+  // TODO: This is super ghetto, should just query for the note.
+  Future<Note?> getNote(id) async {
+    var allNotes = await getAllNotes();
+    Note? note = allNotes.firstWhereOrNull((note) {
+      return note.id == id;
     });
     return note;
   }

@@ -7,20 +7,24 @@ import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart'
 import 'package:provider/provider.dart';
 
 class NoteScreenNavigator extends StatelessWidget {
-  const NoteScreenNavigator({
+  NoteScreenNavigator({
     Key? key,
     required this.db,
   }) : super(key: key);
 
   final RealmDB db;
 
+  final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
   @override
   Widget build(BuildContext context) {
     db.navigatorKey = GlobalKey<NavigatorState>();
+    db.routeObserver = routeObserver;
     var history = db.noteHistory.entries.toList();
 
     return Navigator(
       key: db.navigatorKey,
+      observers: [routeObserver],
       onGenerateRoute: (route) => PageRouteBuilder(
         settings: route,
         pageBuilder: (context, _, __) {

@@ -29,9 +29,13 @@ class NoteEditor extends StatefulWidget {
   _NoteEditorState createState() => _NoteEditorState();
 }
 
-class _NoteEditorState extends State<NoteEditor> {
+class _NoteEditorState extends State<NoteEditor> with RouteAware {
   List<Note> backlinkNotes = [];
-  bool hasNewChanges = false;
+  bool hasNewChanges = true;
+  bool previouslySaved = false;
+
+  Note note = Note.empty();
+
   late bool autofocus;
   late TextEditingController titleController;
   late TextEditingController contentController;
@@ -40,7 +44,10 @@ class _NoteEditorState extends State<NoteEditor> {
   @override
   void initState() {
     super.initState();
+    note = widget.note;
     autofocus = widget.note.isEmpty();
+    previouslySaved = !widget.note.isEmpty();
+
     titleController = TextEditingController(text: widget.note.title);
     sourceController = TextEditingController(text: widget.note.source);
     contentController = StyleableTextFieldController(
@@ -62,9 +69,51 @@ class _NoteEditorState extends State<NoteEditor> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.db.routeObserver
+        .subscribe(this, ModalRoute.of(context) as PageRoute);
+  }
+
+  @override
   void dispose() {
-    if (hasNewChanges) _saveNote(updateState: false);
+    widget.db.routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didPop() {
+    // Autosave if the note was previously saved
+    // If we autosave every note, we would pollute pretty fast.
+    if (previouslySaved) _saveNote();
+  }
+
+  @override
+  void didPopNext() {
+    // Reload the note to see if it has changed
+    // This is pretty janky but it works
+    Note? result = null;
+    widget.db.getNote(widget.note.id).then((value) {
+      if (value != null) {
+        result = value;
+      }
+    }).whenComplete(() {
+      if (result != null) {
+        titleController.text = result!.title;
+        contentController.text = result!.content;
+        sourceController.text = result!.source;
+        setState(() {
+          note = result!;
+        });
+      }
+    });
+  }
+
+  @override
+  void didPushNext() {
+    // Autosave if the note was previously saved
+    // If we autosave every note, we would pollute pretty fast.
+    if (previouslySaved) _saveNote();
   }
 
   // Helper functions
