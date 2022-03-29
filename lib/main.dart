@@ -1,9 +1,11 @@
+import 'package:fleeting_notes_flutter/screens/main/state/note_stack_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,13 +51,16 @@ class _MyAppState extends State<MyApp> {
             if (snapshot.data == 'auth') {
               return AuthScreen(db: db);
             } else {
-              return MainScreen(db: db);
+              var notifierProvider = ChangeNotifierProvider(
+                  create: (context) => NoteStackModel(),
+                  child: MainScreen(db: db));
+              return notifierProvider;
             }
           } else {
             return const Center(child: CircularProgressIndicator());
           }
         },
-      ),
+      )
     );
   }
 }

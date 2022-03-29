@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
-import 'package:fleeting_notes_flutter/components/stylable_textfield_controller.dart';
+import 'package:fleeting_notes_flutter/widgets/stylable_textfield_controller.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
@@ -13,9 +13,11 @@ import 'package:fleeting_notes_flutter/screens/note/components/content_field.dar
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
+import 'package:provider/provider.dart';
+import 'package:fleeting_notes_flutter/screens/main/state/note_stack_model.dart';
 
-class NoteScreen extends StatefulWidget {
-  const NoteScreen({
+class NoteEditor extends StatefulWidget {
+  const NoteEditor({
     Key? key,
     required this.note,
     required this.db,
@@ -24,10 +26,10 @@ class NoteScreen extends StatefulWidget {
   final Note note;
   final RealmDB db;
   @override
-  _NoteScreenState createState() => _NoteScreenState();
+  _NoteEditorState createState() => _NoteEditorState();
 }
 
-class _NoteScreenState extends State<NoteScreen> {
+class _NoteEditorState extends State<NoteEditor> {
   List<Note> backlinkNotes = [];
   bool hasNewChanges = false;
   late bool autofocus;
@@ -189,7 +191,10 @@ class _NoteScreenState extends State<NoteScreen> {
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             onTap: () {
-                              widget.db.navigateToNote(note);
+                              Provider.of<NoteStackModel>(context,
+                                      listen: false)
+                                  .pushNote(Note.empty());
+                              widget.db.navigateToNote(note); // TODO: Deprecate
                             },
                           )),
                     ],

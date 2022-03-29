@@ -33,7 +33,7 @@ void main() {
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
-    expect(find.byType(NoteScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
     expect(find.byType(SearchScreen), findsOneWidget);
   });
 
@@ -49,7 +49,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
-    expect(find.byType(NoteScreen), findsNWidgets(2));
+    expect(find.byType(NoteEditor), findsNWidgets(2));
     expect(find.byType(SearchScreen), findsOneWidget);
   });
 
@@ -67,7 +67,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.widgetWithText(NoteCard, 'Click me note!'));
     await tester.pumpAndSettle(); // Wait for animation to finish
-    expect(find.widgetWithText(NoteScreen, 'Click me note!'), findsOneWidget);
+    expect(find.widgetWithText(NoteEditor, 'Click me note!'), findsOneWidget);
     expect(
         tester
             .widget<Text>(find.descendant(
@@ -96,7 +96,7 @@ void main() {
     await tester.pump();
     expect(
         find.widgetWithText(SearchScreen, 'Test save note!'), findsOneWidget);
-    expect(find.byType(NoteScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
   }, skip: true);
 
   testWidgets('Delete note updates list of notes', (WidgetTester tester) async {
@@ -118,7 +118,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
         find.widgetWithText(SearchScreen, 'Test delete note!'), findsNothing);
-    expect(find.byType(NoteScreen), findsNothing);
+    expect(find.byType(NoteEditor), findsNothing);
   }, skip: true);
 
   // Mobile Tests
@@ -129,7 +129,7 @@ void main() {
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
-    expect(find.byType(NoteScreen), findsNothing);
+    expect(find.byType(NoteEditor), findsNothing);
     expect(find.byType(SearchScreen), findsOneWidget);
   });
 
@@ -147,7 +147,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.widgetWithText(NoteCard, 'Click me note!'));
     await tester.pumpAndSettle(); // Wait for animation to finish
-    expect(find.widgetWithText(NoteScreen, 'Click me note!'), findsOneWidget);
+    expect(find.widgetWithText(NoteEditor, 'Click me note!'), findsOneWidget);
     expect(find.byType(SearchScreen), findsNothing);
   });
 
@@ -168,7 +168,7 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteScreen), findsNothing);
+    expect(find.byType(NoteEditor), findsNothing);
   });
 
   testWidgets('Resize Desktop (note + empty) -> Mobile (search)',
@@ -190,14 +190,14 @@ void main() {
     await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteScreen), findsNothing);
+    expect(find.byType(NoteEditor), findsNothing);
 
     // Change to mobile
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteScreen), findsNothing);
+    expect(find.byType(NoteEditor), findsNothing);
   });
 
   testWidgets('Resize Mobile (search) -> Desktop (search + note)',
@@ -213,14 +213,14 @@ void main() {
 
     // Mobile on Search Screen
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteScreen), findsNothing);
+    expect(find.byType(NoteEditor), findsNothing);
 
     // Change to Desktop
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
   });
 
   testWidgets('Resize Mobile (note) -> Desktop (search + note)',
@@ -238,14 +238,14 @@ void main() {
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsNothing);
-    expect(find.byType(NoteScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
 
     // Change to Desktop
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
   });
 
   // Universal Tests

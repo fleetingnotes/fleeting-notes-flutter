@@ -24,7 +24,7 @@ class MockRealmDB extends Mock implements RealmDB {
     noteHistory[note] = noteKey;
     navigatorKey.currentState!.push(
       PageRouteBuilder(
-          pageBuilder: (context, _, __) => NoteScreen(db: this, note: note)),
+          pageBuilder: (context, _, __) => NoteEditor(db: this, note: note)),
     );
   }
 

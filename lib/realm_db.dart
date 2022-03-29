@@ -15,7 +15,9 @@ import 'package:collection/collection.dart';
 import 'package:path/path.dart' as Path;
 
 class RealmDB {
-  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
+
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey searchKey = GlobalKey();
   Map<Note, GlobalKey> noteHistory = {Note.empty(): GlobalKey()};
@@ -274,6 +276,7 @@ class RealmDB {
     return notes;
   }
 
+  // TODO: Move this out of db
   void navigateToSearch(String query) {
     navigatorKey.currentState!.push(
       PageRouteBuilder(
@@ -283,6 +286,7 @@ class RealmDB {
     );
   }
 
+  // TODO: Move this out of db
   SlideTransition _transitionBuilder(
       context, animation, secondaryAnimation, child) {
     const begin = Offset(0.0, 1.0);
@@ -297,12 +301,13 @@ class RealmDB {
     );
   }
 
+  // TODO: Move this out of db
   void navigateToNote(Note note) {
     GlobalKey noteKey = GlobalKey();
     noteHistory[note] = noteKey;
     navigatorKey.currentState!.push(PageRouteBuilder(
       pageBuilder: (context, _, __) =>
-          NoteScreen(key: noteKey, db: this, note: note),
+          NoteEditor(key: noteKey, db: this, note: note),
       transitionsBuilder: _transitionBuilder,
     ));
   }
