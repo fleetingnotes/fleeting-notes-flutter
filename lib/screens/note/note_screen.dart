@@ -109,7 +109,11 @@ class _NoteScreenState extends State<NoteScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
-      if (updateState) onChanged();
+      if (updateState) {
+        setState(() {
+          hasNewChanges = false;
+        });
+      }
       bool isSaveSuccess = await widget.db.upsertNote(updatedNote);
       if (!isSaveSuccess) {
         errMessage = 'Failed to save note';
@@ -127,6 +131,10 @@ class _NoteScreenState extends State<NoteScreen> {
         widget.note.source != sourceController.text) {
       setState(() {
         hasNewChanges = true;
+      });
+    } else {
+      setState(() {
+        hasNewChanges = false;
       });
     }
   }
