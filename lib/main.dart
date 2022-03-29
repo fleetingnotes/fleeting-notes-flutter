@@ -23,12 +23,8 @@ class _MyAppState extends State<MyApp> {
   final RealmDB db = RealmDB();
 
   Future<String> _navigateScreen() async {
-    bool user = await db.loginWithStorage();
-    if (!user) {
-      return 'auth';
-    } else {
-      return 'main';
-    }
+    await db.loginWithStorage();
+    return 'main';
   }
 
   // This widget is the root of your application.
@@ -46,11 +42,7 @@ class _MyAppState extends State<MyApp> {
         future: _navigateScreen(),
         builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
           if (snapshot.hasData) {
-            if (snapshot.data == 'auth') {
-              return AuthScreen(db: db);
-            } else {
-              return MyHomePage(db: db);
-            }
+            return MyHomePage(db: db);
           } else {
             return const Center(child: CircularProgressIndicator());
           }
