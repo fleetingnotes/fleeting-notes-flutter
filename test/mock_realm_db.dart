@@ -16,6 +16,8 @@ class MockRealmDB extends Mock implements RealmDB {
   @override
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   StreamController streamController = StreamController();
+  @override
+  RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
   // not ideal that i have to copy below from the real class
   @override
