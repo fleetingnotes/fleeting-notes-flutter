@@ -36,31 +36,29 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      // scrollBehavior: MyCustomScrollBehavior(),
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          primarySwatch: Colors.blue,
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
-              .copyWith(background: const Color(0xECECECEC))),
-      home: FutureBuilder<String>(
-        future: _navigateScreen(),
-        builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-          if (snapshot.hasData) {
-            if (snapshot.data == 'auth') {
-              return AuthScreen(db: db);
-            } else {
-              var notifierProvider = ChangeNotifierProvider(
-                  create: (context) => NoteStackModel(),
-                  child: MainScreen(db: db));
-              return notifierProvider;
-            }
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      )
-    );
+    return ChangeNotifierProvider(
+        create: (context) => NoteStackModel(),
+        child: MaterialApp(
+            title: 'Flutter Demo',
+            // scrollBehavior: MyCustomScrollBehavior(),
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+                primarySwatch: Colors.blue,
+                colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
+                    .copyWith(background: const Color(0xECECECEC))),
+            home: FutureBuilder<String>(
+              future: _navigateScreen(),
+              builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                if (snapshot.hasData) {
+                  if (snapshot.data == 'auth') {
+                    return AuthScreen(db: db);
+                  } else {
+                    return MainScreen(db: db);
+                  }
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            )));
   }
 }

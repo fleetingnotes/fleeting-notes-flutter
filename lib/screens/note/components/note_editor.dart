@@ -78,6 +78,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void dispose() {
     widget.db.routeObserver.unsubscribe(this);
+    if (previouslySaved) _saveNote(updateState: false);
     super.dispose();
   }
 
