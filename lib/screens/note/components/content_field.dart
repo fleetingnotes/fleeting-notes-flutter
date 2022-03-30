@@ -3,8 +3,6 @@ import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart'
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
-import 'package:provider/provider.dart';
-import 'package:fleeting_notes_flutter/screens/main/state/note_stack_model.dart';
 
 class ContentField extends StatefulWidget {
   const ContentField({
@@ -161,8 +159,6 @@ class _ContentFieldState extends State<ContentField> {
     void _onFollowLinkTap() async {
       Note? note = await widget.db.getNoteByTitle(title);
       note ??= Note.empty(title: title);
-      Provider.of<NoteStackModel>(context, listen: false)
-              .pushNote(Note.empty());
       widget.db.navigateToNote(note); // TODO: Deprecate
     }
 

@@ -1,9 +1,7 @@
-import 'package:fleeting_notes_flutter/screens/main/state/note_stack_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
-import 'package:provider/provider.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -27,29 +25,27 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (context) => NoteStackModel(),
-        child: MaterialApp(
-            title: 'Flutter Demo',
-            // scrollBehavior: MyCustomScrollBehavior(),
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-                primarySwatch: Colors.blue,
-                colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
-                    .copyWith(background: const Color(0xECECECEC))),
-            home: FutureBuilder<String>(
-              future: _navigateScreen(),
-              builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-                if (snapshot.hasData) {
-                  if (snapshot.data == 'auth') {
-                    return AuthScreen(db: db);
-                  } else {
-                    return MainScreen(db: db);
-                  }
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              },
-            )));
+    return MaterialApp(
+        title: 'Flutter Demo',
+        // scrollBehavior: MyCustomScrollBehavior(),
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+            primarySwatch: Colors.blue,
+            colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
+                .copyWith(background: const Color(0xECECECEC))),
+        home: FutureBuilder<String>(
+          future: _navigateScreen(),
+          builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data == 'auth') {
+                return AuthScreen(db: db);
+              } else {
+                return MainScreen(db: db);
+              }
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ));
   }
 }

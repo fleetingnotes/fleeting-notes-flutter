@@ -13,8 +13,6 @@ import 'package:fleeting_notes_flutter/screens/note/components/content_field.dar
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
-import 'package:provider/provider.dart';
-import 'package:fleeting_notes_flutter/screens/main/state/note_stack_model.dart';
 
 class NoteEditor extends StatefulWidget {
   const NoteEditor({
@@ -219,9 +217,6 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             onTap: () {
-                              Provider.of<NoteStackModel>(context,
-                                      listen: false)
-                                  .pushNote(Note.empty());
                               widget.db.navigateToNote(note); // TODO: Deprecate
                             },
                           )),
