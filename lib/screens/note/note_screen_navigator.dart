@@ -1,10 +1,7 @@
-import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
-import 'package:fleeting_notes_flutter/screens/main/state/note_stack_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
-import 'package:provider/provider.dart';
 
 class NoteScreenNavigator extends StatelessWidget {
   NoteScreenNavigator({

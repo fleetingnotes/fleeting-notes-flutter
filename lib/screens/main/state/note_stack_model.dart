@@ -1,7 +1,4 @@
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
-import 'package:flutter/foundation.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:collection';
 

@@ -92,7 +92,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   void didPopNext() {
     // Reload the note to see if it has changed
     // This is pretty janky but it works
-    Note? result = null;
+    Note? result;
     widget.db.getNote(widget.note.id).then((value) {
       if (value != null) {
         result = value;
