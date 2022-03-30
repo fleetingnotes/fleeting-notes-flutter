@@ -169,6 +169,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       if (!isSaveSuccess) {
         errMessage = 'Failed to save note';
         if (updateState) onChanged();
+      } else {
+        previouslySaved = true;
       }
     } else {
       titleController.text = prevTitle;
