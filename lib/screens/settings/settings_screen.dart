@@ -9,9 +9,11 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key, required this.db}) : super(key: key);
+  const SettingsScreen({Key? key, required this.db, required this.onAuthChange})
+      : super(key: key);
 
   final RealmDB db;
+  final VoidCallback onAuthChange;
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
@@ -157,6 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ElevatedButton(
                                         onPressed: () {
                                           widget.db.logout();
+                                          widget.onAuthChange();
                                           setState(() {
                                             isLoggedIn = false;
                                           });
@@ -177,6 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : Auth(
                               db: widget.db,
                               onLogin: (e) {
+                                widget.onAuthChange();
                                 setState(() {
                                   isLoggedIn = true;
                                   email = e;

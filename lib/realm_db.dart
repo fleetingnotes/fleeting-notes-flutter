@@ -218,12 +218,10 @@ class RealmDB {
   }
 
   void logout() async {
-    await storage.delete(key: 'email');
-    await storage.delete(key: 'password');
-    searchKey = GlobalKey();
-    noteHistory = {Note.empty(): GlobalKey()};
     _token = null;
     _userId = 'local';
+    await storage.delete(key: 'email');
+    await storage.delete(key: 'password');
   }
 
   Future<String?> getEmail() async {

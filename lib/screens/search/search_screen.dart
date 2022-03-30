@@ -27,6 +27,7 @@ class _SearchScreenState extends State<SearchScreen> {
   String activeNoteId = '';
 
   Future<void> loadNotes(queryRegex, {forceSync = false}) async {
+    if (!mounted) return;
     var tempNotes =
         await widget.db.getSearchNotes(queryRegex, forceSync: forceSync);
     setState(() {

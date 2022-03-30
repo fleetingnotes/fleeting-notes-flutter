@@ -39,11 +39,9 @@ class SideMenu extends StatelessWidget {
                 title: const Text("Settings"),
                 leading: const Icon(Icons.settings),
                 onTap: () {
-                  Navigator.push(
+                  Navigator.pushNamed(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsScreen(db: db),
-                    ),
+                    '/settings',
                   );
                 },
               ),

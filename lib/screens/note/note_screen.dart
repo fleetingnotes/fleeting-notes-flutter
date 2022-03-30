@@ -109,7 +109,7 @@ class _NoteScreenState extends State<NoteScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
-      if (updateState) {
+      if (updateState && mounted) {
         setState(() {
           hasNewChanges = false;
         });
@@ -126,6 +126,7 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   void onChanged() {
+    if (!mounted) return;
     if (widget.note.content != contentController.text ||
         widget.note.title != titleController.text ||
         widget.note.source != sourceController.text) {
