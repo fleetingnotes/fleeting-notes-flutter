@@ -1,8 +1,6 @@
-import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fleeting_notes_flutter/constants.dart';
-import 'package:fleeting_notes_flutter/screens/auth/auth_screen.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
 
@@ -40,25 +38,7 @@ class SideMenu extends StatelessWidget {
                 title: const Text("Settings"),
                 leading: const Icon(Icons.settings),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsScreen(db: db),
-                    ),
-                  );
-                },
-              ),
-              ListTile(
-                title: const Text("Logout"),
-                leading: const Icon(Icons.logout),
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AuthScreen(db: db),
-                    ),
-                  );
-                  db.logout();
+                  Navigator.pushNamed(context, '/settings');
                 },
               ),
             ],
