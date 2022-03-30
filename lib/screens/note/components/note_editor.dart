@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
-import 'package:fleeting_notes_flutter/components/stylable_textfield_controller.dart';
+import 'package:fleeting_notes_flutter/widgets/stylable_textfield_controller.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
-import 'package:fleeting_notes_flutter/components/note_card.dart';
+import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
@@ -14,8 +14,8 @@ import 'package:fleeting_notes_flutter/screens/note/components/source_container.
     if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
 import 'package:fleeting_notes_flutter/constants.dart';
 
-class NoteScreen extends StatefulWidget {
-  const NoteScreen({
+class NoteEditor extends StatefulWidget {
+  const NoteEditor({
     Key? key,
     required this.note,
     required this.db,
@@ -24,12 +24,13 @@ class NoteScreen extends StatefulWidget {
   final Note note;
   final RealmDB db;
   @override
-  _NoteScreenState createState() => _NoteScreenState();
+  _NoteEditorState createState() => _NoteEditorState();
 }
 
-class _NoteScreenState extends State<NoteScreen> {
+class _NoteEditorState extends State<NoteEditor> with RouteAware {
   List<Note> backlinkNotes = [];
   bool hasNewChanges = false;
+
   late bool autofocus;
   late TextEditingController titleController;
   late TextEditingController contentController;
@@ -60,9 +61,36 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.db.routeObserver
+        .subscribe(this, ModalRoute.of(context) as PageRoute);
+  }
+
+  @override
   void dispose() {
+    widget.db.routeObserver.unsubscribe(this);
     if (hasNewChanges) _saveNote(updateState: false);
     super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Refresh note if we traverse back
+    widget.db.getNote(widget.note.id).then((note) {
+      if (note != null) {
+        titleController.text = note.title;
+        contentController.text = note.content;
+        sourceController.text = note.source;
+      }
+    });
+  }
+
+  @override
+  void didPushNext() {
+    // Autosave if the note was previously saved
+    // If we autosave every note, we would pollute pretty fast.
+    if (hasNewChanges) _saveNote();
   }
 
   // Helper functions
@@ -189,7 +217,7 @@ class _NoteScreenState extends State<NoteScreen> {
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             onTap: () {
-                              widget.db.navigateToNote(note);
+                              widget.db.navigateToNote(note); // TODO: Deprecate
                             },
                           )),
                     ],

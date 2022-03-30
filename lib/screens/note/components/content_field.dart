@@ -159,7 +159,7 @@ class _ContentFieldState extends State<ContentField> {
     void _onFollowLinkTap() async {
       Note? note = await widget.db.getNoteByTitle(title);
       note ??= Note.empty(title: title);
-      widget.db.navigateToNote(note);
+      widget.db.navigateToNote(note); // TODO: Deprecate
     }
 
     // init overlay entry

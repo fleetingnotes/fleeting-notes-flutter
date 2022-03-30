@@ -46,6 +46,9 @@ dependencies:
   file_saver: ^0.1.0
   web_browser_detect: ^2.0.2
 
+  # Dependency for state management
+  provider: ^6.0.0
+
 
 dev_dependencies:
   flutter_test:

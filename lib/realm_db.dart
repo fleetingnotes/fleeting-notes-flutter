@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -15,7 +15,9 @@ import 'package:collection/collection.dart';
 import 'package:path/path.dart' as Path;
 
 class RealmDB {
-  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
+
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey searchKey = GlobalKey();
   Map<Note, GlobalKey> noteHistory = {Note.empty(): GlobalKey()};
@@ -26,6 +28,8 @@ class RealmDB {
   String apiUrl =
       'https://realm.mongodb.com/api/client/v2.0/app/fleeting-notes-knojs/';
   Dio dio = Dio();
+
+  RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
   Future<List<Note>> getSearchNotes(queryRegex, {forceSync = false}) async {
     String escapedQuery =
@@ -97,6 +101,11 @@ class RealmDB {
       return note.title == title;
     });
     return note;
+  }
+
+  Future<Note?> getNote(id) async {
+    var box = await Hive.openBox(_userId);
+    return box.get(id) as Note?;
   }
 
   Future<bool> titleExists(id, title) async {
@@ -274,6 +283,7 @@ class RealmDB {
     return notes;
   }
 
+  // TODO: Move this out of db
   void navigateToSearch(String query) {
     navigatorKey.currentState!.push(
       PageRouteBuilder(
@@ -283,6 +293,7 @@ class RealmDB {
     );
   }
 
+  // TODO: Move this out of db
   SlideTransition _transitionBuilder(
       context, animation, secondaryAnimation, child) {
     const begin = Offset(0.0, 1.0);
@@ -297,12 +308,13 @@ class RealmDB {
     );
   }
 
+  // TODO: Move this out of db
   void navigateToNote(Note note) {
     GlobalKey noteKey = GlobalKey();
     noteHistory[note] = noteKey;
     navigatorKey.currentState!.push(PageRouteBuilder(
       pageBuilder: (context, _, __) =>
-          NoteScreen(key: noteKey, db: this, note: note),
+          NoteEditor(key: noteKey, db: this, note: note),
       transitionsBuilder: _transitionBuilder,
     ));
   }

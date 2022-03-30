@@ -1,7 +1,7 @@
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:flutter/material.dart';
 
-import '../../components/note_card.dart';
+import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../constants.dart';
 import '../../responsive.dart';
