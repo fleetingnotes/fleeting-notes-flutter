@@ -103,13 +103,9 @@ class RealmDB {
     return note;
   }
 
-  // TODO: This is super ghetto, should just query for the note.
   Future<Note?> getNote(id) async {
-    var allNotes = await getAllNotes();
-    Note? note = allNotes.firstWhereOrNull((note) {
-      return note.id == id;
-    });
-    return note;
+    var box = await Hive.openBox(_userId);
+    return box.get(id) as Note?;
   }
 
   Future<bool> titleExists(id, title) async {

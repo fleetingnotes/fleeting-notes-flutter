@@ -31,10 +31,7 @@ class NoteEditor extends StatefulWidget {
 
 class _NoteEditorState extends State<NoteEditor> with RouteAware {
   List<Note> backlinkNotes = [];
-  bool hasNewChanges = true;
-  bool previouslySaved = false;
-
-  Note note = Note.empty();
+  bool hasNewChanges = false;
 
   late bool autofocus;
   late TextEditingController titleController;
@@ -44,10 +41,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void initState() {
     super.initState();
-    note = widget.note;
     autofocus = widget.note.isEmpty();
-    previouslySaved = !widget.note.isEmpty();
-
     titleController = TextEditingController(text: widget.note.title);
     sourceController = TextEditingController(text: widget.note.source);
     contentController = StyleableTextFieldController(
@@ -78,34 +72,18 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void dispose() {
     widget.db.routeObserver.unsubscribe(this);
-    if (previouslySaved) _saveNote(updateState: false);
+    if (hasNewChanges) _saveNote(updateState: false);
     super.dispose();
   }
 
   @override
-  void didPop() {
-    // Autosave if the note was previously saved
-    // If we autosave every note, we would pollute pretty fast.
-    if (previouslySaved) _saveNote();
-  }
-
-  @override
   void didPopNext() {
-    // Reload the note to see if it has changed
-    // This is pretty janky but it works
-    Note? result;
-    widget.db.getNote(widget.note.id).then((value) {
-      if (value != null) {
-        result = value;
-      }
-    }).whenComplete(() {
-      if (result != null) {
-        titleController.text = result!.title;
-        contentController.text = result!.content;
-        sourceController.text = result!.source;
-        setState(() {
-          note = result!;
-        });
+    // Refresh note if we traverse back
+    widget.db.getNote(widget.note.id).then((note) {
+      if (note != null) {
+        titleController.text = note.title;
+        contentController.text = note.content;
+        sourceController.text = note.source;
       }
     });
   }
@@ -114,7 +92,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   void didPushNext() {
     // Autosave if the note was previously saved
     // If we autosave every note, we would pollute pretty fast.
-    if (previouslySaved) _saveNote();
+    if (hasNewChanges) _saveNote();
   }
 
   // Helper functions
@@ -170,8 +148,6 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       if (!isSaveSuccess) {
         errMessage = 'Failed to save note';
         if (updateState) onChanged();
-      } else {
-        previouslySaved = true;
       }
     } else {
       titleController.text = prevTitle;
