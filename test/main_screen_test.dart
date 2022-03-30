@@ -63,6 +63,8 @@ void main() {
         .thenAnswer((_) async => Future.value([newNote]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
+    when((() => mockDb.upsertNote(any())))
+        .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
     await tester.pump();
     await tester.tap(find.widgetWithText(NoteCard, 'Click me note!'));
@@ -143,6 +145,8 @@ void main() {
         .thenAnswer((_) async => Future.value([newNote]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
+    when((() => mockDb.upsertNote(any())))
+        .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
     await tester.pump();
     await tester.tap(find.widgetWithText(NoteCard, 'Click me note!'));
