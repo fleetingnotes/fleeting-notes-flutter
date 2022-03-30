@@ -5,7 +5,6 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 @TestOn('browser')
-import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -13,7 +12,6 @@ import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
-import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'mock_realm_db.dart';
 
@@ -250,41 +248,5 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
     expect(find.byType(NoteEditor), findsOneWidget);
-  });
-
-  // Universal Tests
-  testWidgets('Logout changes to auth screen', (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
-    when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-        .thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.getBacklinkNotes(any()))
-        .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Logout'));
-    await tester.pumpAndSettle();
-    expect(find.byType(MainScreen), findsNothing);
-    expect(find.byType(Auth), findsOneWidget);
-  });
-
-  testWidgets('Settings changes to settings screen',
-      (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
-    when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-        .thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.getBacklinkNotes(any()))
-        .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
-    expect(find.byType(MainScreen), findsNothing);
-    expect(find.byType(SettingsScreen), findsOneWidget);
   });
 }
