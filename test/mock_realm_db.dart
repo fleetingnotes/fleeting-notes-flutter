@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'dart:async';
 import 'package:mocktail/mocktail.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
 class MockRealmDB extends Mock implements RealmDB {
@@ -16,6 +16,8 @@ class MockRealmDB extends Mock implements RealmDB {
   @override
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   StreamController streamController = StreamController();
+  @override
+  RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
   // not ideal that i have to copy below from the real class
   @override
@@ -24,7 +26,7 @@ class MockRealmDB extends Mock implements RealmDB {
     noteHistory[note] = noteKey;
     navigatorKey.currentState!.push(
       PageRouteBuilder(
-          pageBuilder: (context, _, __) => NoteScreen(db: this, note: note)),
+          pageBuilder: (context, _, __) => NoteEditor(db: this, note: note)),
     );
   }
 

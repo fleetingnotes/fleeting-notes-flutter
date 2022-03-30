@@ -2,21 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
-import 'package:fleeting_notes_flutter/components/side_menu.dart';
+import 'package:fleeting_notes_flutter/widgets/side_menu.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.db}) : super(key: key);
+class MainScreen extends StatefulWidget {
+  const MainScreen({Key? key, required this.db}) : super(key: key);
 
   final RealmDB db;
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  TextEditingController searchController = TextEditingController();
-
+class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +27,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
         tooltip: 'Add note',
         onPressed: () {
-          widget.db.navigateToNote(Note.empty());
+          // This is bugged because floating action button isn't part of 
+          // any route...
+          // Provider.of<NoteStackModel>(context, listen: false)
+          //     .pushNote(Note.empty());
+          widget.db.navigateToNote(Note.empty()); // TODO: Deprecate
         },
       ),
       body: Responsive(
