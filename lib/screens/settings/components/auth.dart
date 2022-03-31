@@ -22,11 +22,13 @@ class _AuthState extends State<Auth> {
     return password.isNotEmpty;
   }
 
-  Future<void> _login(BuildContext context) async {
+  Future<void> _login(BuildContext context,
+      {bool pushLocalNotes = false}) async {
     if (!validPassword() || !validEmail()) {
       return;
     }
-    bool isLoggedIn = await widget.db.login(email, password);
+    bool isLoggedIn =
+        await widget.db.login(email, password, pushLocalNotes: pushLocalNotes);
     if (isLoggedIn) {
       if (widget.onLogin != null) widget.onLogin!(email);
     } else {
@@ -43,7 +45,7 @@ class _AuthState extends State<Auth> {
     }
     bool isRegistered = await widget.db.registerUser(email, password);
     if (isRegistered) {
-      _login(context);
+      _login(context, pushLocalNotes: true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Registration failed'),

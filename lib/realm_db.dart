@@ -88,15 +88,20 @@ class RealmDB {
         // box.clear(); // TODO: investigate why this causes bugs
         await box.putAll(noteIdMap);
       }
-      List<Note> notes = [];
-      for (var note in box.values) {
-        notes.add(note as Note);
-      }
+      List<Note> notes = getAllNotesLocal(box);
       notes.sort((n1, n2) => n2.timestamp.compareTo(n1.timestamp));
       return notes;
     } catch (e) {
       return [];
     }
+  }
+
+  List<Note> getAllNotesLocal(box) {
+    List<Note> notes = [];
+    for (var note in box.values) {
+      notes.add(note as Note);
+    }
+    return notes;
   }
 
   Future<Note?> getNoteByTitle(title) async {
@@ -189,6 +194,25 @@ class RealmDB {
     }
   }
 
+  Future<bool> updateNotes(List<Note> notes) async {
+    if (!isLoggedIn()) return false;
+    try {
+      List queryList = notes.map((note) {
+        Note encodedNote = Note.encodeNote(note);
+        String noteQuery =
+            '{_id: ${encodedNote.id}, _partition: ${jsonEncode(_userId)},title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}, timestamp: ${encodedNote.timestamp}, _isDeleted: ${encodedNote.isDeleted}}';
+        return noteQuery;
+      }).toList();
+      String query =
+          'mutation { insertManyNotes(data: ${queryList.toString()}) { insertedIds } }';
+      var res = await graphQLRequest(query);
+      if (res['data'] == null) return false;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<bool> deleteNote(Note note) async {
     try {
       Note encodedNote = Note.encodeNote(note);
@@ -254,10 +278,18 @@ class RealmDB {
     return await storage.read(key: 'email');
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String email, String password,
+      {bool pushLocalNotes = false}) async {
     await storage.write(key: 'email', value: email);
     await storage.write(key: 'password', value: password);
     bool validCredentials = await checkAndSetCredentials(email, password);
+    if (validCredentials && pushLocalNotes) {
+      var box = await Hive.openBox('local');
+      List<Note> notes = getAllNotesLocal(box);
+      if (notes.isNotEmpty) {
+        await updateNotes(notes);
+      }
+    }
     return validCredentials;
   }
 
