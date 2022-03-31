@@ -13,6 +13,7 @@ class Auth extends StatefulWidget {
 class _AuthState extends State<Auth> {
   String email = '';
   String password = '';
+  bool isLoading = false;
 
   bool validEmail() {
     return email.isNotEmpty;
@@ -27,6 +28,9 @@ class _AuthState extends State<Auth> {
     if (!validPassword() || !validEmail()) {
       return;
     }
+    setState(() {
+      isLoading = true;
+    });
     bool isLoggedIn =
         await widget.db.login(email, password, pushLocalNotes: pushLocalNotes);
     if (isLoggedIn) {
@@ -37,12 +41,18 @@ class _AuthState extends State<Auth> {
         duration: Duration(seconds: 2),
       ));
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<void> _register(BuildContext context) async {
     if (!validPassword() || !validEmail()) {
       return;
     }
+    setState(() {
+      isLoading = true;
+    });
     bool isRegistered = await widget.db.registerUser(email, password);
     if (isRegistered) {
       _login(context, pushLocalNotes: true);
@@ -52,6 +62,9 @@ class _AuthState extends State<Auth> {
         duration: Duration(seconds: 2),
       ));
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -93,10 +106,10 @@ class _AuthState extends State<Auth> {
               children: [
                 ElevatedButton(
                     child: const Text('Login'),
-                    onPressed: () => _login(context)),
+                    onPressed: (isLoading) ? null : () => _login(context)),
                 ElevatedButton(
                   child: const Text('Register'),
-                  onPressed: () => _register(context),
+                  onPressed: (isLoading) ? null : () => _register(context),
                 ),
               ],
             ),
