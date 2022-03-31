@@ -20,13 +20,11 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String exportOption = 'Markdown';
-  late bool isLoggedIn;
   String email = '';
 
   @override
   void initState() {
     super.initState();
-    isLoggedIn = widget.db.isLoggedIn();
     widget.db.getEmail().then((e) {
       setState(() {
         email = e.toString();
@@ -160,9 +158,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         onPressed: () {
                                           widget.db.logout();
                                           widget.onAuthChange();
-                                          setState(() {
-                                            isLoggedIn = false;
-                                          });
+                                          setState(() {});
                                         },
                                         child: const Text('Logout'))
                                   ]),
@@ -182,7 +178,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               onLogin: (e) {
                                 widget.onAuthChange();
                                 setState(() {
-                                  isLoggedIn = true;
                                   email = e;
                                 });
                               }),
