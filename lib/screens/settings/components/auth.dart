@@ -53,7 +53,7 @@ class _AuthState extends State<Auth> {
     setState(() {
       isLoading = true;
     });
-    bool isRegistered = await widget.db.registerUserRealm(email, password);
+    bool isRegistered = await widget.db.register(email, password);
     if (isRegistered) {
       _login(context, pushLocalNotes: true);
     } else {
