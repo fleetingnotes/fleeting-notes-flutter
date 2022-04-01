@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/side_menu.dart';
@@ -9,7 +9,7 @@ import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key, required this.db}) : super(key: key);
 
-  final RealmDB db;
+  final Database db;
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
@@ -27,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
         child: const Icon(Icons.add),
         tooltip: 'Add note',
         onPressed: () {
-          // This is bugged because floating action button isn't part of 
+          // This is bugged because floating action button isn't part of
           // any route...
           // Provider.of<NoteStackModel>(context, listen: false)
           //     .pushNote(Note.empty());

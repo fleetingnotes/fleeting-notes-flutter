@@ -1,12 +1,12 @@
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 import 'dart:async';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
-class MockRealmDB extends Mock implements RealmDB {
+class MockRealmDB extends Mock implements Database {
   @override
   final GlobalKey searchKey = GlobalKey();
   @override

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../realm_db.dart';
+import '../../../database.dart';
 
 class Auth extends StatefulWidget {
   const Auth({Key? key, required this.db, this.onLogin}) : super(key: key);
 
-  final RealmDB db;
+  final Database db;
   final Function? onLogin;
   @override
   _AuthState createState() => _AuthState();

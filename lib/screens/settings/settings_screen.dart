@@ -2,7 +2,7 @@ import 'package:fleeting_notes_flutter/constants.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 import 'package:file_saver/file_saver.dart';
 import 'dart:typed_data';
 import 'dart:convert';
@@ -12,7 +12,7 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key, required this.db, required this.onAuthChange})
       : super(key: key);
 
-  final RealmDB db;
+  final Database db;
   final VoidCallback onAuthChange;
   @override
   _SettingsScreenState createState() => _SettingsScreenState();

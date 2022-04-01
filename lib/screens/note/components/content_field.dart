@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 
 class ContentField extends StatefulWidget {
   const ContentField({
@@ -14,7 +14,7 @@ class ContentField extends StatefulWidget {
   }) : super(key: key);
 
   final TextEditingController controller;
-  final RealmDB db;
+  final Database db;
   final VoidCallback? onChanged;
   final bool autofocus;
 

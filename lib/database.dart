@@ -14,7 +14,7 @@ import 'package:collection/collection.dart';
 // ignore: library_prefixes
 import 'package:path/path.dart' as Path;
 
-class RealmDB {
+class Database {
   GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fleeting_notes_flutter/constants.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
 
 class SideMenu extends StatelessWidget {
@@ -10,7 +10,7 @@ class SideMenu extends StatelessWidget {
     required this.db,
   }) : super(key: key);
 
-  final RealmDB db;
+  final Database db;
 
   @override
   Widget build(BuildContext context) {

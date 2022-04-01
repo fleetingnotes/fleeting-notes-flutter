@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -12,7 +12,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final RealmDB db = RealmDB();
+  final Database db = Database();
 
   Future<String> _navigateScreen() async {
     await db.loginWithStorage();

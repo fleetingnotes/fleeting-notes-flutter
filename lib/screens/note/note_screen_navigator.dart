@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 
@@ -9,7 +9,7 @@ class NoteScreenNavigator extends StatelessWidget {
     required this.db,
   }) : super(key: key);
 
-  final RealmDB db;
+  final Database db;
 
   final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
