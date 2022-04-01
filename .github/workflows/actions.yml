@@ -1,8 +1,6 @@
 name: Fleeting Notes Actions
 on:
   # Triggers workflow on PR but only for main branch
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
   
