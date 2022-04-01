@@ -75,21 +75,29 @@ class RealmDB {
   }
 
   Future<List<Note>> getAllNotes({forceSync = false}) async {
-    var query =
-        'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
     try {
       var box = await Hive.openBox(_userId);
       if ((box.isEmpty || forceSync) && isLoggedIn()) {
-        var res = await graphQLRequest(query);
-        var noteMapList = res['data']['notes'];
-        Map<String, Note> noteIdMap = {
-          for (var note in noteMapList) note['_id']: Note.fromMap(note)
-        };
+        List<Note> notes = await getAllNotesRealm();
+        Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         // box.clear(); // TODO: investigate why this causes bugs
         await box.putAll(noteIdMap);
       }
       List<Note> notes = getAllNotesLocal(box);
       notes.sort((n1, n2) => n2.timestamp.compareTo(n1.timestamp));
+      return notes;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Note>> getAllNotesRealm() async {
+    var query =
+        'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
+    try {
+      var res = await graphQLRequest(query);
+      var noteMapList = res['data']['notes'];
+      List<Note> notes = [for (var note in noteMapList) Note.fromMap(note)];
       return notes;
     } catch (e) {
       return [];
@@ -160,16 +168,27 @@ class RealmDB {
 
   Future<bool> insertNote(Note note) async {
     try {
-      Note encodedNote = Note.encodeNote(note);
       if (isLoggedIn()) {
-        var query =
-            'mutation { insertOneNote(data: {_id: ${encodedNote.id}, _partition: ${jsonEncode(_userId)},title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}, timestamp: ${encodedNote.timestamp}, _isDeleted: ${encodedNote.isDeleted}}) {_id  title  content  source  timestamp}}';
-        var res = await graphQLRequest(query);
-        if (res['data'] == null) return false;
-        note = Note.fromMap(res["data"]["insertOneNote"]);
+        bool isSuccess = await insertNoteRealm(note);
+        if (!isSuccess) return false;
       }
+      await insertNoteRealm(note);
       var box = await Hive.openBox(_userId);
       box.put(note.id, note);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> insertNoteRealm(Note note) async {
+    try {
+      Note encodedNote = Note.encodeNote(note);
+      var query =
+          'mutation { insertOneNote(data: {_id: ${encodedNote.id}, _partition: ${jsonEncode(_userId)},title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}, timestamp: ${encodedNote.timestamp}, _isDeleted: ${encodedNote.isDeleted}}) {_id  title  content  source  timestamp}}';
+      var res = await graphQLRequest(query);
+      if (res['data'] == null) return false;
+      note = Note.fromMap(res["data"]["insertOneNote"]);
       return true;
     } catch (e) {
       return false;
@@ -178,13 +197,9 @@ class RealmDB {
 
   Future<bool> updateNote(Note note) async {
     try {
-      Note encodedNote = Note.encodeNote(note);
       if (isLoggedIn()) {
-        var query =
-            'mutation { updateOneNote(query: {_id: ${encodedNote.id}}, set: {title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}}) {_id  title  content  source  timestamp}}';
-        var res = await graphQLRequest(query);
-        if (res['data'] == null) return false;
-        note = Note.fromMap(res["data"]["updateOneNote"]);
+        bool isSuccess = await updateNoteRealm(note);
+        if (!isSuccess) return false;
       }
       var box = await Hive.openBox(_userId);
       box.put(note.id, note);
@@ -194,8 +209,21 @@ class RealmDB {
     }
   }
 
-  Future<bool> updateNotes(List<Note> notes) async {
-    if (!isLoggedIn()) return false;
+  Future<bool> updateNoteRealm(Note note) async {
+    try {
+      Note encodedNote = Note.encodeNote(note);
+      var query =
+          'mutation { updateOneNote(query: {_id: ${encodedNote.id}}, set: {title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}}) {_id  title  content  source  timestamp}}';
+      var res = await graphQLRequest(query);
+      if (res['data'] == null) return false;
+      note = Note.fromMap(res["data"]["updateOneNote"]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> updateNotesRealm(List<Note> notes) async {
     try {
       List queryList = notes.map((note) {
         Note encodedNote = Note.encodeNote(note);
@@ -215,13 +243,9 @@ class RealmDB {
 
   Future<bool> deleteNote(Note note) async {
     try {
-      Note encodedNote = Note.encodeNote(note);
       if (isLoggedIn()) {
-        var query =
-            'mutation { updateOneNote(query: {_id: ${encodedNote.id}}, set: {_isDeleted: true}) {_id  title  content  source  timestamp}}';
-        var res = await graphQLRequest(query);
-        if (res['data'] == null) return false;
-        note = Note.fromMap(res["data"]["updateOneNote"]);
+        bool isSuccess = await deleteNoteRealm(note);
+        if (!isSuccess) return false;
       }
       var box = await Hive.openBox(_userId);
       box.delete(note.id);
@@ -231,7 +255,21 @@ class RealmDB {
     }
   }
 
-  Future<bool> registerUser(String email, String password) async {
+  Future<bool> deleteNoteRealm(Note note) async {
+    try {
+      Note encodedNote = Note.encodeNote(note);
+      var query =
+          'mutation { updateOneNote(query: {_id: ${encodedNote.id}}, set: {_isDeleted: true}) {_id  title  content  source  timestamp}}';
+      var res = await graphQLRequest(query);
+      if (res['data'] == null) return false;
+      note = Note.fromMap(res["data"]["updateOneNote"]);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> registerUserRealm(String email, String password) async {
     var url = Path.join(apiUrl, 'auth/providers/local-userpass/register');
     try {
       await Dio().post(
@@ -251,10 +289,14 @@ class RealmDB {
   }
 
   void logout() async {
-    _userId = 'local';
-    _token = null;
+    logoutRealm();
     await storage.delete(key: 'email');
     await storage.delete(key: 'password');
+  }
+
+  void logoutRealm() {
+    _userId = 'local';
+    _token = null;
   }
 
   Future<bool> loginWithStorage() async {
@@ -270,7 +312,7 @@ class RealmDB {
     if (email == null || password == null) {
       return false;
     }
-    bool validCredentials = await checkAndSetCredentials(email, password);
+    bool validCredentials = await loginRealm(email, password);
     return validCredentials;
   }
 
@@ -282,18 +324,18 @@ class RealmDB {
       {bool pushLocalNotes = false}) async {
     await storage.write(key: 'email', value: email);
     await storage.write(key: 'password', value: password);
-    bool validCredentials = await checkAndSetCredentials(email, password);
+    bool validCredentials = await loginRealm(email, password);
     if (validCredentials && pushLocalNotes) {
       var box = await Hive.openBox('local');
       List<Note> notes = getAllNotesLocal(box);
       if (notes.isNotEmpty) {
-        await updateNotes(notes);
+        await updateNotesRealm(notes);
       }
     }
     return validCredentials;
   }
 
-  Future<bool> checkAndSetCredentials(String email, String password) async {
+  Future<bool> loginRealm(String email, String password) async {
     try {
       var authUrl = Path.join(apiUrl, 'auth/providers/local-userpass/login');
       var res = await Dio().post(
