@@ -1,6 +1,6 @@
 {
     "name": "Fleeting Notes",
-    "description": "A place to manage and discover your ideas",
+    "description": "Notes that extend your brain",
     "version": "0.0.4",
     "browser_action": {
       "default_popup": "popup.html",
