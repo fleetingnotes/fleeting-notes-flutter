@@ -1,4 +1,4 @@
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/note_card.dart';
@@ -14,7 +14,7 @@ class SearchScreen extends StatefulWidget {
     required this.db,
   }) : super(key: key);
 
-  final RealmDB db;
+  final Database db;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -27,6 +27,7 @@ class _SearchScreenState extends State<SearchScreen> {
   String activeNoteId = '';
 
   Future<void> loadNotes(queryRegex, {forceSync = false}) async {
+    if (!mounted) return;
     var tempNotes =
         await widget.db.getSearchNotes(queryRegex, forceSync: forceSync);
     setState(() {
@@ -147,7 +148,7 @@ class SearchScreenNavigator extends StatelessWidget {
     required this.db,
   }) : super(key: key);
 
-  final RealmDB db;
+  final Database db;
 
   @override
   Widget build(BuildContext context) {

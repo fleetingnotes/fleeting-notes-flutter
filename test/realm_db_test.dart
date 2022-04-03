@@ -1,8 +1,8 @@
 import 'package:test/test.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
-class MockRealmDB extends RealmDB {
+class MockRealmDB extends Database {
   Note newNote(id, title, content, source) {
     String t = DateTime.now().toIso8601String();
     var note = Note(

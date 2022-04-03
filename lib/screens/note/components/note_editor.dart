@@ -6,7 +6,7 @@ import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
@@ -22,7 +22,7 @@ class NoteEditor extends StatefulWidget {
   }) : super(key: key);
 
   final Note note;
-  final RealmDB db;
+  final Database db;
   @override
   _NoteEditorState createState() => _NoteEditorState();
 }

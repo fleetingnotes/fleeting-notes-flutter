@@ -1,22 +1,36 @@
 import 'package:fleeting_notes_flutter/constants.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/database.dart';
 import 'package:file_saver/file_saver.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key, required this.db}) : super(key: key);
+  const SettingsScreen({Key? key, required this.db, required this.onAuthChange})
+      : super(key: key);
 
-  final RealmDB db;
+  final Database db;
+  final VoidCallback onAuthChange;
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String exportOption = 'Markdown';
+  String email = '';
+
+  @override
+  void initState() {
+    super.initState();
+    widget.db.getEmail().then((e) {
+      setState(() {
+        email = e.toString();
+      });
+    });
+  }
 
   _downloadNotesAsMarkdownZIP(List<Note> notes) {
     var encoder = ZipEncoder();
@@ -130,13 +144,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: kDefaultPadding / 2),
                       const Text("Sync", style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
-                      Padding(
-                        padding: const EdgeInsets.all(kDefaultPadding / 2),
-                        child: ElevatedButton(
-                            onPressed: () =>
-                                widget.db.getAllNotes(forceSync: true),
-                            child: const Text('Force Sync')),
-                      ),
+                      (widget.db.isLoggedIn())
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.all(kDefaultPadding / 2),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(children: [
+                                    Text(email),
+                                    const Spacer(),
+                                    ElevatedButton(
+                                        onPressed: () {
+                                          widget.db.logout();
+                                          widget.onAuthChange();
+                                          setState(() {});
+                                        },
+                                        child: const Text('Logout'))
+                                  ]),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: kDefaultPadding),
+                                    child: ElevatedButton(
+                                        onPressed: () => widget.db
+                                            .getAllNotes(forceSync: true),
+                                        child: const Text('Force Sync')),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Auth(
+                              db: widget.db,
+                              onLogin: (e) {
+                                widget.onAuthChange();
+                                setState(() {
+                                  email = e;
+                                });
+                              }),
                     ],
                   ))
             ],

@@ -50,7 +50,9 @@ class _SourceContainerState extends State<SourceContainer> {
       autofocus: widget.autofocus,
       style: Theme.of(context).textTheme.bodyText2,
       controller: widget.controller,
-      onChanged: (text) => widget.onChanged,
+      onChanged: (text) {
+        if (widget.onChanged != null) widget.onChanged!();
+      },
       decoration: InputDecoration(
         hintText: "Source",
         border: InputBorder.none,
