@@ -90,7 +90,8 @@ void main() {
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
-    await tester.enterText(find.bySemanticsLabel('Title'), 'Test save note!');
+    await tester.enterText(
+        find.bySemanticsLabel('Title of the idea'), 'Test save note!');
     await tester.pump();
     await tester.tap(find.text('Save'));
     await tester.pump();

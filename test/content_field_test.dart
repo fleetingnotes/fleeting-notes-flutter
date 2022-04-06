@@ -30,10 +30,12 @@ void main() {
         onChanged: () {},
       ),
     )));
-    await tester.enterText(find.bySemanticsLabel('Note'), '[[test]]');
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), '[[test]]');
     await tester.pump();
-    await tester.tapAt(
-        tester.getTopLeft(find.bySemanticsLabel('Note')).translate(20, 10));
+    await tester.tapAt(tester
+        .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
+        .translate(20, 10));
     await tester.pump();
 
     expect(find.text('Follow Link'), findsOneWidget);
@@ -53,7 +55,8 @@ void main() {
         onChanged: () {},
       ),
     )));
-    await tester.enterText(find.bySemanticsLabel('Note'), '[[');
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), '[[');
     await tester.pump();
 
     expect(find.byType(TitleLinks), findsOneWidget);

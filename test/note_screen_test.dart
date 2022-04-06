@@ -23,8 +23,9 @@ void main() {
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
-    expect(find.bySemanticsLabel('Title'), findsOneWidget);
-    expect(find.bySemanticsLabel('Note'), findsOneWidget);
+    expect(find.bySemanticsLabel('Title of the idea'), findsOneWidget);
+    expect(
+        find.bySemanticsLabel('Note and links to other ideas'), findsOneWidget);
   });
 
   testWidgets('Backlinks are populated', (WidgetTester tester) async {
@@ -47,7 +48,8 @@ void main() {
     when(() => mockDb.upsertNote(any()))
         .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
-    await tester.enterText(find.bySemanticsLabel('Note'), 'new note');
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), 'new note');
     await tester.pump();
 
     expect(
@@ -71,7 +73,8 @@ void main() {
     when(() => mockDb.upsertNote(any()))
         .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
-    await tester.enterText(find.bySemanticsLabel('Note'), 'new note');
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), 'new note');
     await tester.pump();
     await tester.tap(find.text('Save'));
     await tester.pump();
@@ -97,7 +100,8 @@ void main() {
     when(() => mockDb.upsertNote(any()))
         .thenAnswer((_) async => Future.value(false));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
-    await tester.enterText(find.bySemanticsLabel('Note'), 'new note');
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), 'new note');
     await tester.pump();
     expect(find.byType(SnackBar), findsNothing);
     await tester.tap(find.text('Save'));
