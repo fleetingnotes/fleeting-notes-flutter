@@ -10,8 +10,9 @@ else
   # Argument supplied, so bump to version specified
   perl -i -pe 's/^(version:\s+\d+\.\d+\.\d+\+)(\d+)$/$1.($2+1)/e' pubspec.yaml
   sed -i '' "s/^version.*+/version: $1+/g" pubspec.yaml
-  sed -i '' 's|\(.*"version"\): "\(.*\)",.*|\1: '"\"$1\",|" web/manifest.json
+  sed -i '' 's|\(.*"version"\): "\(.*\)",.*|\1: '"\"$1\",|" web/manifest2.json
+  sed -i '' 's|\(.*"version"\): "\(.*\)",.*|\1: '"\"$1\",|" web/manifest3.json
   version=$1
-  git commit -m "Bump version to $version" pubspec.yaml web/manifest.json
+  git commit -m "Bump version to $version" pubspec.yaml web/manifest2.json web/manifest3.json
   git tag v$version
 fi
