@@ -26,7 +26,11 @@ class Database {
     return realm.isLoggedIn();
   }
 
-  Future<List<Note>> getSearchNotes(queryRegex, {forceSync = false}) async {
+  Future<List<Note>> getSearchNotes(queryRegex,
+      {searchByTitle = true,
+      searchByContent = true,
+      searchBySource = true,
+      forceSync = false}) async {
     String escapedQuery =
         queryRegex.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
       return '\\${match.group(0)}';
@@ -34,9 +38,9 @@ class Database {
     RegExp r = RegExp(escapedQuery, multiLine: true);
     var allNotes = await getAllNotes(forceSync: forceSync);
     var notes = allNotes.where((note) {
-      return r.hasMatch(note.title) ||
-          r.hasMatch(note.content) ||
-          r.hasMatch(note.source);
+      return (searchByTitle && r.hasMatch(note.title)) ||
+          (searchByContent && r.hasMatch(note.content)) ||
+          (searchBySource && r.hasMatch(note.source));
     }).toList();
 
     return notes.sublist(0, min(notes.length, 50));
