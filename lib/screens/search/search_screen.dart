@@ -25,8 +25,8 @@ class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
   late List<Note> notes = [];
-  String initialSortVal = 'Sort by date (new to old)';
-  Map<String, SortOptions> sortOptions = {
+  String sortBy = 'Sort by date (new to old)';
+  Map<String, SortOptions> sortOptionMap = {
     'Sort by date (new to old)': SortOptions.dateASC,
     'Sort by date (old to new)': SortOptions.dateDESC,
     'Sort by title (A to Z)': SortOptions.titleASC,
@@ -46,6 +46,7 @@ class _SearchScreenState extends State<SearchScreen> {
       searchByTitle: searchFilter['title'],
       searchByContent: searchFilter['content'],
       searchBySource: searchFilter['source'],
+      sortBy: sortOptionMap[sortBy],
       forceSync: forceSync,
     );
     setState(() {
@@ -122,16 +123,17 @@ class _SearchScreenState extends State<SearchScreen> {
                   children: [
                     DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
-                        value: initialSortVal,
+                        value: sortBy,
                         icon: const Icon(Icons.arrow_drop_down, size: 16),
                         // elevation: 16,
                         style: const TextStyle(fontWeight: FontWeight.w500),
                         onChanged: (String? newValue) {
                           setState(() {
-                            initialSortVal = newValue!;
+                            sortBy = newValue!;
                           });
+                          loadNotes(queryController.text);
                         },
-                        items: sortOptions.keys
+                        items: sortOptionMap.keys
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,

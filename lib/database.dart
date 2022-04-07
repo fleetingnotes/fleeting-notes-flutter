@@ -22,7 +22,22 @@ enum SortOptions {
 }
 
 final Map sortMap = {
-  SortOptions.dateASC: '',
+  SortOptions.dateASC: (Note n1, Note n2) =>
+      n2.timestamp.compareTo(n1.timestamp),
+  SortOptions.dateDESC: (Note n1, Note n2) =>
+      n1.timestamp.compareTo(n2.timestamp),
+  SortOptions.titleASC: (Note n1, Note n2) =>
+      n1.title.toLowerCase().compareTo(n2.title.toLowerCase()),
+  SortOptions.titleDSC: (Note n1, Note n2) =>
+      n2.title.toLowerCase().compareTo(n1.title.toLowerCase()),
+  SortOptions.contentASC: (Note n1, Note n2) =>
+      n1.content.toLowerCase().compareTo(n2.content.toLowerCase()),
+  SortOptions.contentDESC: (Note n1, Note n2) =>
+      n2.content.toLowerCase().compareTo(n1.content.toLowerCase()),
+  SortOptions.sourceASC: (Note n1, Note n2) =>
+      n1.source.toLowerCase().compareTo(n2.source.toLowerCase()),
+  SortOptions.sourceDESC: (Note n1, Note n2) =>
+      n2.source.toLowerCase().compareTo(n1.source.toLowerCase()),
 };
 
 class Database {
@@ -45,6 +60,7 @@ class Database {
       {searchByTitle = true,
       searchByContent = true,
       searchBySource = true,
+      sortBy = SortOptions.dateASC,
       forceSync = false}) async {
     String escapedQuery =
         queryRegex.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
@@ -57,6 +73,7 @@ class Database {
           (searchByContent && r.hasMatch(note.content)) ||
           (searchBySource && r.hasMatch(note.source));
     }).toList();
+    notes.sort(sortMap[sortBy]);
 
     return notes.sublist(0, min(notes.length, 50));
   }
@@ -71,7 +88,6 @@ class Database {
         await box.putAll(noteIdMap);
       }
       List<Note> notes = getAllNotesLocal(box);
-      notes.sort((Note n1, Note n2) => n2.timestamp.compareTo(n1.timestamp));
       return notes;
     } catch (e) {
       return [];
