@@ -65,4 +65,8 @@ void main() {
   testWidgets('When search by dialog has all unchecked boxes, then no notes',
       (WidgetTester tester) async {},
       skip: true);
+
+  testWidgets('When we sort by anything, then notes are sorted',
+      (WidgetTester tester) async {},
+      skip: true);
 }
