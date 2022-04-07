@@ -29,7 +29,8 @@ class TitleLinks extends StatelessWidget {
     double width = 300;
     Offset newCaretOffset = caretOffset;
     if (width + caretOffset.dx > layerLink.leaderSize!.width) {
-      newCaretOffset += Offset(-width, 0);
+      newCaretOffset =
+          Offset(layerLink.leaderSize!.width - width, caretOffset.dy);
     }
     List filteredTitles = filterTitles(query);
     double tileHeight = 50;

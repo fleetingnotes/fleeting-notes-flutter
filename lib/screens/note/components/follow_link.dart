@@ -17,7 +17,8 @@ class FollowLink extends StatelessWidget {
     double width = 125;
     Offset newCaretOffset = caretOffset;
     if (width + caretOffset.dx > layerLink.leaderSize!.width) {
-      newCaretOffset += Offset(-width, 0);
+      newCaretOffset =
+          Offset(layerLink.leaderSize!.width - width, caretOffset.dy);
     }
     return Positioned(
       width: width,
