@@ -59,7 +59,9 @@ class _SourceContainerState extends State<SourceContainer> {
         suffixIcon: IconButton(
           tooltip: 'Open URL',
           icon: const Icon(Icons.open_in_new),
-          onPressed: () => launchURLBrowser(widget.controller.text, context),
+          onPressed: (widget.controller.text == '')
+              ? null
+              : () => launchURLBrowser(widget.controller.text, context),
         ),
       ),
     );
