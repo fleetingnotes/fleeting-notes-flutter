@@ -25,6 +25,17 @@ class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
   late List<Note> notes = [];
+  String initialSortVal = 'Sort by date (new to old)';
+  Map<String, SortOptions> sortOptions = {
+    'Sort by date (new to old)': SortOptions.dateASC,
+    'Sort by date (old to new)': SortOptions.dateDESC,
+    'Sort by title (A to Z)': SortOptions.titleASC,
+    'Sort by title (Z to A)': SortOptions.titleDSC,
+    'Sort by content (A to Z)': SortOptions.contentASC,
+    'Sort by content (Z to A)': SortOptions.contentDESC,
+    'Sort by source (A to Z)': SortOptions.sourceASC,
+    'Sort by source (Z to A)': SortOptions.sourceDESC,
+  };
   String activeNoteId = '';
   Map searchFilter = {'title': true, 'content': true, 'source': true};
 
@@ -109,32 +120,49 @@ class _SearchScreenState extends State<SearchScreen> {
                     const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Row(
                   children: [
-                    const Icon(Icons.arrow_drop_down, size: 16),
-                    const SizedBox(width: 5),
-                    const Text(
-                      "Sort by date",
-                      style: TextStyle(fontWeight: FontWeight.w500),
+                    DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: initialSortVal,
+                        icon: const Icon(Icons.arrow_drop_down, size: 16),
+                        // elevation: 16,
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            initialSortVal = newValue!;
+                          });
+                        },
+                        items: sortOptions.keys
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
                     ),
                     const Spacer(),
-                    MaterialButton(
-                      minWidth: 20,
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) {
-                            return SearchDialog(
-                              searchFilter: searchFilter,
-                              onFilterChange: (type, val) {
-                                setState(() {
-                                  searchFilter[type] = val;
-                                });
-                                loadNotes(queryController.text);
-                              },
-                            );
-                          },
-                        );
-                      },
-                      child: const Icon(Icons.filter_list, size: 16),
+                    Tooltip(
+                      message: 'Search by',
+                      child: MaterialButton(
+                        minWidth: 20,
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) {
+                              return SearchDialog(
+                                searchFilter: searchFilter,
+                                onFilterChange: (type, val) {
+                                  setState(() {
+                                    searchFilter[type] = val;
+                                  });
+                                  loadNotes(queryController.text);
+                                },
+                              );
+                            },
+                          );
+                        },
+                        child: const Icon(Icons.filter_list, size: 16),
+                      ),
                     ),
                   ],
                 ),

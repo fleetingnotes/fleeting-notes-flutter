@@ -10,6 +10,21 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:fleeting_notes_flutter/realm_db.dart';
 
+enum SortOptions {
+  dateASC,
+  dateDESC,
+  titleASC,
+  titleDSC,
+  contentASC,
+  contentDESC,
+  sourceASC,
+  sourceDESC,
+}
+
+final Map sortMap = {
+  SortOptions.dateASC: '',
+};
+
 class Database {
   GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
@@ -56,7 +71,7 @@ class Database {
         await box.putAll(noteIdMap);
       }
       List<Note> notes = getAllNotesLocal(box);
-      notes.sort((n1, n2) => n2.timestamp.compareTo(n1.timestamp));
+      notes.sort((Note n1, Note n2) => n2.timestamp.compareTo(n1.timestamp));
       return notes;
     } catch (e) {
       return [];
