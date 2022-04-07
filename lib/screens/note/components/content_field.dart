@@ -209,7 +209,7 @@ class _ContentFieldState extends State<ContentField> {
           maxLines: 10,
           style: Theme.of(context).textTheme.bodyText2,
           decoration: const InputDecoration(
-            hintText: "Note",
+            hintText: "Note and links to other ideas",
             border: InputBorder.none,
           ),
           onChanged: (text) => _onContentChanged(context, text, size),

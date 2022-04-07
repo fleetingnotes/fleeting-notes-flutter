@@ -21,7 +21,7 @@ class TitleField extends StatelessWidget {
       ),
       controller: controller,
       decoration: const InputDecoration(
-        hintText: "Title",
+        hintText: "Title of the idea",
         border: InputBorder.none,
       ),
       onChanged: (text) {
