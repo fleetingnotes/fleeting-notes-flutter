@@ -120,29 +120,34 @@ class _SearchScreenState extends State<SearchScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: sortBy,
-                        icon: const Icon(Icons.arrow_drop_down, size: 16),
-                        // elevation: 16,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            sortBy = newValue!;
-                          });
-                          loadNotes(queryController.text);
-                        },
-                        items: sortOptionMap.keys
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
+                    Flexible(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 170),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: sortBy,
+                            iconSize: 16,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                sortBy = newValue!;
+                              });
+                              loadNotes(queryController.text);
+                            },
+                            items: sortOptionMap.keys
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       ),
                     ),
-                    const Spacer(),
                     Tooltip(
                       message: 'Search by',
                       child: MaterialButton(

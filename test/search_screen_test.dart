@@ -62,7 +62,7 @@ void main() {
     expect(find.byType(SearchDialog), findsOneWidget);
   });
 
-  testWidgets('When search dialog has all unchecked boxes, then no notes',
+  testWidgets('When search by dialog has all unchecked boxes, then no notes',
       (WidgetTester tester) async {},
       skip: true);
 }
