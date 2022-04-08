@@ -173,8 +173,8 @@ class Database {
     return firebase.currUser?.email;
   }
 
-  Future<bool> register(String email, String password) {
-    return firebase.register(email, password);
+  Future<bool> register(String email, String password) async {
+    return await firebase.register(email, password);
   }
 
   Future<bool> login(String email, String password,
@@ -188,6 +188,21 @@ class Database {
           await firebase.updateNotes(notes);
         }
       }
+    } else {
+      // REALMDB MIGRATION LOGIC HERE
+      bool callSuccess = false;
+      callSuccess = await realm.login(email, password);
+      if (!callSuccess) return false;
+      callSuccess = await firebase.register(email, password);
+      if (!callSuccess) return false;
+      callSuccess = await firebase.login(email, password);
+      if (!callSuccess) return false;
+      List<Note> notes = await realm.getAllNotes();
+      await firebase.updateNotes(notes);
+      var box = await Hive.openBox(firebase.userId);
+      Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
+      await box.putAll(noteIdMap);
+      return true;
     }
     return validCredentials;
   }

@@ -9,11 +9,7 @@ class FirebaseDB {
   FirebaseDB() {
     FirebaseAuth.instance.userChanges().listen((User? user) {
       currUser = user;
-      if (user != null) {
-        userId = user.uid;
-      } else {
-        userId = 'local';
-      }
+      userId = (user == null) ? 'local' : user.uid;
     });
     notesCollection = FirebaseFirestore.instance.collection('notes');
   }
@@ -26,6 +22,7 @@ class FirebaseDB {
       UserCredential credentials = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       currUser = credentials.user;
+      userId = (credentials.user == null) ? 'local' : credentials.user!.uid;
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
