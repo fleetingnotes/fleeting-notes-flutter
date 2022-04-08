@@ -1,6 +1,4 @@
 // ignore_for_file: file_names
-import 'dart:convert';
-
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -57,29 +55,6 @@ class Note {
       'source': source,
       'timestamp': timestamp,
     };
-  }
-
-  static Note fromMap(dynamic note) {
-    Map noteMap = Map.from(note);
-    return Note(
-      id: noteMap["_id"].toString(),
-      title: noteMap["title"].toString(),
-      content: noteMap["content"].toString(),
-      source: noteMap["source"].toString(),
-      timestamp: noteMap["timestamp"].toString(),
-    );
-  }
-
-  static Note encodeNote(Note note) {
-    return Note(
-      id: jsonEncode(note.id),
-      title: jsonEncode(note.title),
-      content: jsonEncode(note.content),
-      source: jsonEncode(note.source),
-      timestamp: jsonEncode(note.timestamp),
-      isDeleted: note.isDeleted,
-      hasAttachment: note.hasAttachment,
-    );
   }
 
   bool isEmpty() {

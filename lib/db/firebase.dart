@@ -4,12 +4,12 @@ import '../models/Note.dart';
 
 class FirebaseDB {
   User? user;
-  late CollectionReference notesCollection;
+  late CollectionReference noteQuery;
   FirebaseDB() {
     FirebaseAuth.instance.userChanges().listen((User? user) {
       user = user;
     });
-    notesCollection = FirebaseFirestore.instance.collection('notes');
+    noteQuery = FirebaseFirestore.instance.collection('notes');
   }
   bool isLoggedIn() => user != null;
 
@@ -59,5 +59,28 @@ class FirebaseDB {
     } catch (e) {
       return false;
     }
+  }
+
+  Future<List<Note>> getAllNotes() async {
+    if (user == null) return [];
+    try {
+      QuerySnapshot query =
+          await noteQuery.where('_partition', isEqualTo: user!.uid).get();
+      List<Note> notes = [for (var note in query.docs) fromQueryDoc(note)];
+      return notes;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Note fromQueryDoc(QueryDocumentSnapshot note) {
+    DateTime dt = (note['created_timestamp'] as Timestamp).toDate();
+    return Note(
+      id: note.id,
+      title: note["title"].toString(),
+      content: note["content"].toString(),
+      source: note["source"].toString(),
+      timestamp: dt.toIso8601String(),
+    );
   }
 }

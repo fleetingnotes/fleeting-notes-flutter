@@ -46,7 +46,7 @@ class RealmDB {
     try {
       var res = await graphQLRequest(query);
       var noteMapList = res['data']['notes'];
-      List<Note> notes = [for (var note in noteMapList) Note.fromMap(note)];
+      List<Note> notes = [for (var note in noteMapList) fromMap(note)];
       return notes;
     } catch (e) {
       return [];
@@ -55,12 +55,12 @@ class RealmDB {
 
   Future<bool> insertNote(Note note) async {
     try {
-      Note encodedNote = Note.encodeNote(note);
+      Note encodedNote = encodeNote(note);
       var query =
           'mutation { insertOneNote(data: {_id: ${encodedNote.id}, _partition: ${jsonEncode(userId)},title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}, timestamp: ${encodedNote.timestamp}, _isDeleted: ${encodedNote.isDeleted}}) {_id  title  content  source  timestamp}}';
       var res = await graphQLRequest(query);
       if (res['data'] == null) return false;
-      note = Note.fromMap(res["data"]["insertOneNote"]);
+      note = fromMap(res["data"]["insertOneNote"]);
       return true;
     } catch (e) {
       return false;
@@ -69,12 +69,12 @@ class RealmDB {
 
   Future<bool> updateNote(Note note) async {
     try {
-      Note encodedNote = Note.encodeNote(note);
+      Note encodedNote = encodeNote(note);
       var query =
           'mutation { updateOneNote(query: {_id: ${encodedNote.id}}, set: {title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}}) {_id  title  content  source  timestamp}}';
       var res = await graphQLRequest(query);
       if (res['data'] == null) return false;
-      note = Note.fromMap(res["data"]["updateOneNote"]);
+      note = fromMap(res["data"]["updateOneNote"]);
       return true;
     } catch (e) {
       return false;
@@ -84,7 +84,7 @@ class RealmDB {
   Future<bool> updateNotes(List<Note> notes) async {
     try {
       List queryList = notes.map((note) {
-        Note encodedNote = Note.encodeNote(note);
+        Note encodedNote = encodeNote(note);
         String noteQuery =
             '{_id: ${encodedNote.id}, _partition: ${jsonEncode(userId)},title: ${encodedNote.title}, content: ${encodedNote.content}, source: ${encodedNote.source}, timestamp: ${encodedNote.timestamp}, _isDeleted: ${encodedNote.isDeleted}}';
         return noteQuery;
@@ -101,12 +101,12 @@ class RealmDB {
 
   Future<bool> deleteNote(Note note) async {
     try {
-      Note encodedNote = Note.encodeNote(note);
+      Note encodedNote = encodeNote(note);
       var query =
           'mutation { updateOneNote(query: {_id: ${encodedNote.id}}, set: {_isDeleted: true}) {_id  title  content  source  timestamp}}';
       var res = await graphQLRequest(query);
       if (res['data'] == null) return false;
-      note = Note.fromMap(res["data"]["updateOneNote"]);
+      note = fromMap(res["data"]["updateOneNote"]);
       return true;
     } catch (e) {
       return false;
@@ -177,5 +177,28 @@ class RealmDB {
     } catch (e) {
       return false;
     }
+  }
+
+  Note fromMap(dynamic note) {
+    Map noteMap = Map.from(note);
+    return Note(
+      id: noteMap["_id"].toString(),
+      title: noteMap["title"].toString(),
+      content: noteMap["content"].toString(),
+      source: noteMap["source"].toString(),
+      timestamp: noteMap["timestamp"].toString(),
+    );
+  }
+
+  Note encodeNote(Note note) {
+    return Note(
+      id: jsonEncode(note.id),
+      title: jsonEncode(note.title),
+      content: jsonEncode(note.content),
+      source: jsonEncode(note.source),
+      timestamp: jsonEncode(note.timestamp),
+      isDeleted: note.isDeleted,
+      hasAttachment: note.hasAttachment,
+    );
   }
 }
