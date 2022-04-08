@@ -3,21 +3,29 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/Note.dart';
 
 class FirebaseDB {
-  User? user;
-  late CollectionReference noteQuery;
+  User? currUser;
+  String userId = 'local';
+  late CollectionReference notesCollection;
   FirebaseDB() {
     FirebaseAuth.instance.userChanges().listen((User? user) {
-      user = user;
+      currUser = user;
+      if (user != null) {
+        userId = user.uid;
+      } else {
+        userId = 'local';
+      }
     });
-    noteQuery = FirebaseFirestore.instance.collection('notes');
+    notesCollection = FirebaseFirestore.instance.collection('notes');
   }
-  bool isLoggedIn() => user != null;
+  bool isLoggedIn() {
+    return currUser != null;
+  }
 
   Future<bool> login(String email, String password) async {
     try {
       UserCredential credentials = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      user = credentials.user;
+      currUser = credentials.user;
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -61,16 +69,56 @@ class FirebaseDB {
     }
   }
 
+  Future<bool> insertNote(Note note) => updateNote(note);
+
   Future<List<Note>> getAllNotes() async {
-    if (user == null) return [];
+    if (currUser == null) return [];
     try {
-      QuerySnapshot query =
-          await noteQuery.where('_partition', isEqualTo: user!.uid).get();
+      QuerySnapshot query = await notesCollection
+          .where('_partition', isEqualTo: currUser!.uid)
+          .where('_isDeleted', isNotEqualTo: true)
+          .get();
       List<Note> notes = [for (var note in query.docs) fromQueryDoc(note)];
       return notes;
     } catch (e) {
       return [];
     }
+  }
+
+  Future<bool> updateNotes(List<Note> notes) async {
+    if (currUser == null) return false;
+    try {
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+      for (var note in notes) {
+        updateNote(note, batch: batch);
+      }
+      await batch.commit();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> updateNote(Note note, {WriteBatch? batch}) async {
+    if (currUser == null) return false;
+    try {
+      var json = toFirebaseJson(note);
+      json['last_modified_timestamp'] = Timestamp.now();
+      DocumentReference docRef = notesCollection.doc(note.id);
+      if (batch == null) {
+        await docRef.set(json, SetOptions(merge: true));
+      } else {
+        batch.set(docRef, json, SetOptions(merge: true));
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteNote(Note note) async {
+    note.isDeleted = true;
+    return await updateNote(note);
   }
 
   Note fromQueryDoc(QueryDocumentSnapshot note) {
@@ -82,5 +130,17 @@ class FirebaseDB {
       source: note["source"].toString(),
       timestamp: dt.toIso8601String(),
     );
+  }
+
+  toFirebaseJson(Note note) {
+    Timestamp created = Timestamp.fromDate(note.getDateTime());
+    return {
+      'title': note.title,
+      'content': note.content,
+      'source': note.source,
+      'created_timestamp': created,
+      '_isDeleted': note.isDeleted,
+      '_partition': currUser!.uid,
+    };
   }
 }
