@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'mock_realm_db.dart';
+import 'mock_database.dart';
 
 void main() {
   setUpAll(() {
@@ -20,7 +20,7 @@ void main() {
 
   testWidgets('Follow link button appears on link tap',
       (WidgetTester tester) async {
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     TextEditingController controller = TextEditingController();
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -43,7 +43,7 @@ void main() {
 
   testWidgets('TitleLinks list appears on `[[` type',
       (WidgetTester tester) async {
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     TextEditingController controller = TextEditingController();
     when(() => mockDb.getAllLinks())
         .thenAnswer((_) async => Future.value(['hello']));

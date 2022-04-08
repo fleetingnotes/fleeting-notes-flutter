@@ -11,6 +11,11 @@ import 'package:fleeting_notes_flutter/db/realm.dart';
 import 'package:fleeting_notes_flutter/db/firebase.dart';
 
 class Database {
+  Database({
+    required this.firebase,
+  }) : super();
+
+  final FirebaseDB firebase;
   GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
 
@@ -18,7 +23,6 @@ class Database {
   GlobalKey searchKey = GlobalKey();
   Map<Note, GlobalKey> noteHistory = {Note.empty(): GlobalKey()};
   RealmDB realm = RealmDB();
-  FirebaseDB firebase = FirebaseDB();
 
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 

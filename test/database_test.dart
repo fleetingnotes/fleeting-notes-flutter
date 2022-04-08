@@ -1,8 +1,14 @@
+import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:test/test.dart';
 import 'package:fleeting_notes_flutter/db/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:mocktail/mocktail.dart';
 
-class MockRealmDB extends Database {
+class MockFirebaseDB extends Mock implements FirebaseDB {}
+
+class MockDatabase extends Database {
+  MockDatabase() : super(firebase: MockFirebaseDB());
+
   Note newNote(id, title, content, source) {
     String t = DateTime.now().toIso8601String();
     var note = Note(
@@ -33,7 +39,7 @@ void main() {
     };
     inputsToExpected.forEach((query, noteIds) {
       test('query: $query -> note_ids: $noteIds', () async {
-        final db = MockRealmDB();
+        final db = MockDatabase();
         List searchedNotes = await db.getSearchNotes(query);
         List searchedIds = searchedNotes.map((e) => e.id).toList();
         expect(searchedIds, noteIds);
@@ -48,7 +54,7 @@ void main() {
     };
     inputsToExpected.forEach((query, noteId) {
       test('query: $query -> note_id: $noteId', () async {
-        final db = MockRealmDB();
+        final db = MockDatabase();
         Note? note = await db.getNoteByTitle(query);
         expect(note?.id, noteId);
       });
@@ -62,7 +68,7 @@ void main() {
     };
     inputsToExpected.forEach((params, isExists) {
       test('query: $params -> note_id: $isExists', () async {
-        final db = MockRealmDB();
+        final db = MockDatabase();
         bool? actualIsExists = await db.titleExists(params[0], params[1]);
         expect(actualIsExists, isExists);
       });
@@ -70,13 +76,13 @@ void main() {
   });
 
   test('getAllLinks', () async {
-    final db = MockRealmDB();
+    final db = MockDatabase();
     List allLinks = await db.getAllLinks();
     expect(allLinks, ['title', 'link']);
   });
 
   group("noteExists", () {
-    final db = MockRealmDB();
+    final db = MockDatabase();
     var inputsToExpected = {
       db.newNote('1', 'title', 'content', 'source'): true,
       db.newNote('1', '', '', ''): true,
