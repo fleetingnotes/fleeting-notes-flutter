@@ -63,13 +63,14 @@ class FirebaseDB {
   Future<bool> logout() async {
     try {
       await FirebaseAuth.instance.signOut();
+      currUser = null;
       return true;
     } catch (e) {
       return false;
     }
   }
 
-  Future<bool> insertNote(Note note) => updateNote(note);
+  Future<bool> insertNote(Note note) async => await updateNote(note);
 
   Future<List<Note>> getAllNotes() async {
     if (currUser == null) return [];
