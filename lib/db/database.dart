@@ -165,8 +165,8 @@ class Database {
     }
   }
 
-  void logout() async {
-    firebase.logout();
+  Future logout() async {
+    await firebase.logout();
   }
 
   Future<String?> getEmail() async {
