@@ -1,18 +1,23 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/Note.dart';
 
 class FirebaseDB {
   User? user;
+  late CollectionReference notesCollection;
   FirebaseDB() {
     FirebaseAuth.instance.userChanges().listen((User? user) {
       user = user;
     });
+    notesCollection = FirebaseFirestore.instance.collection('notes');
   }
   bool isLoggedIn() => user != null;
 
   Future<bool> login(String email, String password) async {
     try {
-      await FirebaseAuth.instance
+      UserCredential credentials = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+      user = credentials.user;
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
