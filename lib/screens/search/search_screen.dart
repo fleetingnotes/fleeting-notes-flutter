@@ -1,4 +1,4 @@
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/db/database.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/note_card.dart';

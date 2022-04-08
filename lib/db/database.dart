@@ -3,12 +3,12 @@ import 'dart:math';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
-import 'models/Note.dart';
+import '../models/Note.dart';
 import 'dart:async';
 import 'package:collection/collection.dart';
-import 'package:fleeting_notes_flutter/realm_db.dart';
+import 'package:fleeting_notes_flutter/db/realm.dart';
+import 'package:fleeting_notes_flutter/db/firebase.dart';
 
 class Database {
   GlobalKey<NavigatorState> navigatorKey =
@@ -17,8 +17,8 @@ class Database {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey searchKey = GlobalKey();
   Map<Note, GlobalKey> noteHistory = {Note.empty(): GlobalKey()};
-  static const storage = FlutterSecureStorage();
   RealmDB realm = RealmDB();
+  FirebaseDB firebase = FirebaseDB();
 
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
@@ -46,7 +46,7 @@ class Database {
     try {
       var box = await Hive.openBox(realm.userId);
       if ((box.isEmpty || forceSync) && isLoggedIn()) {
-        List<Note> notes = await realm.getAllNotesRealm();
+        List<Note> notes = await realm.getAllNotes();
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         // box.clear(); // TODO: investigate why this causes bugs
         await box.putAll(noteIdMap);
@@ -124,7 +124,7 @@ class Database {
   Future<bool> insertNote(Note note) async {
     try {
       if (isLoggedIn()) {
-        bool isSuccess = await realm.insertNoteRealm(note);
+        bool isSuccess = await realm.insertNote(note);
         if (!isSuccess) return false;
       }
       var box = await Hive.openBox(realm.userId);
@@ -138,7 +138,7 @@ class Database {
   Future<bool> updateNote(Note note) async {
     try {
       if (isLoggedIn()) {
-        bool isSuccess = await realm.updateNoteRealm(note);
+        bool isSuccess = await realm.updateNote(note);
         if (!isSuccess) return false;
       }
       var box = await Hive.openBox(realm.userId);
@@ -152,7 +152,7 @@ class Database {
   Future<bool> deleteNote(Note note) async {
     try {
       if (isLoggedIn()) {
-        bool isSuccess = await realm.deleteNoteRealm(note);
+        bool isSuccess = await realm.deleteNote(note);
         if (!isSuccess) return false;
       }
       var box = await Hive.openBox(realm.userId);
@@ -164,51 +164,26 @@ class Database {
   }
 
   void logout() async {
-    realm.logoutRealm();
-    await storage.delete(key: 'email');
-    await storage.delete(key: 'password');
-  }
-
-  Future<bool> loginWithStorage() async {
-    String? email;
-    String? password;
-    try {
-      email = await getEmail();
-      password = await getPassword();
-    } catch (e) {
-      return false;
-    }
-
-    if (email == null || password == null) {
-      return false;
-    }
-    bool validCredentials = await realm.loginRealm(email, password);
-    return validCredentials;
+    realm.logout();
   }
 
   Future<String?> getEmail() async {
-    return await storage.read(key: 'email');
-  }
-
-  Future<String?> getPassword() async {
-    return await storage.read(key: 'password');
+    return firebase.user?.email;
   }
 
   Future<bool> register(String email, String password) {
-    return realm.registerUserRealm(email, password);
+    return realm.register(email, password);
   }
 
   Future<bool> login(String email, String password,
       {bool pushLocalNotes = false}) async {
-    bool validCredentials = await realm.loginRealm(email, password);
+    bool validCredentials = await realm.login(email, password);
     if (validCredentials) {
-      await storage.write(key: 'email', value: email);
-      await storage.write(key: 'password', value: password);
       if (pushLocalNotes) {
         var box = await Hive.openBox('local');
         List<Note> notes = getAllNotesLocal(box);
         if (notes.isNotEmpty) {
-          await realm.updateNotesRealm(notes);
+          await realm.updateNotes(notes);
         }
       }
     }

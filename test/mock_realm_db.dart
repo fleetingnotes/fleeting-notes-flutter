@@ -1,6 +1,6 @@
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/db/database.dart';
 import 'dart:async';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';

@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'models/Note.dart';
+import '../models/Note.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:dio/dio.dart';
@@ -40,7 +40,7 @@ class RealmDB {
     }
   }
 
-  Future<List<Note>> getAllNotesRealm() async {
+  Future<List<Note>> getAllNotes() async {
     var query =
         'query {  notes(query: {_isDeleted_ne: true}, sortBy: TIMESTAMP_DESC) {_id  title  content  source  timestamp}}';
     try {
@@ -53,7 +53,7 @@ class RealmDB {
     }
   }
 
-  Future<bool> insertNoteRealm(Note note) async {
+  Future<bool> insertNote(Note note) async {
     try {
       Note encodedNote = Note.encodeNote(note);
       var query =
@@ -67,7 +67,7 @@ class RealmDB {
     }
   }
 
-  Future<bool> updateNoteRealm(Note note) async {
+  Future<bool> updateNote(Note note) async {
     try {
       Note encodedNote = Note.encodeNote(note);
       var query =
@@ -81,7 +81,7 @@ class RealmDB {
     }
   }
 
-  Future<bool> updateNotesRealm(List<Note> notes) async {
+  Future<bool> updateNotes(List<Note> notes) async {
     try {
       List queryList = notes.map((note) {
         Note encodedNote = Note.encodeNote(note);
@@ -99,7 +99,7 @@ class RealmDB {
     }
   }
 
-  Future<bool> deleteNoteRealm(Note note) async {
+  Future<bool> deleteNote(Note note) async {
     try {
       Note encodedNote = Note.encodeNote(note);
       var query =
@@ -113,7 +113,7 @@ class RealmDB {
     }
   }
 
-  Future<bool> registerUserRealm(String email, String password) async {
+  Future<bool> register(String email, String password) async {
     var url = Path.join(apiUrl, 'auth/providers/local-userpass/register');
     try {
       await Dio().post(
@@ -132,7 +132,7 @@ class RealmDB {
     }
   }
 
-  void logoutRealm() {
+  void logout() {
     userId = 'local';
     _accessToken = null;
   }
@@ -155,7 +155,7 @@ class RealmDB {
     }
   }
 
-  Future<bool> loginRealm(String email, String password) async {
+  Future<bool> login(String email, String password) async {
     try {
       var authUrl = Path.join(apiUrl, 'auth/providers/local-userpass/login');
       var res = await Dio().post(

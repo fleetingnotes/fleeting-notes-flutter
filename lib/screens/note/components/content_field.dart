@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/db/database.dart';
 
 class ContentField extends StatefulWidget {
   const ContentField({

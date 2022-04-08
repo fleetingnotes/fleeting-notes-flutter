@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../database.dart';
+import '../../../db/database.dart';
 
 class Auth extends StatefulWidget {
   const Auth({Key? key, required this.db, this.onLogin}) : super(key: key);

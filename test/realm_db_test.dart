@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/db/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
 class MockRealmDB extends Database {

@@ -2,7 +2,7 @@ import 'package:fleeting_notes_flutter/constants.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/db/database.dart';
 import 'package:file_saver/file_saver.dart';
 import 'dart:typed_data';
 import 'dart:convert';
