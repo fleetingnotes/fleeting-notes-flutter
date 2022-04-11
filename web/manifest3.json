@@ -1,7 +1,7 @@
 {
     "name": "Fleeting Notes",
     "description": "Notes that extend your brain",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "content_security_policy": {
       "extension_pages": "script-src 'self' ; object-src 'self'"
     },
