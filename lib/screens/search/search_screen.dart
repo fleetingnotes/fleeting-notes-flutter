@@ -5,6 +5,7 @@ import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../constants.dart';
 import '../../responsive.dart';
+import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -24,12 +25,30 @@ class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
   late List<Note> notes = [];
+  String sortBy = 'Sort by date (new to old)';
+  Map<String, SortOptions> sortOptionMap = {
+    'Sort by date (new to old)': SortOptions.dateASC,
+    'Sort by date (old to new)': SortOptions.dateDESC,
+    'Sort by title (A to Z)': SortOptions.titleASC,
+    'Sort by title (Z to A)': SortOptions.titleDSC,
+    'Sort by content (A to Z)': SortOptions.contentASC,
+    'Sort by content (Z to A)': SortOptions.contentDESC,
+    'Sort by source (A to Z)': SortOptions.sourceASC,
+    'Sort by source (Z to A)': SortOptions.sourceDESC,
+  };
   String activeNoteId = '';
+  Map searchFilter = {'title': true, 'content': true, 'source': true};
 
   Future<void> loadNotes(queryRegex, {forceSync = false}) async {
     if (!mounted) return;
-    var tempNotes =
-        await widget.db.getSearchNotes(queryRegex, forceSync: forceSync);
+    var tempNotes = await widget.db.getSearchNotes(
+      queryRegex,
+      searchByTitle: searchFilter['title'],
+      searchByContent: searchFilter['content'],
+      searchBySource: searchFilter['source'],
+      sortBy: sortOptionMap[sortBy],
+      forceSync: forceSync,
+    );
     setState(() {
       notes = tempNotes;
     });
@@ -101,18 +120,56 @@ class _SearchScreenState extends State<SearchScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: kDefaultPadding),
                 child: Row(
-                  children: const [
-                    Icon(Icons.arrow_drop_down, size: 16),
-                    SizedBox(width: 5),
-                    Text(
-                      "Sort by date",
-                      style: TextStyle(fontWeight: FontWeight.w500),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 170),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: sortBy,
+                            iconSize: 16,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                sortBy = newValue!;
+                              });
+                              loadNotes(queryController.text);
+                            },
+                            items: sortOptionMap.keys
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
                     ),
-                    Spacer(),
-                    MaterialButton(
-                      minWidth: 20,
-                      onPressed: null,
-                      child: Icon(Icons.sort, size: 16),
+                    Tooltip(
+                      message: 'Search by',
+                      child: MaterialButton(
+                        minWidth: 20,
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) {
+                              return SearchDialog(
+                                searchFilter: searchFilter,
+                                onFilterChange: (type, val) {
+                                  setState(() {
+                                    searchFilter[type] = val;
+                                  });
+                                  loadNotes(queryController.text);
+                                },
+                              );
+                            },
+                          );
+                        },
+                        child: const Icon(Icons.filter_list, size: 16),
+                      ),
                     ),
                   ],
                 ),
