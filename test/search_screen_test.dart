@@ -50,7 +50,7 @@ void main() {
   testWidgets('Test filter button opens search dialog',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes('', forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([Note.empty()]));
     when(() =>
