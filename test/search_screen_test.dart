@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,4 +46,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(NoteCard), findsNothing);
   });
+
+  testWidgets('Test filter button opens search dialog',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getSearchNotes('', forceSync: any(named: 'forceSync')))
+        .thenAnswer((_) async => Future.value([Note.empty()]));
+    when(() =>
+            mockDb.getSearchNotes('hello', forceSync: any(named: 'forceSync')))
+        .thenAnswer((_) async => Future.value([]));
+    await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
+    await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchDialog), findsOneWidget);
+  });
+
+  testWidgets('When search by dialog has all unchecked boxes, then no notes',
+      (WidgetTester tester) async {},
+      skip: true);
+
+  testWidgets('When we sort by anything, then notes are sorted',
+      (WidgetTester tester) async {},
+      skip: true);
 }
