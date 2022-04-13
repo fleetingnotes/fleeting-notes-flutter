@@ -219,7 +219,7 @@ class SearchScreenNavigator extends StatelessWidget {
       onGenerateRoute: (route) => PageRouteBuilder(
           settings: route,
           pageBuilder: (context, _, __) {
-            if (history.first.key.isEmpty()) {
+            if (history.isEmpty || history.first.key.isEmpty()) {
               return SearchScreen(
                 key: db.searchKey,
                 db: db,
