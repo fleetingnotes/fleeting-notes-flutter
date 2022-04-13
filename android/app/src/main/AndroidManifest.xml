@@ -27,6 +27,12 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!--TODO: Add this filter, if you want to support sharing text into your app-->
+            <intent-filter>
+               <action android:name="android.intent.action.SEND" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <data android:mimeType="text/*" />
+            </intent-filter>
         </activity>
         <activity android:name="io.flutter.plugins.urllauncher.WebViewActivity"
            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"

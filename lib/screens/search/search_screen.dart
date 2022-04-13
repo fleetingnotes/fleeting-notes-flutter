@@ -9,6 +9,8 @@ import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.d
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
+import '../note/components/note_editor.dart';
+
 class SearchScreen extends StatefulWidget {
   const SearchScreen({
     Key? key,
@@ -210,16 +212,26 @@ class SearchScreenNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var history = db.noteHistory.entries.toList();
     db.navigatorKey = GlobalKey<NavigatorState>();
     return Navigator(
       key: db.navigatorKey,
       onGenerateRoute: (route) => PageRouteBuilder(
-        settings: route,
-        pageBuilder: (context, _, __) => SearchScreen(
-          key: db.searchKey,
-          db: db,
-        ),
-      ),
+          settings: route,
+          pageBuilder: (context, _, __) {
+            if (history.first.key.isEmpty()) {
+              return SearchScreen(
+                key: db.searchKey,
+                db: db,
+              );
+            } else {
+              return NoteEditor(
+                key: history.first.value,
+                note: history.first.key,
+                db: db,
+              );
+            }
+          }),
     );
   }
 }

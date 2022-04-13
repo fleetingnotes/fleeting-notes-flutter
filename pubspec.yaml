@@ -48,6 +48,7 @@ dependencies:
 
   # Dependency for state management
   provider: ^6.0.0
+  receive_sharing_intent: ^1.4.5
 
 
 dev_dependencies:

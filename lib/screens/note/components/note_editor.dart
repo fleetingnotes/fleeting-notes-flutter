@@ -39,7 +39,14 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void initState() {
     super.initState();
-    autofocus = widget.note.isEmpty();
+    widget.db.noteExists(widget.note).then((isExist) {
+      if (!isExist) {
+        setState(() {
+          hasNewChanges = true;
+        });
+      }
+    });
+    autofocus = widget.note.title == '' && widget.note.content == '';
     titleController = TextEditingController(text: widget.note.title);
     sourceController = TextEditingController(text: widget.note.source);
     contentController = StyleableTextFieldController(

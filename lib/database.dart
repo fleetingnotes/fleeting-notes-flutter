@@ -46,7 +46,7 @@ class Database {
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey searchKey = GlobalKey();
-  Map<Note, GlobalKey> noteHistory = {Note.empty(): GlobalKey()};
+  Map<Note, GlobalKey> noteHistory = {};
   static const storage = FlutterSecureStorage();
   RealmDB realm = RealmDB();
 
@@ -140,11 +140,13 @@ class Database {
   }
 
   Future<bool> noteExists(Note note) async {
-    var allNotes = await getAllNotes();
-    Note? filteredNote = allNotes.firstWhereOrNull((n) {
-      return n.id == note.id;
-    });
+    Note? filteredNote = await getNoteById(note.id);
     return filteredNote != null;
+  }
+
+  Future<Note?> getNoteById(String id) async {
+    var box = await Hive.openBox(realm.userId);
+    return box.get(id);
   }
 
   Future<bool> upsertNote(Note note) async {
