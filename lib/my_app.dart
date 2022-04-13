@@ -34,7 +34,7 @@ class _MyAppState extends State<MyApp> {
 
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
     ReceiveSharingIntent.getTextStream().listen((String sharedText) {
-      db.navigateToNote(getNoteFromShareText(sharedText));
+      db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
     }, onError: (err) {
       // ignore: avoid_print
       print("getLinkStream error: $err");

@@ -229,6 +229,7 @@ class SearchScreenNavigator extends StatelessWidget {
                 key: history.first.value,
                 note: history.first.key,
                 db: db,
+                isShared: true,
               );
             }
           }),

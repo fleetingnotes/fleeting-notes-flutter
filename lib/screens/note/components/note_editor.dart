@@ -19,10 +19,12 @@ class NoteEditor extends StatefulWidget {
     Key? key,
     required this.note,
     required this.db,
+    this.isShared = false,
   }) : super(key: key);
 
   final Note note;
   final Database db;
+  final bool isShared;
   @override
   _NoteEditorState createState() => _NoteEditorState();
 }
@@ -39,14 +41,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void initState() {
     super.initState();
-    widget.db.noteExists(widget.note).then((isExist) {
-      if (!isExist) {
-        setState(() {
-          hasNewChanges = true;
-        });
-      }
-    });
-    autofocus = widget.note.title == '' && widget.note.content == '';
+    hasNewChanges = widget.isShared;
+    autofocus = widget.note.isEmpty() || widget.isShared;
     titleController = TextEditingController(text: widget.note.title);
     sourceController = TextEditingController(text: widget.note.source);
     contentController = StyleableTextFieldController(
