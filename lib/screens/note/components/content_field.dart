@@ -26,11 +26,18 @@ class ContentField extends StatefulWidget {
 class _ContentFieldState extends State<ContentField> {
   final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
   final LayerLink layerLink = LayerLink();
-  final FocusNode contentFocusNode = FocusNode();
+  late final FocusNode contentFocusNode;
   OverlayEntry? overlayEntry = OverlayEntry(
     builder: (context) => Container(),
   );
   bool titleLinksVisible = false;
+
+  @override
+  void initState() {
+    // NOTE: onKeyEvent doesn't ignore enter key press
+    contentFocusNode = FocusNode(onKey: onKeyEvent);
+    super.initState();
+  }
 
   @override
   void dispose() {
