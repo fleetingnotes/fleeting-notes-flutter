@@ -64,6 +64,9 @@ class _TitleLinksState extends State<TitleLinks> {
         selectedIndex = max(selectedIndex - 1, 0);
       });
       return true;
+    } else if ([LogicalKeyboardKey.arrowLeft, LogicalKeyboardKey.arrowRight]
+        .contains(e.logicalKey)) {
+      return true;
     } else if (e.logicalKey == LogicalKeyboardKey.enter) {
       widget.onLinkSelect(filteredTitles[selectedIndex]);
       return true;
