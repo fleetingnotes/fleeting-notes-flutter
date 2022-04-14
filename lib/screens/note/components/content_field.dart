@@ -153,7 +153,6 @@ class _ContentFieldState extends State<ContentField> {
             valueListenable: titleLinkQuery,
             builder: (context, value, child) {
               return TitleLinks(
-                focusNode: contentFocusNode,
                 caretOffset: caretOffset,
                 allLinks: allLinks,
                 query: titleLinkQuery.value,

@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 class TitleLinks extends StatefulWidget {
   const TitleLinks({
     Key? key,
-    required this.focusNode,
     required this.caretOffset,
     required this.allLinks,
     required this.query,
@@ -14,7 +13,6 @@ class TitleLinks extends StatefulWidget {
     required this.layerLink,
   }) : super(key: key);
 
-  final FocusNode focusNode;
   final Offset caretOffset;
   final List allLinks;
   final String query;
@@ -38,6 +36,14 @@ class _TitleLinksState extends State<TitleLinks> {
       newCaretOffset = Offset(
           widget.layerLink.leaderSize!.width - width, widget.caretOffset.dy);
     }
+    HardwareKeyboard.instance.addHandler(onKeyEvent);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(onKeyEvent);
+    super.dispose();
   }
 
   List filterTitles(query) {
@@ -46,19 +52,23 @@ class _TitleLinksState extends State<TitleLinks> {
         .toList();
   }
 
-  void onKeyEvent(KeyEvent e) {
-    if (e is! KeyDownEvent) return;
+  bool onKeyEvent(KeyEvent e) {
+    if (e is! KeyDownEvent) return false;
     if (e.logicalKey == LogicalKeyboardKey.arrowDown) {
       setState(() {
         selectedIndex = min(selectedIndex + 1, filteredTitles.length - 1);
       });
+      return true;
     } else if (e.logicalKey == LogicalKeyboardKey.arrowUp) {
       setState(() {
         selectedIndex = max(selectedIndex - 1, 0);
       });
+      return true;
     } else if (e.logicalKey == LogicalKeyboardKey.enter) {
       widget.onLinkSelect(filteredTitles[selectedIndex]);
+      return true;
     }
+    return false;
   }
 
   @override
@@ -72,31 +82,29 @@ class _TitleLinksState extends State<TitleLinks> {
         link: widget.layerLink,
         offset: newCaretOffset,
         child: Material(
-          child: KeyboardListener(
-            focusNode: widget.focusNode,
-            onKeyEvent: onKeyEvent,
-            child: ListView.builder(
-              itemCount: filteredTitles.length,
-              itemExtent: tileHeight,
-              itemBuilder: (context, index) {
-                final String item = filteredTitles[index];
-                return MouseRegion(
-                  onEnter: (e) {
-                    setState(() {
-                      selectedIndex = index;
-                    });
+          child: ListView.builder(
+            itemCount: filteredTitles.length,
+            itemExtent: tileHeight,
+            itemBuilder: (context, index) {
+              final String item = filteredTitles[index];
+              return MouseRegion(
+                onEnter: (e) {
+                  setState(() {
+                    selectedIndex = index;
+                  });
+                },
+                child: ListTile(
+                  tileColor: (index == selectedIndex)
+                      ? Theme.of(context).hoverColor
+                      : null,
+                  hoverColor: Colors.transparent,
+                  title: Text(item),
+                  onTap: () {
+                    widget.onLinkSelect(item);
                   },
-                  child: ListTile(
-                    tileColor: (index == selectedIndex) ? Colors.blue : null,
-                    hoverColor: Colors.transparent,
-                    title: Text(item),
-                    onTap: () {
-                      widget.onLinkSelect(item);
-                    },
-                  ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
