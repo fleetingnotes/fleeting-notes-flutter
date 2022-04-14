@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart'
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
 import 'package:fleeting_notes_flutter/database.dart';
+import 'package:flutter/services.dart';
 
 class ContentField extends StatefulWidget {
   const ContentField({
@@ -26,18 +27,24 @@ class _ContentFieldState extends State<ContentField> {
   final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
   final LayerLink layerLink = LayerLink();
   final FocusNode contentFocusNode = FocusNode();
-  late OverlayEntry overlayEntry = OverlayEntry(
+  OverlayEntry? overlayEntry = OverlayEntry(
     builder: (context) => Container(),
   );
   bool titleLinksVisible = false;
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    removeOverlay();
+    super.dispose();
+  }
 
-    contentFocusNode.addListener(() {
-      removeOverlay();
-    });
+  KeyEventResult onKeyEvent(node, e) {
+    if (e.logicalKey == LogicalKeyboardKey.enter) {
+      return (titleLinksVisible)
+          ? KeyEventResult.handled
+          : KeyEventResult.ignored;
+    }
+    return KeyEventResult.ignored;
   }
 
   // Widget Functions
@@ -121,10 +128,7 @@ class _ContentFieldState extends State<ContentField> {
           t.substring(caretI, t.length);
       widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: linkIndex + link.length + 4));
-      titleLinkQuery.value = '';
-      if (overlayEntry.mounted) {
-        overlayEntry.remove();
-      }
+      removeOverlay();
     }
 
     removeOverlay();
@@ -142,6 +146,7 @@ class _ContentFieldState extends State<ContentField> {
             valueListenable: titleLinkQuery,
             builder: (context, value, child) {
               return TitleLinks(
+                focusNode: contentFocusNode,
                 caretOffset: caretOffset,
                 allLinks: allLinks,
                 query: titleLinkQuery.value,
@@ -185,14 +190,15 @@ class _ContentFieldState extends State<ContentField> {
     overlayEntry = OverlayEntry(builder: builder);
     // show overlay
     if (overlayState != null) {
-      overlayState.insert(overlayEntry);
+      overlayState.insert(overlayEntry!);
     }
   }
 
   void removeOverlay() {
-    if (overlayEntry.mounted) {
-      overlayEntry.remove();
+    if (overlayEntry != null && overlayEntry!.mounted) {
+      overlayEntry!.remove();
       titleLinkQuery.value = '';
+      overlayEntry = null;
     }
   }
 
