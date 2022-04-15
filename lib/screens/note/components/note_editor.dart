@@ -146,6 +146,24 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       if (!isSaveSuccess) {
         errMessage = 'Failed to save note';
         if (updateState) onChanged();
+      } else if (backlinkNotes.isNotEmpty) {
+        // update backlinks
+        List<Note> updatedBacklinks = backlinkNotes.map((n) {
+          RegExp r = RegExp('\\[\\[$prevTitle\\]\\]', multiLine: true);
+          n.content = n.content.replaceAll(r, '[[${updatedNote.title}]]');
+          return n;
+        }).toList();
+        if (await widget.db.updateNotes(updatedBacklinks)) {
+          setState(() {
+            backlinkNotes = updatedBacklinks;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('${backlinkNotes.length} Link(s) Updated'),
+            duration: const Duration(seconds: 2),
+          ));
+        } else {
+          errMessage = 'Failed to update backlinks';
+        }
       }
     } else {
       titleController.text = prevTitle;
