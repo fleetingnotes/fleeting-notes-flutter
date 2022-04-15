@@ -130,7 +130,8 @@ class _SearchScreenState extends State<SearchScreen> {
                             isExpanded: true,
                             value: sortBy,
                             iconSize: 16,
-                            style: const TextStyle(fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w500, color: kTextColor),
                             onChanged: (String? newValue) {
                               setState(() {
                                 sortBy = newValue!;
