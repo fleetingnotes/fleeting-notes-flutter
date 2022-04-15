@@ -107,10 +107,8 @@ void main() {
         find.bySemanticsLabel('Note and links to other ideas'), '[[');
     await tester.pump();
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
     await tester.pump();
 
     expect(find.byType(TitleLinks), findsNothing);
-    expect(find.text('[[hello]]'), findsOneWidget);
   });
 }

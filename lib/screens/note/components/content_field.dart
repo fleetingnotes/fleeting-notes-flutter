@@ -46,10 +46,9 @@ class _ContentFieldState extends State<ContentField> {
   }
 
   KeyEventResult onKeyEvent(node, e) {
-    if (e.logicalKey == LogicalKeyboardKey.enter) {
-      return (titleLinksVisible)
-          ? KeyEventResult.handled
-          : KeyEventResult.ignored;
+    if ([LogicalKeyboardKey.arrowLeft, LogicalKeyboardKey.arrowRight]
+        .contains(e.logicalKey)) {
+      removeOverlay();
     }
     return KeyEventResult.ignored;
   }
