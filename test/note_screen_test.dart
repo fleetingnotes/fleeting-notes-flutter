@@ -125,4 +125,25 @@ void main() {
     await tester.pump();
     expect(find.byType(SnackBar), findsOneWidget);
   });
+
+  testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
+    MockRealmDB mockDb = MockRealmDB();
+    mockDb.noteHistory = {Note.empty(title: 'hello'): GlobalKey()};
+    when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
+        (_) async => Future.value([Note.empty(content: '[[hello]]')]));
+    when(() => mockDb.upsertNote(any()))
+        .thenAnswer((_) async => Future.value(true));
+    when(() => mockDb.titleExists(any(), any()))
+        .thenAnswer((_) async => Future.value(false));
+    when(() => mockDb.updateNotes(any()))
+        .thenAnswer((_) async => Future.value(true));
+    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.enterText(
+        find.bySemanticsLabel('Title of the idea'), 'hello world');
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('[[hello world]]'), findsOneWidget);
+  });
 }
