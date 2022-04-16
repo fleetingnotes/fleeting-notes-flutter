@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-class TitleLinks extends StatelessWidget {
+class TitleLinks extends StatefulWidget {
   const TitleLinks({
     Key? key,
     required this.caretOffset,
@@ -18,27 +19,67 @@ class TitleLinks extends StatelessWidget {
   final Function onLinkSelect;
   final LayerLink layerLink;
 
+  @override
+  State<TitleLinks> createState() => _TitleLinksState();
+}
+
+class _TitleLinksState extends State<TitleLinks> {
+  int selectedIndex = 0;
+  double width = 300;
+  late Offset newCaretOffset;
+  late List filteredTitles = filterTitles(widget.query);
+
+  @override
+  void initState() {
+    newCaretOffset = widget.caretOffset;
+    if (width + widget.caretOffset.dx > widget.layerLink.leaderSize!.width) {
+      newCaretOffset = Offset(
+          widget.layerLink.leaderSize!.width - width, widget.caretOffset.dy);
+    }
+    HardwareKeyboard.instance.addHandler(onKeyEvent);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(onKeyEvent);
+    super.dispose();
+  }
+
   List filterTitles(query) {
-    return allLinks
+    return widget.allLinks
         .where((title) => title.toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 
+  bool onKeyEvent(KeyEvent e) {
+    if (e is! KeyDownEvent) return false;
+    if (e.logicalKey == LogicalKeyboardKey.arrowDown) {
+      setState(() {
+        selectedIndex = min(selectedIndex + 1, filteredTitles.length - 1);
+      });
+      return true;
+    } else if (e.logicalKey == LogicalKeyboardKey.arrowUp) {
+      setState(() {
+        selectedIndex = max(selectedIndex - 1, 0);
+      });
+      return true;
+    } else if (e.logicalKey == LogicalKeyboardKey.enter) {
+      widget.onLinkSelect(filteredTitles[selectedIndex]);
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    double width = 300;
-    Offset newCaretOffset = caretOffset;
-    if (width + caretOffset.dx > layerLink.leaderSize!.width) {
-      newCaretOffset =
-          Offset(layerLink.leaderSize!.width - width, caretOffset.dy);
-    }
-    List filteredTitles = filterTitles(query);
+    filteredTitles = filterTitles(widget.query);
     double tileHeight = 50;
     return Positioned(
       width: width,
       height: min(150, filteredTitles.length * tileHeight),
       child: CompositedTransformFollower(
-        link: layerLink,
+        link: widget.layerLink,
         offset: newCaretOffset,
         child: Material(
           child: ListView.builder(
@@ -46,11 +87,22 @@ class TitleLinks extends StatelessWidget {
             itemExtent: tileHeight,
             itemBuilder: (context, index) {
               final String item = filteredTitles[index];
-              return ListTile(
-                title: Text(item),
-                onTap: () {
-                  onLinkSelect(item);
+              return MouseRegion(
+                onEnter: (e) {
+                  setState(() {
+                    selectedIndex = index;
+                  });
                 },
+                child: ListTile(
+                  tileColor: (index == selectedIndex)
+                      ? Theme.of(context).hoverColor
+                      : null,
+                  hoverColor: Colors.transparent,
+                  title: Text(item),
+                  onTap: () {
+                    widget.onLinkSelect(item);
+                  },
+                ),
               );
             },
           ),

@@ -8,6 +8,7 @@
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -60,5 +61,54 @@ void main() {
     await tester.pump();
 
     expect(find.byType(TitleLinks), findsOneWidget);
+  });
+
+  testWidgets('Key navigation works in TitleLinks',
+      (WidgetTester tester) async {
+    MockRealmDB mockDb = MockRealmDB();
+    TextEditingController controller = TextEditingController();
+    when(() => mockDb.getAllLinks())
+        .thenAnswer((_) async => Future.value(['hello', 'world']));
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+      body: ContentField(
+        db: mockDb,
+        controller: controller,
+        onChanged: () {},
+      ),
+    )));
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), '[[');
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+
+    expect(find.byType(TitleLinks), findsNothing);
+    expect(find.text('[[world]]'), findsOneWidget);
+  });
+
+  testWidgets('Key navigation doesnt break on left key navigation',
+      (WidgetTester tester) async {
+    MockRealmDB mockDb = MockRealmDB();
+    TextEditingController controller = TextEditingController();
+    when(() => mockDb.getAllLinks())
+        .thenAnswer((_) async => Future.value(['hello', 'world']));
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+      body: ContentField(
+        db: mockDb,
+        controller: controller,
+        onChanged: () {},
+      ),
+    )));
+    await tester.tap(find.bySemanticsLabel('Note and links to other ideas'));
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), '[[');
+    await tester.pump();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+
+    expect(find.byType(TitleLinks), findsNothing);
   });
 }
