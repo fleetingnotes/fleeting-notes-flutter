@@ -4,7 +4,6 @@ import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/adapters.dart';
 
 class MyApp extends StatefulWidget {

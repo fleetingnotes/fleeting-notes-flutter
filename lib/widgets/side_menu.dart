@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fleeting_notes_flutter/database.dart';
-import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:hive/hive.dart';
-import '../my_app.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({

@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import '../extensions.dart';
 import '../models/Note.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
