@@ -36,13 +36,15 @@ class Note {
     this.hasAttachment = false,
   });
 
-  static Note empty({String title = '', String content = ''}) {
+  static Note empty(
+      {String title = '', String content = '', String source = ''}) {
     Uuid uuid = const Uuid();
     String dateStr = DateTime.now().toIso8601String();
     return Note(
       id: uuid.v1(),
       title: title,
       content: content,
+      source: source,
       timestamp: dateStr,
       isDeleted: false,
       hasAttachment: false,
