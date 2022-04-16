@@ -45,10 +45,11 @@ dependencies:
   hive_flutter: ^1.1.0
   file_saver: ^0.1.0
   web_browser_detect: ^2.0.2
+  flutter_neumorphic: ^3.2.0
+  receive_sharing_intent: ^1.4.5
 
   # Dependency for state management
   provider: ^6.0.0
-  receive_sharing_intent: ^1.4.5
 
 
 dev_dependencies:

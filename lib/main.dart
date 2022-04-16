@@ -8,5 +8,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Hive.initFlutter();
   Hive.registerAdapter(NoteAdapter());
+  await Hive.openBox('settings');
   runApp(const MyApp());
 }
