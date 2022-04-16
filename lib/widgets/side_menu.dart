@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:fleeting_notes_flutter/constants.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
+import 'package:fleeting_notes_flutter/theme_data.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({
@@ -16,11 +16,13 @@ class SideMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: double.infinity,
-      padding: const EdgeInsets.only(top: kIsWeb ? kDefaultPadding : 0),
-      color: kBgLightColor,
+      padding: EdgeInsets.only(
+          top: kIsWeb ? Theme.of(context).own().kDefaultPadding : 0),
+      color: Theme.of(context).own().kBgLightColor,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+          padding: EdgeInsets.symmetric(
+              horizontal: Theme.of(context).own().kDefaultPadding),
           child: Column(
             children: [
               Row(

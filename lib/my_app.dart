@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:fleeting_notes_flutter/theme_data.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -34,10 +35,9 @@ class _MyAppState extends State<MyApp> {
       title: 'Fleeting Notes',
       // scrollBehavior: MyCustomScrollBehavior(),
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          primarySwatch: Colors.blue,
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
-              .copyWith(background: const Color(0xECECECEC))),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.light,
       initialRoute: '/',
       routes: {
         '/': (context) => FutureBuilder<String>(

@@ -1,6 +1,6 @@
-import 'package:fleeting_notes_flutter/constants.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
+import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:file_saver/file_saver.dart';
@@ -71,7 +71,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(kDefaultPadding / 3),
+                padding:
+                    EdgeInsets.all(Theme.of(context).own().kDefaultPadding / 3),
                 child: Row(children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
@@ -98,7 +99,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               SingleChildScrollView(
                   controller: ScrollController(),
-                  padding: const EdgeInsets.all(kDefaultPadding),
+                  padding:
+                      EdgeInsets.all(Theme.of(context).own().kDefaultPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -106,7 +108,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
                       Padding(
-                        padding: const EdgeInsets.all(kDefaultPadding / 2),
+                        padding: EdgeInsets.all(
+                            Theme.of(context).own().kDefaultPadding / 2),
                         child: Row(children: [
                           DropdownButton(
                             underline: const SizedBox(),
@@ -141,13 +144,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               child: const Text('Export')),
                         ]),
                       ),
-                      const SizedBox(height: kDefaultPadding / 2),
+                      SizedBox(
+                          height: Theme.of(context).own().kDefaultPadding / 2),
                       const Text("Sync", style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
                       (widget.db.isLoggedIn())
                           ? Padding(
-                              padding:
-                                  const EdgeInsets.all(kDefaultPadding / 2),
+                              padding: EdgeInsets.all(
+                                  Theme.of(context).own().kDefaultPadding / 2),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -163,8 +167,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         child: const Text('Logout'))
                                   ]),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: kDefaultPadding),
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: Theme.of(context)
+                                            .own()
+                                            .kDefaultPadding),
                                     child: ElevatedButton(
                                         onPressed: () => widget.db
                                             .getAllNotes(forceSync: true),

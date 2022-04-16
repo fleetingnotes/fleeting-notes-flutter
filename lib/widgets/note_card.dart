@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../constants.dart';
 import '../extensions.dart';
 import '../models/Note.dart';
+import 'package:fleeting_notes_flutter/theme_data.dart';
 
 class NoteCard extends StatelessWidget {
   const NoteCard({
@@ -18,16 +18,19 @@ class NoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: kDefaultPadding, vertical: kDefaultPadding / 2),
+        padding: EdgeInsets.symmetric(
+            horizontal: Theme.of(context).own().kDefaultPadding,
+            vertical: Theme.of(context).own().kDefaultPadding / 2),
         child: InkWell(
           borderRadius: BorderRadius.circular(15),
           onTap: onTap,
           child: Stack(children: [
             Container(
-              padding: const EdgeInsets.all(kDefaultPadding),
+              padding: EdgeInsets.all(Theme.of(context).own().kDefaultPadding),
               decoration: BoxDecoration(
-                color: isActive ? kPrimaryColor : kBgDarkColor,
+                color: isActive
+                    ? Theme.of(context).own().kPrimaryColor
+                    : Theme.of(context).own().kBgDarkColor,
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Column(
@@ -46,7 +49,9 @@ class NoteCard extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
-                                    color: isActive ? Colors.white : kTextColor,
+                                    color: isActive
+                                        ? Colors.white
+                                        : Theme.of(context).own().kTextColor,
                                   ),
                                 ),
                               if (note.content != '')
@@ -59,12 +64,14 @@ class NoteCard extends StatelessWidget {
                                       .copyWith(
                                         color: isActive
                                             ? Colors.white
-                                            : kTextColor,
+                                            : Theme.of(context)
+                                                .own()
+                                                .kTextColor,
                                       ),
                                 ),
                             ]),
                       ),
-                      const SizedBox(width: kDefaultPadding),
+                      SizedBox(width: Theme.of(context).own().kDefaultPadding),
                       Column(
                         children: [
                           Text(
@@ -79,7 +86,9 @@ class NoteCard extends StatelessWidget {
                             Icon(
                               Icons.attachment,
                               size: 15,
-                              color: isActive ? Colors.white70 : kGrayColor,
+                              color: isActive
+                                  ? Colors.white70
+                                  : Theme.of(context).own().kGrayColor,
                             ),
                         ],
                       )

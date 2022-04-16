@@ -1,9 +1,9 @@
 import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
-import '../../constants.dart';
 import '../../responsive.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 
@@ -79,16 +79,18 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: const EdgeInsets.only(top: kIsWeb ? kDefaultPadding : 0),
-        color: kBgDarkColor,
+        padding: EdgeInsets.only(
+            top: kIsWeb ? Theme.of(context).own().kDefaultPadding : 0),
+        color: Theme.of(context).own().kBgDarkColor,
         child: SafeArea(
           right: false,
           child: Column(
             children: [
               // This is our Seearch bar
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: kDefaultPadding, vertical: kDefaultPadding / 2),
+                padding: EdgeInsets.symmetric(
+                    horizontal: Theme.of(context).own().kDefaultPadding,
+                    vertical: Theme.of(context).own().kDefaultPadding / 2),
                 child: Row(
                   children: [
                     IconButton(
@@ -102,7 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         onChanged: loadNotes,
                         decoration: InputDecoration(
                           hintText: 'Search',
-                          fillColor: kBgLightColor,
+                          fillColor: Theme.of(context).own().kBgLightColor,
                           filled: true,
                           suffixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
@@ -115,10 +117,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: kDefaultPadding),
+              SizedBox(height: Theme.of(context).own().kDefaultPadding),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+                padding: EdgeInsets.symmetric(
+                    horizontal: Theme.of(context).own().kDefaultPadding),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -130,8 +132,9 @@ class _SearchScreenState extends State<SearchScreen> {
                             isExpanded: true,
                             value: sortBy,
                             iconSize: 16,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w500, color: kTextColor),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context).own().kTextColor),
                             onChanged: (String? newValue) {
                               setState(() {
                                 sortBy = newValue!;
@@ -175,7 +178,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: kDefaultPadding),
+              SizedBox(height: Theme.of(context).own().kDefaultPadding),
               Expanded(
                 child: ListView.builder(
                   key: const PageStorageKey('ListOfNotes'),

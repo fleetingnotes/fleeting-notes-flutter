@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
@@ -12,7 +13,6 @@ import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart'
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
-import 'package:fleeting_notes_flutter/constants.dart';
 
 class NoteEditor extends StatefulWidget {
   const NoteEditor({
@@ -188,7 +188,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
               Expanded(
                 child: SingleChildScrollView(
                   controller: ScrollController(),
-                  padding: const EdgeInsets.all(kDefaultPadding),
+                  padding:
+                      EdgeInsets.all(Theme.of(context).own().kDefaultPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -210,10 +211,11 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                         controller: sourceController,
                         onChanged: onChanged,
                       ),
-                      const SizedBox(height: kDefaultPadding),
+                      SizedBox(height: Theme.of(context).own().kDefaultPadding),
                       const Text("Backlinks", style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
-                      const SizedBox(height: kDefaultPadding / 2),
+                      SizedBox(
+                          height: Theme.of(context).own().kDefaultPadding / 2),
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             onTap: () {
