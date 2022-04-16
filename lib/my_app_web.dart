@@ -5,8 +5,6 @@ import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'dart:async';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -19,42 +17,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final Database db = Database();
-  Note? initNote;
-
-  @override
-  void initState() {
-    Note getNoteFromShareText(String sharedText) {
-      try {
-        bool _validURL = Uri.parse(sharedText).isAbsolute;
-        if (_validURL) {
-          return Note.empty(source: sharedText);
-        } else {
-          return Note.empty(content: sharedText);
-        }
-      } on FormatException {
-        return Note.empty(content: sharedText);
-      }
-    }
-
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    ReceiveSharingIntent.getTextStream().listen((String sharedText) {
-      db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
-    }, onError: (err) {
-      // ignore: avoid_print
-      print("getLinkStream error: $err");
-    });
-
-    // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String? sharedText) {
-      if (sharedText != null) {
-        setState(() {
-          initNote = getNoteFromShareText(sharedText);
-        });
-      }
-    });
-    super.initState();
-  }
-
   Future<String> _navigateScreen() async {
     await db.loginWithStorage();
     return 'main';
@@ -89,7 +51,7 @@ class _MyAppState extends State<MyApp> {
                     builder: (BuildContext context,
                         AsyncSnapshot<String?> snapshot) {
                       if (snapshot.hasData) {
-                        return MainScreen(db: db, initNote: initNote);
+                        return MainScreen(db: db);
                       } else {
                         return const Center(child: CircularProgressIndicator());
                       }

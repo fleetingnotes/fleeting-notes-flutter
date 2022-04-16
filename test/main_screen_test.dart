@@ -250,4 +250,45 @@ void main() {
     expect(find.byType(SearchScreen), findsOneWidget);
     expect(find.byType(NoteEditor), findsOneWidget);
   });
+
+  testWidgets('When Mobile Size with initial note, Then see NoteEditor',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(300, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.upsertNote(any()))
+        .thenAnswer((_) async => Future.value(true));
+    await tester.pumpWidget(MaterialApp(
+        home: MainScreen(
+            db: mockDb, initNote: Note.empty(content: 'init note'))));
+
+    // Mobile on Note Screen
+    expect(find.byType(SearchScreen), findsNothing);
+    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.text('init note'), findsOneWidget);
+  });
+
+  testWidgets('When Desktop Size with initial note, Then see init note',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.upsertNote(any()))
+        .thenAnswer((_) async => Future.value(true));
+
+    await tester.pumpWidget(MaterialApp(
+        home: MainScreen(
+            db: mockDb, initNote: Note.empty(content: 'init note'))));
+
+    // Mobile on Note Screen
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.text('init note'), findsOneWidget);
+  });
 }

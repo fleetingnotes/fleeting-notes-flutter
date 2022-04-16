@@ -19,9 +19,12 @@ class MockRealmDB extends Mock implements Database {
   @override
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
+  @override
+  Future<bool> noteExists(Note note) async => true;
+
   // not ideal that i have to copy below from the real class
   @override
-  void navigateToNote(Note note) {
+  void navigateToNote(Note note, {bool isShared = false}) {
     GlobalKey noteKey = GlobalKey();
     noteHistory[note] = noteKey;
     navigatorKey.currentState!.push(
