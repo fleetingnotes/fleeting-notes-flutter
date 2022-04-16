@@ -187,6 +187,12 @@ class _SearchScreenState extends State<SearchScreen> {
                   controller: scrollController,
                   itemCount: notes.length,
                   itemBuilder: (context, index) => NoteCard(
+                    sQuery: SearchQuery(
+                        queryRegex: queryController.text,
+                        searchByTitle: searchFilter['title'],
+                        searchByContent: searchFilter['content'],
+                        searchBySource: searchFilter['source'],
+                        sortBy: sortOptionMap[sortBy]!),
                     note: notes[index],
                     isActive: Responsive.isMobile(context)
                         ? false
