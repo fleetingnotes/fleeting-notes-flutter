@@ -7,6 +7,8 @@ import 'package:fleeting_notes_flutter/theme_data.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+  static final ValueNotifier<ThemeMode> themeNotifier =
+      ValueNotifier(ThemeMode.system);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -14,7 +16,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final Database db = Database();
-
   Future<String> _navigateScreen() async {
     await db.loginWithStorage();
     return 'main';
@@ -31,28 +32,32 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Fleeting Notes',
-      // scrollBehavior: MyCustomScrollBehavior(),
-      debugShowCheckedModeBanner: false,
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: ThemeMode.system,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => FutureBuilder<String>(
-              future: _navigateScreen(),
-              builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-                if (snapshot.hasData) {
-                  return MainScreen(db: db);
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              },
-            ),
-        '/settings': (context) =>
-            SettingsScreen(db: db, onAuthChange: refreshScreen)
-      },
-    );
+    return ValueListenableBuilder(
+        valueListenable: MyApp.themeNotifier,
+        builder: (context, ThemeMode currentTheme, _) {
+          return MaterialApp(
+            title: 'Fleeting Notes',
+            debugShowCheckedModeBanner: false,
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode: currentTheme,
+            initialRoute: '/',
+            routes: {
+              '/': (context) => FutureBuilder<String>(
+                    future: _navigateScreen(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<String?> snapshot) {
+                      if (snapshot.hasData) {
+                        return MainScreen(db: db);
+                      } else {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
+              '/settings': (context) =>
+                  SettingsScreen(db: db, onAuthChange: refreshScreen)
+            },
+          );
+        });
   }
 }

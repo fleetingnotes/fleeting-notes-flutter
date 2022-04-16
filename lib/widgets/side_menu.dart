@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
+import '../my_app.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({
@@ -32,7 +33,16 @@ class SideMenu extends StatelessWidget {
                       "Fleeting Notes",
                     ),
                   ),
-                  if (!Responsive.isDesktop(context)) const CloseButton(),
+                  IconButton(
+                      icon: Icon(MyApp.themeNotifier.value == ThemeMode.light
+                          ? Icons.dark_mode
+                          : Icons.light_mode),
+                      onPressed: () {
+                        MyApp.themeNotifier.value =
+                            MyApp.themeNotifier.value == ThemeMode.light
+                                ? ThemeMode.dark
+                                : ThemeMode.light;
+                      })
                 ],
               ),
               const Spacer(),
