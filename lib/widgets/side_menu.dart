@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:fleeting_notes_flutter/constants.dart';
 import 'package:fleeting_notes_flutter/database.dart';
-import 'package:fleeting_notes_flutter/responsive.dart';
+import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:hive/hive.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({
@@ -14,13 +14,16 @@ class SideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool darkMode = Hive.box('settings').get('darkMode', defaultValue: false);
     return Container(
       height: double.infinity,
-      padding: const EdgeInsets.only(top: kIsWeb ? kDefaultPadding : 0),
-      color: kBgLightColor,
+      padding: EdgeInsets.only(
+          top: kIsWeb ? Theme.of(context).custom.kDefaultPadding : 0),
+      color: Theme.of(context).dialogBackgroundColor,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+          padding: EdgeInsets.symmetric(
+              horizontal: Theme.of(context).custom.kDefaultPadding),
           child: Column(
             children: [
               Row(
@@ -30,7 +33,13 @@ class SideMenu extends StatelessWidget {
                       "Fleeting Notes",
                     ),
                   ),
-                  if (!Responsive.isDesktop(context)) const CloseButton(),
+                  IconButton(
+                    icon: Icon(darkMode ? Icons.dark_mode : Icons.light_mode),
+                    onPressed: () {
+                      Hive.box('settings').put('darkMode', !darkMode);
+                    },
+                    tooltip: 'Toggle Theme',
+                  )
                 ],
               ),
               const Spacer(),

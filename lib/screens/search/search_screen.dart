@@ -1,13 +1,15 @@
 import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
-import '../../constants.dart';
 import '../../responsive.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
+
+import '../note/components/note_editor.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({
@@ -79,16 +81,18 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: const EdgeInsets.only(top: kIsWeb ? kDefaultPadding : 0),
-        color: kBgDarkColor,
+        padding: EdgeInsets.only(
+            top: kIsWeb ? Theme.of(context).custom.kDefaultPadding : 0),
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: SafeArea(
           right: false,
           child: Column(
             children: [
               // This is our Seearch bar
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: kDefaultPadding, vertical: kDefaultPadding / 2),
+                padding: EdgeInsets.symmetric(
+                    horizontal: Theme.of(context).custom.kDefaultPadding,
+                    vertical: Theme.of(context).custom.kDefaultPadding / 2),
                 child: Row(
                   children: [
                     IconButton(
@@ -102,7 +106,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         onChanged: loadNotes,
                         decoration: InputDecoration(
                           hintText: 'Search',
-                          fillColor: kBgLightColor,
+                          fillColor: Theme.of(context).dialogBackgroundColor,
                           filled: true,
                           suffixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
@@ -115,10 +119,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: kDefaultPadding),
+              SizedBox(height: Theme.of(context).custom.kDefaultPadding),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: kDefaultPadding),
+                padding: EdgeInsets.symmetric(
+                    horizontal: Theme.of(context).custom.kDefaultPadding),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -130,8 +134,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             isExpanded: true,
                             value: sortBy,
                             iconSize: 16,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w500, color: kTextColor),
+                            style: Theme.of(context).textTheme.bodyText1,
                             onChanged: (String? newValue) {
                               setState(() {
                                 sortBy = newValue!;
@@ -175,7 +178,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: kDefaultPadding),
+              SizedBox(height: Theme.of(context).custom.kDefaultPadding),
               Expanded(
                 child: ListView.builder(
                   key: const PageStorageKey('ListOfNotes'),
@@ -210,16 +213,27 @@ class SearchScreenNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var history = db.noteHistory.entries.toList();
     db.navigatorKey = GlobalKey<NavigatorState>();
     return Navigator(
       key: db.navigatorKey,
       onGenerateRoute: (route) => PageRouteBuilder(
-        settings: route,
-        pageBuilder: (context, _, __) => SearchScreen(
-          key: db.searchKey,
-          db: db,
-        ),
-      ),
+          settings: route,
+          pageBuilder: (context, _, __) {
+            if (history.isEmpty || history.first.key.isEmpty()) {
+              return SearchScreen(
+                key: db.searchKey,
+                db: db,
+              );
+            } else {
+              return NoteEditor(
+                key: history.first.value,
+                note: history.first.key,
+                db: db,
+                isShared: true,
+              );
+            }
+          }),
     );
   }
 }

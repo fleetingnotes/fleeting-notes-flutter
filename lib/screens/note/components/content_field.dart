@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart'
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
 import 'package:fleeting_notes_flutter/database.dart';
+import 'package:flutter/services.dart';
 
 class ContentField extends StatefulWidget {
   const ContentField({
@@ -25,19 +26,31 @@ class ContentField extends StatefulWidget {
 class _ContentFieldState extends State<ContentField> {
   final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
   final LayerLink layerLink = LayerLink();
-  final FocusNode contentFocusNode = FocusNode();
-  late OverlayEntry overlayEntry = OverlayEntry(
+  late final FocusNode contentFocusNode;
+  OverlayEntry? overlayEntry = OverlayEntry(
     builder: (context) => Container(),
   );
   bool titleLinksVisible = false;
 
   @override
   void initState() {
+    // NOTE: onKeyEvent doesn't ignore enter key press
+    contentFocusNode = FocusNode(onKey: onKeyEvent);
     super.initState();
+  }
 
-    contentFocusNode.addListener(() {
+  @override
+  void dispose() {
+    removeOverlay();
+    super.dispose();
+  }
+
+  KeyEventResult onKeyEvent(node, e) {
+    if ([LogicalKeyboardKey.arrowLeft, LogicalKeyboardKey.arrowRight]
+        .contains(e.logicalKey)) {
       removeOverlay();
-    });
+    }
+    return KeyEventResult.ignored;
   }
 
   // Widget Functions
@@ -121,10 +134,7 @@ class _ContentFieldState extends State<ContentField> {
           t.substring(caretI, t.length);
       widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: linkIndex + link.length + 4));
-      titleLinkQuery.value = '';
-      if (overlayEntry.mounted) {
-        overlayEntry.remove();
-      }
+      removeOverlay();
     }
 
     removeOverlay();
@@ -185,14 +195,15 @@ class _ContentFieldState extends State<ContentField> {
     overlayEntry = OverlayEntry(builder: builder);
     // show overlay
     if (overlayState != null) {
-      overlayState.insert(overlayEntry);
+      overlayState.insert(overlayEntry!);
     }
   }
 
   void removeOverlay() {
-    if (overlayEntry.mounted) {
-      overlayEntry.remove();
+    if (overlayEntry != null && overlayEntry!.mounted) {
+      overlayEntry!.remove();
       titleLinkQuery.value = '';
+      overlayEntry = null;
     }
   }
 

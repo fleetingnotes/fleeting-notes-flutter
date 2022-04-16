@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
@@ -12,17 +13,18 @@ import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart'
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
-import 'package:fleeting_notes_flutter/constants.dart';
 
 class NoteEditor extends StatefulWidget {
   const NoteEditor({
     Key? key,
     required this.note,
     required this.db,
+    this.isShared = false,
   }) : super(key: key);
 
   final Note note;
   final Database db;
+  final bool isShared;
   @override
   _NoteEditorState createState() => _NoteEditorState();
 }
@@ -39,7 +41,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void initState() {
     super.initState();
-    autofocus = widget.note.isEmpty();
+    hasNewChanges = widget.isShared;
+    autofocus = widget.note.isEmpty() || widget.isShared;
     titleController = TextEditingController(text: widget.note.title);
     sourceController = TextEditingController(text: widget.note.source);
     contentController = StyleableTextFieldController(
@@ -194,7 +197,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.white,
+        color: Theme.of(context).dialogBackgroundColor,
         child: SafeArea(
           child: Column(
             children: [
@@ -206,7 +209,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
               Expanded(
                 child: SingleChildScrollView(
                   controller: ScrollController(),
-                  padding: const EdgeInsets.all(kDefaultPadding),
+                  padding:
+                      EdgeInsets.all(Theme.of(context).custom.kDefaultPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -228,10 +232,12 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                         controller: sourceController,
                         onChanged: onChanged,
                       ),
-                      const SizedBox(height: kDefaultPadding),
+                      SizedBox(
+                          height: Theme.of(context).custom.kDefaultPadding),
                       const Text("Backlinks", style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
-                      const SizedBox(height: kDefaultPadding / 2),
+                      SizedBox(
+                          height: Theme.of(context).custom.kDefaultPadding / 2),
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             onTap: () {

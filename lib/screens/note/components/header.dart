@@ -1,6 +1,6 @@
 import 'package:fleeting_notes_flutter/responsive.dart';
+import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/constants.dart';
 
 class Header extends StatelessWidget {
   const Header({
@@ -17,9 +17,6 @@ class Header extends StatelessWidget {
   final String title;
 
   void _onBack(context) {
-    // if (onSave != null) {
-    //   onSave!();
-    // }
     Navigator.of(context).pop();
   }
 
@@ -41,7 +38,7 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(kDefaultPadding / 3),
+      padding: EdgeInsets.all(Theme.of(context).custom.kDefaultPadding / 3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -50,7 +47,7 @@ class Header extends StatelessWidget {
             onPressed:
                 (Navigator.canPop(context)) ? () => _onBack(context) : null,
           ),
-          const SizedBox(width: kDefaultPadding / 2),
+          SizedBox(width: Theme.of(context).custom.kDefaultPadding / 2),
           Text(
             title,
             style: const TextStyle(

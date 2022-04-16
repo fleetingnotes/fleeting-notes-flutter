@@ -7,14 +7,26 @@ import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key, required this.db}) : super(key: key);
+  const MainScreen({Key? key, required this.db, this.initNote})
+      : super(key: key);
 
   final Database db;
+  final Note? initNote;
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    if (widget.initNote == null) {
+      widget.db.noteHistory = {Note.empty(): GlobalKey()};
+    } else {
+      widget.db.noteHistory = {widget.initNote!: GlobalKey()};
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
