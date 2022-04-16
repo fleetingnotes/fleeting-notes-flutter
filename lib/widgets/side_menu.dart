@@ -34,15 +34,17 @@ class SideMenu extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                      icon: Icon(MyApp.themeNotifier.value == ThemeMode.light
-                          ? Icons.dark_mode
-                          : Icons.light_mode),
-                      onPressed: () {
-                        MyApp.themeNotifier.value =
-                            MyApp.themeNotifier.value == ThemeMode.light
-                                ? ThemeMode.dark
-                                : ThemeMode.light;
-                      })
+                    icon: Icon(MyApp.themeNotifier.value == ThemeMode.light
+                        ? Icons.dark_mode
+                        : Icons.light_mode),
+                    onPressed: () {
+                      MyApp.themeNotifier.value =
+                          MyApp.themeNotifier.value == ThemeMode.light
+                              ? ThemeMode.dark
+                              : ThemeMode.light;
+                    },
+                    tooltip: 'Toggle Theme',
+                  )
                 ],
               ),
               const Spacer(),
