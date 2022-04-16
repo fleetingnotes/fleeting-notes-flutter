@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:hive/hive.dart';
 import '../my_app.dart';
 
 class SideMenu extends StatelessWidget {
@@ -15,6 +16,7 @@ class SideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool darkMode = Hive.box('settings').get('darkMode', defaultValue: false);
     return Container(
       height: double.infinity,
       padding: EdgeInsets.only(
@@ -34,14 +36,9 @@ class SideMenu extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(MyApp.themeNotifier.value == ThemeMode.light
-                        ? Icons.dark_mode
-                        : Icons.light_mode),
+                    icon: Icon(darkMode ? Icons.dark_mode : Icons.light_mode),
                     onPressed: () {
-                      MyApp.themeNotifier.value =
-                          MyApp.themeNotifier.value == ThemeMode.light
-                              ? ThemeMode.dark
-                              : ThemeMode.light;
+                      Hive.box('settings').put('darkMode', !darkMode);
                     },
                     tooltip: 'Toggle Theme',
                   )

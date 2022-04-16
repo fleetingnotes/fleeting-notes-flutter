@@ -4,6 +4,8 @@ import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -33,14 +35,16 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: MyApp.themeNotifier,
-        builder: (context, ThemeMode currentTheme, _) {
+        valueListenable: Hive.box('settings').listenable(),
+        builder: (context, Box box, _) {
           return MaterialApp(
             title: 'Fleeting Notes',
             debugShowCheckedModeBanner: false,
             theme: lightTheme,
             darkTheme: darkTheme,
-            themeMode: currentTheme,
+            themeMode: box.get('darkMode', defaultValue: false)
+                ? ThemeMode.dark
+                : ThemeMode.light,
             initialRoute: '/',
             routes: {
               '/': (context) => FutureBuilder<String>(
