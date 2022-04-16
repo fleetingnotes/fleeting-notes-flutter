@@ -41,7 +41,7 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(Theme.of(context).own().kDefaultPadding / 3),
+      padding: EdgeInsets.all(Theme.of(context).custom.kDefaultPadding / 3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -50,7 +50,7 @@ class Header extends StatelessWidget {
             onPressed:
                 (Navigator.canPop(context)) ? () => _onBack(context) : null,
           ),
-          SizedBox(width: Theme.of(context).own().kDefaultPadding / 2),
+          SizedBox(width: Theme.of(context).custom.kDefaultPadding / 2),
           Text(
             title,
             style: const TextStyle(

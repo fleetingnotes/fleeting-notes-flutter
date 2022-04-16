@@ -17,12 +17,12 @@ class SideMenu extends StatelessWidget {
     return Container(
       height: double.infinity,
       padding: EdgeInsets.only(
-          top: kIsWeb ? Theme.of(context).own().kDefaultPadding : 0),
-      color: Theme.of(context).own().kBgLightColor,
+          top: kIsWeb ? Theme.of(context).custom.kDefaultPadding : 0),
+      color: Theme.of(context).dialogBackgroundColor,
       child: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(
-              horizontal: Theme.of(context).own().kDefaultPadding),
+              horizontal: Theme.of(context).custom.kDefaultPadding),
           child: Column(
             children: [
               Row(

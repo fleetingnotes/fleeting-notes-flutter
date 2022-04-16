@@ -80,8 +80,8 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       body: Container(
         padding: EdgeInsets.only(
-            top: kIsWeb ? Theme.of(context).own().kDefaultPadding : 0),
-        color: Theme.of(context).own().kBgDarkColor,
+            top: kIsWeb ? Theme.of(context).custom.kDefaultPadding : 0),
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: SafeArea(
           right: false,
           child: Column(
@@ -89,8 +89,8 @@ class _SearchScreenState extends State<SearchScreen> {
               // This is our Seearch bar
               Padding(
                 padding: EdgeInsets.symmetric(
-                    horizontal: Theme.of(context).own().kDefaultPadding,
-                    vertical: Theme.of(context).own().kDefaultPadding / 2),
+                    horizontal: Theme.of(context).custom.kDefaultPadding,
+                    vertical: Theme.of(context).custom.kDefaultPadding / 2),
                 child: Row(
                   children: [
                     IconButton(
@@ -104,7 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         onChanged: loadNotes,
                         decoration: InputDecoration(
                           hintText: 'Search',
-                          fillColor: Theme.of(context).own().kBgLightColor,
+                          fillColor: Theme.of(context).dialogBackgroundColor,
                           filled: true,
                           suffixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
@@ -117,10 +117,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: Theme.of(context).own().kDefaultPadding),
+              SizedBox(height: Theme.of(context).custom.kDefaultPadding),
               Padding(
                 padding: EdgeInsets.symmetric(
-                    horizontal: Theme.of(context).own().kDefaultPadding),
+                    horizontal: Theme.of(context).custom.kDefaultPadding),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -132,9 +132,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             isExpanded: true,
                             value: sortBy,
                             iconSize: 16,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Theme.of(context).own().kTextColor),
+                            style: Theme.of(context).textTheme.bodyText1,
                             onChanged: (String? newValue) {
                               setState(() {
                                 sortBy = newValue!;
@@ -178,7 +176,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: Theme.of(context).own().kDefaultPadding),
+              SizedBox(height: Theme.of(context).custom.kDefaultPadding),
               Expanded(
                 child: ListView.builder(
                   key: const PageStorageKey('ListOfNotes'),

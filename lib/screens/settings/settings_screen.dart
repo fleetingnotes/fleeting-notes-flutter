@@ -71,8 +71,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             children: [
               Padding(
-                padding:
-                    EdgeInsets.all(Theme.of(context).own().kDefaultPadding / 3),
+                padding: EdgeInsets.all(
+                    Theme.of(context).custom.kDefaultPadding / 3),
                 child: Row(children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
@@ -100,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SingleChildScrollView(
                   controller: ScrollController(),
                   padding:
-                      EdgeInsets.all(Theme.of(context).own().kDefaultPadding),
+                      EdgeInsets.all(Theme.of(context).custom.kDefaultPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -109,7 +109,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const Divider(thickness: 1, height: 1),
                       Padding(
                         padding: EdgeInsets.all(
-                            Theme.of(context).own().kDefaultPadding / 2),
+                            Theme.of(context).custom.kDefaultPadding / 2),
                         child: Row(children: [
                           DropdownButton(
                             underline: const SizedBox(),
@@ -145,13 +145,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ]),
                       ),
                       SizedBox(
-                          height: Theme.of(context).own().kDefaultPadding / 2),
+                          height: Theme.of(context).custom.kDefaultPadding / 2),
                       const Text("Sync", style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
                       (widget.db.isLoggedIn())
                           ? Padding(
                               padding: EdgeInsets.all(
-                                  Theme.of(context).own().kDefaultPadding / 2),
+                                  Theme.of(context).custom.kDefaultPadding / 2),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -169,7 +169,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   Padding(
                                     padding: EdgeInsets.symmetric(
                                         vertical: Theme.of(context)
-                                            .own()
+                                            .custom
                                             .kDefaultPadding),
                                     child: ElevatedButton(
                                         onPressed: () => widget.db

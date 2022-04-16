@@ -176,7 +176,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.white,
+        color: Theme.of(context).dialogBackgroundColor,
         child: SafeArea(
           child: Column(
             children: [
@@ -189,7 +189,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                 child: SingleChildScrollView(
                   controller: ScrollController(),
                   padding:
-                      EdgeInsets.all(Theme.of(context).own().kDefaultPadding),
+                      EdgeInsets.all(Theme.of(context).custom.kDefaultPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -211,11 +211,12 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                         controller: sourceController,
                         onChanged: onChanged,
                       ),
-                      SizedBox(height: Theme.of(context).own().kDefaultPadding),
+                      SizedBox(
+                          height: Theme.of(context).custom.kDefaultPadding),
                       const Text("Backlinks", style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
                       SizedBox(
-                          height: Theme.of(context).own().kDefaultPadding / 2),
+                          height: Theme.of(context).custom.kDefaultPadding / 2),
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             onTap: () {
