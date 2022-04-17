@@ -18,7 +18,6 @@ class NoteScreenNavigator extends StatelessWidget {
     db.navigatorKey = GlobalKey<NavigatorState>();
     db.routeObserver = routeObserver;
     var history = db.noteHistory.entries.toList();
-
     return Navigator(
       key: db.navigatorKey,
       observers: [routeObserver],
