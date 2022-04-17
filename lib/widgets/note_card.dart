@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fleeting_notes_flutter/models/search_query.dart';
 
 import '../models/Note.dart';
@@ -29,9 +31,15 @@ class NoteCard extends StatelessWidget {
     int placeHolder = 0;
     List<TextSpan> textSpanner = [];
     r.allMatches(text).forEach((element) {
-      textSpanner.add(TextSpan(
-          text: text.substring(placeHolder, element.start),
-          style: defaultStyle));
+      if (textSpanner.isNotEmpty) {
+        textSpanner.add(TextSpan(
+            text: text.substring(placeHolder, element.start),
+            style: defaultStyle));
+      } else {
+        textSpanner.add(TextSpan(
+            text: text.substring(max(element.start - 50, 0), element.start),
+            style: defaultStyle));
+      }
       textSpanner.add(TextSpan(
           text: text.substring(element.start, element.end), style: highlight));
       placeHolder = element.end;
