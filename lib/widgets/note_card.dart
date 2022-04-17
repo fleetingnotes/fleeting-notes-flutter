@@ -84,7 +84,8 @@ class NoteCard extends StatelessWidget {
                                               color: isActive
                                                   ? Colors.white
                                                   : null))),
-                                  maxLines: 1),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
                             if (note.content != '')
                               RichText(
                                   text: TextSpan(
@@ -102,7 +103,8 @@ class NoteCard extends StatelessWidget {
                                                     ? Colors.white
                                                     : null,
                                               ))),
-                                  maxLines: 2),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis),
                           ]),
                     ),
                     SizedBox(width: Theme.of(context).custom.kDefaultPadding),
