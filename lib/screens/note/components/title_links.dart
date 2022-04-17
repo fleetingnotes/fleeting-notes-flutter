@@ -83,6 +83,8 @@ class _TitleLinksState extends State<TitleLinks> {
         offset: newCaretOffset,
         child: Material(
           child: ListView.builder(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
             itemCount: filteredTitles.length,
             itemExtent: tileHeight,
             itemBuilder: (context, index) {
