@@ -5,6 +5,10 @@ Fleeting Notes - is a reference for the ideas in your mind
 ```
 flutter run
 ```
+Or as a web-server
+```
+flutter run -d web-server
+```
 
 ## Testing Applications on browser
 ```
