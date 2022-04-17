@@ -22,6 +22,7 @@ class FollowLink extends StatelessWidget {
     }
     return Positioned(
       width: width,
+      height: 35,
       child: CompositedTransformFollower(
         link: layerLink,
         offset: newCaretOffset,
