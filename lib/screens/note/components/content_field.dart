@@ -36,12 +36,17 @@ class _ContentFieldState extends State<ContentField> {
   void initState() {
     // NOTE: onKeyEvent doesn't ignore enter key press
     contentFocusNode = FocusNode(onKey: onKeyEvent);
+    contentFocusNode.addListener(() {
+      if (!contentFocusNode.hasFocus) {
+        removeOverlay();
+      }
+    });
     super.initState();
   }
 
   @override
   void dispose() {
-    removeOverlay();
+    contentFocusNode.dispose();
     super.dispose();
   }
 
@@ -170,6 +175,7 @@ class _ContentFieldState extends State<ContentField> {
       Note? note = await widget.db.getNoteByTitle(title);
       note ??= Note.empty(title: title);
       widget.db.navigateToNote(note); // TODO: Deprecate
+      removeOverlay();
     }
 
     // init overlay entry

@@ -146,4 +146,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('[[hello world]]'), findsOneWidget);
   });
+
+  testWidgets('Clicking Follow Link button removes Follow Link overlay',
+      (WidgetTester tester) async {
+    MockRealmDB mockDb = MockRealmDB();
+    when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
+        (_) async => Future.value([Note.empty(content: '[[hello]]')]));
+    when(() => mockDb.upsertNote(any()))
+        .thenAnswer((_) async => Future.value(false));
+    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), '[[test]]');
+    await tester.pump();
+    await tester.tapAt(tester
+        .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
+        .translate(20, 10));
+    await tester.pump();
+    await tester.tap(find.text('Follow Link'));
+    await tester.pumpAndSettle();
+    expect(find.text('Follow Link'), findsNothing);
+  });
 }
