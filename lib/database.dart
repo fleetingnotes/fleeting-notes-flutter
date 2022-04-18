@@ -152,6 +152,21 @@ class Database {
     }
   }
 
+  Future<bool> updateNotes(List<Note> notes) async {
+    try {
+      if (isLoggedIn()) {
+        bool isSuccess = await realm.updateNotesRealm(notes);
+        if (!isSuccess) return false;
+      }
+      var box = await Hive.openBox(realm.userId);
+      Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
+      await box.putAll(noteIdMap);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<bool> deleteNote(Note note) async {
     try {
       if (isLoggedIn()) {
