@@ -112,8 +112,6 @@ class FirebaseDB implements DatabaseInterface {
       await batch.commit();
       return true;
     } catch (e) {
-      print(currUser);
-      print(e);
       return false;
     }
   }

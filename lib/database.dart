@@ -269,7 +269,6 @@ class Database {
       await storage.write(key: 'email', value: email);
       await storage.write(key: 'password', value: password);
       if (pushLocalNotes) {
-        print('pushed local notes');
         var box = await Hive.openBox('local');
         List<Note> notes = getAllNotesLocal(box);
         if (notes.isNotEmpty) {

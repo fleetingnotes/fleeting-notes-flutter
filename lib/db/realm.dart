@@ -99,13 +99,10 @@ class RealmDB implements DatabaseInterface {
       }).toList();
       String query =
           'mutation { insertManyNotes(data: ${queryList.toString()}) { insertedIds } }';
-      print(query);
       var res = await graphQLRequest(query);
-      print(res['data']);
       if (res['data'] == null) return false;
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
