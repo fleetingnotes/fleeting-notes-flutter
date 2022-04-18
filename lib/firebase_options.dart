@@ -60,8 +60,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '220377646074',
     projectId: 'fleetingnotes-22f77',
     storageBucket: 'fleetingnotes-22f77.appspot.com',
-    iosClientId:
-        '220377646074-b3l8tu5g7r4rti84lrlecurgqoq559gb.apps.googleusercontent.com',
+    iosClientId: '220377646074-b3l8tu5g7r4rti84lrlecurgqoq559gb.apps.googleusercontent.com',
     iosBundleId: 'com.fleetingnotes',
   );
 }
