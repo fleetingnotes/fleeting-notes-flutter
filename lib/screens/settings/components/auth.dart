@@ -23,7 +23,8 @@ class _AuthState extends State<Auth> {
     return password.isNotEmpty;
   }
 
-  Future<void> _login(BuildContext context, {pushLocalNotes = false}) async {
+  Future<void> _login(BuildContext context,
+      {bool pushLocalNotes = false}) async {
     if (!validPassword() || !validEmail()) {
       return;
     }
