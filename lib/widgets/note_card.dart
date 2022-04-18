@@ -26,7 +26,7 @@ class NoteCard extends StatelessWidget {
         query.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
       return '\\${match.group(0)}';
     });
-    TextStyle highlight = const TextStyle(backgroundColor: Colors.orange);
+    TextStyle highlight = defaultStyle.copyWith(backgroundColor: Colors.orange);
     RegExp r = RegExp(escapedQuery, multiLine: true);
     int placeHolder = 0;
     List<TextSpan> textSpanner = [];
@@ -36,9 +36,12 @@ class NoteCard extends StatelessWidget {
             text: text.substring(placeHolder, element.start),
             style: defaultStyle));
       } else {
+        int prev = max(element.start - 10, 0);
+        if (prev > 0) {
+          textSpanner.add(TextSpan(text: "...", style: defaultStyle));
+        }
         textSpanner.add(TextSpan(
-            text: text.substring(max(element.start - 50, 0), element.start),
-            style: defaultStyle));
+            text: text.substring(prev, element.start), style: defaultStyle));
       }
       textSpanner.add(TextSpan(
           text: text.substring(element.start, element.end), style: highlight));
@@ -86,12 +89,16 @@ class NoteCard extends StatelessWidget {
                                               ? sQuery!.queryRegex
                                               : '',
                                           note.title,
-                                          TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500,
-                                              color: isActive
-                                                  ? Colors.white
-                                                  : null))),
+                                          Theme.of(context)
+                                              .textTheme
+                                              .bodyText2!
+                                              .copyWith(
+                                                color: isActive
+                                                    ? Colors.white
+                                                    : null,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ))),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
                             if (note.content != '')
