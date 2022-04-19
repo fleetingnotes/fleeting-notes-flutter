@@ -165,11 +165,11 @@ class Database {
 
   Future<bool> insertNote(Note note) async {
     try {
-      if (firebase.isLoggedIn()) firebase.insertNote(note);
       if (realm.isLoggedIn()) {
         bool isSuccess = await realm.insertNote(note);
         if (!isSuccess) return false;
       }
+      if (firebase.isLoggedIn()) firebase.insertNote(note);
       var box = await Hive.openBox(realm.userId);
       box.put(note.id, note);
       return true;
@@ -180,11 +180,11 @@ class Database {
 
   Future<bool> updateNote(Note note) async {
     try {
-      if (firebase.isLoggedIn()) firebase.updateNote(note);
       if (realm.isLoggedIn()) {
         bool isSuccess = await realm.updateNote(note);
         if (!isSuccess) return false;
       }
+      if (firebase.isLoggedIn()) firebase.updateNote(note);
       var box = await Hive.openBox(realm.userId);
       box.put(note.id, note);
       return true;
@@ -195,11 +195,11 @@ class Database {
 
   Future<bool> updateNotes(List<Note> notes) async {
     try {
-      if (firebase.isLoggedIn()) firebase.updateNotes(notes);
       if (realm.isLoggedIn()) {
         bool isSuccess = await realm.updateNotes(notes);
         if (!isSuccess) return false;
       }
+      if (firebase.isLoggedIn()) firebase.updateNotes(notes);
       var box = await Hive.openBox(realm.userId);
       Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
       await box.putAll(noteIdMap);
@@ -211,11 +211,11 @@ class Database {
 
   Future<bool> deleteNote(Note note) async {
     try {
-      if (firebase.isLoggedIn()) firebase.deleteNote(note);
       if (realm.isLoggedIn()) {
         bool isSuccess = await realm.deleteNote(note);
         if (!isSuccess) return false;
       }
+      if (firebase.isLoggedIn()) firebase.deleteNote(note);
       var box = await Hive.openBox(realm.userId);
       box.delete(note.id);
       return true;
@@ -285,10 +285,8 @@ class Database {
   Future<bool> migrateToFirebase(String email, String password) async {
     await firebase.register(email, password);
     if (!await firebase.login(email, password)) return false;
-    if (await firebase.isNotesEmpty()) {
-      List<Note> notes = await realm.getAllNotes();
-      await firebase.updateNotes(notes);
-    }
+    List<Note> notes = await realm.getAllNotes();
+    await firebase.updateNotes(notes);
     return true;
   }
 
