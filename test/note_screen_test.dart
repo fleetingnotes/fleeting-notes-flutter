@@ -36,7 +36,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
     await tester.pumpAndSettle();
 
-    expect(find.text('backlink note'), findsOneWidget);
+    expect(find.text('backlink note', findRichText: true), findsOneWidget);
   });
 
   testWidgets('Save note button is enabled when note is changed',
@@ -144,7 +144,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
-    expect(find.text('[[hello world]]'), findsOneWidget);
+    expect(find.text('[[hello world]]', findRichText: true), findsOneWidget);
   });
 
   testWidgets('Clicking Follow Link button removes Follow Link overlay',
