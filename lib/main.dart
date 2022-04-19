@@ -3,6 +3,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:fleeting_notes_flutter/my_app.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/my_app_web.dart';
 
@@ -17,6 +19,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(NoteAdapter());
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await openHiveBox('settings');
   runApp(const MyApp());
 }

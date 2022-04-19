@@ -7,6 +7,7 @@ import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'dart:async';
+import 'db/firebase.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -18,7 +19,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final Database db = Database();
+  final Database db = Database(firebase: FirebaseDB());
   Note? initNote;
 
   @override
