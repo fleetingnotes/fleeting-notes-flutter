@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:test/test.dart';
 import 'package:fleeting_notes_flutter/database.dart';
@@ -40,7 +41,8 @@ void main() {
     inputsToExpected.forEach((query, noteIds) {
       test('query: $query -> note_ids: $noteIds', () async {
         final db = MockRealmDB();
-        List searchedNotes = await db.getSearchNotes(query);
+        List searchedNotes =
+            await db.getSearchNotes(SearchQuery(queryRegex: query));
         List searchedIds = searchedNotes.map((e) => e.id).toList();
         expect(searchedIds.length, noteIds.length);
         expect(searchedIds.toSet(), noteIds.toSet());

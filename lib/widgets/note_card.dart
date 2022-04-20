@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:fleeting_notes_flutter/models/search_query.dart';
+
 import '../models/Note.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
@@ -7,12 +11,46 @@ class NoteCard extends StatelessWidget {
     Key? key,
     required this.note,
     required this.onTap,
+    this.sQuery,
     this.isActive = false,
   }) : super(key: key);
 
   final bool isActive;
   final VoidCallback onTap;
   final Note note;
+  final SearchQuery? sQuery;
+
+  List<TextSpan> highlightString(
+      String query, String text, TextStyle defaultStyle) {
+    String escapedQuery =
+        query.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
+      return '\\${match.group(0)}';
+    });
+    TextStyle highlight = defaultStyle.copyWith(backgroundColor: Colors.orange);
+    RegExp r = RegExp(escapedQuery, multiLine: true);
+    int placeHolder = 0;
+    List<TextSpan> textSpanner = [];
+    r.allMatches(text).forEach((element) {
+      if (textSpanner.isNotEmpty) {
+        textSpanner.add(TextSpan(
+            text: text.substring(placeHolder, element.start),
+            style: defaultStyle));
+      } else {
+        int prev = max(element.start - 10, 0);
+        if (prev > 0) {
+          textSpanner.add(TextSpan(text: "...", style: defaultStyle));
+        }
+        textSpanner.add(TextSpan(
+            text: text.substring(prev, element.start), style: defaultStyle));
+      }
+      textSpanner.add(TextSpan(
+          text: text.substring(element.start, element.end), style: highlight));
+      placeHolder = element.end;
+    });
+    textSpanner.add(TextSpan(
+        text: text.substring(placeHolder, text.length), style: defaultStyle));
+    return textSpanner;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,26 +81,45 @@ class NoteCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (note.title != '')
-                              Text(
-                                note.title,
-                                maxLines: 1,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: isActive ? Colors.white : null,
-                                ),
-                              ),
+                              RichText(
+                                  text: TextSpan(
+                                      children: highlightString(
+                                          (sQuery != null &&
+                                                  sQuery!.searchByTitle)
+                                              ? sQuery!.queryRegex
+                                              : '',
+                                          note.title,
+                                          Theme.of(context)
+                                              .textTheme
+                                              .bodyText2!
+                                              .copyWith(
+                                                color: isActive
+                                                    ? Colors.white
+                                                    : null,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ))),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
                             if (note.content != '')
-                              Text(
-                                note.content,
-                                maxLines: 2,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText2!
-                                    .copyWith(
-                                      color: isActive ? Colors.white : null,
-                                    ),
-                              ),
+                              RichText(
+                                  text: TextSpan(
+                                      children: highlightString(
+                                          (sQuery != null &&
+                                                  sQuery!.searchByContent)
+                                              ? sQuery!.queryRegex
+                                              : '',
+                                          note.content,
+                                          Theme.of(context)
+                                              .textTheme
+                                              .bodyText2!
+                                              .copyWith(
+                                                color: isActive
+                                                    ? Colors.white
+                                                    : null,
+                                              ))),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis),
                           ]),
                     ),
                     SizedBox(width: Theme.of(context).custom.kDefaultPadding),

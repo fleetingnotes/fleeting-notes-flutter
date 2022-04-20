@@ -1,7 +1,7 @@
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
-
+import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../responsive.dart';
@@ -43,12 +43,14 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Future<void> loadNotes(queryRegex, {forceSync = false}) async {
     if (!mounted) return;
+    SearchQuery query = SearchQuery(
+        queryRegex: queryRegex,
+        searchByTitle: searchFilter['title'],
+        searchByContent: searchFilter['content'],
+        searchBySource: searchFilter['source'],
+        sortBy: sortOptionMap[sortBy]!);
     var tempNotes = await widget.db.getSearchNotes(
-      queryRegex,
-      searchByTitle: searchFilter['title'],
-      searchByContent: searchFilter['content'],
-      searchBySource: searchFilter['source'],
-      sortBy: sortOptionMap[sortBy],
+      query,
       forceSync: forceSync,
     );
     setState(() {
@@ -185,6 +187,12 @@ class _SearchScreenState extends State<SearchScreen> {
                   controller: scrollController,
                   itemCount: notes.length,
                   itemBuilder: (context, index) => NoteCard(
+                    sQuery: SearchQuery(
+                        queryRegex: queryController.text,
+                        searchByTitle: searchFilter['title'],
+                        searchByContent: searchFilter['content'],
+                        searchBySource: searchFilter['source'],
+                        sortBy: sortOptionMap[sortBy]!),
                     note: notes[index],
                     isActive: Responsive.isMobile(context)
                         ? false

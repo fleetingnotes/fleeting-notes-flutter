@@ -5,7 +5,8 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 @TestOn('browser')
-import 'package:flutter/material.dart';
+import 'package:fleeting_notes_flutter/models/search_query.dart';
+import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
@@ -19,6 +20,7 @@ import 'mock_realm_db.dart';
 void main() {
   setUpAll(() {
     registerFallbackValue(Note.empty());
+    registerFallbackValue(SearchQuery(queryRegex: ''));
   });
   // Desktop / Tablet Tests
   testWidgets('Render Main Screen (Desktop/Tablet)',
@@ -65,18 +67,18 @@ void main() {
         .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
     await tester.pump();
-    await tester.tap(find.widgetWithText(NoteCard, 'Click me note!'));
+    await tester.tap(find.text('Click me note!', findRichText: true));
     await tester.pumpAndSettle(); // Wait for animation to finish
     expect(find.widgetWithText(NoteEditor, 'Click me note!'), findsOneWidget);
     expect(
         tester
-            .widget<Text>(find.descendant(
+            .widget<NeumorphicButton>(find.descendant(
               of: find.byType(SearchScreen),
-              matching: find.text('Click me note!'),
+              matching: find.byType(NeumorphicButton),
             ))
             .style!
             .color,
-        Colors.white);
+        Colors.blue);
   });
 
   testWidgets('Save note updates list of notes', (WidgetTester tester) async {
@@ -148,7 +150,7 @@ void main() {
         .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
     await tester.pump();
-    await tester.tap(find.widgetWithText(NoteCard, 'Click me note!'));
+    await tester.tap(find.text('Click me note!', findRichText: true));
     await tester.pumpAndSettle(); // Wait for animation to finish
     expect(find.widgetWithText(NoteEditor, 'Click me note!'), findsOneWidget);
     expect(find.byType(SearchScreen), findsNothing);
