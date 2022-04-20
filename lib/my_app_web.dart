@@ -9,16 +9,14 @@ import 'package:hive_flutter/adapters.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
-  static final ValueNotifier<ThemeMode> themeNotifier =
-      ValueNotifier(ThemeMode.system);
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<MyApp> createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   final Database db = Database(firebase: FirebaseDB());
-  Future<String> _navigateScreen() async {
+  Future<String> navigateScreen() async {
     await db.loginWithStorage();
     return 'main';
   }
@@ -48,7 +46,7 @@ class _MyAppState extends State<MyApp> {
             initialRoute: '/',
             routes: {
               '/': (context) => FutureBuilder<String>(
-                    future: _navigateScreen(),
+                    future: navigateScreen(),
                     builder: (BuildContext context,
                         AsyncSnapshot<String?> snapshot) {
                       if (snapshot.hasData) {
