@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
@@ -14,7 +15,7 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState<T extends StatefulWidget> extends State<MyApp> {
-  final Database db = Database();
+  final Database db = Database(firebase: FirebaseDB());
   Future<String> navigateScreen() async {
     await db.loginWithStorage();
     return 'main';
