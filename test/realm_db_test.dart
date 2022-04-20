@@ -1,9 +1,15 @@
 import 'package:fleeting_notes_flutter/models/search_query.dart';
+import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:test/test.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:mocktail/mocktail.dart';
+
+class MockFirebaseDB extends Mock implements FirebaseDB {}
 
 class MockRealmDB extends Database {
+  MockRealmDB() : super(firebase: MockFirebaseDB());
+
   Note newNote(id, title, content, source) {
     String t = DateTime.now().toIso8601String();
     var note = Note(
