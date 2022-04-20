@@ -12,6 +12,14 @@
     "permissions": [
       "tabs"
     ],
+    "commands": {
+      "_execute_action": {
+        "suggested_key" : {
+         "default": "Ctrl+Shift+E",
+         "mac": "Command+Shift+E"
+        }
+      }
+    },
     "manifest_version": 3
   }
   
