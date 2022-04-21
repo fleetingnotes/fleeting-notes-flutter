@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -31,6 +32,7 @@ class _MyAppState extends web.MyAppState<MyApp> {
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
     ReceiveSharingIntent.getTextStream().listen((String sharedText) {
       db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
+      FirebaseAnalytics.instance.logEvent(name: 'receive_share');
     }, onError: (err) {
       // ignore: avoid_print
       print("getLinkStream error: $err");
@@ -42,6 +44,7 @@ class _MyAppState extends web.MyAppState<MyApp> {
         setState(() {
           initNote = getNoteFromShareText(sharedText);
         });
+        FirebaseAnalytics.instance.logEvent(name: 'receive_share');
       }
     });
     super.initState();

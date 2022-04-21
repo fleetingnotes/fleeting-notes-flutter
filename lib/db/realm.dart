@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:fleeting_notes_flutter/db/db_interface.dart';
 
 import '../models/Note.dart';
@@ -136,6 +137,7 @@ class RealmDB implements DatabaseInterface {
           "password": password,
         }),
       );
+      FirebaseAnalytics.instance.logSignUp(signUpMethod: 'realm');
       return true;
     } catch (e) {
       return false;
@@ -146,6 +148,9 @@ class RealmDB implements DatabaseInterface {
   Future<bool> logout() async {
     userId = 'local';
     _accessToken = null;
+    await FirebaseAnalytics.instance.logEvent(name: 'sign_out', parameters: {
+      'method': 'realm',
+    });
     return true;
   }
 
@@ -186,6 +191,7 @@ class RealmDB implements DatabaseInterface {
       _refreshToken = res.data['refresh_token'];
       DateTime currentTime = DateTime.now();
       _expirationDate = currentTime.add(const Duration(minutes: 30));
+      await FirebaseAnalytics.instance.logLogin(loginMethod: 'realm');
       return true;
     } catch (e) {
       return false;

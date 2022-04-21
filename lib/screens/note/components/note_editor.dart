@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -73,7 +74,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void dispose() {
     widget.db.routeObserver.unsubscribe(this);
-    if (hasNewChanges) _saveNote(updateState: false);
+    if (hasNewChanges) {
+      FirebaseAnalytics.instance.logEvent(name: 'auto_save_note');
+      _saveNote(updateState: false);
+    }
     super.dispose();
   }
 
@@ -93,7 +97,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   void didPushNext() {
     // Autosave if the note was previously saved
     // If we autosave every note, we would pollute pretty fast.
-    if (hasNewChanges) _saveNote();
+    if (hasNewChanges) {
+      FirebaseAnalytics.instance.logEvent(name: 'auto_save_note');
+      _saveNote();
+    }
   }
 
   // Helper functions
@@ -248,6 +255,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             onTap: () {
+                              FirebaseAnalytics.instance
+                                  .logEvent(name: 'click_backlink');
                               widget.db.navigateToNote(note); // TODO: Deprecate
                             },
                           )),

@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
