@@ -9,22 +9,24 @@ class Header extends StatelessWidget {
     required this.onSave,
     required this.onDelete,
     required this.onSearch,
+    required this.analytics,
     this.title = '',
   }) : super(key: key);
 
   final Function? onSave;
   final VoidCallback onDelete;
   final VoidCallback onSearch;
+  final FirebaseAnalytics analytics;
   final String title;
 
   void _onBack(context) {
-    FirebaseAnalytics.instance.logEvent(name: 'go_back_notecard');
+    analytics.logEvent(name: 'go_back_notecard');
     Navigator.of(context).pop();
   }
 
   void newSave(context) async {
     String errMessage = await onSave!();
-    FirebaseAnalytics.instance.logEvent(name: 'click_save_note');
+    analytics.logEvent(name: 'click_save_note');
     if (errMessage != '') {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(errMessage),
@@ -72,8 +74,7 @@ class Header extends StatelessWidget {
               PopupMenuItem(
                 child: const Text("Delete"),
                 onTap: () {
-                  FirebaseAnalytics.instance
-                      .logEvent(name: 'click_delete_note');
+                  analytics.logEvent(name: 'click_delete_note');
                   onDelete();
                 },
               ),

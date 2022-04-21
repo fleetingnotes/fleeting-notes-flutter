@@ -7,14 +7,14 @@ import 'db_interface.dart';
 class FirebaseDB implements DatabaseInterface {
   @override
   String userId = 'local';
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   User? currUser;
   late CollectionReference notesCollection;
   FirebaseDB() {
     FirebaseAuth.instance.userChanges().listen((User? user) {
       currUser = user;
       userId = (user == null) ? 'local' : user.uid;
-      FirebaseAnalytics.instance
-          .setUserId(id: (user == null) ? null : user.uid);
+      analytics.setUserId(id: (user == null) ? null : user.uid);
     });
     notesCollection = FirebaseFirestore.instance.collection('notes');
   }
@@ -30,7 +30,7 @@ class FirebaseDB implements DatabaseInterface {
           .signInWithEmailAndPassword(email: email, password: password);
       currUser = credentials.user;
       userId = (credentials.user == null) ? 'local' : credentials.user!.uid;
-      await FirebaseAnalytics.instance.logLogin(loginMethod: 'firebase');
+      await analytics.logLogin(loginMethod: 'firebase');
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -51,7 +51,7 @@ class FirebaseDB implements DatabaseInterface {
         email: email,
         password: password,
       );
-      await FirebaseAnalytics.instance.logSignUp(signUpMethod: 'firebase');
+      await analytics.logSignUp(signUpMethod: 'firebase');
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -71,7 +71,7 @@ class FirebaseDB implements DatabaseInterface {
   Future<bool> logout() async {
     try {
       await FirebaseAuth.instance.signOut();
-      await FirebaseAnalytics.instance.logEvent(name: 'sign_out', parameters: {
+      await analytics.logEvent(name: 'sign_out', parameters: {
         'method': 'firebase',
       });
       currUser = null;

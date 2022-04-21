@@ -1,4 +1,3 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -140,7 +139,7 @@ class _ContentFieldState extends State<ContentField> {
           t.substring(caretI, t.length);
       widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: linkIndex + link.length + 4));
-      FirebaseAnalytics.instance
+      widget.db.firebase.analytics
           .logEvent(name: 'link_suggestion_select', parameters: {
         'query': beforeCaretText.substring(linkIndex).replaceAll('[', ''),
         'selected_link': link,
@@ -181,7 +180,7 @@ class _ContentFieldState extends State<ContentField> {
       Note? note = await widget.db.getNoteByTitle(title);
       note ??= Note.empty(title: title);
       widget.db.navigateToNote(note); // TODO: Deprecate
-      await FirebaseAnalytics.instance.logEvent(name: 'follow_link');
+      await widget.db.firebase.analytics.logEvent(name: 'follow_link');
       removeOverlay();
     }
 

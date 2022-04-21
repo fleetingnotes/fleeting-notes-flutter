@@ -1,4 +1,3 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -75,7 +74,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   void dispose() {
     widget.db.routeObserver.unsubscribe(this);
     if (hasNewChanges) {
-      FirebaseAnalytics.instance.logEvent(name: 'auto_save_note');
+      widget.db.firebase.analytics.logEvent(name: 'auto_save_note');
       _saveNote(updateState: false);
     }
     super.dispose();
@@ -98,7 +97,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     // Autosave if the note was previously saved
     // If we autosave every note, we would pollute pretty fast.
     if (hasNewChanges) {
-      FirebaseAnalytics.instance.logEvent(name: 'auto_save_note');
+      widget.db.firebase.analytics.logEvent(name: 'auto_save_note');
       _saveNote();
     }
   }
@@ -216,9 +215,11 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
           child: Column(
             children: [
               Header(
-                  onSave: (hasNewChanges) ? _saveNote : null,
-                  onDelete: _deleteNote,
-                  onSearch: () => onSearchNavigate(context)),
+                onSave: (hasNewChanges) ? _saveNote : null,
+                onDelete: _deleteNote,
+                onSearch: () => onSearchNavigate(context),
+                analytics: widget.db.firebase.analytics,
+              ),
               const Divider(thickness: 1, height: 1),
               Expanded(
                 child: SingleChildScrollView(
@@ -255,7 +256,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                       ...backlinkNotes.map((note) => NoteCard(
                             note: note,
                             onTap: () {
-                              FirebaseAnalytics.instance
+                              widget.db.firebase.analytics
                                   .logEvent(name: 'click_backlink');
                               widget.db.navigateToNote(note); // TODO: Deprecate
                             },

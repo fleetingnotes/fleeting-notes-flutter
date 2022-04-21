@@ -1,4 +1,3 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -45,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
           // Provider.of<NoteStackModel>(context, listen: false)
           //     .pushNote(Note.empty());
           widget.db.navigateToNote(Note.empty()); // TODO: Deprecate
-          FirebaseAnalytics.instance.logEvent(name: 'click_new_note_fab');
+          widget.db.firebase.analytics.logEvent(name: 'click_new_note_fab');
         },
       ),
       body: Responsive(

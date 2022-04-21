@@ -1,4 +1,3 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +107,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         controller: queryController,
                         onChanged: loadNotes,
                         onTap: () {
-                          FirebaseAnalytics.instance
+                          widget.db.firebase.analytics
                               .logEvent(name: 'click_search_bar');
                         },
                         decoration: InputDecoration(
@@ -143,7 +142,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             iconSize: 16,
                             style: Theme.of(context).textTheme.bodyText1,
                             onChanged: (String? newValue) {
-                              FirebaseAnalytics.instance.logEvent(
+                              widget.db.firebase.analytics.logEvent(
                                   name: 'change_sort_by',
                                   parameters: {
                                     'sort_by': newValue,
@@ -169,7 +168,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: MaterialButton(
                         minWidth: 20,
                         onPressed: () {
-                          FirebaseAnalytics.instance
+                          widget.db.firebase.analytics
                               .logEvent(name: 'click_search_filter');
                           showDialog(
                             context: context,
@@ -210,7 +209,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         ? false
                         : notes[index].id == activeNoteId,
                     onTap: () {
-                      FirebaseAnalytics.instance
+                      widget.db.firebase.analytics
                           .logEvent(name: 'click_search_notecard');
                       _pressNote(context, notes[index]);
                     },
