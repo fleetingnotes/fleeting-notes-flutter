@@ -140,6 +140,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 } else {
                                   _downloadNotesAsJSON(notes);
                                 }
+                                widget.db.firebase.analytics.logEvent(
+                                    name: 'export_notes',
+                                    parameters: {
+                                      'file_type': exportOption,
+                                    });
                               },
                               child: const Text('Export')),
                         ]),
@@ -172,8 +177,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                             .custom
                                             .kDefaultPadding),
                                     child: ElevatedButton(
-                                        onPressed: () => widget.db
-                                            .getAllNotes(forceSync: true),
+                                        onPressed: () {
+                                          widget.db.firebase.analytics.logEvent(
+                                              name: 'force_sync_notes');
+                                          widget.db
+                                              .getAllNotes(forceSync: true);
+                                        },
                                         child: const Text('Force Sync')),
                                   ),
                                 ],
