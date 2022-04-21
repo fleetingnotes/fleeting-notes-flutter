@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "220377646074",
+    "project_id": "fleetingnotes-22f77",
+    "storage_bucket": "fleetingnotes-22f77.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:220377646074:android:f12456df2d895312ebda43",
+        "android_client_info": {
+          "package_name": "com.fleetingnotes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "220377646074-na9hvd1h26046pqgabb1hn3v4v86mnd8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXON2_4OVoHSplISHIQKtexvAlZEIZBRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "220377646074-na9hvd1h26046pqgabb1hn3v4v86mnd8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "220377646074-b3l8tu5g7r4rti84lrlecurgqoq559gb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.fleetingnotes"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
