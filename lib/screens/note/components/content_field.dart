@@ -139,6 +139,11 @@ class _ContentFieldState extends State<ContentField> {
           t.substring(caretI, t.length);
       widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: linkIndex + link.length + 4));
+      widget.db.firebase.analytics
+          .logEvent(name: 'link_suggestion_select', parameters: {
+        'query': beforeCaretText.substring(linkIndex).replaceAll('[', ''),
+        'selected_link': link,
+      });
       removeOverlay();
     }
 
@@ -175,6 +180,7 @@ class _ContentFieldState extends State<ContentField> {
       Note? note = await widget.db.getNoteByTitle(title);
       note ??= Note.empty(title: title);
       widget.db.navigateToNote(note); // TODO: Deprecate
+      await widget.db.firebase.analytics.logEvent(name: 'follow_link');
       removeOverlay();
     }
 

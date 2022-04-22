@@ -106,6 +106,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: TextField(
                         controller: queryController,
                         onChanged: loadNotes,
+                        onTap: () {
+                          widget.db.firebase.analytics
+                              .logEvent(name: 'click_search_bar');
+                        },
                         decoration: InputDecoration(
                           hintText: 'Search',
                           fillColor: Theme.of(context).dialogBackgroundColor,
@@ -130,7 +134,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   children: [
                     Flexible(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 170),
+                        constraints: const BoxConstraints(maxWidth: 180),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             isExpanded: true,
@@ -138,6 +142,11 @@ class _SearchScreenState extends State<SearchScreen> {
                             iconSize: 16,
                             style: Theme.of(context).textTheme.bodyText1,
                             onChanged: (String? newValue) {
+                              widget.db.firebase.analytics.logEvent(
+                                  name: 'change_sort_by',
+                                  parameters: {
+                                    'sort_by': newValue,
+                                  });
                               setState(() {
                                 sortBy = newValue!;
                               });
@@ -159,6 +168,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: MaterialButton(
                         minWidth: 20,
                         onPressed: () {
+                          widget.db.firebase.analytics
+                              .logEvent(name: 'click_search_filter');
                           showDialog(
                             context: context,
                             builder: (_) {
@@ -198,6 +209,8 @@ class _SearchScreenState extends State<SearchScreen> {
                         ? false
                         : notes[index].id == activeNoteId,
                     onTap: () {
+                      widget.db.firebase.analytics
+                          .logEvent(name: 'click_search_notecard');
                       _pressNote(context, notes[index]);
                     },
                   ),

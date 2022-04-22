@@ -44,6 +44,7 @@ class _MainScreenState extends State<MainScreen> {
           // Provider.of<NoteStackModel>(context, listen: false)
           //     .pushNote(Note.empty());
           widget.db.navigateToNote(Note.empty()); // TODO: Deprecate
+          widget.db.firebase.analytics.logEvent(name: 'click_new_note_fab');
         },
       ),
       body: Responsive(

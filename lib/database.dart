@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
@@ -250,9 +249,15 @@ class Database {
 
   Future<bool> migrateToFirebase(String email, String password) async {
     await firebase.register(email, password);
-    if (!await firebase.login(email, password)) return false;
+    if (!await firebase.login(email, password)) {
+      await firebase.analytics.logEvent(
+          name: 'firebase_migration', parameters: {'is_success': false});
+      return false;
+    }
     List<Note> notes = await realm.getAllNotes();
     await firebase.updateNotes(notes);
+    await firebase.analytics
+        .logEvent(name: 'firebase_migration', parameters: {'is_success': true});
     return true;
   }
 

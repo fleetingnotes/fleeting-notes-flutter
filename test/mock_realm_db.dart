@@ -1,3 +1,5 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/database.dart';
@@ -5,6 +7,13 @@ import 'dart:async';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+
+class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
+
+class MockFirebaseDB extends Mock implements FirebaseDB {
+  @override
+  FirebaseAnalytics analytics = MockFirebaseAnalytics();
+}
 
 class MockRealmDB extends Mock implements Database {
   @override
@@ -18,6 +27,8 @@ class MockRealmDB extends Mock implements Database {
   StreamController streamController = StreamController();
   @override
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+  @override
+  FirebaseDB firebase = MockFirebaseDB();
 
   @override
   Future<bool> noteExists(Note note) async => true;
