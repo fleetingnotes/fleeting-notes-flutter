@@ -3,10 +3,12 @@ import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/database.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
+import 'package:hive/hive.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key, required this.db, required this.onAuthChange})
@@ -61,6 +63,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var bytes = utf8.encode(json);
     FileSaver.instance.saveFile(
         'fleeting_notes_export.json', Uint8List.fromList(bytes), 'json');
+  }
+
+  void importFiles(FilePickerResult? jsonFile) async {
+    if (jsonFile != null) {
+      var box = await Hive.openBox('local');
+      String file = String.fromCharCodes(jsonFile.files.single.bytes!);
+      if (file.isNotEmpty) {
+        List<dynamic> contents = await json.decode(file);
+        List<Note> newNoteList = [];
+        for (var note in contents) {
+          if (!(note['_id'].toString().isNotEmpty &&
+              note['title'].toString().isNotEmpty &&
+              note['content'].toString().isNotEmpty &&
+              note['timestamp'].toString().isNotEmpty)) continue;
+          newNoteList.add(Note(
+              id: note['_id'],
+              title: note['title'],
+              content: note['content'],
+              timestamp: note['timestamp']));
+        }
+        Map<String, Note> noteIdMap = {
+          for (var note in newNoteList) note.id: note
+        };
+        await box.putAll(noteIdMap);
+      }
+    }
   }
 
   @override
@@ -131,6 +159,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ],
                           ),
                           const Spacer(),
+                          ElevatedButton(
+                              onPressed: () async {
+                                importFiles(await FilePicker.platform.pickFiles(
+                                    type: FileType.custom,
+                                    allowedExtensions: ['json']));
+                              },
+                              child: const Text('Import')),
                           ElevatedButton(
                               onPressed: () async {
                                 List<Note> notes =
