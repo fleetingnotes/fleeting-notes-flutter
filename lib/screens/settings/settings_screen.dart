@@ -8,7 +8,6 @@ import 'package:file_saver/file_saver.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
-import 'package:hive/hive.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key, required this.db, required this.onAuthChange})
@@ -67,26 +66,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void importFiles(FilePickerResult? jsonFile) async {
     if (jsonFile != null) {
-      var box = await Hive.openBox('local');
       String file = String.fromCharCodes(jsonFile.files.single.bytes!);
+      bool allValid = true;
       if (file.isNotEmpty) {
         List<dynamic> contents = await json.decode(file);
         List<Note> newNoteList = [];
         for (var note in contents) {
-          if (!(note['_id'].toString().isNotEmpty &&
-              note['title'].toString().isNotEmpty &&
-              note['content'].toString().isNotEmpty &&
-              note['timestamp'].toString().isNotEmpty)) continue;
+          if (note['_id'] == null ||
+              note['title'] == null ||
+              note['content'] == null ||
+              note['timestamp'] == null ||
+              note['_id'].toString().isEmpty) {
+            allValid = false;
+            continue;
+          }
           newNoteList.add(Note(
               id: note['_id'],
               title: note['title'],
               content: note['content'],
               timestamp: note['timestamp']));
         }
-        Map<String, Note> noteIdMap = {
-          for (var note in newNoteList) note.id: note
-        };
-        await box.putAll(noteIdMap);
+        if (!allValid) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Invalid JSON: Could not load all of the notes"),
+            duration: Duration(seconds: 2),
+          ));
+        }
+        await widget.db.updateNotes(newNoteList);
       }
     }
   }
