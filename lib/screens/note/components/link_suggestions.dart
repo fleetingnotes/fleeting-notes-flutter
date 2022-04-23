@@ -46,6 +46,26 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
     super.dispose();
   }
 
+  List<TextSpan> highlightString(String text) {
+    String escapedQuery =
+        widget.query.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
+      return '\\${match.group(0)}';
+    });
+    TextStyle highlight = const TextStyle(backgroundColor: Colors.orange);
+    RegExp r = RegExp(escapedQuery, multiLine: true);
+    int placeHolder = 0;
+    List<TextSpan> textSpanner = [];
+    r.allMatches(text).forEach((element) {
+      textSpanner
+          .add(TextSpan(text: text.substring(placeHolder, element.start)));
+      textSpanner.add(TextSpan(
+          text: text.substring(element.start, element.end), style: highlight));
+      placeHolder = element.end;
+    });
+    textSpanner.add(TextSpan(text: text.substring(placeHolder, text.length)));
+    return textSpanner;
+  }
+
   List filterTitles(query) {
     return widget.allLinks
         .where((title) => title.toLowerCase().contains(query.toLowerCase()))
@@ -100,7 +120,8 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
                       ? Theme.of(context).hoverColor
                       : null,
                   hoverColor: Colors.transparent,
-                  title: Text(item),
+                  title:
+                      RichText(text: TextSpan(children: highlightString(item))),
                   onTap: () {
                     widget.onLinkSelect(item);
                   },
