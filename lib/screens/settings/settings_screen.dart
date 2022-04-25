@@ -76,6 +76,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               note['title'] == null ||
               note['content'] == null ||
               note['timestamp'] == null ||
+              note['source'] == null ||
+              (note['content'].toString().isEmpty &&
+                  note['title'].toString().isEmpty &&
+                  note['source'].toString().isEmpty) ||
               note['_id'].toString().isEmpty) {
             allValid = false;
             continue;
@@ -84,6 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               id: note['_id'],
               title: note['title'],
               content: note['content'],
+              source: note['source'],
               timestamp: note['timestamp']));
         }
         if (!allValid) {
