@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/Note.dart';
 import 'db_interface.dart';
@@ -7,10 +8,12 @@ import 'db_interface.dart';
 class FirebaseDB implements DatabaseInterface {
   @override
   String userId = 'local';
-  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
   User? currUser;
   late CollectionReference notesCollection;
   FirebaseDB() {
+    configRemoteConfig();
     FirebaseAuth.instance.userChanges().listen((User? user) {
       currUser = user;
       userId = (user == null) ? 'local' : user.uid;
@@ -18,6 +21,15 @@ class FirebaseDB implements DatabaseInterface {
     });
     notesCollection = FirebaseFirestore.instance.collection('notes');
   }
+  Future<void> configRemoteConfig() async {
+    await remoteConfig.setConfigSettings(RemoteConfigSettings(
+      fetchTimeout: const Duration(minutes: 1),
+      minimumFetchInterval: const Duration(seconds: 1),
+    ));
+    await remoteConfig.setDefaults(const {"use_firebase": false});
+    await remoteConfig.fetchAndActivate();
+  }
+
   @override
   bool isLoggedIn() {
     return currUser != null;

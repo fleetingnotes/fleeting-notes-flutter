@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
@@ -11,14 +10,11 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:fleeting_notes_flutter/db/realm.dart';
 import 'models/search_query.dart';
-import 'package:firebase_remote_config_web/firebase_remote_config_web.dart';
 
 class Database {
   Database({
     required this.firebase,
-  }) {
-    configRemoteConfig();
-  }
+  }) : super();
 
   final FirebaseDB firebase;
   GlobalKey<NavigatorState> navigatorKey =
@@ -32,23 +28,13 @@ class Database {
 
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
-  final remoteConfig = FirebaseRemoteConfig.instance;
-
   bool isLoggedIn() {
     // Realm always has to be logged in
     // If "use_firebase" is false, short circuit and don't check firebase
     // If "use_firebase" is true, then must also be logged into firebase
     return realm.isLoggedIn() &&
-        (!remoteConfig.getBool("use_firebase") || firebase.isLoggedIn());
-  }
-
-  Future<void> configRemoteConfig() async {
-    await remoteConfig.setConfigSettings(RemoteConfigSettings(
-      fetchTimeout: const Duration(minutes: 1),
-      minimumFetchInterval: const Duration(seconds: 1),
-    ));
-    await remoteConfig.setDefaults(const {"use_firebase": false});
-    await remoteConfig.fetchAndActivate();
+        (!firebase.remoteConfig.getBool("use_firebase") ||
+            firebase.isLoggedIn());
   }
 
   Future<List<Note>> getSearchNotes(SearchQuery query,
@@ -72,7 +58,7 @@ class Database {
     try {
       var box = await Hive.openBox(realm.userId);
       if ((box.isEmpty || forceSync) && isLoggedIn()) {
-        List<Note> notes = remoteConfig.getBool("use_firebase")
+        List<Note> notes = firebase.remoteConfig.getBool("use_firebase")
             ? await firebase.getAllNotes()
             : await realm.getAllNotes();
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};

@@ -18,7 +18,8 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   final Database db = Database(firebase: FirebaseDB());
   Future<String> navigateScreen() async {
     await db.loginWithStorage();
-    await db.configRemoteConfig(); // Load remote config before anything else
+    // Load remote config before anything else
+    await db.firebase.configRemoteConfig();
     return 'main';
   }
 

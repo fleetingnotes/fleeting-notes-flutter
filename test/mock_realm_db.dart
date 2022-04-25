@@ -7,12 +7,17 @@ import 'dart:async';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
+
+class MockRemoteConfig extends Mock implements FirebaseRemoteConfig {}
 
 class MockFirebaseDB extends Mock implements FirebaseDB {
   @override
   FirebaseAnalytics analytics = MockFirebaseAnalytics();
+  @override
+  FirebaseRemoteConfig remoteConfig = MockRemoteConfig();
 }
 
 class MockRealmDB extends Mock implements Database {
