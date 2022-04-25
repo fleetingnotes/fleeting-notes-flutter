@@ -15,7 +15,7 @@
   "main": "index.js",
   "dependencies": {
     "@tensorflow-models/universal-sentence-encoder": "^1.3.3",
-    "@tensorflow/tfjs": "^3.16.0",
+    "@tensorflow/tfjs-node": "^3.16.0",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.18.0"
   },
