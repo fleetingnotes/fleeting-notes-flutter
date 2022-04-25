@@ -20,7 +20,7 @@ class MockFirebaseDB extends Mock implements FirebaseDB {
   FirebaseRemoteConfig remoteConfig = MockRemoteConfig();
 }
 
-class MockRealmDB extends Mock implements Database {
+class MockDatabase extends Mock implements Database {
   @override
   final GlobalKey searchKey = GlobalKey();
   @override

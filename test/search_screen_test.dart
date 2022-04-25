@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
-import 'mock_realm_db.dart';
+import 'mock_database.dart';
 
 void main() {
   setUpAll(() {
@@ -23,7 +23,7 @@ void main() {
 
   testWidgets('Render List of Notes', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([Note.empty()]));
     await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
@@ -35,7 +35,7 @@ void main() {
 
   testWidgets('Test search filters properly', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(SearchQuery(queryRegex: ''),
             forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([Note.empty()]));
@@ -53,7 +53,7 @@ void main() {
   testWidgets('Test filter button opens search dialog',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([Note.empty()]));
     await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
