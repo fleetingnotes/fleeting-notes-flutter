@@ -23,7 +23,7 @@ const zipWith = (f, xs, ys) => {
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 
-exports.rank_sentence_similarity = functions.https.onRequest(async (req, res) => {
+exports.rank_sentence_similarity = functions.runWith({memory: "1GB"}).https.onRequest(async (req, res) => {
     // Embed an array of sentences.
     const sentences = [
         req.body['query'],
