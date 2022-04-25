@@ -1,4 +1,4 @@
-require('@tensorflow/tfjs');
+require('@tensorflow/tfjs-node');
 const functions = require("firebase-functions");
 const use = require("@tensorflow-models/universal-sentence-encoder");
 
