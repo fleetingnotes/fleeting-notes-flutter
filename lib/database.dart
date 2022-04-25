@@ -251,13 +251,13 @@ class Database {
     await firebase.register(email, password);
     if (!await firebase.login(email, password)) {
       await firebase.analytics.logEvent(
-          name: 'firebase_migration', parameters: {'is_success': false});
+          name: 'migrate_to_firebase', parameters: {'is_success': false});
       return false;
     }
     List<Note> notes = await realm.getAllNotes();
     await firebase.updateNotes(notes);
-    await firebase.analytics
-        .logEvent(name: 'firebase_migration', parameters: {'is_success': true});
+    await firebase.analytics.logEvent(
+        name: 'migrate_to_firebase', parameters: {'is_success': true});
     return true;
   }
 
