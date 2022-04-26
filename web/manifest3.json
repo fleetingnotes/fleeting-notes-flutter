@@ -6,7 +6,7 @@
       "extension_pages": "script-src 'self' ; object-src 'self'"
     },
     "action": {
-      "default_popup": "index.html",
+      "default_popup": "web-ext.html",
       "default_icon": "/icons/196.png"
     },
     "permissions": [

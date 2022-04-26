@@ -2,16 +2,17 @@
 set -e
 
 #Build the web version of the flutter app
-echo "Building flutter app for web"
-flutter build web --web-renderer html --csp
+echo "Building flutter app for web extension"
+flutter build web --web-renderer html --csa --release
+mv build/web build/web-ext
 echo "Finished building flutter app"
 
 #Replace remote library references with packed js
 echo "Replacing remote js libraries with packed versions"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-sed -i -e 's|https\:\/\/www.gstatic\.com\/||g' $SCRIPT_DIR/build/web/main.dart.js
+sed -i -e 's|https\:\/\/www.gstatic\.com\/||g' $SCRIPT_DIR/build/web-ext/main.dart.js
 
-cd build/web
+cd build/web-ext
 #ZIP chrome 
 cp manifest3.json manifest.json
 zip -r ../mainfest3.zip .
