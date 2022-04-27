@@ -3,7 +3,7 @@
     "short_name": "fleetingnotes",
     "start_url": ".",
     "display": "standalone",
-    "description": "Notes that extend your brain",
+    "description": "A lightweight note-taking app for capturing and connecting fleeting thoughts",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
