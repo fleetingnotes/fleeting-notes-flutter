@@ -1,0 +1,21 @@
+{
+    "name": "Fleeting Notes",
+    "short_name": "fleetingnotes",
+    "start_url": ".",
+    "display": "standalone",
+    "description": "Notes that extend your brain",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
