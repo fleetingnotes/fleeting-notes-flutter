@@ -211,10 +211,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {
-          print('save note');
           if (hasNewChanges) {
             _saveNote();
           }
+          return null;
         }),
       },
       child: Scaffold(
