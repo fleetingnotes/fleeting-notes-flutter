@@ -8,16 +8,17 @@ import '../../responsive.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-
 import '../note/components/note_editor.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({
     Key? key,
     required this.db,
+    this.searchFocusNode,
   }) : super(key: key);
 
   final Database db;
+  final FocusNode? searchFocusNode;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -26,6 +27,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   late List<Note> notes = [];
   String sortBy = 'Sort by date (new to old)';
   Map<String, SortOptions> sortOptionMap = {
@@ -104,6 +106,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     const SizedBox(width: 5),
                     Expanded(
                       child: TextField(
+                        focusNode: widget.searchFocusNode,
                         controller: queryController,
                         onChanged: loadNotes,
                         onTap: () {

@@ -1,4 +1,5 @@
 import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
@@ -143,7 +144,6 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     updatedNote.source = sourceController.text;
-    FocusManager.instance.primaryFocus?.unfocus();
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
       if (updateState) {
@@ -208,64 +208,76 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Theme.of(context).dialogBackgroundColor,
-        child: SafeArea(
-          child: Column(
-            children: [
-              Header(
-                onSave: (hasNewChanges) ? _saveNote : null,
-                onDelete: _deleteNote,
-                onSearch: () => onSearchNavigate(context),
-                analytics: widget.db.firebase.analytics,
-              ),
-              const Divider(thickness: 1, height: 1),
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: ScrollController(),
-                  padding:
-                      EdgeInsets.all(Theme.of(context).custom.kDefaultPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.note.getDateTimeStr(),
-                        style: Theme.of(context).textTheme.caption,
-                      ),
-                      TitleField(
-                        controller: titleController,
-                        onChanged: onChanged,
-                      ),
-                      ContentField(
-                        controller: contentController,
-                        db: widget.db,
-                        onChanged: onChanged,
-                        autofocus: autofocus,
-                      ),
-                      SourceContainer(
-                        controller: sourceController,
-                        onChanged: onChanged,
-                      ),
-                      SizedBox(
-                          height: Theme.of(context).custom.kDefaultPadding),
-                      const Text("Backlinks", style: TextStyle(fontSize: 12)),
-                      const Divider(thickness: 1, height: 1),
-                      SizedBox(
-                          height: Theme.of(context).custom.kDefaultPadding / 2),
-                      ...backlinkNotes.map((note) => NoteCard(
-                            note: note,
-                            onTap: () {
-                              widget.db.firebase.analytics
-                                  .logEvent(name: 'click_backlink');
-                              widget.db.navigateToNote(note); // TODO: Deprecate
-                            },
-                          )),
-                    ],
-                  ),
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        SaveIntent: CallbackAction(onInvoke: (Intent intent) {
+          print('save note');
+          if (hasNewChanges) {
+            _saveNote();
+          }
+        }),
+      },
+      child: Scaffold(
+        body: Container(
+          color: Theme.of(context).dialogBackgroundColor,
+          child: SafeArea(
+            child: Column(
+              children: [
+                Header(
+                  onSave: (hasNewChanges) ? _saveNote : null,
+                  onDelete: _deleteNote,
+                  onSearch: () => onSearchNavigate(context),
+                  analytics: widget.db.firebase.analytics,
                 ),
-              )
-            ],
+                const Divider(thickness: 1, height: 1),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: ScrollController(),
+                    padding: EdgeInsets.all(
+                        Theme.of(context).custom.kDefaultPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.note.getDateTimeStr(),
+                          style: Theme.of(context).textTheme.caption,
+                        ),
+                        TitleField(
+                          controller: titleController,
+                          onChanged: onChanged,
+                        ),
+                        ContentField(
+                          controller: contentController,
+                          db: widget.db,
+                          onChanged: onChanged,
+                          autofocus: autofocus,
+                        ),
+                        SourceContainer(
+                          controller: sourceController,
+                          onChanged: onChanged,
+                        ),
+                        SizedBox(
+                            height: Theme.of(context).custom.kDefaultPadding),
+                        const Text("Backlinks", style: TextStyle(fontSize: 12)),
+                        const Divider(thickness: 1, height: 1),
+                        SizedBox(
+                            height:
+                                Theme.of(context).custom.kDefaultPadding / 2),
+                        ...backlinkNotes.map((note) => NoteCard(
+                              note: note,
+                              onTap: () {
+                                widget.db.firebase.analytics
+                                    .logEvent(name: 'click_backlink');
+                                widget.db
+                                    .navigateToNote(note); // TODO: Deprecate
+                              },
+                            )),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
