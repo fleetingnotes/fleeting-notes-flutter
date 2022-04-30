@@ -120,4 +120,22 @@ class Note {
     }
     return DateFormat('MMMM d, y').format(noteDateTime);
   }
+
+  String getMarkdownFilename() {
+    String mdTime =
+        "${timestamp.replaceFirst(':', 'h').replaceFirst(':', 'm')}s";
+    return (title.isEmpty) ? "$mdTime.md" : "$title.md";
+  }
+
+  String getMarkdownContent() {
+    String frontmatter = """---
+id: $id
+title: ${getMarkdownFilename().replaceFirst('.md', '')}
+date: ${timestamp.substring(0, 10)}
+---\n""";
+    String mdContent = frontmatter + content;
+    mdContent =
+        (source.isEmpty) ? mdContent : mdContent + "\n\n---\n\n" + source;
+    return mdContent;
+  }
 }
