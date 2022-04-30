@@ -3,7 +3,7 @@ set -e
 
 #Build the web version of the flutter app
 echo "Building flutter app for web extension"
-flutter build web --web-renderer html --csa --release
+flutter build web --web-renderer html --csp --release
 mv build/web build/web-ext
 echo "Finished building flutter app"
 
