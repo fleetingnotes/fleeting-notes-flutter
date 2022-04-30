@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
-import 'mock_realm_db.dart';
+import 'mock_database.dart';
 
 void main() {
   setUpAll(() {
@@ -19,7 +19,7 @@ void main() {
 
   testWidgets('Render Note Screen', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
@@ -30,7 +30,7 @@ void main() {
 
   testWidgets('Backlinks are populated', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: 'backlink note')]));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
@@ -42,7 +42,7 @@ void main() {
   testWidgets('Save note button is enabled when note is changed',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -67,7 +67,7 @@ void main() {
   testWidgets('Save note button is disabled when pressed',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -94,7 +94,7 @@ void main() {
   testWidgets('Save note button shows snackbar if save failed',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -112,7 +112,7 @@ void main() {
   testWidgets('Delete note shows snackbar if delete failed',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.deleteNote(any()))
@@ -128,7 +128,7 @@ void main() {
 
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     mockDb.noteHistory = {Note.empty(title: 'hello'): GlobalKey()};
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: '[[hello]]')]));
@@ -149,7 +149,7 @@ void main() {
 
   testWidgets('Clicking Follow Link button removes Follow Link overlay',
       (WidgetTester tester) async {
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: '[[hello]]')]));
     when(() => mockDb.upsertNote(any()))

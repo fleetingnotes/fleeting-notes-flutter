@@ -15,6 +15,7 @@ class Database {
   Database({
     required this.firebase,
   }) : super();
+
   final FirebaseDB firebase;
   GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
@@ -28,7 +29,12 @@ class Database {
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
   bool isLoggedIn() {
-    return realm.isLoggedIn();
+    // Realm always has to be logged in
+    // If "use_firebase" is false, short circuit and don't check firebase
+    // If "use_firebase" is true, then must also be logged into firebase
+    return realm.isLoggedIn() &&
+        (!firebase.remoteConfig.getBool("use_firebase") ||
+            firebase.isLoggedIn());
   }
 
   Future<List<Note>> getSearchNotes(SearchQuery query,
@@ -52,7 +58,9 @@ class Database {
     try {
       var box = await Hive.openBox(realm.userId);
       if ((box.isEmpty || forceSync) && isLoggedIn()) {
-        List<Note> notes = await realm.getAllNotes();
+        List<Note> notes = firebase.remoteConfig.getBool("use_firebase")
+            ? await firebase.getAllNotes()
+            : await realm.getAllNotes();
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         // box.clear(); // TODO: investigate why this causes bugs
         await box.putAll(noteIdMap);

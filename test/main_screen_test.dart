@@ -14,7 +14,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
-import 'mock_realm_db.dart';
+import 'mock_database.dart';
 
 // Currently Only Testing Web
 void main() {
@@ -27,7 +27,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -41,7 +41,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -58,7 +58,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     Note newNote = Note.empty(content: 'Click me note!');
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([newNote]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -84,7 +84,7 @@ void main() {
   testWidgets('Save note updates list of notes', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.titleExists(any(), any()))
@@ -106,7 +106,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     Note newNote = Note.empty(content: 'Test delete note!');
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([newNote]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -128,7 +128,7 @@ void main() {
   testWidgets('Render Main Screen (Mobile)', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
@@ -141,7 +141,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     Note newNote = Note.empty(content: 'Click me note!');
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([newNote]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -161,7 +161,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -180,7 +180,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -209,7 +209,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -232,7 +232,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -257,7 +257,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
@@ -278,7 +278,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
