@@ -27,7 +27,7 @@ class NoteCard extends StatelessWidget {
       return '\\${match.group(0)}';
     });
     TextStyle highlight = defaultStyle.copyWith(backgroundColor: Colors.orange);
-    RegExp r = RegExp(escapedQuery, multiLine: true);
+    RegExp r = RegExp(escapedQuery, multiLine: true, caseSensitive: false);
     int placeHolder = 0;
     List<TextSpan> textSpanner = [];
     r.allMatches(text).forEach((element) {

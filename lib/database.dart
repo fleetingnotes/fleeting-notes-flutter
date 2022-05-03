@@ -43,7 +43,7 @@ class Database {
         query.queryRegex.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
       return '\\${match.group(0)}';
     });
-    RegExp r = RegExp(escapedQuery, multiLine: true);
+    RegExp r = RegExp(escapedQuery, multiLine: true, caseSensitive: false);
     var allNotes = await getAllNotes(forceSync: forceSync);
     var notes = allNotes.where((note) {
       return (query.searchByTitle && r.hasMatch(note.title)) ||
