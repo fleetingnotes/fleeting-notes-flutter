@@ -15,4 +15,4 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 rm -rf $SCRIPT_DIR/build/web-app/firebasejs
 rm $SCRIPT_DIR/build/web-app/manifest3.json $SCRIPT_DIR/build/web-app/manifest2.json $SCRIPT_DIR/build/web-app/popup.html $SCRIPT_DIR/build/web-app/web-ext.html
 
-echo "Finished building web extension in build/manifest2.zip and build/manifest3.zip"
+echo "Finished building web app in build/web-app"
