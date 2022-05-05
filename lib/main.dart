@@ -17,16 +17,27 @@ Future<Box> openHiveBox(String boxName) async {
   return await Hive.openBox(boxName);
 }
 
+Future<void> initApp() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(NoteAdapter());
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await openHiveBox('settings');
+}
+
 void main() async {
-  runZonedGuarded<Future<void>>(() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Hive.initFlutter();
-    Hive.registerAdapter(NoteAdapter());
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
-    await openHiveBox('settings');
+  if (!kIsWeb) {
+    await initApp();
     runApp(const MyApp());
-  }, (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack));
+  } else {
+    runZonedGuarded<Future<void>>(() async {
+      await initApp();
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+      runApp(const MyApp());
+    },
+        (error, stack) =>
+            FirebaseCrashlytics.instance.recordError(error, stack));
+  }
 }
