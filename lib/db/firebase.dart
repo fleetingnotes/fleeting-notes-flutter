@@ -30,6 +30,14 @@ class FirebaseDB implements DatabaseInterface {
     remoteConfig.fetchAndActivate();
   }
 
+  Future<bool> isCurrUserPremium() async {
+    if (currUser == null) return false;
+    await currUser!.getIdToken(true);
+    var decodedToken = await currUser!.getIdTokenResult();
+    Map claims = decodedToken.claims ?? {};
+    return claims['stripeRole'] == 'premium';
+  }
+
   @override
   bool isLoggedIn() {
     return currUser != null;
