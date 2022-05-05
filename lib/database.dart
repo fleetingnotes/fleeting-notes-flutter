@@ -248,7 +248,7 @@ class Database {
           await realm.updateNotes(notes);
         }
       }
-      if (!firebase.isLoggedIn()) {
+      if (!firebase.isLoggedIn() && !await firebase.login(email, password)) {
         migrateToFirebase(email, password);
       }
     }
