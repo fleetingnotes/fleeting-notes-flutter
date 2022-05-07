@@ -91,13 +91,13 @@ class NoteCard extends StatelessWidget {
                                           note.title,
                                           Theme.of(context)
                                               .textTheme
-                                              .bodyText2!
+                                              .bodyText1!
                                               .copyWith(
                                                 color: isActive
                                                     ? Colors.white
                                                     : null,
                                                 fontSize: 16,
-                                                fontWeight: FontWeight.w500,
+                                                fontWeight: FontWeight.w600,
                                               ))),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis),
