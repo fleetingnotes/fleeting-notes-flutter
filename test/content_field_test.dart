@@ -6,7 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/link_suggestions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -60,7 +60,7 @@ void main() {
         find.bySemanticsLabel('Note and links to other ideas'), '[[');
     await tester.pump();
 
-    expect(find.byType(TitleLinks), findsOneWidget);
+    expect(find.byType(LinkSuggestions), findsOneWidget);
   });
 
   testWidgets('Key navigation works in TitleLinks',
@@ -84,7 +84,7 @@ void main() {
     await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
     await tester.pump();
 
-    expect(find.byType(TitleLinks), findsNothing);
+    expect(find.byType(LinkSuggestions), findsNothing);
     expect(find.text('[[world]]'), findsOneWidget);
   });
 
@@ -109,6 +109,6 @@ void main() {
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
 
-    expect(find.byType(TitleLinks), findsNothing);
+    expect(find.byType(LinkSuggestions), findsNothing);
   });
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/link_suggestions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/link_preview.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:flutter/services.dart';
 
@@ -161,7 +161,7 @@ class _ContentFieldState extends State<ContentField> {
         child: ValueListenableBuilder(
             valueListenable: titleLinkQuery,
             builder: (context, value, child) {
-              return TitleLinks(
+              return LinkSuggestions(
                 caretOffset: caretOffset,
                 allLinks: allLinks,
                 query: titleLinkQuery.value,
@@ -191,8 +191,8 @@ class _ContentFieldState extends State<ContentField> {
       Theme.of(context).textTheme.bodyText2!,
       size,
     );
-    FollowLink builder(context) {
-      return FollowLink(
+    LinkPreview builder(context) {
+      return LinkPreview(
         caretOffset: caretOffset,
         onTap: _onFollowLinkTap,
         layerLink: layerLink,

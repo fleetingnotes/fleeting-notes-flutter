@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class FollowLink extends StatelessWidget {
-  const FollowLink({
+class LinkPreview extends StatelessWidget {
+  const LinkPreview({
     Key? key,
     required this.caretOffset,
     required this.onTap,
