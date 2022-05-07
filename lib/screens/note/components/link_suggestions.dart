@@ -51,7 +51,7 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
         widget.query.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
       return '\\${match.group(0)}';
     });
-    TextStyle highlight = const TextStyle(backgroundColor: Colors.orange);
+    TextStyle highlight = const TextStyle(fontWeight: FontWeight.bold);
     RegExp r = RegExp(escapedQuery, multiLine: true);
     int placeHolder = 0;
     List<TextSpan> textSpanner = [];
