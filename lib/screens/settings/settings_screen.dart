@@ -80,16 +80,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               (note['content'].toString().isEmpty &&
                   note['title'].toString().isEmpty &&
                   note['source'].toString().isEmpty) ||
-              note['_id'].toString().isEmpty) {
+              note['_id'].toString().isEmpty ||
+              RegExp('[${Note.invalidChars}]').firstMatch(note['title']) !=
+                  null ||
+              await widget.db.titleExists(note['_id'], note['title'])) {
             allValid = false;
             continue;
           }
-          newNoteList.add(Note(
-              id: note['_id'],
-              title: note['title'],
-              content: note['content'],
-              source: note['source'],
-              timestamp: note['timestamp']));
+          newNoteList.add(fromMap(note));
         }
         if (!allValid) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -171,11 +169,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           const Spacer(),
                           ElevatedButton(
-                              onPressed: () async {
-                                importFiles(await FilePicker.platform.pickFiles(
-                                    type: FileType.custom,
-                                    allowedExtensions: ['json']));
-                              },
+                              onPressed: (exportOption == 'Markdown')
+                                  ? null
+                                  : () async {
+                                      importFiles(await FilePicker.platform
+                                          .pickFiles(
+                                              type: FileType.custom,
+                                              allowedExtensions: ['json']));
+                                    },
                               child: const Text('Import')),
                           ElevatedButton(
                               onPressed: () async {
