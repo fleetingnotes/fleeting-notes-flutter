@@ -11,6 +11,8 @@ import 'package:fleeting_notes_flutter/screens/note/components/source_container.
 import 'package:web_browser_detect/web_browser_detect.dart';
 import 'package:hive/hive.dart';
 
+import '../../../database.dart';
+
 @JS('chrome.tabs.query')
 external dynamic queryTabsChrome(dynamic queryInfo);
 
@@ -21,6 +23,7 @@ class SourceContainer extends StatefulWidget {
   const SourceContainer({
     Key? key,
     required this.controller,
+    this.db,
     this.onChanged,
     this.autofocus = false,
   }) : super(key: key);
@@ -28,6 +31,7 @@ class SourceContainer extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onChanged;
   final bool autofocus;
+  final Database? db;
 
   @override
   State<SourceContainer> createState() => _SourceContainerState();
@@ -83,8 +87,9 @@ class _SourceContainerState extends State<SourceContainer> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: (sourceFieldVisible ||
-              (Hive.box('settings').get('auto-fill-source') ?? false))
+      child: (sourceFieldVisible || widget.db == null
+              ? false
+              : widget.db!.fillSource())
           ? sourceContainer()
           : TextButton(
               onPressed: setSourceUrl,

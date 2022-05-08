@@ -255,6 +255,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                         SourceContainer(
                           controller: sourceController,
                           onChanged: onChanged,
+                          db: widget.db,
                         ),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
