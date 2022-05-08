@@ -39,11 +39,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     var archive = Archive();
 
     for (var note in notes) {
-      var mdContent = note.content;
-      mdContent += (note.source.isNotEmpty) ? '\n\n---\n\n' + note.source : '';
-      var bytes = utf8.encode(mdContent);
+      var bytes = utf8.encode(note.getMarkdownContent());
       ArchiveFile archiveFiles = ArchiveFile.stream(
-        (note.title == '') ? note.id.toString() : note.title,
+        note.getMarkdownFilename(),
         bytes.length,
         InputStream(bytes),
       );

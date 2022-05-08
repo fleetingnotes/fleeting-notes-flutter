@@ -11,8 +11,6 @@ class MyApp extends web.MyApp {
 }
 
 class _MyAppState extends web.MyAppState<MyApp> {
-  Note? initNote;
-
   @override
   void initState() {
     Note getNoteFromShareText(String sharedText) {

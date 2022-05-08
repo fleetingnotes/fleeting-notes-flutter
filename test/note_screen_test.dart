@@ -5,12 +5,14 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:fleeting_notes_flutter/screens/note/components/link_preview.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
-import 'mock_realm_db.dart';
+import 'mock_database.dart';
 
 void main() {
   setUpAll(() {
@@ -19,7 +21,7 @@ void main() {
 
   testWidgets('Render Note Screen', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
@@ -30,7 +32,7 @@ void main() {
 
   testWidgets('Backlinks are populated', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: 'backlink note')]));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
@@ -42,7 +44,7 @@ void main() {
   testWidgets('Save note button is enabled when note is changed',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -67,7 +69,7 @@ void main() {
   testWidgets('Save note button is disabled when pressed',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -94,7 +96,7 @@ void main() {
   testWidgets('Save note button shows snackbar if save failed',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -112,7 +114,7 @@ void main() {
   testWidgets('Delete note shows snackbar if delete failed',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.deleteNote(any()))
@@ -128,7 +130,7 @@ void main() {
 
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     mockDb.noteHistory = {Note.empty(title: 'hello'): GlobalKey()};
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: '[[hello]]')]));
@@ -147,9 +149,9 @@ void main() {
     expect(find.text('[[hello world]]', findRichText: true), findsOneWidget);
   });
 
-  testWidgets('Clicking Follow Link button removes Follow Link overlay',
+  testWidgets('Clicking TitleField removes LinkPreview overlay',
       (WidgetTester tester) async {
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: '[[hello]]')]));
     when(() => mockDb.upsertNote(any()))
@@ -161,9 +163,9 @@ void main() {
     await tester.tapAt(tester
         .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
         .translate(20, 10));
-    await tester.pump();
-    await tester.tap(find.text('Follow Link'));
     await tester.pumpAndSettle();
-    expect(find.text('Follow Link'), findsNothing);
+    await tester.tap(find.byType(TitleField));
+    await tester.pumpAndSettle();
+    expect(find.byType(LinkPreview), findsNothing);
   });
 }

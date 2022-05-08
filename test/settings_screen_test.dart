@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'mock_realm_db.dart';
+import 'mock_database.dart';
 
 void main() {
   setUpAll(() {
@@ -20,7 +20,7 @@ void main() {
 
   testWidgets('Render settings when logged in', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.isLoggedIn()).thenAnswer((_) => true);
     when(() => mockDb.getEmail()).thenAnswer((_) => Future.value('test'));
     await tester.pumpWidget(MaterialApp(
@@ -35,7 +35,7 @@ void main() {
   testWidgets('Render settings when not logged in',
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockRealmDB mockDb = MockRealmDB();
+    MockDatabase mockDb = MockDatabase();
     when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getEmail()).thenAnswer((_) => Future.value('test'));
     await tester.pumpWidget(MaterialApp(

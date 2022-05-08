@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class TitleLinks extends StatefulWidget {
-  const TitleLinks({
+class LinkSuggestions extends StatefulWidget {
+  const LinkSuggestions({
     Key? key,
     required this.caretOffset,
     required this.allLinks,
@@ -20,10 +20,10 @@ class TitleLinks extends StatefulWidget {
   final LayerLink layerLink;
 
   @override
-  State<TitleLinks> createState() => _TitleLinksState();
+  State<LinkSuggestions> createState() => _LinkSuggestionsState();
 }
 
-class _TitleLinksState extends State<TitleLinks> {
+class _LinkSuggestionsState extends State<LinkSuggestions> {
   int selectedIndex = 0;
   double width = 300;
   late Offset newCaretOffset;
