@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -44,6 +44,22 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
   void dispose() {
     HardwareKeyboard.instance.removeHandler(onKeyEvent);
     super.dispose();
+  }
+
+  List<TextSpan> highlightString(String text) {
+    RegExp r = getQueryRegex(widget.query);
+    TextStyle highlight = const TextStyle(fontWeight: FontWeight.bold);
+    int placeHolder = 0;
+    List<TextSpan> textSpanner = [];
+    r.allMatches(text).forEach((element) {
+      textSpanner
+          .add(TextSpan(text: text.substring(placeHolder, element.start)));
+      textSpanner.add(TextSpan(
+          text: text.substring(element.start, element.end), style: highlight));
+      placeHolder = element.end;
+    });
+    textSpanner.add(TextSpan(text: text.substring(placeHolder, text.length)));
+    return textSpanner;
   }
 
   List filterTitles(query) {
@@ -100,7 +116,8 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
                       ? Theme.of(context).hoverColor
                       : null,
                   hoverColor: Colors.transparent,
-                  title: Text(item),
+                  title:
+                      RichText(text: TextSpan(children: highlightString(item))),
                   onTap: () {
                     widget.onLinkSelect(item);
                   },

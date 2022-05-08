@@ -20,7 +20,7 @@ import 'mock_database.dart';
 void main() {
   setUpAll(() {
     registerFallbackValue(Note.empty());
-    registerFallbackValue(SearchQuery(queryRegex: ''));
+    registerFallbackValue(SearchQuery(query: ''));
   });
   // Desktop / Tablet Tests
   testWidgets('Render Main Screen (Desktop/Tablet)',
