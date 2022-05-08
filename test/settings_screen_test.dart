@@ -26,7 +26,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: SettingsScreen(
       db: mockDb,
-      onAuthChange: () {},
+      onNotesChange: () {},
     )));
     // await tester.pumpAndSettle();
     expect(find.byType(Auth), findsNothing);
@@ -41,7 +41,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: SettingsScreen(
       db: mockDb,
-      onAuthChange: () {},
+      onNotesChange: () {},
     )));
     expect(find.byType(Auth), findsOneWidget);
   });

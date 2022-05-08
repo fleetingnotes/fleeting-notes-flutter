@@ -7,17 +7,6 @@ import 'package:uuid/uuid.dart';
 
 part 'Note.g.dart';
 
-Note fromMap(dynamic note) {
-  Map noteMap = Map.from(note);
-  return Note(
-    id: noteMap["_id"].toString(),
-    title: noteMap["title"].toString(),
-    content: noteMap["content"].toString(),
-    source: noteMap["source"].toString(),
-    timestamp: noteMap["timestamp"].toString(),
-  );
-}
-
 @HiveType(typeId: 1)
 class Note {
   @HiveField(0)
@@ -70,6 +59,17 @@ class Note {
       'source': source,
       'timestamp': timestamp,
     };
+  }
+
+  static Note fromMap(dynamic note) {
+    Map noteMap = Map.from(note);
+    return Note(
+      id: noteMap["_id"].toString(),
+      title: noteMap["title"].toString(),
+      content: noteMap["content"].toString(),
+      source: noteMap["source"].toString(),
+      timestamp: noteMap["timestamp"].toString(),
+    );
   }
 
   static Note encodeNote(Note note) {

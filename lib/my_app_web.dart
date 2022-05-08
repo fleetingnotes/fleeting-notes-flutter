@@ -57,7 +57,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
                     },
                   ),
               '/settings': (context) =>
-                  SettingsScreen(db: db, onAuthChange: refreshScreen)
+                  SettingsScreen(db: db, onNotesChange: refreshScreen)
             },
           );
         });

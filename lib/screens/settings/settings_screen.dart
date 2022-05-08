@@ -10,11 +10,12 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key, required this.db, required this.onAuthChange})
+  const SettingsScreen(
+      {Key? key, required this.db, required this.onNotesChange})
       : super(key: key);
 
   final Database db;
-  final VoidCallback onAuthChange;
+  final VoidCallback onNotesChange;
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
@@ -72,6 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         List<dynamic> contents = await json.decode(file);
         List<Note> newNoteList = [];
         for (var note in contents) {
+          // Checks if JSON is valid
           if (note['_id'] == null ||
               note['title'] == null ||
               note['content'] == null ||
@@ -85,17 +87,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   null ||
               await widget.db.titleExists(note['_id'], note['title'])) {
             allValid = false;
-            continue;
+            break;
           }
-          newNoteList.add(fromMap(note));
+          newNoteList.add(Note.fromMap(note));
         }
         if (!allValid) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Invalid JSON: Could not load all of the notes"),
             duration: Duration(seconds: 2),
           ));
+        } else {
+          await widget.db.updateNotes(newNoteList);
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Imported JSON Successfully!"),
+            duration: Duration(seconds: 2),
+          ));
+          widget.onNotesChange();
         }
-        await widget.db.updateNotes(newNoteList);
       }
     }
   }
@@ -169,7 +177,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           const Spacer(),
                           ElevatedButton(
-                              onPressed: (exportOption == 'Markdown')
+                              onPressed: (exportOption != 'JSON')
                                   ? null
                                   : () async {
                                       importFiles(await FilePicker.platform
@@ -213,7 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ElevatedButton(
                                         onPressed: () {
                                           widget.db.logout();
-                                          widget.onAuthChange();
+                                          widget.onNotesChange();
                                           setState(() {});
                                         },
                                         child: const Text('Logout'))
@@ -238,7 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : Auth(
                               db: widget.db,
                               onLogin: (e) {
-                                widget.onAuthChange();
+                                widget.onNotesChange();
                                 setState(() {
                                   email = e;
                                 });
