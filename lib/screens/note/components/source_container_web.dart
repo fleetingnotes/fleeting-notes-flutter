@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
     as sc;
 import 'package:web_browser_detect/web_browser_detect.dart';
-import 'package:hive/hive.dart';
 
 import '../../../database.dart';
 
@@ -46,6 +45,9 @@ class _SourceContainerState extends State<SourceContainer> {
     setState(() {
       sourceFieldVisible = widget.controller.text.isNotEmpty || !kIsWeb;
     });
+    if (widget.db != null && widget.db!.fillSource()) {
+      setSourceUrl();
+    }
   }
 
   Future<String> getSourceUrl({String defaultText = ''}) async {
@@ -76,7 +78,6 @@ class _SourceContainerState extends State<SourceContainer> {
   }
 
   sc.SourceContainer sourceContainer() {
-    setSourceUrl();
     return sc.SourceContainer(
       controller: widget.controller,
       onChanged: widget.onChanged,
@@ -87,9 +88,7 @@ class _SourceContainerState extends State<SourceContainer> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: (sourceFieldVisible || widget.db == null
-              ? false
-              : widget.db!.fillSource())
+      child: (sourceFieldVisible)
           ? sourceContainer()
           : TextButton(
               onPressed: setSourceUrl,
