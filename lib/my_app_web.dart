@@ -15,6 +15,7 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState<T extends StatefulWidget> extends State<MyApp> {
+  Note? initNote;
   final Database db = Database(firebase: FirebaseDB());
   Future<String> navigateScreen() async {
     // loads futures concurrently
@@ -52,7 +53,10 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
                     builder: (BuildContext context,
                         AsyncSnapshot<String?> snapshot) {
                       if (snapshot.hasData) {
-                        return MainScreen(db: db);
+                        return MainScreen(
+                          db: db,
+                          initNote: initNote,
+                        );
                       } else {
                         return const Center(child: CircularProgressIndicator());
                       }
