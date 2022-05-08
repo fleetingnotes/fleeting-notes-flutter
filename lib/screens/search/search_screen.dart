@@ -46,7 +46,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Future<void> loadNotes(queryRegex, {forceSync = false}) async {
     if (!mounted) return;
     SearchQuery query = SearchQuery(
-        queryRegex: queryRegex,
+        query: queryRegex,
         searchByTitle: searchFilter['title'],
         searchByContent: searchFilter['content'],
         searchBySource: searchFilter['source'],
@@ -202,7 +202,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   itemCount: notes.length,
                   itemBuilder: (context, index) => NoteCard(
                     sQuery: SearchQuery(
-                        queryRegex: queryController.text,
+                        query: queryController.text,
                         searchByTitle: searchFilter['title'],
                         searchByContent: searchFilter['content'],
                         searchBySource: searchFilter['source'],
