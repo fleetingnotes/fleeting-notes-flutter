@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/title_links.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/link_suggestions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/follow_link.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/link_preview.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:flutter/services.dart';
 
@@ -161,7 +161,7 @@ class _ContentFieldState extends State<ContentField> {
         child: ValueListenableBuilder(
             valueListenable: titleLinkQuery,
             builder: (context, value, child) {
-              return TitleLinks(
+              return LinkSuggestions(
                 caretOffset: caretOffset,
                 allLinks: allLinks,
                 query: titleLinkQuery.value,
@@ -176,9 +176,13 @@ class _ContentFieldState extends State<ContentField> {
   }
 
   void showFollowLinkOverlay(context, String title, BoxConstraints size) async {
-    void _onFollowLinkTap() async {
+    Future<Note> getFollowLinkNote() async {
       Note? note = await widget.db.getNoteByTitle(title);
       note ??= Note.empty(title: title);
+      return note;
+    }
+
+    void _onFollowLinkTap(Note note) async {
       widget.db.navigateToNote(note); // TODO: Deprecate
       await widget.db.firebase.analytics.logEvent(name: 'follow_link');
       removeOverlay();
@@ -191,12 +195,21 @@ class _ContentFieldState extends State<ContentField> {
       Theme.of(context).textTheme.bodyText2!,
       size,
     );
-    FollowLink builder(context) {
-      return FollowLink(
-        caretOffset: caretOffset,
-        onTap: _onFollowLinkTap,
-        layerLink: layerLink,
-      );
+    Widget builder(context) {
+      return FutureBuilder<Note>(
+          future: getFollowLinkNote(),
+          builder: (BuildContext context, AsyncSnapshot<Note> snapshot) {
+            if (snapshot.hasData && snapshot.data != null) {
+              return LinkPreview(
+                note: snapshot.data!,
+                caretOffset: caretOffset,
+                onTap: () => _onFollowLinkTap(snapshot.data!),
+                layerLink: layerLink,
+              );
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          });
     }
 
     overlayContent(builder);
