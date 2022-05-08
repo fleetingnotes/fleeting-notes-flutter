@@ -21,7 +21,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   String exportOption = 'Markdown';
   String email = '';
-  bool autoFill = false;
 
   @override
   void initState() {
@@ -31,7 +30,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         email = e.toString();
       });
     });
-    autoFill = widget.db.fillSource();
   }
 
   _downloadNotesAsMarkdownZIP(List<Note> notes) {
@@ -64,9 +62,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void autoFilledToggled(bool value) {
-    setState(() {
-      autoFill = value;
-    });
     widget.db.setFillSource(value);
   }
 
@@ -112,9 +107,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(children: [
-                        const Text("Auto Fill Souce",
+                        const Text("Auto Fill Source",
                             style: TextStyle(fontSize: 12)),
-                        Switch(value: autoFill, onChanged: autoFilledToggled)
+                        Switch(
+                            value: widget.db.fillSource(),
+                            onChanged: autoFilledToggled)
                       ]),
                       const Divider(thickness: 1, height: 1),
                       SizedBox(

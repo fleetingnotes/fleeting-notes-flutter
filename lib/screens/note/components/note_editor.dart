@@ -252,12 +252,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                           onChanged: onChanged,
                           autofocus: autofocus,
                         ),
-                        Visibility(
-                            visible: widget.db.fillSource(),
-                            child: SourceContainer(
-                              controller: sourceController,
-                              onChanged: onChanged,
-                            )),
+                        SourceContainer(
+                          controller: sourceController,
+                          onChanged: onChanged,
+                        ),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
                         const Text("Backlinks", style: TextStyle(fontSize: 12)),

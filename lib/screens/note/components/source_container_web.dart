@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
     as sc;
 import 'package:web_browser_detect/web_browser_detect.dart';
+import 'package:hive/hive.dart';
 
 @JS('chrome.tabs.query')
 external dynamic queryTabsChrome(dynamic queryInfo);
@@ -61,24 +62,32 @@ class _SourceContainerState extends State<SourceContainer> {
     }
   }
 
+  void setSourceUrl() async {
+    widget.controller.text =
+        await getSourceUrl(defaultText: widget.controller.text);
+    if (widget.onChanged != null) widget.onChanged!();
+    setState(() {
+      sourceFieldVisible = true;
+    });
+  }
+
+  sc.SourceContainer sourceContainer() {
+    setSourceUrl();
+    return sc.SourceContainer(
+      controller: widget.controller,
+      onChanged: widget.onChanged,
+      autofocus: widget.autofocus,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: (sourceFieldVisible)
-          ? sc.SourceContainer(
-              controller: widget.controller,
-              onChanged: widget.onChanged,
-              autofocus: widget.autofocus,
-            )
+      child: (sourceFieldVisible ||
+              (Hive.box('settings').get('auto-fill-source') ?? false))
+          ? sourceContainer()
           : TextButton(
-              onPressed: () async {
-                widget.controller.text =
-                    await getSourceUrl(defaultText: widget.controller.text);
-                if (widget.onChanged != null) widget.onChanged!();
-                setState(() {
-                  sourceFieldVisible = true;
-                });
-              },
+              onPressed: setSourceUrl,
               child: const Text('Add Source URL'),
             ),
     );
