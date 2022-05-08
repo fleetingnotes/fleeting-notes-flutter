@@ -61,6 +61,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'fleeting_notes_export.json', Uint8List.fromList(bytes), 'json');
   }
 
+  void autoFilledToggled(bool value) {
+    widget.db.setFillSource(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,6 +106,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(children: [
+                        const Text("Auto Fill Source",
+                            style: TextStyle(fontSize: 12)),
+                        Switch(
+                            value: widget.db.fillSource(),
+                            onChanged: autoFilledToggled)
+                      ]),
+                      const Divider(thickness: 1, height: 1),
+                      SizedBox(
+                          height: Theme.of(context).custom.kDefaultPadding / 2),
                       const Text("Export Notes",
                           style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),

@@ -34,6 +34,7 @@ final ThemeData lightTheme = ThemeData.light().copyWith(
 
 final ThemeData darkTheme = ThemeData.dark().copyWith(
   // primaryColor: Colors.blue,
+  toggleableActiveColor: Colors.blue,
   colorScheme: const ColorScheme.dark().copyWith(
       primary: Colors.blue,
       secondary: Colors.blue,
@@ -41,10 +42,6 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
       primaryContainer: Colors.blue),
   floatingActionButtonTheme:
       const FloatingActionButtonThemeData(foregroundColor: Colors.white),
-  checkboxTheme:
-      CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith((states) {
-    return (states.contains(MaterialState.selected)) ? Colors.blue : null;
-  })),
   elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           foregroundColor: MaterialStateProperty.resolveWith((states) =>

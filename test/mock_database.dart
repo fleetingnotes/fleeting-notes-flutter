@@ -96,4 +96,12 @@ class MockDatabase extends Mock implements Database {
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
   }
+
+  @override
+  bool fillSource() {
+    return false;
+  }
+
+  @override
+  void setFillSource(bool autoFillEnabled) {}
 }

@@ -328,4 +328,12 @@ class Database {
     noteHistory.clear();
     navigatorKey.currentState!.popUntil((route) => false);
   }
+
+  void setFillSource(bool autoFillEnabled) {
+    Hive.box('settings').put('auto-fill-source', autoFillEnabled);
+  }
+
+  bool fillSource() {
+    return Hive.box('settings').get('auto-fill-source') ?? false;
+  }
 }

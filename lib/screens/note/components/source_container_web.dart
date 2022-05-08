@@ -10,6 +10,8 @@ import 'package:fleeting_notes_flutter/screens/note/components/source_container.
     as sc;
 import 'package:web_browser_detect/web_browser_detect.dart';
 
+import '../../../database.dart';
+
 @JS('chrome.tabs.query')
 external dynamic queryTabsChrome(dynamic queryInfo);
 
@@ -20,6 +22,7 @@ class SourceContainer extends StatefulWidget {
   const SourceContainer({
     Key? key,
     required this.controller,
+    this.db,
     this.onChanged,
     this.autofocus = false,
   }) : super(key: key);
@@ -27,6 +30,7 @@ class SourceContainer extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onChanged;
   final bool autofocus;
+  final Database? db;
 
   @override
   State<SourceContainer> createState() => _SourceContainerState();
@@ -41,6 +45,9 @@ class _SourceContainerState extends State<SourceContainer> {
     setState(() {
       sourceFieldVisible = widget.controller.text.isNotEmpty || !kIsWeb;
     });
+    if (widget.db != null && widget.db!.fillSource()) {
+      setSourceUrl();
+    }
   }
 
   Future<String> getSourceUrl({String defaultText = ''}) async {
@@ -61,24 +68,30 @@ class _SourceContainerState extends State<SourceContainer> {
     }
   }
 
+  void setSourceUrl() async {
+    widget.controller.text =
+        await getSourceUrl(defaultText: widget.controller.text);
+    if (widget.onChanged != null) widget.onChanged!();
+    setState(() {
+      sourceFieldVisible = true;
+    });
+  }
+
+  sc.SourceContainer sourceContainer() {
+    return sc.SourceContainer(
+      controller: widget.controller,
+      onChanged: widget.onChanged,
+      autofocus: widget.autofocus,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       child: (sourceFieldVisible)
-          ? sc.SourceContainer(
-              controller: widget.controller,
-              onChanged: widget.onChanged,
-              autofocus: widget.autofocus,
-            )
+          ? sourceContainer()
           : TextButton(
-              onPressed: () async {
-                widget.controller.text =
-                    await getSourceUrl(defaultText: widget.controller.text);
-                if (widget.onChanged != null) widget.onChanged!();
-                setState(() {
-                  sourceFieldVisible = true;
-                });
-              },
+              onPressed: setSourceUrl,
               child: const Text('Add Source URL'),
             ),
     );
