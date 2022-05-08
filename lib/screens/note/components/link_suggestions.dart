@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -47,12 +47,8 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
   }
 
   List<TextSpan> highlightString(String text) {
-    String escapedQuery =
-        widget.query.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
-      return '\\${match.group(0)}';
-    });
+    RegExp r = getQueryRegex(widget.query);
     TextStyle highlight = const TextStyle(fontWeight: FontWeight.bold);
-    RegExp r = RegExp(escapedQuery, multiLine: true);
     int placeHolder = 0;
     List<TextSpan> textSpanner = [];
     r.allMatches(text).forEach((element) {

@@ -18,7 +18,7 @@ import 'mock_database.dart';
 void main() {
   setUpAll(() {
     registerFallbackValue(Note.empty());
-    registerFallbackValue(SearchQuery(queryRegex: ''));
+    registerFallbackValue(SearchQuery(query: ''));
   });
 
   testWidgets('Render List of Notes', (WidgetTester tester) async {
@@ -36,10 +36,10 @@ void main() {
   testWidgets('Test search filters properly', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.getSearchNotes(SearchQuery(queryRegex: ''),
+    when(() => mockDb.getSearchNotes(SearchQuery(query: ''),
             forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([Note.empty()]));
-    when(() => mockDb.getSearchNotes(SearchQuery(queryRegex: 'hello'),
+    when(() => mockDb.getSearchNotes(SearchQuery(query: 'hello'),
             forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));

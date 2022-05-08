@@ -22,12 +22,8 @@ class NoteCard extends StatelessWidget {
 
   List<TextSpan> highlightString(
       String query, String text, TextStyle defaultStyle) {
-    String escapedQuery =
-        query.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
-      return '\\${match.group(0)}';
-    });
+    RegExp r = getQueryRegex(query);
     TextStyle highlight = defaultStyle.copyWith(backgroundColor: Colors.orange);
-    RegExp r = RegExp(escapedQuery, multiLine: true, caseSensitive: false);
     int placeHolder = 0;
     List<TextSpan> textSpanner = [];
     r.allMatches(text).forEach((element) {
@@ -86,7 +82,7 @@ class NoteCard extends StatelessWidget {
                                       children: highlightString(
                                           (sQuery != null &&
                                                   sQuery!.searchByTitle)
-                                              ? sQuery!.queryRegex
+                                              ? sQuery!.query
                                               : '',
                                           note.title,
                                           Theme.of(context)
@@ -107,7 +103,7 @@ class NoteCard extends StatelessWidget {
                                       children: highlightString(
                                           (sQuery != null &&
                                                   sQuery!.searchByContent)
-                                              ? sQuery!.queryRegex
+                                              ? sQuery!.query
                                               : '',
                                           note.content,
                                           Theme.of(context)

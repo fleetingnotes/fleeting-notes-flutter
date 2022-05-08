@@ -1,14 +1,14 @@
 import 'Note.dart';
 
 class SearchQuery {
-  final String queryRegex;
+  final String query;
   final bool searchByTitle;
   final bool searchByContent;
   final bool searchBySource;
   final SortOptions sortBy;
 
   SearchQuery({
-    required this.queryRegex,
+    required this.query,
     this.searchByTitle = true,
     this.searchByContent = true,
     this.searchBySource = true,
@@ -44,3 +44,12 @@ final Map sortMap = {
   SortOptions.sourceDESC: (Note n1, Note n2) =>
       n2.source.toLowerCase().compareTo(n1.source.toLowerCase()),
 };
+
+RegExp getQueryRegex(String query) {
+  String escapedQuery =
+      query.replaceAllMapped(RegExp(r'[^a-zA-Z0-9]'), (match) {
+    return '\\${match.group(0)}';
+  });
+  RegExp r = RegExp(escapedQuery, multiLine: true, caseSensitive: false);
+  return r;
+}
