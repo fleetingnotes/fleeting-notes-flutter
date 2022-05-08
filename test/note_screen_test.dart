@@ -5,6 +5,8 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:fleeting_notes_flutter/screens/note/components/link_preview.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -147,7 +149,7 @@ void main() {
     expect(find.text('[[hello world]]', findRichText: true), findsOneWidget);
   });
 
-  testWidgets('Clicking Follow Link button removes Follow Link overlay',
+  testWidgets('Clicking TitleField removes LinkPreview overlay',
       (WidgetTester tester) async {
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
@@ -161,9 +163,9 @@ void main() {
     await tester.tapAt(tester
         .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
         .translate(20, 10));
-    await tester.pump();
-    await tester.tap(find.text('Follow Link'));
     await tester.pumpAndSettle();
-    expect(find.text('Follow Link'), findsNothing);
+    await tester.tap(find.byType(TitleField));
+    await tester.pumpAndSettle();
+    expect(find.byType(LinkPreview), findsNothing);
   });
 }
