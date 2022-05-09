@@ -1,7 +1,7 @@
 {
     "name": "Fleeting Notes",
     "description": "A lightweight note-taking app for capturing and connecting fleeting thoughts.",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "browser_action": {
       "default_popup": "popup.html",
       "default_icon": "/icons/196.png"
