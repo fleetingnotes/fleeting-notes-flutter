@@ -6,6 +6,7 @@ echo "Building flutter app for web extension"
 rm -rf build/web build/web-ext
 flutter build web --web-renderer html --csp --release
 mv build/web build/web-ext
+rm -rf build/web-ext/canvaskit
 echo "Finished building flutter app"
 
 #Replace remote library references with packed js
