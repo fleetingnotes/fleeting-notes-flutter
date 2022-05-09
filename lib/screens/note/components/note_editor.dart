@@ -256,6 +256,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                           controller: sourceController,
                           onChanged: onChanged,
                           db: widget.db,
+                          overrideSourceUrl: widget.note.isEmpty(),
                         ),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
