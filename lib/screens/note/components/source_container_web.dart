@@ -24,12 +24,12 @@ class SourceContainer extends StatefulWidget {
     required this.controller,
     this.db,
     this.onChanged,
-    this.autofocus = false,
+    this.overrideSourceUrl = false,
   }) : super(key: key);
 
   final TextEditingController controller;
   final VoidCallback? onChanged;
-  final bool autofocus;
+  final bool overrideSourceUrl;
   final Database? db;
 
   @override
@@ -45,7 +45,9 @@ class _SourceContainerState extends State<SourceContainer> {
     setState(() {
       sourceFieldVisible = widget.controller.text.isNotEmpty || !kIsWeb;
     });
-    if (widget.db != null && widget.db!.fillSource()) {
+    if (widget.db != null &&
+        widget.db!.fillSource() &&
+        widget.overrideSourceUrl) {
       setSourceUrl();
     }
   }
@@ -81,7 +83,7 @@ class _SourceContainerState extends State<SourceContainer> {
     return sc.SourceContainer(
       controller: widget.controller,
       onChanged: widget.onChanged,
-      autofocus: widget.autofocus,
+      overrideSourceUrl: widget.overrideSourceUrl,
     );
   }
 
