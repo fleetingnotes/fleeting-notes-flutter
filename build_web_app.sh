@@ -12,7 +12,9 @@ echo "Finished building flutter app"
 #Replace remote library references with packed js
 echo "Remove unnecessary files"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-rm -rf $SCRIPT_DIR/build/web-app/firebasejs
-rm $SCRIPT_DIR/build/web-app/manifest3.json $SCRIPT_DIR/build/web-app/manifest2.json $SCRIPT_DIR/build/web-app/popup.html $SCRIPT_DIR/build/web-app/web-ext.html
+cd $SCRIPT_DIR/build/web-app
+rm -rf firebasejs
+rm manifest3.json manifest2.json popup.html web-ext.html
+zip -q -r ../web-app.zip .
 
 echo "Finished building web app in build/web-app"
