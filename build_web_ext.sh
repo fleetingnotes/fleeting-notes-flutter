@@ -17,11 +17,11 @@ sed -i -e 's|https\:\/\/www.gstatic\.com\/||g' $SCRIPT_DIR/build/web-ext/main.da
 cd build/web-ext
 #ZIP chrome 
 cp manifest3.json manifest.json
-zip -r ../mainfest3.zip .
+zip -q -x 'manifest\d.json' -r ../web-ext-3.zip .
 
 #ZIP firefox
 cp manifest2.json manifest.json
-zip -r ../mainfest2.zip . 
+zip -q -x 'manifest\d.json' -r ../web-ext-2.zip . 
 
 rm manifest.json
 echo "Finished building web extension in build/manifest2.zip and build/manifest3.zip"
