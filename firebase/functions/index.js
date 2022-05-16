@@ -1,5 +1,6 @@
 // CORS Express middleware to enable CORS Requests.
 const cors = require('cors')({origin: true});
+const request = require('request');
 
 // Firebase Setup
 const functions = require("firebase-functions");
@@ -72,7 +73,6 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
         {
           Response: {
             Status: status,
-            Body: body,
           },
         }
       );
@@ -97,15 +97,29 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
           return handleResponse(email, 400);
         }
   
-        // TODO(DEVELOPER): In production you'll need to update the `authenticate` function so that it authenticates with your own credentials system.
-        const valid = await authenticate(email, password)
+        const authRes = await authenticate(email, password)
+        const valid = authRes['error'] === undefined;
         if (!valid) {
           return handleResponse(email, 401); // Invalid username/password
         }
-  
-        // On success return the Firebase Custom Auth Token.
-        // const firebaseToken = await admin.auth().createCustomToken(email);
-        return handleResponse(email, 200);
+        var db = admin.firestore();
+        var notes = []
+        const uid = authRes['localId'];
+        const snapshot = await db.collection("notes").where('_partition', '==', uid).get()
+
+
+        snapshot.forEach(doc => {
+          var newNote = {
+            "_id": doc.id,
+            "title": doc.data().title,
+            "content": doc.data().content,
+            "source": doc.data().source,
+            "timestamp": doc.data().created_timestamp.toDate(),
+            "_isDeleted": doc.data()._isDeleted,
+          }
+          notes = notes.concat(newNote);
+        });
+        return handleResponse(email, 200, notes);
       });
     } catch (error) {
       return handleError(email, error);
@@ -114,8 +128,7 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
 
 /**
  * Authenticate the provided credentials.
- * TODO(DEVELOPER): In production you'll need to update this function so that it authenticates with your own credentials system.
- * @returns {Promise<boolean>} success or failure.
+ * @returns {Promise<JSON>} success or failure.
  */
  function authenticate(email, password) {
     // For the purpose of this example use httpbin (https://httpbin.org) and send a basic authentication request.
@@ -123,22 +136,29 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
     const firebaseApiKey= 'AIzaSyBXON2_4OVoHSplISHIQKtexvAlZEIZBRY'
     const authEndpoint = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`;
     const creds = {
-      email: email,
-      password: password,
+      "email": email,
+      "password": password,
     };
     return new Promise((resolve, reject) => {
-      request.post(authEndpoint, creds, (error, response, body) => {
+      request.post({
+        url: authEndpoint,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: creds,
+        json: true,
+      }, (error, response, body) => {
         if (error) {
           return reject(error);
         }
         const statusCode = response ? response.statusCode : 0;
-        if (statusCode === 401) { // Invalid username/password
-          return resolve(false);
+        if (statusCode === 401 || statusCode === 400) { // Invalid username/password
+          return resolve(body);
         }
         if (statusCode !== 200) {
           return reject(new Error(`invalid response returned from ${authEndpoint} status code ${statusCode}`));
         }
-        return resolve(true);
+        return resolve(body);
       });
     });
   }
