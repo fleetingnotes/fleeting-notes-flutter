@@ -6,13 +6,8 @@ const request = require('request');
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 admin.initializeApp();
-// @ts-ignore
-// const serviceAccount = require('./service-account.json');
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   databaseURL: `https://${process.env.GCLOUD_PROJECT}.firebaseio.com`,
-// });
 
+// tensorflow setup
 require('@tensorflow/tfjs-node');
 const use = require("@tensorflow-models/universal-sentence-encoder");
 let model;
@@ -35,7 +30,6 @@ const zipWith = (f, xs, ys) => {
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
-
 exports.rank_sentence_similarity = functions.runWith({memory: "1GB"}).https.onRequest(async (req, res) => {
     // Embed an array of sentences.
     const sentences = [
