@@ -6,6 +6,7 @@ import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/side_menu.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
+import 'package:flutter/scheduler.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key, required this.db, this.initNote})
@@ -27,6 +28,47 @@ class _MainScreenState extends State<MainScreen> {
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
     super.initState();
+    // Privacy Alert Dialog
+    SchedulerBinding.instance?.addPostFrameCallback((_) {
+      bool? analyticsEnabled = widget.db.getAnalyticsEnabled();
+      if (analyticsEnabled == null) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Privacy'),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 300),
+                child: const Text(
+                    '''Can we collect the following anonymous data about your use of Fleeting Notes:
+
+- Anonymous interaction data, which we collect to make Fleeting Notes better for everyone
+- Anonymous crash reports, which we collect to help fix bugs within the app
+              
+Full details about the anonymous data we collect and what we do with it are provided in our Privacy Policy.'''),
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      analyticsEnabled = false;
+                      widget.db.setAnalyticsEnabled(analyticsEnabled);
+                    },
+                    child: const Text("No, don't collect anonymous data")),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      analyticsEnabled = true;
+                      widget.db.setAnalyticsEnabled(analyticsEnabled);
+                    },
+                    child: const Text("Yes, collect anonymous data"))
+              ],
+            );
+          },
+        );
+      }
+    });
   }
 
   @override

@@ -336,4 +336,13 @@ class Database {
   bool fillSource() {
     return Hive.box('settings').get('auto-fill-source') ?? false;
   }
+
+  bool? getAnalyticsEnabled() {
+    return Hive.box('settings').get('analytics-enabled');
+  }
+
+  void setAnalyticsEnabled(enabled) {
+    Hive.box('settings').put('analytics-enabled', enabled);
+    firebase.setAnalytics(enabled);
+  }
 }
