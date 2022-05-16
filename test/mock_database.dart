@@ -104,4 +104,9 @@ class MockDatabase extends Mock implements Database {
 
   @override
   void setFillSource(bool autoFillEnabled) {}
+
+  @override
+  bool? getAnalyticsEnabled() {
+    return true;
+  }
 }

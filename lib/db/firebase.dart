@@ -1,7 +1,9 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/Note.dart';
 import 'db_interface.dart';
 
@@ -21,6 +23,7 @@ class FirebaseDB implements DatabaseInterface {
     });
     notesCollection = FirebaseFirestore.instance.collection('notes');
   }
+
   Future<void> configRemoteConfig() async {
     await remoteConfig.setConfigSettings(RemoteConfigSettings(
       fetchTimeout: const Duration(minutes: 1),
@@ -36,6 +39,13 @@ class FirebaseDB implements DatabaseInterface {
     var decodedToken = await currUser!.getIdTokenResult();
     Map claims = decodedToken.claims ?? {};
     return claims['stripeRole'] == 'premium';
+  }
+
+  void setAnalytics(enabled) {
+    analytics.setAnalyticsCollectionEnabled(enabled);
+    if (!kIsWeb) {
+      FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(enabled);
+    }
   }
 
   @override
