@@ -29,7 +29,7 @@ class FirebaseDB implements DatabaseInterface {
       fetchTimeout: const Duration(minutes: 1),
       minimumFetchInterval: const Duration(seconds: 1),
     ));
-    await remoteConfig.setDefaults(const {"use_firebase": false});
+    await remoteConfig.setDefaults(const {"use_firebase": true});
     remoteConfig.fetchAndActivate();
   }
 
