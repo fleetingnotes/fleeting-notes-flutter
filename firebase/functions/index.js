@@ -13,9 +13,6 @@ admin.initializeApp();
 //   databaseURL: `https://${process.env.GCLOUD_PROJECT}.firebaseio.com`,
 // });
 
-// We use Request to make the basic authentication request in our example.
-const basicAuthRequest = require('request');
-
 require('@tensorflow/tfjs-node');
 const use = require("@tensorflow-models/universal-sentence-encoder");
 let model;
