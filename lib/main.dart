@@ -28,7 +28,7 @@ Future<void> initApp() async {
 }
 
 void main() async {
-  if (!kIsWeb) {
+  if (kIsWeb) {
     await initApp();
     runApp(const MyApp());
   } else {
