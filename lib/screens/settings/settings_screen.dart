@@ -25,10 +25,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    widget.db.getEmail().then((e) {
-      setState(() {
-        email = e.toString();
-      });
+
+    setState(() {
+      if (widget.db.firebase.currUser != null) {
+        email = widget.db.firebase.currUser!.email ?? '';
+      }
     });
   }
 
