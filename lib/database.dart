@@ -186,15 +186,7 @@ class Database {
     return await firebase.register(email, password);
   }
 
-  Future<bool> login(String email, String password,
-      {bool pushLocalNotes = false}) async {
-    if (pushLocalNotes) {
-      var box = await Hive.openBox('local');
-      List<Note> notes = getAllNotesLocal(box);
-      if (notes.isNotEmpty) {
-        await firebase.updateNotes(notes);
-      }
-    }
+  Future<bool> login(String email, String password) async {
     if (!firebase.isLoggedIn()) {
       bool isSuccess = await firebase.login(email, password);
       if (!isSuccess) return false;
