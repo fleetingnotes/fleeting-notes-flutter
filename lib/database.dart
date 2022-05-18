@@ -254,8 +254,10 @@ class Database {
   }
 
   void popAllRoutes() {
-    noteHistory.clear();
-    navigatorKey.currentState!.popUntil((route) => false);
+    if (navigatorKey.currentState != null) {
+      noteHistory.clear();
+      navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    }
   }
 
   void setFillSource(bool autoFillEnabled) {

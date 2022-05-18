@@ -47,7 +47,6 @@ class _SearchScreenState extends State<SearchScreen> {
   Map searchFilter = {'title': true, 'content': true, 'source': true};
 
   Future<void> loadNotes(queryRegex, {forceSync = false}) async {
-    if (!mounted) return;
     SearchQuery query = SearchQuery(
         query: queryRegex,
         searchByTitle: searchFilter['title'],
@@ -58,6 +57,7 @@ class _SearchScreenState extends State<SearchScreen> {
       query,
       forceSync: forceSync,
     );
+    if (!mounted) return;
     setState(() {
       notes = tempNotes;
     });
