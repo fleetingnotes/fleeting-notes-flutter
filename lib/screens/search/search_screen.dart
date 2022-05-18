@@ -249,9 +249,11 @@ class SearchScreenNavigator extends StatelessWidget {
   const SearchScreenNavigator({
     Key? key,
     required this.db,
+    this.hasInitNote = false,
   }) : super(key: key);
 
   final Database db;
+  final bool hasInitNote;
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +274,7 @@ class SearchScreenNavigator extends StatelessWidget {
                 key: history.first.value,
                 note: history.first.key,
                 db: db,
-                isShared: true,
+                isShared: hasInitNote,
               );
             }
           }),

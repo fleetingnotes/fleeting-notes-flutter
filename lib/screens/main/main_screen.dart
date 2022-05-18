@@ -20,11 +20,14 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   FocusNode searchFocusNode = FocusNode();
+  late bool hasInitNote;
   @override
   void initState() {
     if (widget.initNote == null) {
+      hasInitNote = false;
       widget.db.noteHistory = {Note.empty(): GlobalKey()};
     } else {
+      hasInitNote = true;
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
     super.initState();
@@ -102,7 +105,8 @@ Full details about the anonymous data we collect and what we do with it are prov
             },
           ),
           body: Responsive(
-            mobile: SearchScreenNavigator(db: widget.db),
+            mobile:
+                SearchScreenNavigator(db: widget.db, hasInitNote: hasInitNote),
             tablet: Row(
               children: [
                 Expanded(
@@ -115,7 +119,8 @@ Full details about the anonymous data we collect and what we do with it are prov
                 ),
                 Expanded(
                   flex: 9,
-                  child: NoteScreenNavigator(db: widget.db),
+                  child: NoteScreenNavigator(
+                      db: widget.db, hasInitNote: hasInitNote),
                 ),
               ],
             ),
@@ -131,7 +136,8 @@ Full details about the anonymous data we collect and what we do with it are prov
                 ),
                 Expanded(
                   flex: 9,
-                  child: NoteScreenNavigator(db: widget.db),
+                  child: NoteScreenNavigator(
+                      db: widget.db, hasInitNote: hasInitNote),
                 ),
               ],
             ),
