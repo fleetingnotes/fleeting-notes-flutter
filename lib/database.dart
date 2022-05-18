@@ -256,7 +256,7 @@ class Database {
   void popAllRoutes() {
     if (navigatorKey.currentState != null) {
       noteHistory.clear();
-      navigatorKey.currentState?.popUntil((route) => route.isFirst);
+      navigatorKey.currentState?.popUntil((route) => false);
     }
   }
 
