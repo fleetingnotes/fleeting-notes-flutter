@@ -39,9 +39,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
     // For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialText().then((String? sharedText) {
       if (sharedText != null) {
-        setState(() {
-          initNote = getNoteFromShareText(sharedText);
-        });
+        db.popAllRoutes();
+        db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
         db.firebase.analytics.logEvent(name: 'receive_share');
       }
     });

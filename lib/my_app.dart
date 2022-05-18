@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/db/firebase.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
@@ -35,7 +36,11 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   void initState() {
     super.initState();
     userChanges = db.firebase.userChanges.listen(refreshScreen);
-    initNote = db.getUnsavedNote();
+    if (kIsWeb) {
+      setState(() {
+        initNote = db.getUnsavedNote();
+      });
+    }
   }
 
   @override
@@ -48,7 +53,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: Hive.box('settings').listenable(),
+        valueListenable: Hive.box('settings').listenable(keys: ['darkMode']),
         builder: (context, Box box, _) {
           return MaterialApp(
             title: 'Fleeting Notes',
