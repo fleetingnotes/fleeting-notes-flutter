@@ -144,10 +144,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     updatedNote.source = sourceController.text;
+    if (updatedNote.isEmpty()) return '';
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
       if (updateState) {
-        widget.db.clearUnsavedNote();
         setState(() {
           hasNewChanges = false;
         });
@@ -157,6 +157,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
         errMessage = 'Failed to save note';
         if (updateState) onChanged();
       } else {
+        widget.db.clearUnsavedNote();
         errMessage = await updateBacklinks(prevTitle, updatedNote.title);
       }
     } else {
