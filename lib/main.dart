@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:fleeting_notes_flutter/my_app.dart'
-    if (dart.library.js) 'package:fleeting_notes_flutter/my_app_web.dart';
+import 'package:fleeting_notes_flutter/my_app_mobile.dart'
+    if (dart.library.js) 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 Future<Box> openHiveBox(String boxName) async {
