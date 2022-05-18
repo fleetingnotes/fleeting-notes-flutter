@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,8 @@ class MockFirebaseDB extends Mock implements FirebaseDB {
   FirebaseAnalytics analytics = MockFirebaseAnalytics();
   @override
   FirebaseRemoteConfig remoteConfig = MockRemoteConfig();
+  @override
+  Stream<User?> get userChanges => const Stream.empty();
 }
 
 class MockDatabase extends Mock implements Database {
@@ -74,10 +77,10 @@ class MockDatabase extends Mock implements Database {
   }
 
   @override
-  void listenNoteChange(Function callback) {
+  Future<StreamSubscription> listenNoteChange(Function callback) async {
     unlistenNoteChange();
     Stream stream = streamController.stream;
-    stream.listen((note) {
+    return stream.listen((note) {
       callback(note);
     });
   }

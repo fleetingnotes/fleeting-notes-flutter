@@ -74,6 +74,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    loadNotes(queryController.text);
     userChangeStream =
         widget.db.firebase.userChanges.listen(listenCallbackForceSync);
     widget.db.listenNoteChange(listenCallback).then((stream) {
