@@ -2,13 +2,11 @@ import 'dart:math';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'db/firebase.dart';
 import 'models/Note.dart';
 import 'dart:async';
 import 'package:collection/collection.dart';
-import 'package:fleeting_notes_flutter/db/realm.dart';
 import 'models/search_query.dart';
 
 class Database {
@@ -23,18 +21,11 @@ class Database {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey searchKey = GlobalKey();
   Map<Note, GlobalKey> noteHistory = {};
-  static const storage = FlutterSecureStorage();
-  RealmDB realm = RealmDB();
 
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
   bool isLoggedIn() {
-    // Realm always has to be logged in
-    // If "use_firebase" is false, short circuit and don't check firebase
-    // If "use_firebase" is true, then must also be logged into firebase
-    return realm.isLoggedIn() &&
-        (!firebase.remoteConfig.getBool("use_firebase") ||
-            firebase.isLoggedIn());
+    return firebase.isLoggedIn();
   }
 
   Future<List<Note>> getSearchNotes(SearchQuery query,
@@ -52,11 +43,9 @@ class Database {
 
   Future<List<Note>> getAllNotes({forceSync = false}) async {
     try {
-      var box = await Hive.openBox(realm.userId);
+      var box = await Hive.openBox(firebase.userId);
       if ((box.isEmpty || forceSync) && isLoggedIn()) {
-        List<Note> notes = firebase.remoteConfig.getBool("use_firebase")
-            ? await firebase.getAllNotes()
-            : await realm.getAllNotes();
+        List<Note> notes = await firebase.getAllNotes();
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         // box.clear(); // TODO: investigate why this causes bugs
         await box.putAll(noteIdMap);
@@ -85,7 +74,7 @@ class Database {
   }
 
   Future<Note?> getNote(id) async {
-    var box = await Hive.openBox(realm.userId);
+    var box = await Hive.openBox(firebase.userId);
     return box.get(id) as Note?;
   }
 
@@ -119,7 +108,7 @@ class Database {
   }
 
   Future<Note?> getNoteById(String id) async {
-    var box = await Hive.openBox(realm.userId);
+    var box = await Hive.openBox(firebase.userId);
     return box.get(id);
   }
 
@@ -134,12 +123,11 @@ class Database {
 
   Future<bool> insertNote(Note note) async {
     try {
-      if (realm.isLoggedIn()) {
-        bool isSuccess = await realm.insertNote(note);
+      if (firebase.isLoggedIn()) {
+        bool isSuccess = await firebase.insertNote(note);
         if (!isSuccess) return false;
       }
-      if (firebase.isLoggedIn()) firebase.insertNote(note);
-      var box = await Hive.openBox(realm.userId);
+      var box = await Hive.openBox(firebase.userId);
       box.put(note.id, note);
       return true;
     } catch (e) {
@@ -149,12 +137,11 @@ class Database {
 
   Future<bool> updateNote(Note note) async {
     try {
-      if (realm.isLoggedIn()) {
-        bool isSuccess = await realm.updateNote(note);
+      if (firebase.isLoggedIn()) {
+        bool isSuccess = await firebase.updateNote(note);
         if (!isSuccess) return false;
       }
-      if (firebase.isLoggedIn()) firebase.updateNote(note);
-      var box = await Hive.openBox(realm.userId);
+      var box = await Hive.openBox(firebase.userId);
       box.put(note.id, note);
       return true;
     } catch (e) {
@@ -164,12 +151,11 @@ class Database {
 
   Future<bool> updateNotes(List<Note> notes) async {
     try {
-      if (realm.isLoggedIn()) {
-        bool isSuccess = await realm.updateNotes(notes);
+      if (firebase.isLoggedIn()) {
+        bool isSuccess = await firebase.updateNotes(notes);
         if (!isSuccess) return false;
       }
-      if (firebase.isLoggedIn()) firebase.updateNotes(notes);
-      var box = await Hive.openBox(realm.userId);
+      var box = await Hive.openBox(firebase.userId);
       Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
       await box.putAll(noteIdMap);
       return true;
@@ -180,12 +166,11 @@ class Database {
 
   Future<bool> deleteNote(Note note) async {
     try {
-      if (realm.isLoggedIn()) {
-        bool isSuccess = await realm.deleteNote(note);
+      if (firebase.isLoggedIn()) {
+        bool isSuccess = await firebase.deleteNote(note);
         if (!isSuccess) return false;
       }
-      if (firebase.isLoggedIn()) firebase.deleteNote(note);
-      var box = await Hive.openBox(realm.userId);
+      var box = await Hive.openBox(firebase.userId);
       box.delete(note.id);
       return true;
     } catch (e) {
@@ -195,73 +180,17 @@ class Database {
 
   void logout() async {
     firebase.logout();
-    realm.logout();
-    await storage.delete(key: 'email');
-    await storage.delete(key: 'password');
-  }
-
-  Future<bool> loginWithStorage() async {
-    String? email;
-    String? password;
-    try {
-      email = await getEmail();
-      password = await getPassword();
-    } catch (e) {
-      return false;
-    }
-
-    if (email == null || password == null) {
-      return false;
-    }
-    bool validCredentials = await login(email, password);
-    return validCredentials;
-  }
-
-  Future<String?> getEmail() async {
-    return await storage.read(key: 'email');
-  }
-
-  Future<String?> getPassword() async {
-    return await storage.read(key: 'password');
   }
 
   Future<bool> register(String email, String password) async {
-    if (!await firebase.register(email, password)) return false;
-    bool isRegistered = await realm.register(email, password);
-    return isRegistered;
+    return await firebase.register(email, password);
   }
 
-  Future<bool> login(String email, String password,
-      {bool pushLocalNotes = false}) async {
-    bool validCredentials = await realm.login(email, password);
-    if (validCredentials) {
-      await storage.write(key: 'email', value: email);
-      await storage.write(key: 'password', value: password);
-      if (pushLocalNotes) {
-        var box = await Hive.openBox('local');
-        List<Note> notes = getAllNotesLocal(box);
-        if (notes.isNotEmpty) {
-          await realm.updateNotes(notes);
-        }
-      }
-      if (!firebase.isLoggedIn() && !await firebase.login(email, password)) {
-        migrateToFirebase(email, password);
-      }
+  Future<bool> login(String email, String password) async {
+    if (!firebase.isLoggedIn()) {
+      bool isSuccess = await firebase.login(email, password);
+      if (!isSuccess) return false;
     }
-    return validCredentials;
-  }
-
-  Future<bool> migrateToFirebase(String email, String password) async {
-    await firebase.register(email, password);
-    if (!await firebase.login(email, password)) {
-      await firebase.analytics.logEvent(
-          name: 'migrate_to_firebase', parameters: {'is_success': false});
-      return false;
-    }
-    List<Note> notes = await realm.getAllNotes();
-    await firebase.updateNotes(notes);
-    await firebase.analytics.logEvent(
-        name: 'migrate_to_firebase', parameters: {'is_success': true});
     return true;
   }
 
@@ -317,16 +246,18 @@ class Database {
     scaffoldKey.currentState?.openDrawer();
   }
 
-  void listenNoteChange(Function callback) async {
-    var box = await Hive.openBox(realm.userId);
-    box.watch().listen((event) {
+  Future<StreamSubscription> listenNoteChange(Function callback) async {
+    var box = await Hive.openBox(firebase.userId);
+    return box.watch().listen((event) {
       callback(event);
     });
   }
 
   void popAllRoutes() {
-    noteHistory.clear();
-    navigatorKey.currentState!.popUntil((route) => false);
+    if (navigatorKey.currentState != null) {
+      noteHistory.clear();
+      navigatorKey.currentState?.popUntil((route) => false);
+    }
   }
 
   void setFillSource(bool autoFillEnabled) {

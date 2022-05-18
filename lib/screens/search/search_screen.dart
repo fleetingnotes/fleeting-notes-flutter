@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,8 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  late final StreamSubscription userChangeStream;
+  late final StreamSubscription noteChangeStream;
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
@@ -44,7 +47,6 @@ class _SearchScreenState extends State<SearchScreen> {
   Map searchFilter = {'title': true, 'content': true, 'source': true};
 
   Future<void> loadNotes(queryRegex, {forceSync = false}) async {
-    if (!mounted) return;
     SearchQuery query = SearchQuery(
         query: queryRegex,
         searchByTitle: searchFilter['title'],
@@ -55,6 +57,7 @@ class _SearchScreenState extends State<SearchScreen> {
       query,
       forceSync: forceSync,
     );
+    if (!mounted) return;
     setState(() {
       notes = tempNotes;
     });
@@ -64,11 +67,26 @@ class _SearchScreenState extends State<SearchScreen> {
     loadNotes(queryController.text);
   }
 
+  void listenCallbackForceSync(event) {
+    loadNotes(queryController.text, forceSync: true);
+  }
+
   @override
   void initState() {
     super.initState();
-    loadNotes(queryController.text, forceSync: true);
-    widget.db.listenNoteChange(listenCallback);
+    loadNotes(queryController.text);
+    userChangeStream =
+        widget.db.firebase.userChanges.listen(listenCallbackForceSync);
+    widget.db.listenNoteChange(listenCallback).then((stream) {
+      noteChangeStream = stream;
+    });
+  }
+
+  @override
+  void dispose() {
+    userChangeStream.cancel();
+    noteChangeStream.cancel();
+    super.dispose();
   }
 
   void _pressNote(BuildContext context, Note note) {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/database.dart';
@@ -17,19 +18,29 @@ class MyApp extends StatefulWidget {
 class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   Note? initNote;
   final Database db = Database(firebase: FirebaseDB());
+  late final StreamSubscription userChanges;
   Future<String> navigateScreen() async {
-    // loads futures concurrently
-    await Future.wait(
-        [db.loginWithStorage(), db.firebase.configRemoteConfig()]);
     return 'main';
   }
 
-  void refreshScreen() {
+  void refreshScreen(event) {
     db.popAllRoutes();
     setState(() {
       db.searchKey = GlobalKey();
       db.noteHistory = {Note.empty(): GlobalKey()};
     });
+  }
+
+  @override
+  void initState() {
+    userChanges = db.firebase.userChanges.listen(refreshScreen);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    userChanges.cancel();
+    super.dispose();
   }
 
   // This widget is the root of your application.
@@ -62,8 +73,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
                       }
                     },
                   ),
-              '/settings': (context) =>
-                  SettingsScreen(db: db, onAuthChange: refreshScreen)
+              '/settings': (context) => SettingsScreen(db: db)
             },
           );
         });

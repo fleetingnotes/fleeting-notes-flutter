@@ -9,11 +9,9 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key, required this.db, required this.onAuthChange})
-      : super(key: key);
+  const SettingsScreen({Key? key, required this.db}) : super(key: key);
 
   final Database db;
-  final VoidCallback onAuthChange;
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
@@ -25,10 +23,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    widget.db.getEmail().then((e) {
-      setState(() {
-        email = e.toString();
-      });
+
+    setState(() {
+      if (widget.db.firebase.currUser != null) {
+        email = widget.db.firebase.currUser!.email ?? '';
+      }
     });
   }
 
@@ -178,7 +177,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ElevatedButton(
                                         onPressed: () {
                                           widget.db.logout();
-                                          widget.onAuthChange();
                                           setState(() {});
                                         },
                                         child: const Text('Logout'))
@@ -203,7 +201,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           : Auth(
                               db: widget.db,
                               onLogin: (e) {
-                                widget.onAuthChange();
                                 setState(() {
                                   email = e;
                                 });

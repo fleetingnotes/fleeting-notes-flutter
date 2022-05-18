@@ -22,11 +22,9 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.isLoggedIn()).thenAnswer((_) => true);
-    when(() => mockDb.getEmail()).thenAnswer((_) => Future.value('test'));
     await tester.pumpWidget(MaterialApp(
         home: SettingsScreen(
       db: mockDb,
-      onAuthChange: () {},
     )));
     // await tester.pumpAndSettle();
     expect(find.byType(Auth), findsNothing);
@@ -37,11 +35,9 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    when(() => mockDb.getEmail()).thenAnswer((_) => Future.value('test'));
     await tester.pumpWidget(MaterialApp(
         home: SettingsScreen(
       db: mockDb,
-      onAuthChange: () {},
     )));
     expect(find.byType(Auth), findsOneWidget);
   });
