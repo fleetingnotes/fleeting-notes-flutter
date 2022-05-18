@@ -246,9 +246,9 @@ class Database {
     scaffoldKey.currentState?.openDrawer();
   }
 
-  void listenNoteChange(Function callback) async {
+  Future<StreamSubscription> listenNoteChange(Function callback) async {
     var box = await Hive.openBox(firebase.userId);
-    box.watch().listen((event) {
+    return box.watch().listen((event) {
       callback(event);
     });
   }

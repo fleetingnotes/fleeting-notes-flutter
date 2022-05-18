@@ -16,13 +16,15 @@ class FirebaseDB implements DatabaseInterface {
   late CollectionReference notesCollection;
   FirebaseDB() {
     configRemoteConfig();
-    FirebaseAuth.instance.userChanges().listen((User? user) {
+    userChanges.listen((User? user) {
       currUser = user;
       userId = (user == null) ? 'local' : user.uid;
       analytics.setUserId(id: (user == null) ? null : user.uid);
     });
     notesCollection = FirebaseFirestore.instance.collection('notes');
   }
+
+  Stream<User?> get userChanges => FirebaseAuth.instance.userChanges();
 
   Future<void> configRemoteConfig() async {
     await remoteConfig.setConfigSettings(RemoteConfigSettings(
