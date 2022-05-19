@@ -31,19 +31,19 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
 
   @override
   void initState() {
+    super.initState();
     newCaretOffset = widget.caretOffset;
     if (width + widget.caretOffset.dx > widget.layerLink.leaderSize!.width) {
       newCaretOffset = Offset(
           widget.layerLink.leaderSize!.width - width, widget.caretOffset.dy);
     }
     HardwareKeyboard.instance.addHandler(onKeyEvent);
-    super.initState();
   }
 
   @override
   void dispose() {
-    HardwareKeyboard.instance.removeHandler(onKeyEvent);
     super.dispose();
+    HardwareKeyboard.instance.removeHandler(onKeyEvent);
   }
 
   List<TextSpan> highlightString(String text, TextStyle defaultStyle) {

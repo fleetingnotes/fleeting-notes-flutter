@@ -26,7 +26,6 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  late final StreamSubscription userChangeStream;
   late final StreamSubscription noteChangeStream;
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
@@ -75,8 +74,6 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
     loadNotes(queryController.text);
-    userChangeStream =
-        widget.db.firebase.userChanges.listen(listenCallbackForceSync);
     widget.db.listenNoteChange(listenCallback).then((stream) {
       noteChangeStream = stream;
     });
@@ -84,9 +81,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
-    userChangeStream.cancel();
-    noteChangeStream.cancel();
     super.dispose();
+    noteChangeStream.cancel();
   }
 
   void _pressNote(BuildContext context, Note note) {
@@ -249,9 +245,11 @@ class SearchScreenNavigator extends StatelessWidget {
   const SearchScreenNavigator({
     Key? key,
     required this.db,
+    this.hasInitNote = false,
   }) : super(key: key);
 
   final Database db;
+  final bool hasInitNote;
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +270,7 @@ class SearchScreenNavigator extends StatelessWidget {
                 key: history.first.value,
                 note: history.first.key,
                 db: db,
-                isShared: true,
+                isShared: hasInitNote,
               );
             }
           }),

@@ -73,12 +73,12 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   @override
   void dispose() {
+    super.dispose();
     widget.db.routeObserver.unsubscribe(this);
     if (hasNewChanges) {
       widget.db.firebase.analytics.logEvent(name: 'auto_save_note');
       _saveNote(updateState: false);
     }
-    super.dispose();
   }
 
   @override
@@ -144,6 +144,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     updatedNote.source = sourceController.text;
+    if (updatedNote.isEmpty()) return '';
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
       if (updateState) {
@@ -156,12 +157,22 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
         errMessage = 'Failed to save note';
         if (updateState) onChanged();
       } else {
+        widget.db.clearUnsavedNote();
         errMessage = await updateBacklinks(prevTitle, updatedNote.title);
       }
     } else {
       titleController.text = prevTitle;
     }
     return errMessage;
+  }
+
+  void storeUnsavedNote() {
+    Note unsavedNote = Note.empty(
+      title: titleController.text,
+      content: contentController.text,
+      source: sourceController.text,
+    );
+    widget.db.setUnsavedNote(unsavedNote);
   }
 
   Future<String> updateBacklinks(String prevTitle, String newTitle) async {
@@ -191,6 +202,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     if (widget.note.content != contentController.text ||
         widget.note.title != titleController.text ||
         widget.note.source != sourceController.text) {
+      storeUnsavedNote();
       setState(() {
         hasNewChanges = true;
       });

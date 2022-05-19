@@ -7,9 +7,11 @@ class NoteScreenNavigator extends StatelessWidget {
   NoteScreenNavigator({
     Key? key,
     required this.db,
+    this.hasInitNote = false,
   }) : super(key: key);
 
   final Database db;
+  final bool hasInitNote;
 
   final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
@@ -29,6 +31,7 @@ class NoteScreenNavigator extends StatelessWidget {
           return NoteEditor(
             key: history.first.value,
             note: history.first.key,
+            isShared: hasInitNote,
             db: db,
           );
         },

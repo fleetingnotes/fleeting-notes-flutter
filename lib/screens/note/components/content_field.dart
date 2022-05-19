@@ -46,8 +46,8 @@ class _ContentFieldState extends State<ContentField> {
 
   @override
   void dispose() {
-    contentFocusNode.dispose();
     super.dispose();
+    contentFocusNode.dispose();
   }
 
   KeyEventResult onKeyEvent(node, e) {

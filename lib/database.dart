@@ -242,6 +242,18 @@ class Database {
     ));
   }
 
+  Note? getUnsavedNote() {
+    return Hive.box('settings').get('unsaved-note');
+  }
+
+  void setUnsavedNote(Note note) {
+    Hive.box('settings').put('unsaved-note', note);
+  }
+
+  void clearUnsavedNote() {
+    Hive.box('settings').delete('unsaved-note');
+  }
+
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
   }
