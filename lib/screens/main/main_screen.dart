@@ -23,6 +23,7 @@ class _MainScreenState extends State<MainScreen> {
   late bool hasInitNote;
   @override
   void initState() {
+    super.initState();
     if (widget.initNote == null) {
       hasInitNote = false;
       widget.db.noteHistory = {Note.empty(): GlobalKey()};
@@ -30,7 +31,6 @@ class _MainScreenState extends State<MainScreen> {
       hasInitNote = true;
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
-    super.initState();
     // Privacy Alert Dialog
     SchedulerBinding.instance?.addPostFrameCallback((_) {
       bool? analyticsEnabled = widget.db.getAnalyticsEnabled();

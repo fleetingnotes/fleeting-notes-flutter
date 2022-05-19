@@ -73,12 +73,12 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   @override
   void dispose() {
+    super.dispose();
     widget.db.routeObserver.unsubscribe(this);
     if (hasNewChanges) {
       widget.db.firebase.analytics.logEvent(name: 'auto_save_note');
       _saveNote(updateState: false);
     }
-    super.dispose();
   }
 
   @override

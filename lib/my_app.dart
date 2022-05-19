@@ -45,8 +45,8 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
 
   @override
   void dispose() {
-    userChanges.cancel();
     super.dispose();
+    userChanges.cancel();
   }
 
   // This widget is the root of your application.

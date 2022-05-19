@@ -84,9 +84,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
+    super.dispose();
     userChangeStream.cancel();
     noteChangeStream.cancel();
-    super.dispose();
   }
 
   void _pressNote(BuildContext context, Note note) {
