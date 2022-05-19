@@ -21,6 +21,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   final Database db = Database(firebase: FirebaseDB());
   late final StreamSubscription userChanges;
   Future<String> navigateScreen() async {
+    await db.firebase.userChanges.first;
     return 'main';
   }
 
