@@ -1,6 +1,6 @@
 {
     "name": "Fleeting Notes",
-    "description": "A lightweight note-taking app for capturing and connecting fleeting thoughts.",
+    "description": "A note-taking app for capturing and connecting fleeting moments.",
     "version": "0.1.5",
     "content_security_policy": {
       "extension_pages": "script-src 'self' ; object-src 'self'"
