@@ -1,6 +1,6 @@
 {
     "name": "Fleeting Notes",
-    "description": "A note-taking app for capturing and connecting fleeting moments.",
+    "description": "A lightweight note-taking app that resurfaces your notes when you need them.",
     "version": "0.1.5",
     "browser_action": {
       "default_popup": "popup.html",

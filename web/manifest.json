@@ -3,7 +3,7 @@
     "short_name": "fleetingnotes",
     "start_url": ".",
     "display": "standalone",
-    "description": "A note-taking app for capturing and connecting fleeting moments.",
+    "description": "A lightweight note-taking app that resurfaces your notes when you need them.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
