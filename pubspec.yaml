@@ -41,7 +41,10 @@ dependencies:
   url_launcher: ^6.0.20
   hive: ^2.0.6
   hive_flutter: ^1.1.0
-  file_saver: ^0.1.0
+  file_saver:
+    git:
+      url: https://github.com/incrediblezayed/file_saver.git
+      ref: 877b25c6088491037be79e426a7c9c1598d17142
   web_browser_detect: ^2.0.2
   flutter_neumorphic: ^3.2.0
   receive_sharing_intent: ^1.4.5
