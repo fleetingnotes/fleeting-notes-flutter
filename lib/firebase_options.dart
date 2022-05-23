@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions are not supported for this platform.',
@@ -56,11 +53,21 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBSwbl8AZFm6IjSDkC_5I6gO0fDCfCbOcc',
-    appId: '1:220377646074:ios:ef5c21523441b74cebda43',
+    appId: '1:220377646074:ios:84196d9dad6b758cebda43',
     messagingSenderId: '220377646074',
     projectId: 'fleetingnotes-22f77',
     storageBucket: 'fleetingnotes-22f77.appspot.com',
-    iosClientId: '220377646074-b3l8tu5g7r4rti84lrlecurgqoq559gb.apps.googleusercontent.com',
-    iosBundleId: 'com.fleetingnotes',
+    iosClientId: '220377646074-imbadk72g02ue6h101hlblv985o9kkl4.apps.googleusercontent.com',
+    iosBundleId: 'com.fleetingNotesFlutter',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyBSwbl8AZFm6IjSDkC_5I6gO0fDCfCbOcc',
+    appId: '1:220377646074:ios:84196d9dad6b758cebda43',
+    messagingSenderId: '220377646074',
+    projectId: 'fleetingnotes-22f77',
+    storageBucket: 'fleetingnotes-22f77.appspot.com',
+    iosClientId: '220377646074-imbadk72g02ue6h101hlblv985o9kkl4.apps.googleusercontent.com',
+    iosBundleId: 'com.fleetingNotesFlutter',
   );
 }

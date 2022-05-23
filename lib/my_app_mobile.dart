@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -27,22 +29,24 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       }
     }
 
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    ReceiveSharingIntent.getTextStream().listen((String sharedText) {
-      db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
-      db.firebase.analytics.logEvent(name: 'receive_share');
-    }, onError: (err) {
-      // ignore: avoid_print
-      print("getLinkStream error: $err");
-    });
-
-    // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String? sharedText) {
-      if (sharedText != null) {
-        db.popAllRoutes();
+    if (Platform.isIOS || Platform.isAndroid) {
+      // For sharing or opening urls/text coming from outside the app while the app is in the memory
+      ReceiveSharingIntent.getTextStream().listen((String sharedText) {
         db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
         db.firebase.analytics.logEvent(name: 'receive_share');
-      }
-    });
+      }, onError: (err) {
+        // ignore: avoid_print
+        print("getLinkStream error: $err");
+      });
+
+      // For sharing or opening urls/text coming from outside the app while the app is closed
+      ReceiveSharingIntent.getInitialText().then((String? sharedText) {
+        if (sharedText != null) {
+          db.popAllRoutes();
+          db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
+          db.firebase.analytics.logEvent(name: 'receive_share');
+        }
+      });
+    }
   }
 }
