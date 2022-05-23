@@ -8,4 +8,4 @@ git checkout -b version-X.X.X
 4. [Build for android](build_for_android.md). Then commit changes (if any).
 5. Run `./build_web_ext.sh` script and release `build/manifest2.json` and `build/manifest3.json`
 6. On github create a new release with vX.X.X tags and add the changes made
-7. Distribute app on App Store Connect, Google Play Store, Firefox Extension, Google Extension, & Netlify
+7. Distribute app on App Store Connect, Google Play Store, Firefox Extension, Google Extension,  Netlify, & MacOS

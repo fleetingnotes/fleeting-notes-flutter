@@ -15,3 +15,5 @@ chmod a+x build_web_ext.sh
 ./build_web_ext.sh
 ```
 5. The zip file created will be in `build/web-ext-2.zip`
+
+NOTE: `index.html` and `flutter_service_worker.js` will have slight differences due to different service worker versions across clean builds.
