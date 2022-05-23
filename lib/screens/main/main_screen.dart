@@ -32,7 +32,7 @@ class _MainScreenState extends State<MainScreen> {
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
     // Privacy Alert Dialog
-    SchedulerBinding.instance?.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       bool? analyticsEnabled = widget.db.getAnalyticsEnabled();
       if (analyticsEnabled == null) {
         showDialog(
