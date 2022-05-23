@@ -106,7 +106,7 @@ class MockDatabase extends Mock implements Database {
   }
 
   @override
-  void setFillSource(bool autoFillEnabled) {}
+  Future<void> setFillSource(bool autoFillEnabled) async {}
 
   @override
   bool? getAnalyticsEnabled() {
