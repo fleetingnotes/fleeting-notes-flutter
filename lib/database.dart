@@ -272,8 +272,8 @@ class Database {
     }
   }
 
-  void setFillSource(bool autoFillEnabled) {
-    Hive.box('settings').put('auto-fill-source', autoFillEnabled);
+  Future<void> setFillSource(bool autoFillEnabled) async {
+    await Hive.box('settings').put('auto-fill-source', autoFillEnabled);
   }
 
   bool fillSource() {
