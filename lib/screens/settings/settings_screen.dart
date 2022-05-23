@@ -60,8 +60,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'fleeting_notes_export.json', Uint8List.fromList(bytes), 'json');
   }
 
-  void autoFilledToggled(bool value) {
-    widget.db.setFillSource(value);
+  void autoFilledToggled(bool value) async {
+    await widget.db.setFillSource(value);
+    setState(() {}); // refresh settings screen
   }
 
   @override
