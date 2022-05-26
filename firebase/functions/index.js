@@ -10,6 +10,7 @@ admin.initializeApp();
 // tensorflow setup
 require('@tensorflow/tfjs-node');
 const use = require("@tensorflow-models/universal-sentence-encoder");
+const { auth } = require('firebase-admin');
 let model;
 
 // Calculate the dot product of two vector arrays.
@@ -159,12 +160,20 @@ exports.logout_all_sessions = functions.https.onRequest(async (req, res) => {
     if (req.method !== 'POST') {
       return res.sendStatus(403);
     }
-    let email = req.body.email;
+    const email = req.body.email;
     if (!email) {
+      return res.sendStatus(400);
+    }
+    const password = req.body.password;
+    if (!password) {
       return res.sendStatus(400);
     }
 
     try {
+      const authResponse = await authenticate(email, password);
+      if (authResponse.error) {
+        return res.sendStatus(400);
+      }
       const userRecord = await admin.auth().getUserByEmail(email);
       await admin.auth().revokeRefreshTokens(userRecord.toJSON().uid);
       return res.sendStatus(200);
