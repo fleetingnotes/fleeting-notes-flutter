@@ -121,35 +121,54 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
  * Authenticate the provided credentials.
  * @returns {Promise<JSON>} success or failure.
  */
- function authenticate(email, password) {
-    // For the purpose of this example use httpbin (https://httpbin.org) and send a basic authentication request.
-    // (Only a password of `Testing123` will succeed)
-    const firebaseApiKey= 'AIzaSyBXON2_4OVoHSplISHIQKtexvAlZEIZBRY'
-    const authEndpoint = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`;
-    const creds = {
-      "email": email,
-      "password": password,
-    };
-    return new Promise((resolve, reject) => {
-      request.post({
-        url: authEndpoint,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: creds,
-        json: true,
-      }, (error, response, body) => {
-        if (error) {
-          return reject(error);
-        }
-        const statusCode = response ? response.statusCode : 0;
-        if (statusCode === 401 || statusCode === 400) { // Invalid username/password
-          return resolve(body);
-        }
-        if (statusCode !== 200) {
-          return reject(new Error(`invalid response returned from ${authEndpoint} status code ${statusCode}`));
-        }
+function authenticate(email, password) {
+  // For the purpose of this example use httpbin (https://httpbin.org) and send a basic authentication request.
+  // (Only a password of `Testing123` will succeed)
+  const firebaseApiKey= 'AIzaSyBXON2_4OVoHSplISHIQKtexvAlZEIZBRY'
+  const authEndpoint = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`;
+  const creds = {
+    "email": email,
+    "password": password,
+  };
+  return new Promise((resolve, reject) => {
+    request.post({
+      url: authEndpoint,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: creds,
+      json: true,
+    }, (error, response, body) => {
+      if (error) {
+        return reject(error);
+      }
+      const statusCode = response ? response.statusCode : 0;
+      if (statusCode === 401 || statusCode === 400) { // Invalid username/password
         return resolve(body);
-      });
+      }
+      if (statusCode !== 200) {
+        return reject(new Error(`invalid response returned from ${authEndpoint} status code ${statusCode}`));
+      }
+      return resolve(body);
     });
-  }
+  });
+}
+
+exports.logout_all_sessions = functions.https.onRequest(async (req, res) => {
+    // Authentication requests are POSTed, other requests are forbidden
+    if (req.method !== 'POST') {
+      return res.sendStatus(403);
+    }
+    let email = req.body.email;
+    if (!email) {
+      return res.sendStatus(400);
+    }
+
+    try {
+      const userRecord = await admin.auth().getUserByEmail(email);
+      await admin.auth().revokeRefreshTokens(userRecord.toJSON().uid);
+      return res.sendStatus(200);
+    } catch {
+      return res.sendStatus(400);
+    }
+});
