@@ -10,7 +10,6 @@ admin.initializeApp();
 // tensorflow setup
 require('@tensorflow/tfjs-node');
 const use = require("@tensorflow-models/universal-sentence-encoder");
-const { auth } = require('firebase-admin');
 let model;
 
 // Calculate the dot product of two vector arrays.
