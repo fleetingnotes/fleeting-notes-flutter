@@ -27,14 +27,11 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   }
 
   void refreshScreen(User? user) {
-    if (user != null) {
-    } else {
-      db.popAllRoutes();
-      setState(() {
-        db.searchKey = GlobalKey();
-        db.noteHistory = {Note.empty(): GlobalKey()};
-      });
-    }
+    db.popAllRoutes();
+    setState(() {
+      db.searchKey = GlobalKey();
+      db.noteHistory = {Note.empty(): GlobalKey()};
+    });
   }
 
   @override

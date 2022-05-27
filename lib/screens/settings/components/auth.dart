@@ -42,7 +42,7 @@ class _AuthState extends State<Auth> {
                   onPressed: () async {
                     Navigator.pop(context);
                     await widget.db.firebase.logoutAllSessions();
-                    widget.db.firebase.reauthenticateCurrUser(email, password);
+                    widget.db.login(email, password);
                   },
                   child: const Text('Continue'))
             ],

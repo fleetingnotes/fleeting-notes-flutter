@@ -45,21 +45,6 @@ class FirebaseDB implements DatabaseInterface {
     return claims['stripeRole'] == 'premium';
   }
 
-  Future<bool> reauthenticateCurrUser(String email, String password) async {
-    if (currUser == null) return false;
-    var auth = FirebaseAuth.instance;
-    var cred = EmailAuthProvider.credential(
-      email: email,
-      password: password,
-    );
-    try {
-      await auth.signInWithCredential(cred);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
   void setAnalytics(enabled) {
     analytics.setAnalyticsCollectionEnabled(enabled);
     if (!kIsWeb) {
