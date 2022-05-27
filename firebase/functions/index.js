@@ -31,22 +31,24 @@ const zipWith = (f, xs, ys) => {
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 exports.rank_sentence_similarity = functions.runWith({memory: "1GB"}).https.onRequest(async (req, res) => {
+  return cors(req, res, async () => {
     // Embed an array of sentences.
     const sentences = [
-        req.body['query'],
-        ...req.body['sentences'],
+      req.body['query'],
+      ...req.body['sentences'],
     ];
     model = model || await use.load();
     model.embed(sentences).then((embeddings) => {
-        let embeddings_arr = embeddings.arraySync();
-        let queryVector = embeddings_arr[0];
-        let sentenceVectors = embeddings_arr.slice(1);
-        let sentenceMap = {}
-        for (let i = 0; i < sentenceVectors.length; i++) {
-            sentenceMap[sentences[i+1]] = dotProduct(queryVector, sentenceVectors[i]);
-        }
-        res.send(sentenceMap);
+      let embeddings_arr = embeddings.arraySync();
+      let queryVector = embeddings_arr[0];
+      let sentenceVectors = embeddings_arr.slice(1);
+      let sentenceMap = {}
+      for (let i = 0; i < sentenceVectors.length; i++) {
+          sentenceMap[sentences[i+1]] = dotProduct(queryVector, sentenceVectors[i]);
+      }
+      res.send(sentenceMap);
     });
+  });
 });
 
 
@@ -155,28 +157,30 @@ function authenticate(email, password) {
 }
 
 exports.logout_all_sessions = functions.https.onRequest(async (req, res) => {
-    // Authentication requests are POSTed, other requests are forbidden
-    if (req.method !== 'POST') {
-      return res.sendStatus(403);
-    }
-    const email = req.body.email;
-    if (!email) {
-      return res.sendStatus(400);
-    }
-    const password = req.body.password;
-    if (!password) {
-      return res.sendStatus(400);
-    }
-
-    try {
-      const authResponse = await authenticate(email, password);
-      if (authResponse.error) {
+    return cors(req, res, async () => {
+      // Authentication requests are POSTed, other requests are forbidden
+      if (req.method !== 'POST') {
+        return res.sendStatus(403);
+      }
+      const email = req.body.email;
+      if (!email) {
         return res.sendStatus(400);
       }
-      const userRecord = await admin.auth().getUserByEmail(email);
-      await admin.auth().revokeRefreshTokens(userRecord.toJSON().uid);
-      return res.sendStatus(200);
-    } catch {
-      return res.sendStatus(400);
-    }
+      const password = req.body.password;
+      if (!password) {
+        return res.sendStatus(400);
+      }
+
+      try {
+        const authResponse = await authenticate(email, password);
+        if (authResponse.error) {
+          return res.sendStatus(400);
+        }
+        const userRecord = await admin.auth().getUserByEmail(email);
+        await admin.auth().revokeRefreshTokens(userRecord.toJSON().uid);
+        return res.sendStatus(200);
+      } catch {
+        return res.sendStatus(400);
+      }
+    });
 });
