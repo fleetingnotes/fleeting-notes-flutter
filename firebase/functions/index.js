@@ -162,22 +162,13 @@ exports.logout_all_sessions = functions.https.onRequest(async (req, res) => {
       if (req.method !== 'POST') {
         return res.sendStatus(403);
       }
-      const email = req.body.email;
-      if (!email) {
-        return res.sendStatus(400);
-      }
-      const password = req.body.password;
-      if (!password) {
+      const uid = req.body.uid;
+      if (!uid) {
         return res.sendStatus(400);
       }
 
       try {
-        const authResponse = await authenticate(email, password);
-        if (authResponse.error) {
-          return res.sendStatus(400);
-        }
-        const userRecord = await admin.auth().getUserByEmail(email);
-        await admin.auth().revokeRefreshTokens(userRecord.toJSON().uid);
+        await admin.auth().revokeRefreshTokens(uid);
         return res.sendStatus(200);
       } catch {
         return res.sendStatus(400);

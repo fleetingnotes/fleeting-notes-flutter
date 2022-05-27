@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,12 +26,15 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
     return 'main';
   }
 
-  void refreshScreen(event) {
-    db.popAllRoutes();
-    setState(() {
-      db.searchKey = GlobalKey();
-      db.noteHistory = {Note.empty(): GlobalKey()};
-    });
+  void refreshScreen(User? user) {
+    if (user != null) {
+    } else {
+      db.popAllRoutes();
+      setState(() {
+        db.searchKey = GlobalKey();
+        db.noteHistory = {Note.empty(): GlobalKey()};
+      });
+    }
   }
 
   @override
