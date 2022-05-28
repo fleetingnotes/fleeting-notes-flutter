@@ -6,12 +6,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/Note.dart';
 import 'db_interface.dart';
+import 'package:dio/dio.dart';
 
 class FirebaseDB implements DatabaseInterface {
   @override
   String userId = 'local';
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+  final Dio dio = Dio();
   User? currUser;
   late CollectionReference notesCollection;
   FirebaseDB() {
@@ -47,6 +49,21 @@ class FirebaseDB implements DatabaseInterface {
     analytics.setAnalyticsCollectionEnabled(enabled);
     if (!kIsWeb) {
       FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(enabled);
+    }
+  }
+
+  Future<bool> logoutAllSessions() async {
+    if (currUser == null) return false;
+    try {
+      await dio.post(
+        'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/logout_all_sessions',
+        data: {
+          'uid': currUser!.uid,
+        },
+      );
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 

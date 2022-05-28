@@ -31,22 +31,24 @@ const zipWith = (f, xs, ys) => {
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 exports.rank_sentence_similarity = functions.runWith({memory: "1GB"}).https.onRequest(async (req, res) => {
+  return cors(req, res, async () => {
     // Embed an array of sentences.
     const sentences = [
-        req.body['query'],
-        ...req.body['sentences'],
+      req.body['query'],
+      ...req.body['sentences'],
     ];
     model = model || await use.load();
     model.embed(sentences).then((embeddings) => {
-        let embeddings_arr = embeddings.arraySync();
-        let queryVector = embeddings_arr[0];
-        let sentenceVectors = embeddings_arr.slice(1);
-        let sentenceMap = {}
-        for (let i = 0; i < sentenceVectors.length; i++) {
-            sentenceMap[sentences[i+1]] = dotProduct(queryVector, sentenceVectors[i]);
-        }
-        res.send(sentenceMap);
+      let embeddings_arr = embeddings.arraySync();
+      let queryVector = embeddings_arr[0];
+      let sentenceVectors = embeddings_arr.slice(1);
+      let sentenceMap = {}
+      for (let i = 0; i < sentenceVectors.length; i++) {
+          sentenceMap[sentences[i+1]] = dotProduct(queryVector, sentenceVectors[i]);
+      }
+      res.send(sentenceMap);
     });
+  });
 });
 
 
@@ -121,35 +123,55 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
  * Authenticate the provided credentials.
  * @returns {Promise<JSON>} success or failure.
  */
- function authenticate(email, password) {
-    // For the purpose of this example use httpbin (https://httpbin.org) and send a basic authentication request.
-    // (Only a password of `Testing123` will succeed)
-    const firebaseApiKey= 'AIzaSyBXON2_4OVoHSplISHIQKtexvAlZEIZBRY'
-    const authEndpoint = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`;
-    const creds = {
-      "email": email,
-      "password": password,
-    };
-    return new Promise((resolve, reject) => {
-      request.post({
-        url: authEndpoint,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: creds,
-        json: true,
-      }, (error, response, body) => {
-        if (error) {
-          return reject(error);
-        }
-        const statusCode = response ? response.statusCode : 0;
-        if (statusCode === 401 || statusCode === 400) { // Invalid username/password
-          return resolve(body);
-        }
-        if (statusCode !== 200) {
-          return reject(new Error(`invalid response returned from ${authEndpoint} status code ${statusCode}`));
-        }
+function authenticate(email, password) {
+  // For the purpose of this example use httpbin (https://httpbin.org) and send a basic authentication request.
+  // (Only a password of `Testing123` will succeed)
+  const firebaseApiKey= 'AIzaSyBXON2_4OVoHSplISHIQKtexvAlZEIZBRY'
+  const authEndpoint = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseApiKey}`;
+  const creds = {
+    "email": email,
+    "password": password,
+  };
+  return new Promise((resolve, reject) => {
+    request.post({
+      url: authEndpoint,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: creds,
+      json: true,
+    }, (error, response, body) => {
+      if (error) {
+        return reject(error);
+      }
+      const statusCode = response ? response.statusCode : 0;
+      if (statusCode === 401 || statusCode === 400) { // Invalid username/password
         return resolve(body);
-      });
+      }
+      if (statusCode !== 200) {
+        return reject(new Error(`invalid response returned from ${authEndpoint} status code ${statusCode}`));
+      }
+      return resolve(body);
     });
-  }
+  });
+}
+
+exports.logout_all_sessions = functions.https.onRequest(async (req, res) => {
+    return cors(req, res, async () => {
+      // Authentication requests are POSTed, other requests are forbidden
+      if (req.method !== 'POST') {
+        return res.sendStatus(403);
+      }
+      const uid = req.body.uid;
+      if (!uid) {
+        return res.sendStatus(400);
+      }
+
+      try {
+        await admin.auth().revokeRefreshTokens(uid);
+        return res.sendStatus(200);
+      } catch {
+        return res.sendStatus(400);
+      }
+    });
+});
