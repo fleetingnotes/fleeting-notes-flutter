@@ -55,7 +55,7 @@ class FirebaseDB implements DatabaseInterface {
   Future<bool> logoutAllSessions() async {
     if (currUser == null) return false;
     try {
-      var res = await dio.post(
+      await dio.post(
         'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/logout_all_sessions',
         data: {
           'uid': currUser!.uid,
