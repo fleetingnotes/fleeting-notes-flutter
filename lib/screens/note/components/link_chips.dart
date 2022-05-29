@@ -20,6 +20,7 @@ class LinkChips extends StatelessWidget {
             vertical: Theme.of(context).custom.kDefaultPadding / 3),
         child: Wrap(
           spacing: Theme.of(context).custom.kDefaultPadding / 3,
+          runSpacing: Theme.of(context).custom.kDefaultPadding / 3,
           children: [
             ...links.take(3).map((e) => ActionChip(
                   label: Text("[[$e]]"),
