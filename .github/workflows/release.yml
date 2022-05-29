@@ -35,17 +35,20 @@ jobs:
       env:
         BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
         P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-        BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+        RUNNER_BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.RUNNER_BUILD_PROVISION_PROFILE_BASE64 }}
+        SHARE_EXT_BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.SHARE_EXT_BUILD_PROVISION_PROFILE_BASE64 }}
         KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
       run: |
         # create variables
         CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-        PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+        RUNNER_PP_PATH=$RUNNER_TEMP/runner_build_pp.mobileprovision
+        SHARE_EXT_PP_PATH=$RUNNER_TEMP/share_ext_build_pp.mobileprovision
         KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
         # import certificate and provisioning profile from secrets
         echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
-        echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $PP_PATH
+        echo -n "$RUNNER_BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $RUNNER_PP_PATH
+        echo -n "$SHARE_EXT_BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $SHARE_EXT_PP_PATH
 
         # create temporary keychain
         security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -58,19 +61,20 @@ jobs:
 
         # apply provisioning profile
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+        cp $RUNNER_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+        cp $SHARE_EXT_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
     - uses: actions/checkout@v2
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.0.1'
         channel: 'stable'
     - run: flutter pub get
-    - run: flutter build ipa --release
+    - run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist
     - uses: softprops/action-gh-release@v1 
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          build/ios/archive/Runner.xcarchive
+          build/ios/ipa/*.ipa
         draft: true
         fail_on_unmatched_files: true
     - name: Clean up keychain and provisioning profile
