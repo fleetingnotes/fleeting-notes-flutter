@@ -86,7 +86,7 @@ class Database {
     return note != null;
   }
 
-  Future<List> getAllLinks() async {
+  Future<List<String>> getAllLinks() async {
     var allNotes = await getAllNotes();
     RegExp linkRegex = RegExp(Note.linkRegex, multiLine: true);
     var linkSet = <String>{};

@@ -67,6 +67,27 @@ class FirebaseDB implements DatabaseInterface {
     }
   }
 
+  Future<List<String>> findSimilarLinksOrdered(
+      String text, List<String> links) async {
+    // if (currUser == null) return [];
+    try {
+      var response = await dio.post(
+        'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/rank_sentence_similarity',
+        data: {
+          'query': text,
+          'sentences': links,
+        },
+      );
+      Map<String, double> linkMap = Map.from(response.data);
+      List<String> similarLinks = linkMap.keys.toList();
+      // sort descending and filter
+      similarLinks.sort((k1, k2) => linkMap[k2]!.compareTo(linkMap[k1]!));
+      return similarLinks.where((link) => linkMap[link]! > 0.4).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
   @override
   bool isLoggedIn() {
     return currUser != null;
