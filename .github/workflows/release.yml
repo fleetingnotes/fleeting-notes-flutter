@@ -57,7 +57,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          build/outputs/bundle/*.aab
+          build/app/outputs/bundle/release/*.aab
         draft: true
         fail_on_unmatched_files: true
   release-ios:
