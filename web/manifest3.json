@@ -1,7 +1,7 @@
 {
     "name": "Fleeting Notes",
     "description": "A lightweight note-taking app that resurfaces your notes when you need them.",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "content_security_policy": {
       "extension_pages": "script-src 'self' ; object-src 'self'"
     },
