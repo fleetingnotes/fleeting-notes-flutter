@@ -22,6 +22,7 @@ void main() {
   testWidgets('Render Note Screen', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
@@ -33,6 +34,7 @@ void main() {
   testWidgets('Backlinks are populated', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: 'backlink note')]));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
@@ -45,6 +47,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -70,6 +73,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -97,6 +101,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -115,6 +120,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.deleteNote(any()))
@@ -131,6 +137,7 @@ void main() {
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     mockDb.noteHistory = {Note.empty(title: 'hello'): GlobalKey()};
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: '[[hello]]')]));
@@ -152,6 +159,7 @@ void main() {
   testWidgets('Clicking TitleField removes LinkPreview overlay',
       (WidgetTester tester) async {
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: '[[hello]]')]));
     when(() => mockDb.upsertNote(any()))

@@ -19,12 +19,14 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   String exportOption = 'Markdown';
   String email = '';
+  bool isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
 
     setState(() {
+      isLoggedIn = widget.db.isLoggedIn();
       if (widget.db.firebase.currUser != null) {
         email = widget.db.firebase.currUser!.email ?? '';
       }
@@ -165,7 +167,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           height: Theme.of(context).custom.kDefaultPadding / 2),
                       const Text("Sync", style: TextStyle(fontSize: 12)),
                       const Divider(thickness: 1, height: 1),
-                      (widget.db.isLoggedIn())
+                      (isLoggedIn)
                           ? Padding(
                               padding: EdgeInsets.all(
                                   Theme.of(context).custom.kDefaultPadding / 2),
@@ -178,7 +180,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ElevatedButton(
                                         onPressed: () {
                                           widget.db.logout();
-                                          setState(() {});
+                                          setState(() {
+                                            isLoggedIn = false;
+                                          });
                                         },
                                         child: const Text('Logout'))
                                   ]),
@@ -203,6 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               db: widget.db,
                               onLogin: (e) {
                                 setState(() {
+                                  isLoggedIn = true;
                                   email = e;
                                 });
                               }),

@@ -23,14 +23,33 @@ class _AuthState extends State<Auth> {
     return password.isNotEmpty;
   }
 
-  Future<void> _login(BuildContext context) async {
-    if (!validPassword() || !validEmail()) {
-      return;
-    }
+  Future<void> onLoginPress() async {
     setState(() {
       isLoading = true;
     });
-    bool isLoggedIn = await widget.db.login(email, password);
+    bool isLoggedIn = await _login();
+    if (isLoggedIn && !await widget.db.firebase.isCurrUserPremium()) {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Logout of all other sessions'),
+            content: const Text(
+                'As a free user, you can only log in with one account at a time.'),
+            actions: [
+              ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await widget.db.firebase.logoutAllSessions();
+                    widget.db.login(email, password);
+                  },
+                  child: const Text('Continue'))
+            ],
+          );
+        },
+      );
+    }
     if (isLoggedIn) {
       if (widget.onLogin != null) widget.onLogin!(email);
     } else {
@@ -44,7 +63,15 @@ class _AuthState extends State<Auth> {
     });
   }
 
-  Future<void> _register(BuildContext context) async {
+  Future<bool> _login() async {
+    if (!validPassword() || !validEmail()) {
+      return false;
+    }
+    bool isLoggedIn = await widget.db.login(email, password);
+    return isLoggedIn;
+  }
+
+  Future<void> _register() async {
     if (!validPassword() || !validEmail()) {
       return;
     }
@@ -53,7 +80,7 @@ class _AuthState extends State<Auth> {
     });
     bool isRegistered = await widget.db.register(email, password);
     if (isRegistered) {
-      _login(context);
+      _login();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Registration failed'),
@@ -104,10 +131,10 @@ class _AuthState extends State<Auth> {
               children: [
                 ElevatedButton(
                     child: const Text('Login'),
-                    onPressed: (isLoading) ? null : () => _login(context)),
+                    onPressed: (isLoading) ? null : onLoginPress),
                 ElevatedButton(
                   child: const Text('Register'),
-                  onPressed: (isLoading) ? null : () => _register(context),
+                  onPressed: (isLoading) ? null : _register,
                 ),
               ],
             ),

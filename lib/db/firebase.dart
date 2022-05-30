@@ -6,12 +6,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/Note.dart';
 import 'db_interface.dart';
+import 'package:dio/dio.dart';
 
 class FirebaseDB implements DatabaseInterface {
   @override
   String userId = 'local';
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+  final Dio dio = Dio();
   User? currUser;
   late CollectionReference notesCollection;
   FirebaseDB() {
@@ -47,6 +49,42 @@ class FirebaseDB implements DatabaseInterface {
     analytics.setAnalyticsCollectionEnabled(enabled);
     if (!kIsWeb) {
       FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(enabled);
+    }
+  }
+
+  Future<bool> logoutAllSessions() async {
+    if (currUser == null) return false;
+    try {
+      await dio.post(
+        'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/logout_all_sessions',
+        data: {
+          'uid': currUser!.uid,
+        },
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<List<String>> findSimilarLinksOrdered(
+      String text, List<String> links) async {
+    // if (currUser == null) return [];
+    try {
+      var response = await dio.post(
+        'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/rank_sentence_similarity',
+        data: {
+          'query': text,
+          'sentences': links,
+        },
+      );
+      Map<String, double> linkMap = Map.from(response.data);
+      List<String> similarLinks = linkMap.keys.toList();
+      // sort descending and filter
+      similarLinks.sort((k1, k2) => linkMap[k2]!.compareTo(linkMap[k1]!));
+      return similarLinks.where((link) => linkMap[link]! > 0.4).toList();
+    } catch (e) {
+      return [];
     }
   }
 
