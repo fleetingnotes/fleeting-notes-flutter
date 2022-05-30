@@ -25,6 +25,7 @@ class Header extends StatelessWidget {
   }
 
   void newSave(context) async {
+    if (onSave == null) return;
     String errMessage = await onSave!();
     analytics.logEvent(name: 'click_save_note');
     if (errMessage != '') {
