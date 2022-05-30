@@ -235,6 +235,18 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     widget.db.navigateToSearch('');
   }
 
+  void onLinkChipPress(String link) {
+    var caretIndex = contentController.selection.baseOffset;
+    contentController.text =
+        "${contentController.text.substring(0, caretIndex)}[[$link]]${contentController.text.substring(caretIndex)}";
+    contentController.selection = TextSelection.fromPosition(
+        TextPosition(offset: caretIndex + link.length + 4));
+    widget.db.firebase.analytics.logEvent(name: 'click_link_chip', parameters: {
+      'link': link,
+      'note_content': contentController.text,
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Actions(
@@ -289,16 +301,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                         ),
                         LinkChips(
                           links: linkSuggestions,
-                          onLinkPress: (link) {
-                            contentController.text =
-                                "${contentController.text} [[$link]]";
-
-                            widget.db.firebase.analytics
-                                .logEvent(name: 'click_link_chip', parameters: {
-                              'link': link,
-                              'note_content': contentController.text,
-                            });
-                          },
+                          onLinkPress: onLinkChipPress,
                         ),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
