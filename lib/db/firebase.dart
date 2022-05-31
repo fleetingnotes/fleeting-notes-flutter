@@ -33,7 +33,8 @@ class FirebaseDB implements DatabaseInterface {
       fetchTimeout: const Duration(minutes: 1),
       minimumFetchInterval: const Duration(seconds: 1),
     ));
-    await remoteConfig.setDefaults(const {"use_firebase": true});
+    await remoteConfig.setDefaults(
+        const {"use_firebase": true, "link_suggestion_threshold": 0.5});
     remoteConfig.fetchAndActivate();
   }
 
@@ -82,7 +83,11 @@ class FirebaseDB implements DatabaseInterface {
       List<String> similarLinks = linkMap.keys.toList();
       // sort descending and filter
       similarLinks.sort((k1, k2) => linkMap[k2]!.compareTo(linkMap[k1]!));
-      return similarLinks.where((link) => linkMap[link]! > 0.4).toList();
+      return similarLinks
+          .where((link) =>
+              linkMap[link]! >
+              remoteConfig.getDouble("link_suggestion_threshold"))
+          .toList();
     } catch (e) {
       return [];
     }
