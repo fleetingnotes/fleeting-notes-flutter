@@ -5,7 +5,7 @@
 	<key>generateAppStoreInformation</key>
 	<false/>
 	<key>manageAppVersionAndBuildNumber</key>
-	<false/>
+	<true/>
 	<key>method</key>
 	<string>app-store</string>
 	<key>provisioningProfiles</key>
