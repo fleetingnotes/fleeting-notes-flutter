@@ -3,7 +3,7 @@
     "short_name": "fleetingnotes",
     "start_url": ".",
     "display": "standalone",
-    "description": "A lightweight note-taking app that resurfaces your notes when you need them.",
+    "description": "A scratchpad for connected notes",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

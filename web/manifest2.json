@@ -1,6 +1,6 @@
 {
     "name": "Fleeting Notes",
-    "description": "A lightweight note-taking app that resurfaces your notes when you need them.",
+    "description": "A scratchpad for connected notes",
     "version": "0.2.2",
     "browser_action": {
       "default_popup": "popup.html",
