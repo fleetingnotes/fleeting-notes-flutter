@@ -175,10 +175,13 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void storeUnsavedNote() {
-    Note unsavedNote = widget.note;
-    unsavedNote.title = titleController.text;
-    unsavedNote.content = contentController.text;
-    unsavedNote.source = sourceController.text;
+    Note unsavedNote = Note(
+      id: widget.note.id,
+      title: titleController.text,
+      content: contentController.text,
+      source: sourceController.text,
+      timestamp: widget.note.timestamp,
+    );
     widget.db.setUnsavedNote(unsavedNote);
   }
 
