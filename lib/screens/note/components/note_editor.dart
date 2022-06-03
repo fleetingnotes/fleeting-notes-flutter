@@ -83,7 +83,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   void dispose() {
     super.dispose();
     widget.db.routeObserver.unsubscribe(this);
-    if (hasNewChanges) {
+    if (hasNewChanges && !widget.isShared) {
       widget.db.firebase.analytics.logEvent(name: 'auto_save_note');
       _saveNote(updateState: false);
     }
@@ -152,7 +152,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     updatedNote.source = sourceController.text;
-    if (updatedNote.isEmpty()) return '';
+    if (updatedNote.title.isEmpty && updatedNote.content.isEmpty) return '';
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
       if (updateState) {
@@ -175,11 +175,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void storeUnsavedNote() {
-    Note unsavedNote = Note.empty(
-      title: titleController.text,
-      content: contentController.text,
-      source: sourceController.text,
-    );
+    Note unsavedNote = widget.note;
+    unsavedNote.title = titleController.text;
+    unsavedNote.content = contentController.text;
+    unsavedNote.source = sourceController.text;
     widget.db.setUnsavedNote(unsavedNote);
   }
 
