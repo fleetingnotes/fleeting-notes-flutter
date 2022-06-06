@@ -106,7 +106,6 @@ class _ContentFieldState extends State<ContentField> {
       widget.db.firebase
           .orderListByRelevance(widget.controller.text, allLinks)
           .then((newLinkSuggestions) {
-        print('newLinkSuggestions: $newLinkSuggestions');
         setState(() {
           allLinks = newLinkSuggestions;
         });

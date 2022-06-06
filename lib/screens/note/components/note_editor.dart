@@ -7,7 +7,6 @@ import 'package:fleeting_notes_flutter/widgets/stylable_textfield_controller.dar
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
-import 'package:fleeting_notes_flutter/screens/note/components/link_chips.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
