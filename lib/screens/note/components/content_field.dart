@@ -25,6 +25,7 @@ class ContentField extends StatefulWidget {
 
 class _ContentFieldState extends State<ContentField> {
   final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
+  List<String> allLinks = [];
   final LayerLink layerLink = LayerLink();
   late final FocusNode contentFocusNode;
   OverlayEntry? overlayEntry = OverlayEntry(
@@ -40,6 +41,11 @@ class _ContentFieldState extends State<ContentField> {
       if (!contentFocusNode.hasFocus) {
         removeOverlay();
       }
+    });
+    widget.db.getAllLinks().then((links) {
+      setState(() {
+        allLinks = links;
+      });
     });
     super.initState();
   }
@@ -94,6 +100,17 @@ class _ContentFieldState extends State<ContentField> {
     } else {
       titleLinksVisible = false;
       removeOverlay();
+    }
+    if (widget.controller.text.length % 30 == 0 &&
+        widget.controller.text.isNotEmpty) {
+      widget.db.firebase
+          .orderListByRelevance(widget.controller.text, allLinks)
+          .then((newLinkSuggestions) {
+        print('newLinkSuggestions: $newLinkSuggestions');
+        setState(() {
+          allLinks = newLinkSuggestions;
+        });
+      });
     }
   }
 
@@ -153,7 +170,6 @@ class _ContentFieldState extends State<ContentField> {
       Theme.of(context).textTheme.bodyText2!,
       size,
     );
-    List allLinks = await widget.db.getAllLinks();
 
     Widget builder(context) {
       // ignore: avoid_unnecessary_containers

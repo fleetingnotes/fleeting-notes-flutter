@@ -68,7 +68,7 @@ class FirebaseDB implements DatabaseInterface {
     }
   }
 
-  Future<List<String>> findSimilarLinksOrdered(
+  Future<List<String>> orderListByRelevance(
       String text, List<String> links) async {
     // if (currUser == null) return [];
     try {
@@ -83,11 +83,7 @@ class FirebaseDB implements DatabaseInterface {
       List<String> similarLinks = linkMap.keys.toList();
       // sort descending and filter
       similarLinks.sort((k1, k2) => linkMap[k2]!.compareTo(linkMap[k1]!));
-      return similarLinks
-          .where((link) =>
-              linkMap[link]! >
-              remoteConfig.getDouble("link_suggestion_threshold"))
-          .toList();
+      return similarLinks.toList();
     } catch (e) {
       return [];
     }
