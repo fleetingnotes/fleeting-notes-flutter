@@ -93,6 +93,7 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
         const authRes = await authenticate(email, password)
         const valid = authRes['error'] === undefined;
         if (!valid) {
+          functions.logger.error({ User: email }, authRes['error']);
           return handleResponse(email, 401); // Invalid username/password
         }
         var db = admin.firestore();
