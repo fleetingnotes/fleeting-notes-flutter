@@ -68,25 +68,25 @@ class FirebaseDB implements DatabaseInterface {
     }
   }
 
+  Future<Map<String, double>> getSentenceSimilarity(
+      String text, List<String> sentences) async {
+    var response = await dio.post(
+      'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/rank_sentence_similarity',
+      data: {
+        'query': text,
+        'sentences': sentences,
+      },
+    );
+    Map<String, double> linkMap = Map.from(response.data);
+    return linkMap;
+  }
+
   Future<List<String>> orderListByRelevance(
       String text, List<String> links) async {
-    // if (currUser == null) return [];
-    try {
-      var response = await dio.post(
-        'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/rank_sentence_similarity',
-        data: {
-          'query': text,
-          'sentences': links,
-        },
-      );
-      Map<String, double> linkMap = Map.from(response.data);
-      List<String> similarLinks = linkMap.keys.toList();
-      // sort descending and filter
-      similarLinks.sort((k1, k2) => linkMap[k2]!.compareTo(linkMap[k1]!));
-      return similarLinks.toList();
-    } catch (e) {
-      return [];
-    }
+    Map<String, double> linkMap = await getSentenceSimilarity(text, links);
+    List<String> similarLinks = linkMap.keys.toList();
+    similarLinks.sort((k1, k2) => linkMap[k2]!.compareTo(linkMap[k1]!));
+    return similarLinks.toList();
   }
 
   @override
