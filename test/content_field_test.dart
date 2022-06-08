@@ -23,6 +23,8 @@ void main() {
   testWidgets('LinkPreview appears on link tap', (WidgetTester tester) async {
     MockDatabase mockDb = MockDatabase();
     TextEditingController controller = TextEditingController();
+    when(() => mockDb.getAllLinks())
+        .thenAnswer((_) async => Future.value(['hello', 'world']));
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
       body: ContentField(

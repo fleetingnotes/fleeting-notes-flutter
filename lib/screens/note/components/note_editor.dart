@@ -7,7 +7,6 @@ import 'package:fleeting_notes_flutter/widgets/stylable_textfield_controller.dar
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
-import 'package:fleeting_notes_flutter/screens/note/components/link_chips.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
@@ -34,7 +33,6 @@ class NoteEditor extends StatefulWidget {
 class _NoteEditorState extends State<NoteEditor> with RouteAware {
   List<Note> backlinkNotes = [];
   List<String> linkSuggestions = [];
-  List<String> allLinks = [];
   bool hasNewChanges = false;
 
   late bool autofocus;
@@ -63,11 +61,6 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     widget.db.getBacklinkNotes(widget.note).then((notes) {
       setState(() {
         backlinkNotes = notes;
-      });
-    });
-    widget.db.getAllLinks().then((links) {
-      setState(() {
-        allLinks = links;
       });
     });
   }
@@ -221,32 +214,11 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
         hasNewChanges = false;
       });
     }
-    if (contentController.text.length % 30 == 0 &&
-        contentController.text.isNotEmpty) {
-      List<String> newLinkSuggestions = await widget.db.firebase
-          .findSimilarLinksOrdered(contentController.text, allLinks);
-      newLinkSuggestions.removeWhere((link) => link == widget.note.title);
-      setState(() {
-        linkSuggestions = newLinkSuggestions;
-      });
-    }
   }
 
   void onSearchNavigate(BuildContext context) {
     widget.db.popAllRoutes();
     widget.db.navigateToSearch('');
-  }
-
-  void onLinkChipPress(String link) {
-    var caretIndex = contentController.selection.baseOffset;
-    contentController.text =
-        "${contentController.text.substring(0, caretIndex)}[[$link]]${contentController.text.substring(caretIndex)}";
-    contentController.selection = TextSelection.fromPosition(
-        TextPosition(offset: caretIndex + link.length + 4));
-    widget.db.firebase.analytics.logEvent(name: 'click_link_chip', parameters: {
-      'link': link,
-      'note_content': contentController.text,
-    });
   }
 
   @override
@@ -300,10 +272,6 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                           onChanged: onChanged,
                           db: widget.db,
                           overrideSourceUrl: widget.note.isEmpty(),
-                        ),
-                        LinkChips(
-                          links: linkSuggestions,
-                          onLinkPress: onLinkChipPress,
                         ),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
