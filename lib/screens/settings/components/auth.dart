@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../database.dart';
+import 'login_dialog.dart';
 
 class Auth extends StatefulWidget {
   const Auth({Key? key, required this.db, this.onLogin}) : super(key: key);
@@ -23,6 +25,19 @@ class _AuthState extends State<Auth> {
     return password.isNotEmpty;
   }
 
+  void onDialogContinue() async {
+    Navigator.pop(context);
+    await widget.db.firebase.logoutAllSessions();
+    widget.db.login(email, password);
+    widget.db.firebase.analytics.logEvent(name: 'login_dialog_continue');
+  }
+
+  void onSeePricing() {
+    String pricingUrl = "https://fleetingnotes.app/pricing?ref=app";
+    launch(pricingUrl);
+    widget.db.firebase.analytics.logEvent(name: 'login_dialog_see_pricing');
+  }
+
   Future<void> onLoginPress() async {
     setState(() {
       isLoading = true;
@@ -33,19 +48,9 @@ class _AuthState extends State<Auth> {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Logout of all other sessions'),
-            content: const Text(
-                'As a free user, you can only log in with one account at a time.'),
-            actions: [
-              ElevatedButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    await widget.db.firebase.logoutAllSessions();
-                    widget.db.login(email, password);
-                  },
-                  child: const Text('Continue'))
-            ],
+          return LoginDialog(
+            onContinue: onDialogContinue,
+            onSeePricing: onSeePricing,
           );
         },
       );
