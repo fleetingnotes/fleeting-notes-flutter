@@ -28,6 +28,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
@@ -43,6 +44,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
@@ -61,6 +63,7 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     Note newNote = Note.empty(content: 'Click me note!');
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([newNote]));
@@ -88,6 +91,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
@@ -111,6 +115,7 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     Note newNote = Note.empty(content: 'Test delete note!');
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([newNote]));
@@ -134,6 +139,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
@@ -148,6 +154,7 @@ void main() {
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     Note newNote = Note.empty(content: 'Click me note!');
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([newNote]));
@@ -169,6 +176,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
@@ -189,6 +197,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
@@ -219,6 +228,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
@@ -243,6 +253,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
@@ -269,6 +280,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
@@ -291,6 +303,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
     tester.binding.window.devicePixelRatioTestValue = 1.0;
     MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));

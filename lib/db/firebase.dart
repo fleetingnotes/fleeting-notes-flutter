@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mime/mime.dart';
 import '../models/Note.dart';
 import 'db_interface.dart';
 import 'package:dio/dio.dart';
@@ -13,6 +17,7 @@ class FirebaseDB implements DatabaseInterface {
   String userId = 'local';
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
   final Dio dio = Dio();
   User? currUser;
   late CollectionReference notesCollection;
@@ -66,6 +71,16 @@ class FirebaseDB implements DatabaseInterface {
     } catch (e) {
       return false;
     }
+  }
+
+  Future<String?> addAttachment(String filename, Uint8List fileBytes) async {
+    if (currUser == null) return null;
+    final userStorageRef = storage.ref(currUser?.uid);
+    final fileRef = userStorageRef.child(filename);
+    final mimeType = lookupMimeType(filename);
+    await fileRef.putData(fileBytes,
+        SettableMetadata(contentType: mimeType ?? 'application/octet-stream'));
+    return await fileRef.getDownloadURL();
   }
 
   Future<Map<String, double>> getSentenceSimilarity(
