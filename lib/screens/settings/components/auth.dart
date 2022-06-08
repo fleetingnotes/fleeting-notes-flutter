@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../database.dart';
 import 'login_dialog.dart';
 
@@ -28,6 +29,13 @@ class _AuthState extends State<Auth> {
     Navigator.pop(context);
     await widget.db.firebase.logoutAllSessions();
     widget.db.login(email, password);
+    widget.db.firebase.analytics.logEvent(name: 'login_dialog_continue');
+  }
+
+  void onSeePricing() {
+    String pricingUrl = "https://fleetingnotes.app/pricing?ref=app";
+    launch(pricingUrl);
+    widget.db.firebase.analytics.logEvent(name: 'login_dialog_see_pricing');
   }
 
   Future<void> onLoginPress() async {
@@ -40,7 +48,10 @@ class _AuthState extends State<Auth> {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return LoginDialog(onContinue: onDialogContinue);
+          return LoginDialog(
+            onContinue: onDialogContinue,
+            onSeePricing: onSeePricing,
+          );
         },
       );
     }

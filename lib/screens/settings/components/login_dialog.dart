@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
 
 class LoginDialog extends StatelessWidget {
   const LoginDialog({
     Key? key,
     required this.onContinue,
+    required this.onSeePricing,
   }) : super(key: key);
 
   final VoidCallback onContinue;
+  final VoidCallback onSeePricing;
 
   List<Widget> getActionButtons() {
-    String pricingUrl = "https://fleetingnotes.app/pricing?ref=app";
     if (!kIsWeb) {
       return [
         ElevatedButton(
@@ -27,9 +27,7 @@ class LoginDialog extends StatelessWidget {
         ),
         ElevatedButton(
           child: const Text('See Pricing'),
-          onPressed: () {
-            launch(pricingUrl);
-          },
+          onPressed: onSeePricing,
         ),
       ];
     }
