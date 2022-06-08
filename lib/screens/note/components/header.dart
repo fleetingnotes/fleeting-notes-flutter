@@ -18,7 +18,7 @@ class Header extends StatelessWidget {
   }) : super(key: key);
 
   final Function? onSave;
-  final Function? onAddAttachment;
+  final Function onAddAttachment;
   final VoidCallback onDelete;
   final VoidCallback onSearch;
   final FirebaseAnalytics analytics;
@@ -52,10 +52,7 @@ class Header extends StatelessWidget {
     if (result != null) {
       Uint8List? fileBytes = result.files.first.bytes;
       String filename = result.files.first.name;
-
-      if (onAddAttachment != null) {
-        onAddAttachment!(filename, fileBytes);
-      }
+      onAddAttachment(filename, fileBytes);
     }
   }
 
@@ -93,7 +90,6 @@ class Header extends StatelessWidget {
               PopupMenuItem(
                 child: const Text("Add Attachment"),
                 onTap: addAttachment,
-                enabled: onAddAttachment != null,
               ),
               PopupMenuItem(
                 child: const Text("Delete"),

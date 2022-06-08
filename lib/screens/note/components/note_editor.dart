@@ -225,8 +225,9 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   void onAddAttachment(String filename, Uint8List? bytes) async {
     if (bytes != null) {
+      String newFileName = '${widget.note.id}/$filename';
       String? downloadUrl =
-          await widget.db.firebase.addAttachment(filename, bytes);
+          await widget.db.firebase.addAttachment(newFileName, bytes);
       if (downloadUrl != null) {
         sourceController.text = downloadUrl;
         onChanged();
@@ -255,8 +256,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                   onSave: (hasNewChanges) ? _saveNote : null,
                   onDelete: _deleteNote,
                   onSearch: () => onSearchNavigate(context),
-                  onAddAttachment:
-                      (widget.db.isLoggedIn()) ? onAddAttachment : null,
+                  onAddAttachment: onAddAttachment,
                   analytics: widget.db.firebase.analytics,
                 ),
                 const Divider(thickness: 1, height: 1),

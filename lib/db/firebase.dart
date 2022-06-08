@@ -74,9 +74,8 @@ class FirebaseDB implements DatabaseInterface {
   }
 
   Future<String?> addAttachment(String filename, Uint8List fileBytes) async {
-    if (currUser == null) return null;
-    final userStorageRef = storage.ref(currUser?.uid);
-    final fileRef = userStorageRef.child(filename);
+    final storageRef = storage.ref();
+    final fileRef = storageRef.child(filename);
     final mimeType = lookupMimeType(filename);
     await fileRef.putData(fileBytes,
         SettableMetadata(contentType: mimeType ?? 'application/octet-stream'));
