@@ -90,12 +90,13 @@ class _SourceContainerState extends State<SourceContainer> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: (sourceFieldVisible)
-          ? sourceContainer()
-          : TextButton(
-              onPressed: setSourceUrl,
-              child: const Text('Add Source URL'),
-            ),
+      child:
+          (widget.controller.text.isNotEmpty || !kIsWeb || sourceFieldVisible)
+              ? sourceContainer()
+              : TextButton(
+                  onPressed: setSourceUrl,
+                  child: const Text('Add Source URL'),
+                ),
     );
   }
 }

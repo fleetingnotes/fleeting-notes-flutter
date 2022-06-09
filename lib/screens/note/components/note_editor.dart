@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/material.dart';
@@ -221,6 +223,23 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     widget.db.navigateToSearch('');
   }
 
+  void onAddAttachment(String filename, Uint8List? bytes) async {
+    try {
+      String newFileName = '${widget.note.id}/$filename';
+      String? downloadUrl =
+          await widget.db.firebase.addAttachment(newFileName, bytes);
+      if (mounted) {
+        sourceController.text = downloadUrl;
+        onChanged();
+      }
+    } on Exception catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("$e"),
+        duration: const Duration(seconds: 2),
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Actions(
@@ -242,6 +261,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                   onSave: (hasNewChanges) ? _saveNote : null,
                   onDelete: _deleteNote,
                   onSearch: () => onSearchNavigate(context),
+                  onAddAttachment: onAddAttachment,
                   analytics: widget.db.firebase.analytics,
                 ),
                 const Divider(thickness: 1, height: 1),

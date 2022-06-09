@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 class Header extends StatelessWidget {
@@ -9,11 +12,13 @@ class Header extends StatelessWidget {
     required this.onSave,
     required this.onDelete,
     required this.onSearch,
+    required this.onAddAttachment,
     required this.analytics,
     this.title = '',
   }) : super(key: key);
 
   final Function? onSave;
+  final Function onAddAttachment;
   final VoidCallback onDelete;
   final VoidCallback onSearch;
   final FirebaseAnalytics analytics;
@@ -38,6 +43,18 @@ class Header extends StatelessWidget {
         content: Text('Saved'),
         duration: Duration(seconds: 2),
       ));
+    }
+  }
+
+  void addAttachment() async {
+    analytics.logEvent(name: 'click_add_attachment');
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(withData: true);
+    if (result != null) {
+      PlatformFile file = result.files.first;
+      Uint8List? fileBytes = file.bytes;
+      String filename = file.name;
+      onAddAttachment(filename, fileBytes);
     }
   }
 
@@ -72,6 +89,10 @@ class Header extends StatelessWidget {
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),
             itemBuilder: (context) => [
+              PopupMenuItem(
+                child: const Text("Add Attachment"),
+                onTap: addAttachment,
+              ),
               PopupMenuItem(
                 child: const Text("Delete"),
                 onTap: () {

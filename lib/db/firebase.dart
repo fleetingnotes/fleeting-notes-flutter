@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mime/mime.dart';
 import '../models/Note.dart';
 import 'db_interface.dart';
 import 'package:dio/dio.dart';
@@ -13,6 +17,7 @@ class FirebaseDB implements DatabaseInterface {
   String userId = 'local';
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
   final Dio dio = Dio();
   User? currUser;
   late CollectionReference notesCollection;
@@ -33,8 +38,11 @@ class FirebaseDB implements DatabaseInterface {
       fetchTimeout: const Duration(minutes: 1),
       minimumFetchInterval: const Duration(seconds: 1),
     ));
-    await remoteConfig.setDefaults(
-        const {"use_firebase": true, "link_suggestion_threshold": 0.5});
+    await remoteConfig.setDefaults(const {
+      "use_firebase": true,
+      "link_suggestion_threshold": 0.5,
+      "max_attachment_size_mb": 10,
+    });
     remoteConfig.fetchAndActivate();
   }
 
@@ -66,6 +74,23 @@ class FirebaseDB implements DatabaseInterface {
     } catch (e) {
       return false;
     }
+  }
+
+  Future<String> addAttachment(String filename, Uint8List? fileBytes) async {
+    if (fileBytes == null || fileBytes.isEmpty) {
+      throw Exception('File is empty');
+    }
+    if (fileBytes.lengthInBytes / 1000000 >
+        remoteConfig.getInt('max_attachment_size_mb')) {
+      throw Exception(
+          'File cannot be larger than ${remoteConfig.getInt('max_attachment_size_mb')}MB');
+    }
+    final storageRef = storage.ref();
+    final fileRef = storageRef.child(filename);
+    final mimeType = lookupMimeType(filename);
+    await fileRef.putData(fileBytes,
+        SettableMetadata(contentType: mimeType ?? 'application/octet-stream'));
+    return await fileRef.getDownloadURL();
   }
 
   Future<Map<String, double>> getSentenceSimilarity(
