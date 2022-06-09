@@ -370,6 +370,9 @@ PODS:
   - Firebase/RemoteConfig (8.14.0):
     - Firebase/CoreOnly
     - FirebaseRemoteConfig (~> 8.14.0)
+  - Firebase/Storage (8.14.0):
+    - Firebase/CoreOnly
+    - FirebaseStorage (~> 8.14.0)
   - firebase_analytics (9.1.5):
     - Firebase/Analytics (= 8.14.0)
     - firebase_core
@@ -390,6 +393,11 @@ PODS:
   - firebase_remote_config (2.0.5):
     - Firebase/CoreOnly (~> 8.14.0)
     - Firebase/RemoteConfig (~> 8.14.0)
+    - firebase_core
+    - FlutterMacOS
+  - firebase_storage (10.2.17):
+    - Firebase/CoreOnly (~> 8.14.0)
+    - Firebase/Storage (~> 8.14.0)
     - firebase_core
     - FlutterMacOS
   - FirebaseABTesting (8.15.0):
@@ -457,6 +465,9 @@ PODS:
     - FirebaseInstallations (~> 8.0)
     - GoogleUtilities/Environment (~> 7.7)
     - "GoogleUtilities/NSData+zlib (~> 7.7)"
+  - FirebaseStorage (8.14.0):
+    - FirebaseCore (~> 8.0)
+    - GTMSessionFetcher/Core (~> 1.5)
   - FlutterMacOS (1.0.0)
   - GoogleAppMeasurement (8.14.0):
     - GoogleAppMeasurement/AdIdSupport (= 8.14.0)
@@ -546,6 +557,7 @@ DEPENDENCIES:
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
   - firebase_crashlytics (from `Flutter/ephemeral/.symlinks/plugins/firebase_crashlytics/macos`)
   - firebase_remote_config (from `Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos`)
+  - firebase_storage (from `Flutter/ephemeral/.symlinks/plugins/firebase_storage/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
@@ -564,6 +576,7 @@ SPEC REPOS:
     - FirebaseFirestore
     - FirebaseInstallations
     - FirebaseRemoteConfig
+    - FirebaseStorage
     - GoogleAppMeasurement
     - GoogleDataTransport
     - GoogleUtilities
@@ -589,6 +602,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_crashlytics/macos
   firebase_remote_config:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos
+  firebase_storage:
+    :path: Flutter/ephemeral/.symlinks/plugins/firebase_storage/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
   path_provider_macos:
@@ -607,6 +622,7 @@ SPEC CHECKSUMS:
   firebase_core: b35001a38661f4a882510bff98e2c3af2d35a46f
   firebase_crashlytics: 00b697a920f02235c646450d77aca9b21c4b5256
   firebase_remote_config: d0e7550cf082a54a3b9c8834a4ace8a4445435a1
+  firebase_storage: 2915315923f023009f48fa3a4f19f45cbb356a73
   FirebaseABTesting: 10cbce8db9985ae2e3847ea44e9947dd18f94e10
   FirebaseAnalytics: 2fc3876e2eb347673ad2f35e249ae7b15d6c88f5
   FirebaseAuth: c5fde343630090253d3af7e2d35697b414b40202
@@ -616,6 +632,7 @@ SPEC CHECKSUMS:
   FirebaseFirestore: fff37682b934e3e94d83e5c24936721890a2edf0
   FirebaseInstallations: 40bd9054049b2eae9a2c38ef1c3dd213df3605cd
   FirebaseRemoteConfig: a5d9188d8f57f602636f111eca6460ebe32b9b71
+  FirebaseStorage: 32ab036ce11eb7e94c279a238a65efa24f81593d
   FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
   GoogleAppMeasurement: 71156240babd3cc6ced03e0d54816f01a880c730
   GoogleDataTransport: 629c20a4d363167143f30ea78320d5a7eb8bd940
