@@ -48,10 +48,12 @@ class Header extends StatelessWidget {
 
   void addAttachment() async {
     analytics.logEvent(name: 'click_add_attachment');
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(withData: true);
     if (result != null) {
-      Uint8List? fileBytes = result.files.first.bytes;
-      String filename = result.files.first.name;
+      PlatformFile file = result.files.first;
+      Uint8List? fileBytes = file.bytes;
+      String filename = file.name;
       onAddAttachment(filename, fileBytes);
     }
   }

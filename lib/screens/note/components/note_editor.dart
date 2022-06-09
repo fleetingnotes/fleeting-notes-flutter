@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:developer';
 
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
@@ -224,14 +225,19 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void onAddAttachment(String filename, Uint8List? bytes) async {
-    if (bytes != null) {
+    try {
       String newFileName = '${widget.note.id}/$filename';
       String? downloadUrl =
           await widget.db.firebase.addAttachment(newFileName, bytes);
-      if (downloadUrl != null) {
+      if (mounted) {
         sourceController.text = downloadUrl;
         onChanged();
       }
+    } on Exception catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("$e"),
+        duration: const Duration(seconds: 2),
+      ));
     }
   }
 

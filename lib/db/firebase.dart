@@ -38,8 +38,11 @@ class FirebaseDB implements DatabaseInterface {
       fetchTimeout: const Duration(minutes: 1),
       minimumFetchInterval: const Duration(seconds: 1),
     ));
-    await remoteConfig.setDefaults(
-        const {"use_firebase": true, "link_suggestion_threshold": 0.5});
+    await remoteConfig.setDefaults(const {
+      "use_firebase": true,
+      "link_suggestion_threshold": 0.5,
+      "max_attachment_size_mb": 10,
+    });
     remoteConfig.fetchAndActivate();
   }
 
@@ -73,7 +76,15 @@ class FirebaseDB implements DatabaseInterface {
     }
   }
 
-  Future<String?> addAttachment(String filename, Uint8List fileBytes) async {
+  Future<String> addAttachment(String filename, Uint8List? fileBytes) async {
+    if (fileBytes == null || fileBytes.isEmpty) {
+      throw Exception('File is empty');
+    }
+    if (fileBytes.lengthInBytes / 1000000 >
+        remoteConfig.getInt('max_attachment_size_mb')) {
+      throw Exception(
+          'File cannot be larger than ${remoteConfig.getInt('max_attachment_size_mb')}MB');
+    }
     final storageRef = storage.ref();
     final fileRef = storageRef.child(filename);
     final mimeType = lookupMimeType(filename);
