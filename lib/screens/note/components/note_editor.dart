@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:developer';
 
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
