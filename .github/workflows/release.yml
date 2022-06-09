@@ -107,11 +107,13 @@ jobs:
     - run: flutter doctor -v
     - run: flutter pub get
     - run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist
+    - run: flutter build macos --release
     - uses: softprops/action-gh-release@v1 
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
           build/ios/ipa/*.ipa
+          build/macos/Build/Products/Release/*.app
         draft: true
         fail_on_unmatched_files: true
     - name: Clean up keychain and provisioning profile
