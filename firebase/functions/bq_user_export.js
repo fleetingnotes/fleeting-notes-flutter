@@ -8,7 +8,7 @@ const bigquery = new BigQuery();
 const listAllUsers = async () => {
     const appendToAllUsers = async (allUsers, nextPageToken) => {
         // List batch of users, 1000 at a time.
-        listUsersResult = await admin.auth().listUsers(1000, nextPageToken)
+        let listUsersResult = await admin.auth().listUsers(1000, nextPageToken)
         listUsersResult.users.forEach((userRecord) => {
             userRecord.metadata.creationTime = new Date(userRecord.metadata.creationTime)
             allUsers.push({
@@ -29,7 +29,7 @@ const listAllUsers = async () => {
     return allUsers
 };
 
-exports.bq_user_export = functions.pubsub.schedule('every hour').onRun(async (context) => {
+exports.bq_user_export = functions.pubsub.schedule('every hour').onRun(async () => {
     let allUsers = await listAllUsers();
     const dataset = bigquery.dataset('firebase_functions');
     const table = dataset.table('auth_users');
