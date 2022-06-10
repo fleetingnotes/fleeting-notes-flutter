@@ -4,6 +4,8 @@ PODS:
     - Firebase/Firestore (~> 8.14.0)
     - firebase_core
     - FlutterMacOS
+  - device_info_plus_macos (0.0.1):
+    - FlutterMacOS
   - file_saver (0.0.1):
     - FlutterMacOS
   - Firebase/Analytics (8.14.0):
@@ -176,6 +178,7 @@ PODS:
 
 DEPENDENCIES:
   - cloud_firestore (from `Flutter/ephemeral/.symlinks/plugins/cloud_firestore/macos`)
+  - device_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus_macos/macos`)
   - file_saver (from `Flutter/ephemeral/.symlinks/plugins/file_saver/macos`)
   - firebase_analytics (from `Flutter/ephemeral/.symlinks/plugins/firebase_analytics/macos`)
   - firebase_auth (from `Flutter/ephemeral/.symlinks/plugins/firebase_auth/macos`)
@@ -210,6 +213,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   cloud_firestore:
     :path: Flutter/ephemeral/.symlinks/plugins/cloud_firestore/macos
+  device_info_plus_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus_macos/macos
   file_saver:
     :path: Flutter/ephemeral/.symlinks/plugins/file_saver/macos
   firebase_analytics:
@@ -241,6 +246,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   cloud_firestore: 5610994e535ede735df10d0a30bf5951eafdfc8d
+  device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
   file_saver: 44e6fbf666677faf097302460e214e977fdd977b
   Firebase: 7e8fe528c161b9271d365217a74c16aaf834578e
   firebase_analytics: b5b210d483d4e50df3351116be13bc53385253de
