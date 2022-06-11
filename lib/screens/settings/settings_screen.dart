@@ -101,118 +101,124 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 thickness: 1,
                 height: 1,
               ),
-              SingleChildScrollView(
-                  controller: ScrollController(),
-                  padding:
-                      EdgeInsets.all(Theme.of(context).custom.kDefaultPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(children: [
-                        const Text("Auto Fill Source",
-                            style: TextStyle(fontSize: 12)),
-                        Switch(
-                            value: widget.db.fillSource(),
-                            onChanged: autoFilledToggled)
-                      ]),
-                      const Divider(thickness: 1, height: 1),
-                      SizedBox(
-                          height: Theme.of(context).custom.kDefaultPadding / 2),
-                      const Text("Export Notes",
-                          style: TextStyle(fontSize: 12)),
-                      const Divider(thickness: 1, height: 1),
-                      Padding(
-                        padding: EdgeInsets.all(
-                            Theme.of(context).custom.kDefaultPadding / 2),
-                        child: Row(children: [
-                          DropdownButton(
-                            underline: const SizedBox(),
-                            value: exportOption,
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                exportOption = newValue!;
-                              });
-                            },
-                            items: const [
-                              DropdownMenuItem(
-                                child: Text('Markdown'),
-                                value: 'Markdown',
-                              ),
-                              DropdownMenuItem(
-                                child: Text('JSON'),
-                                value: 'JSON',
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          ElevatedButton(
-                              onPressed: () async {
-                                List<Note> notes =
-                                    await widget.db.getAllNotes();
-                                if (exportOption == 'Markdown') {
-                                  _downloadNotesAsMarkdownZIP(notes);
-                                } else {
-                                  _downloadNotesAsJSON(notes);
-                                }
-                                widget.db.firebase.analytics.logEvent(
-                                    name: 'export_notes',
-                                    parameters: {
-                                      'file_type': exportOption,
-                                    });
-                              },
-                              child: const Text('Export')),
+              Expanded(
+                child: SingleChildScrollView(
+                    controller: ScrollController(),
+                    padding: EdgeInsets.all(
+                        Theme.of(context).custom.kDefaultPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          const Text("Auto Fill Source",
+                              style: TextStyle(fontSize: 12)),
+                          Switch(
+                              value: widget.db.fillSource(),
+                              onChanged: autoFilledToggled)
                         ]),
-                      ),
-                      SizedBox(
-                          height: Theme.of(context).custom.kDefaultPadding / 2),
-                      const Text("Sync", style: TextStyle(fontSize: 12)),
-                      const Divider(thickness: 1, height: 1),
-                      (isLoggedIn)
-                          ? Padding(
-                              padding: EdgeInsets.all(
-                                  Theme.of(context).custom.kDefaultPadding / 2),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(children: [
-                                    Text(email),
-                                    const Spacer(),
-                                    ElevatedButton(
-                                        onPressed: () {
-                                          widget.db.logout();
-                                          setState(() {
-                                            isLoggedIn = false;
-                                          });
-                                        },
-                                        child: const Text('Logout'))
-                                  ]),
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: Theme.of(context)
-                                            .custom
-                                            .kDefaultPadding),
-                                    child: ElevatedButton(
-                                        onPressed: () {
-                                          widget.db.firebase.analytics.logEvent(
-                                              name: 'force_sync_notes');
-                                          widget.db
-                                              .getAllNotes(forceSync: true);
-                                        },
-                                        child: const Text('Force Sync')),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Auth(
-                              db: widget.db,
-                              onLogin: (e) {
+                        const Divider(thickness: 1, height: 1),
+                        SizedBox(
+                            height:
+                                Theme.of(context).custom.kDefaultPadding / 2),
+                        const Text("Export Notes",
+                            style: TextStyle(fontSize: 12)),
+                        const Divider(thickness: 1, height: 1),
+                        Padding(
+                          padding: EdgeInsets.all(
+                              Theme.of(context).custom.kDefaultPadding / 2),
+                          child: Row(children: [
+                            DropdownButton(
+                              underline: const SizedBox(),
+                              value: exportOption,
+                              onChanged: (String? newValue) {
                                 setState(() {
-                                  isLoggedIn = true;
-                                  email = e;
+                                  exportOption = newValue!;
                                 });
-                              }),
-                    ],
-                  ))
+                              },
+                              items: const [
+                                DropdownMenuItem(
+                                  child: Text('Markdown'),
+                                  value: 'Markdown',
+                                ),
+                                DropdownMenuItem(
+                                  child: Text('JSON'),
+                                  value: 'JSON',
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  List<Note> notes =
+                                      await widget.db.getAllNotes();
+                                  if (exportOption == 'Markdown') {
+                                    _downloadNotesAsMarkdownZIP(notes);
+                                  } else {
+                                    _downloadNotesAsJSON(notes);
+                                  }
+                                  widget.db.firebase.analytics.logEvent(
+                                      name: 'export_notes',
+                                      parameters: {
+                                        'file_type': exportOption,
+                                      });
+                                },
+                                child: const Text('Export')),
+                          ]),
+                        ),
+                        SizedBox(
+                            height:
+                                Theme.of(context).custom.kDefaultPadding / 2),
+                        const Text("Sync", style: TextStyle(fontSize: 12)),
+                        const Divider(thickness: 1, height: 1),
+                        (isLoggedIn)
+                            ? Padding(
+                                padding: EdgeInsets.all(
+                                    Theme.of(context).custom.kDefaultPadding /
+                                        2),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(children: [
+                                      Text(email),
+                                      const Spacer(),
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            widget.db.logout();
+                                            setState(() {
+                                              isLoggedIn = false;
+                                            });
+                                          },
+                                          child: const Text('Logout'))
+                                    ]),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: Theme.of(context)
+                                              .custom
+                                              .kDefaultPadding),
+                                      child: ElevatedButton(
+                                          onPressed: () {
+                                            widget.db.firebase.analytics
+                                                .logEvent(
+                                                    name: 'force_sync_notes');
+                                            widget.db
+                                                .getAllNotes(forceSync: true);
+                                          },
+                                          child: const Text('Force Sync')),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : Auth(
+                                db: widget.db,
+                                onLogin: (e) {
+                                  setState(() {
+                                    isLoggedIn = true;
+                                    email = e;
+                                  });
+                                }),
+                      ],
+                    )),
+              )
             ],
           ),
         ),
