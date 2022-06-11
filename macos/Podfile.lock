@@ -1,8 +1,10 @@
 PODS:
-  - cloud_firestore (3.1.12):
+  - cloud_firestore (3.1.17):
     - Firebase/CoreOnly (~> 8.14.0)
     - Firebase/Firestore (~> 8.14.0)
     - firebase_core
+    - FlutterMacOS
+  - desktop_webview_auth (0.0.1):
     - FlutterMacOS
   - device_info_plus_macos (0.0.1):
     - FlutterMacOS
@@ -21,6 +23,9 @@ PODS:
   - Firebase/Crashlytics (8.14.0):
     - Firebase/CoreOnly
     - FirebaseCrashlytics (~> 8.14.0)
+  - Firebase/Database (8.14.0):
+    - Firebase/CoreOnly
+    - FirebaseDatabase (~> 8.14.0)
   - Firebase/Firestore (8.14.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 8.14.0)
@@ -34,7 +39,7 @@ PODS:
     - Firebase/Analytics (= 8.14.0)
     - firebase_core
     - FlutterMacOS
-  - firebase_auth (3.3.14):
+  - firebase_auth (3.3.19):
     - Firebase/Auth (~> 8.14.0)
     - Firebase/CoreOnly (~> 8.14.0)
     - firebase_core
@@ -45,6 +50,11 @@ PODS:
   - firebase_crashlytics (2.6.2):
     - Firebase/CoreOnly (~> 8.14.0)
     - Firebase/Crashlytics (~> 8.14.0)
+    - firebase_core
+    - FlutterMacOS
+  - firebase_database (9.0.15):
+    - Firebase/CoreOnly (~> 8.14.0)
+    - Firebase/Database (~> 8.14.0)
     - firebase_core
     - FlutterMacOS
   - firebase_remote_config (2.0.5):
@@ -98,6 +108,9 @@ PODS:
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (~> 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
+  - FirebaseDatabase (8.14.0):
+    - FirebaseCore (~> 8.0)
+    - leveldb-library (~> 1.22)
   - FirebaseFirestore (8.14.0):
     - FirebaseFirestore/AutodetectLeveldb (= 8.14.0)
   - FirebaseFirestore/AutodetectLeveldb (8.14.0):
@@ -165,6 +178,7 @@ PODS:
   - GoogleUtilities/UserDefaults (7.7.0):
     - GoogleUtilities/Logger
   - GTMSessionFetcher/Core (1.7.1)
+  - leveldb-library (1.22.1)
   - nanopb (2.30908.0):
     - nanopb/decode (= 2.30908.0)
     - nanopb/encode (= 2.30908.0)
@@ -173,22 +187,27 @@ PODS:
   - path_provider_macos (0.0.1):
     - FlutterMacOS
   - PromisesObjC (2.1.0)
+  - sign_in_with_apple (0.0.1):
+    - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
 
 DEPENDENCIES:
   - cloud_firestore (from `Flutter/ephemeral/.symlinks/plugins/cloud_firestore/macos`)
+  - desktop_webview_auth (from `Flutter/ephemeral/.symlinks/plugins/desktop_webview_auth/macos`)
   - device_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus_macos/macos`)
   - file_saver (from `Flutter/ephemeral/.symlinks/plugins/file_saver/macos`)
   - firebase_analytics (from `Flutter/ephemeral/.symlinks/plugins/firebase_analytics/macos`)
   - firebase_auth (from `Flutter/ephemeral/.symlinks/plugins/firebase_auth/macos`)
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
   - firebase_crashlytics (from `Flutter/ephemeral/.symlinks/plugins/firebase_crashlytics/macos`)
+  - firebase_database (from `Flutter/ephemeral/.symlinks/plugins/firebase_database/macos`)
   - firebase_remote_config (from `Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos`)
   - firebase_storage (from `Flutter/ephemeral/.symlinks/plugins/firebase_storage/macos`)
   - FirebaseFirestore (from `https://github.com/invertase/firestore-ios-sdk-frameworks.git`, tag `8.14.0`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
+  - sign_in_with_apple (from `Flutter/ephemeral/.symlinks/plugins/sign_in_with_apple/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
 
 SPEC REPOS:
@@ -200,6 +219,7 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseCoreDiagnostics
     - FirebaseCrashlytics
+    - FirebaseDatabase
     - FirebaseInstallations
     - FirebaseRemoteConfig
     - FirebaseStorage
@@ -207,12 +227,15 @@ SPEC REPOS:
     - GoogleDataTransport
     - GoogleUtilities
     - GTMSessionFetcher
+    - leveldb-library
     - nanopb
     - PromisesObjC
 
 EXTERNAL SOURCES:
   cloud_firestore:
     :path: Flutter/ephemeral/.symlinks/plugins/cloud_firestore/macos
+  desktop_webview_auth:
+    :path: Flutter/ephemeral/.symlinks/plugins/desktop_webview_auth/macos
   device_info_plus_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus_macos/macos
   file_saver:
@@ -225,6 +248,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_core/macos
   firebase_crashlytics:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_crashlytics/macos
+  firebase_database:
+    :path: Flutter/ephemeral/.symlinks/plugins/firebase_database/macos
   firebase_remote_config:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos
   firebase_storage:
@@ -236,6 +261,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   path_provider_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos
+  sign_in_with_apple:
+    :path: Flutter/ephemeral/.symlinks/plugins/sign_in_with_apple/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
@@ -245,14 +272,16 @@ CHECKOUT OPTIONS:
     :tag: 8.14.0
 
 SPEC CHECKSUMS:
-  cloud_firestore: 5610994e535ede735df10d0a30bf5951eafdfc8d
+  cloud_firestore: 2a4ef47aaf18214937d05a38b6e5c7993616fd2f
+  desktop_webview_auth: 9bba53a29c9bc6a4ff621fd0ebfbb18856c4dada
   device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
   file_saver: 44e6fbf666677faf097302460e214e977fdd977b
   Firebase: 7e8fe528c161b9271d365217a74c16aaf834578e
   firebase_analytics: b5b210d483d4e50df3351116be13bc53385253de
-  firebase_auth: 07fa61609f0c9e1db414b345d8bd9d7dab08e44b
+  firebase_auth: 356c1bde58e6d263ffa602a0d812a3dde31545a4
   firebase_core: b35001a38661f4a882510bff98e2c3af2d35a46f
   firebase_crashlytics: 00b697a920f02235c646450d77aca9b21c4b5256
+  firebase_database: 260ab1a7e80345e0bfde7de070e8d46495135c95
   firebase_remote_config: d0e7550cf082a54a3b9c8834a4ace8a4445435a1
   firebase_storage: 2915315923f023009f48fa3a4f19f45cbb356a73
   FirebaseABTesting: 10cbce8db9985ae2e3847ea44e9947dd18f94e10
@@ -261,6 +290,7 @@ SPEC CHECKSUMS:
   FirebaseCore: b84a44ee7ba999e0f9f76d198a9c7f60a797b848
   FirebaseCoreDiagnostics: fd0c8490f34287229c1d6c103d3a55f81ec85712
   FirebaseCrashlytics: 079ef36f5c4b7161188928faec40fa276ebefd84
+  FirebaseDatabase: 8bfbe7bb8d355f9727507bcf4a2116cb3aabdc5e
   FirebaseFirestore: 44356395b75c6528f2aec5ca26acc85dcc83c4e0
   FirebaseInstallations: 40bd9054049b2eae9a2c38ef1c3dd213df3605cd
   FirebaseRemoteConfig: a5d9188d8f57f602636f111eca6460ebe32b9b71
@@ -270,9 +300,11 @@ SPEC CHECKSUMS:
   GoogleDataTransport: 629c20a4d363167143f30ea78320d5a7eb8bd940
   GoogleUtilities: e0913149f6b0625b553d70dae12b49fc62914fd1
   GTMSessionFetcher: 4577a4cc914a5a07c40a8a0ad0acc22080418c2d
+  leveldb-library: 50c7b45cbd7bf543c81a468fe557a16ae3db8729
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   path_provider_macos: 160cab0d5461f0c0e02995469a98f24bdb9a3f1f
   PromisesObjC: 99b6f43f9e1044bd87a95a60beff28c2c44ddb72
+  sign_in_with_apple: a9e97e744e8edc36aefc2723111f652102a7a727
   url_launcher_macos: 597e05b8e514239626bcf4a850fcf9ef5c856ec3
 
 PODFILE CHECKSUM: 1951776bc2f938498d263747a2cedb9eb716e47b
