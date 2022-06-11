@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../database.dart';
 import 'login_dialog.dart';
+import 'package:flutterfire_ui/auth.dart';
 
 class Auth extends StatefulWidget {
   const Auth({Key? key, required this.db, this.onLogin}) : super(key: key);
@@ -13,19 +15,10 @@ class Auth extends StatefulWidget {
 }
 
 class _AuthState extends State<Auth> {
-  String email = '';
-  String password = '';
   bool isLoading = false;
+  AuthAction _authAction = AuthAction.signIn;
 
-  bool validEmail() {
-    return email.isNotEmpty;
-  }
-
-  bool validPassword() {
-    return password.isNotEmpty;
-  }
-
-  void onDialogContinue() async {
+  void onDialogContinue(String email, String password) async {
     Navigator.pop(context);
     await widget.db.firebase.logoutAllSessions();
     widget.db.login(email, password);
@@ -38,18 +31,15 @@ class _AuthState extends State<Auth> {
     widget.db.firebase.analytics.logEvent(name: 'login_dialog_see_pricing');
   }
 
-  Future<void> onLoginPress() async {
-    setState(() {
-      isLoading = true;
-    });
-    bool isLoggedIn = await _login();
+  Future<void> onLoginPress(String email, String password) async {
+    bool isLoggedIn = await _login(email, password);
     if (isLoggedIn && !await widget.db.firebase.isCurrUserPremium()) {
       await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return LoginDialog(
-            onContinue: onDialogContinue,
+            onContinue: () => onDialogContinue(email, password),
             onSeePricing: onSeePricing,
           );
         },
@@ -63,34 +53,34 @@ class _AuthState extends State<Auth> {
         duration: Duration(seconds: 2),
       ));
     }
-    setState(() {
-      isLoading = false;
-    });
   }
 
-  Future<bool> _login() async {
-    if (!validPassword() || !validEmail()) {
-      return false;
-    }
+  Future<bool> _login(String email, String password) async {
     bool isLoggedIn = await widget.db.login(email, password);
     return isLoggedIn;
   }
 
-  Future<void> _register() async {
-    if (!validPassword() || !validEmail()) {
-      return;
-    }
-    setState(() {
-      isLoading = true;
-    });
+  Future<void> _register(String email, String password) async {
     bool isRegistered = await widget.db.register(email, password);
     if (isRegistered) {
-      _login();
+      bool isLoggedIn = await _login(email, password);
+      if (isLoggedIn && widget.onLogin != null) widget.onLogin!(email);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Registration failed'),
         duration: Duration(seconds: 2),
       ));
+    }
+  }
+
+  void onSubmit(String email, String password) async {
+    setState(() {
+      isLoading = true;
+    });
+    if (_authAction == AuthAction.signIn) {
+      await onLoginPress(email, password);
+    } else if (_authAction == AuthAction.signUp) {
+      await _register(email, password);
     }
     setState(() {
       isLoading = false;
@@ -99,53 +89,67 @@ class _AuthState extends State<Auth> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextField(
-            decoration: const InputDecoration(
-              hintText: 'Email',
+    return (isLoading)
+        ? const Padding(
+            padding: EdgeInsets.all(20),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              (_authAction == AuthAction.signIn)
+                  ? AuthFlow(
+                      text: "Don't have an account? ",
+                      linkedText: "Register",
+                      onTap: () {
+                        setState(() {
+                          _authAction = AuthAction.signUp;
+                        });
+                      },
+                    )
+                  : AuthFlow(
+                      text: "Already have an account? ",
+                      linkedText: "Sign in",
+                      onTap: () {
+                        setState(() {
+                          _authAction = AuthAction.signIn;
+                        });
+                      },
+                    ),
+              EmailForm(
+                action: _authAction,
+                onSubmit: onSubmit,
+              ),
+            ],
+          );
+  }
+}
+
+class AuthFlow extends StatelessWidget {
+  const AuthFlow({
+    Key? key,
+    required this.text,
+    required this.linkedText,
+    required this.onTap,
+  }) : super(key: key);
+
+  final String text;
+  final String linkedText;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 15, 0, 10),
+        child: RichText(
+          text: TextSpan(children: [
+            TextSpan(text: text),
+            TextSpan(
+              text: linkedText,
+              style: const TextStyle(color: Colors.blue),
+              recognizer: TapGestureRecognizer()..onTap = onTap,
             ),
-            keyboardType: TextInputType.emailAddress,
-            enableSuggestions: false,
-            autocorrect: false,
-            onChanged: (String val) {
-              setState(() {
-                email = val;
-              });
-            },
-          ),
-          TextField(
-            decoration: const InputDecoration(
-              hintText: 'Password',
-            ),
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            onChanged: (String val) {
-              setState(() {
-                password = val;
-              });
-            },
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                    child: const Text('Login'),
-                    onPressed: (isLoading) ? null : onLoginPress),
-                ElevatedButton(
-                  child: const Text('Register'),
-                  onPressed: (isLoading) ? null : _register,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+          ]),
+        ));
   }
 }
