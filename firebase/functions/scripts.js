@@ -14,7 +14,7 @@ const exportFirestore2Json = async (collection) => {
     return items
 }
 
-exports.initNoteEvents = functions.https.onRequest(async (req, res) => {
+exports.initNoteEvents = functions.https.onRequest(async () => {
     const notesCollection = await exportFirestore2Json('notes');
     const noteEvents = [];
 
@@ -32,3 +32,14 @@ exports.initNoteEvents = functions.https.onRequest(async (req, res) => {
     const table = dataset.table('note_events');
     return table.insert(noteEvents);
 });
+
+exports.logEvent = (uid, event_name) => {
+    // send log to bigquery
+    const dataset = bigquery.dataset('firebase_functions');
+    const table = dataset.table('events');
+    table.insert([{
+        uid: uid,
+        event_name: event_name,
+        event_time: new BigQueryDatetime(new Date().toISOString()),
+    }]);
+}

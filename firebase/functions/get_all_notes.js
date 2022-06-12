@@ -1,4 +1,5 @@
 const functions = require("firebase-functions");
+const { logEvent } = require('./scripts');
 
 // CORS Express middleware to enable CORS Requests.
 const request = require('request');
@@ -67,6 +68,7 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
           }
           notes = notes.concat(newNote);
         });
+        logEvent(uid, 'get_all_notes');
         return handleResponse(email, 200, notes);
       });
     } catch (error) {
