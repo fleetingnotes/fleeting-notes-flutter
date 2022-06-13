@@ -42,6 +42,7 @@ class FirebaseDB implements DatabaseInterface {
       "use_firebase": true,
       "link_suggestion_threshold": 0.5,
       "max_attachment_size_mb": 10,
+      "max_attachment_size_mb_premium": 25,
     });
     remoteConfig.fetchAndActivate();
   }
@@ -80,10 +81,11 @@ class FirebaseDB implements DatabaseInterface {
     if (fileBytes == null || fileBytes.isEmpty) {
       throw Exception('File is empty');
     }
-    if (fileBytes.lengthInBytes / 1000000 >
-        remoteConfig.getInt('max_attachment_size_mb')) {
-      throw Exception(
-          'File cannot be larger than ${remoteConfig.getInt('max_attachment_size_mb')}MB');
+    int maxSize = (await isCurrUserPremium())
+        ? remoteConfig.getInt('max_attachment_size_mb_premium')
+        : remoteConfig.getInt('max_attachment_size_mb');
+    if (fileBytes.lengthInBytes / 1000000 > maxSize) {
+      throw Exception('File cannot be larger than $maxSize MB');
     }
     final storageRef = storage.ref();
     final fileRef = storageRef.child(filename);
