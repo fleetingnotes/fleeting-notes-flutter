@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -20,10 +21,14 @@ class FirebaseDB implements DatabaseInterface {
   final FirebaseStorage storage = FirebaseStorage.instance;
   final Dio dio = Dio();
   User? currUser;
+  StreamController<User?> authChangeController = StreamController<User?>();
   late CollectionReference notesCollection;
   FirebaseDB() {
     configRemoteConfig();
     userChanges.listen((User? user) {
+      if (currUser?.uid != user?.uid) {
+        authChangeController.add(user);
+      }
       currUser = user;
       userId = (user == null) ? 'local' : user.uid;
       analytics.setUserId(id: (user == null) ? null : user.uid);
@@ -42,6 +47,7 @@ class FirebaseDB implements DatabaseInterface {
       "use_firebase": true,
       "link_suggestion_threshold": 0.5,
       "max_attachment_size_mb": 10,
+      "max_attachment_size_mb_premium": 25,
     });
     remoteConfig.fetchAndActivate();
   }
@@ -80,10 +86,11 @@ class FirebaseDB implements DatabaseInterface {
     if (fileBytes == null || fileBytes.isEmpty) {
       throw Exception('File is empty');
     }
-    if (fileBytes.lengthInBytes / 1000000 >
-        remoteConfig.getInt('max_attachment_size_mb')) {
-      throw Exception(
-          'File cannot be larger than ${remoteConfig.getInt('max_attachment_size_mb')}MB');
+    int maxSize = await isCurrUserPremium()
+        ? remoteConfig.getInt('max_attachment_size_mb_premium')
+        : remoteConfig.getInt('max_attachment_size_mb');
+    if (fileBytes.lengthInBytes / 1000000 > maxSize) {
+      throw Exception('File cannot be larger than $maxSize MB');
     }
     final storageRef = storage.ref();
     final fileRef = storageRef.child(filename);
@@ -125,6 +132,7 @@ class FirebaseDB implements DatabaseInterface {
       UserCredential credentials = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       currUser = credentials.user;
+      authChangeController.add(currUser);
       userId = (credentials.user == null) ? 'local' : credentials.user!.uid;
       await analytics.logLogin(loginMethod: 'firebase');
       return true;
@@ -171,6 +179,7 @@ class FirebaseDB implements DatabaseInterface {
         'method': 'firebase',
       });
       currUser = null;
+      authChangeController.add(currUser);
       return true;
     } catch (e) {
       return false;

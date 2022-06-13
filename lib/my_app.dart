@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +25,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
     return 'main';
   }
 
-  void refreshScreen(User? user) {
+  void refreshApp() {
     db.popAllRoutes();
     setState(() {
       db.searchKey = GlobalKey();
@@ -37,7 +36,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    userChanges = db.firebase.userChanges.listen(refreshScreen);
+    db.firebase.authChangeController.stream.listen((_) => refreshApp());
     if (kIsWeb) {
       setState(() {
         initNote = db.getUnsavedNote();
@@ -81,7 +80,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
                       }
                     },
                   ),
-              '/settings': (context) => SettingsScreen(db: db)
+              '/settings': (context) => SettingsScreen(db: db),
             },
           );
         });

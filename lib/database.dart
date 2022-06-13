@@ -178,8 +178,8 @@ class Database {
     }
   }
 
-  void logout() async {
-    firebase.logout();
+  Future<void> logout() async {
+    await firebase.logout();
   }
 
   Future<bool> register(String email, String password) async {

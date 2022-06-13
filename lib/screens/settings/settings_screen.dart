@@ -182,8 +182,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       Text(email),
                                       const Spacer(),
                                       ElevatedButton(
-                                          onPressed: () {
-                                            widget.db.logout();
+                                          onPressed: () async {
+                                            await widget.db.logout();
                                             setState(() {
                                               isLoggedIn = false;
                                             });

@@ -43,6 +43,7 @@ class _ContentFieldState extends State<ContentField> {
       }
     });
     widget.db.getAllLinks().then((links) {
+      if (!mounted) return;
       setState(() {
         allLinks = links;
       });
@@ -80,7 +81,7 @@ class _ContentFieldState extends State<ContentField> {
     }
   }
 
-  void _onContentChanged(context, text, size) {
+  void _onContentChanged(context, text, size) async {
     if (widget.onChanged != null) {
       widget.onChanged!();
     }
@@ -102,10 +103,12 @@ class _ContentFieldState extends State<ContentField> {
       removeOverlay();
     }
     if (widget.controller.text.length % 30 == 0 &&
-        widget.controller.text.isNotEmpty) {
+        widget.controller.text.isNotEmpty &&
+        await widget.db.firebase.isCurrUserPremium()) {
       widget.db.firebase
           .orderListByRelevance(widget.controller.text, allLinks)
           .then((newLinkSuggestions) {
+        if (!mounted) return;
         setState(() {
           allLinks = newLinkSuggestions;
         });
