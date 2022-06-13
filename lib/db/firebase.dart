@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -20,10 +21,14 @@ class FirebaseDB implements DatabaseInterface {
   final FirebaseStorage storage = FirebaseStorage.instance;
   final Dio dio = Dio();
   User? currUser;
+  StreamController<User?> authChangeController = StreamController<User?>();
   late CollectionReference notesCollection;
   FirebaseDB() {
     configRemoteConfig();
     userChanges.listen((User? user) {
+      if (currUser?.uid != user?.uid) {
+        authChangeController.add(user);
+      }
       currUser = user;
       userId = (user == null) ? 'local' : user.uid;
       analytics.setUserId(id: (user == null) ? null : user.uid);
@@ -81,7 +86,7 @@ class FirebaseDB implements DatabaseInterface {
     if (fileBytes == null || fileBytes.isEmpty) {
       throw Exception('File is empty');
     }
-    int maxSize = (await isCurrUserPremium())
+    int maxSize = await isCurrUserPremium()
         ? remoteConfig.getInt('max_attachment_size_mb_premium')
         : remoteConfig.getInt('max_attachment_size_mb');
     if (fileBytes.lengthInBytes / 1000000 > maxSize) {
@@ -127,6 +132,7 @@ class FirebaseDB implements DatabaseInterface {
       UserCredential credentials = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       currUser = credentials.user;
+      authChangeController.add(currUser);
       userId = (credentials.user == null) ? 'local' : credentials.user!.uid;
       await analytics.logLogin(loginMethod: 'firebase');
       return true;
@@ -173,6 +179,7 @@ class FirebaseDB implements DatabaseInterface {
         'method': 'firebase',
       });
       currUser = null;
+      authChangeController.add(currUser);
       return true;
     } catch (e) {
       return false;

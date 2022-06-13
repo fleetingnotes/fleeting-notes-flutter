@@ -37,6 +37,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    db.firebase.authChangeController.stream.listen((_) => refreshApp());
     if (kIsWeb) {
       setState(() {
         initNote = db.getUnsavedNote();
@@ -80,8 +81,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
                       }
                     },
                   ),
-              '/settings': (context) =>
-                  SettingsScreen(db: db, refreshApp: refreshApp),
+              '/settings': (context) => SettingsScreen(db: db),
             },
           );
         });

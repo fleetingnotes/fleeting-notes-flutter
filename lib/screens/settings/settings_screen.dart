@@ -9,11 +9,9 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key, required this.db, this.refreshApp})
-      : super(key: key);
+  const SettingsScreen({Key? key, required this.db}) : super(key: key);
 
   final Database db;
-  final VoidCallback? refreshApp;
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
@@ -186,9 +184,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       ElevatedButton(
                                           onPressed: () async {
                                             await widget.db.logout();
-                                            if (widget.refreshApp != null) {
-                                              widget.refreshApp!();
-                                            }
                                             setState(() {
                                               isLoggedIn = false;
                                             });
@@ -216,9 +211,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             : Auth(
                                 db: widget.db,
                                 onLogin: (e) {
-                                  if (widget.refreshApp != null) {
-                                    widget.refreshApp!();
-                                  }
                                   setState(() {
                                     isLoggedIn = true;
                                     email = e;
