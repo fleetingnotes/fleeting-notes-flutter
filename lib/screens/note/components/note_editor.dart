@@ -207,7 +207,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     if (widget.note.content != contentController.text ||
         widget.note.title != titleController.text ||
         widget.note.source != sourceController.text) {
-      storeUnsavedNote();
+      if (titleController.text.isNotEmpty ||
+          contentController.text.isNotEmpty) {
+        storeUnsavedNote();
+      }
       setState(() {
         hasNewChanges = true;
       });
