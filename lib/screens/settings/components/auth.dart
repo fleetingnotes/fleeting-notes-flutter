@@ -21,8 +21,7 @@ class _AuthState extends State<Auth> {
 
   void onDialogContinue(String email, String password) async {
     Navigator.pop(context);
-    await widget.db.firebase.logoutAllSessions();
-    widget.db.login(email, password);
+    await widget.db.login(email, password);
     widget.db.firebase.analytics.logEvent(name: 'login_dialog_continue');
   }
 
@@ -35,6 +34,7 @@ class _AuthState extends State<Auth> {
   Future<void> onLoginPress(String email, String password) async {
     bool isLoggedIn = await _login(email, password);
     if (isLoggedIn && !await widget.db.firebase.isCurrUserPremium()) {
+      await widget.db.firebase.logoutAllSessions();
       await showDialog(
         context: context,
         barrierDismissible: false,

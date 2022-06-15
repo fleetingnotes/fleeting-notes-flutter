@@ -19,7 +19,6 @@ class MyApp extends StatefulWidget {
 class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   Note? initNote;
   final Database db = Database(firebase: FirebaseDB());
-  late final StreamSubscription userChanges;
   Future<String> navigateScreen() async {
     await db.firebase.userChanges.first;
     return 'main';
@@ -47,7 +46,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   @override
   void dispose() {
     super.dispose();
-    userChanges.cancel();
+    db.firebase.authChangeController.close();
   }
 
   // This widget is the root of your application.
