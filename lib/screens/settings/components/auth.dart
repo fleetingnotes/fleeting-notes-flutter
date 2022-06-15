@@ -144,10 +144,12 @@ class AuthFlow extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
       child: RichText(
         text: TextSpan(children: [
-          TextSpan(text: text),
+          TextSpan(text: text, style: Theme.of(context).textTheme.bodyText1!),
           TextSpan(
             text: linkedText,
-            style: const TextStyle(color: Colors.blue),
+            style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                  color: Colors.blue,
+                ),
             recognizer: TapGestureRecognizer()..onTap = onTap,
           ),
         ]),
