@@ -16,6 +16,7 @@ exports.logout_all_sessions = functions.https.onRequest(async (req, res) => {
 
       try {
         await admin.auth().revokeRefreshTokens(uid);
+        await new Promise(r => setTimeout(r, 200)); // Wait for the token to expire
         return res.sendStatus(200);
       } catch {
         return res.sendStatus(400);
