@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -35,6 +36,14 @@ class _AuthState extends State<Auth> {
     bool isLoggedIn = await _login(email, password);
     if (isLoggedIn && !await widget.db.firebase.isCurrUserPremium()) {
       await widget.db.firebase.logoutAllSessions();
+      try {
+        // refresh user token to tell client to logout
+        await widget.db.firebase.currUser?.getIdToken(true);
+      } on FirebaseAuthException catch (e) {
+        if (e.code != 'user-token-expired') {
+          rethrow;
+        }
+      }
       await showDialog(
         context: context,
         barrierDismissible: false,
