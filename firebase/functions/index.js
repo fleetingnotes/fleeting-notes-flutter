@@ -10,6 +10,7 @@ const bq_notes_export = require('./bq_notes_export');
 
 exports.get_all_notes = get_all_notes.get_all_notes;
 exports.logout_all_sessions = logout_all_sessions.logout_all_sessions;
+exports.new_logout_all_sessions = logout_all_sessions.new_logout_all_sessions;
 exports.rank_sentence_similarity = rank_sentence_similarity.rank_sentence_similarity;
 exports.bq_user_export = bq_user_export.bq_user_export;
 exports.bq_notes_export = bq_notes_export.bq_notes_export;

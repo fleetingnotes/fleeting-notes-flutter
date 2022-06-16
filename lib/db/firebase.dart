@@ -71,7 +71,7 @@ class FirebaseDB implements DatabaseInterface {
     if (currUser == null) return false;
     try {
       await dio.post(
-        'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/logout_all_sessions',
+        'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/new_logout_all_sessions',
         data: {
           'uid': currUser!.uid,
         },
