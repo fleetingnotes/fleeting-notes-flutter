@@ -29,7 +29,9 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
       }
       return res.sendStatus(status);
     };
-    let email = '';
+
+    let email;
+    let password;
     try {
       return cors(req, res, async () => {
         // Authentication requests are POSTed, other requests are forbidden
@@ -37,11 +39,21 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
           return handleResponse(email, 403);
         }
         email = req.body.email;
-        if (!email) {
-          return handleResponse(email, 400);
+        password = req.body.password;
+
+        // tries to read authentication header
+        if (!email || !password) {
+          try {
+            const base64_auth = req.get('authorization').substring(6);
+            const auth = Buffer.from(base64_auth, 'base64').toString().split(':');
+            email = auth[0];
+            password = auth[1];
+          } catch (e) {
+            return handleError(email, e);
+          }
         }
-        const password = req.body.password;
-        if (!password) {
+
+        if (!email || !password) {
           return handleResponse(email, 400);
         }
   
