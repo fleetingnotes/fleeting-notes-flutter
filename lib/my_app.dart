@@ -27,10 +27,8 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
 
   void refreshApp() {
     db.popAllRoutes();
-    setState(() {
-      db.searchKey = GlobalKey();
-      db.noteHistory = {Note.empty(): GlobalKey()};
-    });
+    db.searchKey = GlobalKey();
+    db.noteHistory = {Note.empty(): GlobalKey()};
   }
 
   @override
@@ -58,25 +56,27 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
       urlPathStrategy: UrlPathStrategy.path,
       routes: [
         GoRoute(
-          path: '/',
-          builder: (context, _) => FutureBuilder<String>(
-            future: navigateScreen(),
-            builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-              if (snapshot.hasData) {
-                return MainScreen(
-                  db: db,
-                  initNote: initNote,
-                );
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
-            },
-          ),
-        ),
-        GoRoute(
-          path: '/settings',
-          builder: (context, _) => SettingsScreen(db: db),
-        ),
+            path: '/',
+            builder: (context, _) => FutureBuilder<String>(
+                  future: navigateScreen(),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                    if (snapshot.hasData) {
+                      return MainScreen(
+                        db: db,
+                        initNote: initNote,
+                      );
+                    } else {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                  },
+                ),
+            routes: [
+              GoRoute(
+                path: 'settings',
+                builder: (context, _) => SettingsScreen(db: db),
+              ),
+            ]),
       ],
     );
     return ValueListenableBuilder(
