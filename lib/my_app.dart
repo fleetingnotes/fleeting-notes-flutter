@@ -22,10 +22,9 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   final Database db = Database(firebase: FirebaseDB());
   Future<Note?> navigateScreen(String? noteId) async {
     await db.firebase.userChanges.first;
-    Note? note;
-    if (noteId != null) {
-      note = await db.getNoteById(noteId);
-    }
+    if (noteId == null) return null;
+    Note? note = await db.getNote(noteId);
+    note ??= await db.firebase.getNoteById(noteId);
     return note;
   }
 
@@ -63,6 +62,30 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
             future: navigateScreen(state.queryParams['note']),
             builder: (BuildContext context, AsyncSnapshot<Note?> snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
+                if (!snapshot.hasData &&
+                    state.queryParams['note'] != null &&
+                    state.path == '/') {
+                  Future.delayed(Duration.zero, () {
+                    showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: const Text('Note not found'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('Ok'),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                context.go('/');
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  });
+                }
                 return MainScreen(
                   db: db,
                   initNote:

@@ -214,6 +214,15 @@ class FirebaseDB implements DatabaseInterface {
     return notes.isEmpty;
   }
 
+  Future<Note?> getNoteById(String id) async {
+    var doc = await notesCollection.doc(id).get();
+    if (doc.exists) {
+      return fromQueryDoc(doc);
+    } else {
+      return null;
+    }
+  }
+
   @override
   Future<bool> updateNotes(List<Note> notes) async {
     if (currUser == null) return false;
@@ -253,7 +262,7 @@ class FirebaseDB implements DatabaseInterface {
     return await updateNote(note);
   }
 
-  Note fromQueryDoc(QueryDocumentSnapshot note) {
+  Note fromQueryDoc(DocumentSnapshot note) {
     DateTime dt = (note['created_timestamp'] as Timestamp).toDate();
     return Note(
       id: note.id,
