@@ -11,11 +11,13 @@ import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:fleeting_notes_flutter/database.dart';
+import 'package:path/path.dart' as p;
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
+import 'package:flutter/services.dart';
 
 class NoteEditor extends StatefulWidget {
   const NoteEditor({
@@ -226,6 +228,15 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     widget.db.navigateToSearch('');
   }
 
+  void onCopyUrl() {
+    Clipboard.setData(ClipboardData(
+        text: p.join(Uri.base.toString(), "note", widget.note.id)));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Copied to clipboard'),
+      duration: Duration(seconds: 2),
+    ));
+  }
+
   void onAddAttachment(String filename, Uint8List? bytes) async {
     try {
       String newFileName = '${widget.note.id}/$filename';
@@ -265,6 +276,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                   onDelete: _deleteNote,
                   onSearch: () => onSearchNavigate(context),
                   onAddAttachment: onAddAttachment,
+                  onCopyUrl: onCopyUrl,
                   analytics: widget.db.firebase.analytics,
                 ),
                 const Divider(thickness: 1, height: 1),

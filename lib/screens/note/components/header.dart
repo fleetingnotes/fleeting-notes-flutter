@@ -13,6 +13,7 @@ class Header extends StatelessWidget {
     required this.onDelete,
     required this.onSearch,
     required this.onAddAttachment,
+    required this.onCopyUrl,
     required this.analytics,
     this.title = '',
   }) : super(key: key);
@@ -21,6 +22,7 @@ class Header extends StatelessWidget {
   final Function onAddAttachment;
   final VoidCallback onDelete;
   final VoidCallback onSearch;
+  final VoidCallback onCopyUrl;
   final FirebaseAnalytics analytics;
   final String title;
 
@@ -90,11 +92,30 @@ class Header extends StatelessWidget {
             icon: const Icon(Icons.more_vert),
             itemBuilder: (context) => [
               PopupMenuItem(
-                child: const Text("Add Attachment"),
+                child: const ListTile(
+                  title: Text("Add Attachments"),
+                  leading: Icon(Icons.attach_file),
+                  contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
+                ),
                 onTap: addAttachment,
               ),
               PopupMenuItem(
-                child: const Text("Delete"),
+                child: const ListTile(
+                  title: Text("Copy URL"),
+                  leading: Icon(Icons.link),
+                  contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
+                ),
+                onTap: () {
+                  analytics.logEvent(name: 'click_copy_url');
+                  onCopyUrl();
+                },
+              ),
+              PopupMenuItem(
+                child: const ListTile(
+                  title: Text("Delete"),
+                  leading: Icon(Icons.delete),
+                  contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
+                ),
                 onTap: () {
                   analytics.logEvent(name: 'click_delete_note');
                   onDelete();
