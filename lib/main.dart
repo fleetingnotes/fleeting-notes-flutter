@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:flutter/foundation.dart';
@@ -28,6 +29,7 @@ Future<void> initApp() async {
 }
 
 void main() async {
+  GoRouter.setUrlPathStrategy(UrlPathStrategy.path);
   if (kIsWeb) {
     await initApp();
     runApp(const MyApp());

@@ -20,9 +20,13 @@ class MyApp extends StatefulWidget {
 class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   Note? initNote;
   final Database db = Database(firebase: FirebaseDB());
-  Future<String> navigateScreen() async {
+  Future<Note?> navigateScreen(String? noteId) async {
     await db.firebase.userChanges.first;
-    return 'main';
+    Note? note;
+    if (noteId != null) {
+      note = await db.getNoteById(noteId);
+    }
+    return note;
   }
 
   void refreshApp() {
@@ -52,31 +56,30 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final _router = GoRouter(
-      initialLocation: '/',
-      urlPathStrategy: UrlPathStrategy.path,
       routes: [
         GoRoute(
-            path: '/',
-            builder: (context, _) => FutureBuilder<String>(
-                  future: navigateScreen(),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<String?> snapshot) {
-                    if (snapshot.hasData) {
-                      return MainScreen(
-                        db: db,
-                        initNote: initNote,
-                      );
-                    } else {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  },
-                ),
-            routes: [
-              GoRoute(
-                path: 'settings',
-                builder: (context, _) => SettingsScreen(db: db),
-              ),
-            ]),
+          path: '/',
+          builder: (context, state) => FutureBuilder<Note?>(
+            future: navigateScreen(state.queryParams['note']),
+            builder: (BuildContext context, AsyncSnapshot<Note?> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return MainScreen(
+                  db: db,
+                  initNote:
+                      (snapshot.hasData) ? snapshot.data as Note : initNote,
+                );
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+          routes: [
+            GoRoute(
+              path: 'settings',
+              builder: (context, _) => SettingsScreen(db: db),
+            ),
+          ],
+        ),
       ],
     );
     return ValueListenableBuilder(

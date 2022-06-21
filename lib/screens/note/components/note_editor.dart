@@ -230,7 +230,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   void onCopyUrl() {
     Clipboard.setData(ClipboardData(
-        text: p.join(Uri.base.toString(), "note", widget.note.id)));
+        text: p.join(Uri.base.origin, "?note=${widget.note.id}")));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('Copied to clipboard'),
       duration: Duration(seconds: 2),
