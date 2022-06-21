@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
@@ -52,10 +53,36 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final _router = GoRouter(
+      initialLocation: '/',
+      urlPathStrategy: UrlPathStrategy.path,
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, _) => FutureBuilder<String>(
+            future: navigateScreen(),
+            builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+              if (snapshot.hasData) {
+                return MainScreen(
+                  db: db,
+                  initNote: initNote,
+                );
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, _) => SettingsScreen(db: db),
+        ),
+      ],
+    );
     return ValueListenableBuilder(
         valueListenable: Hive.box('settings').listenable(keys: ['darkMode']),
         builder: (context, Box box, _) {
-          return MaterialApp(
+          return MaterialApp.router(
             title: 'Fleeting Notes',
             debugShowCheckedModeBanner: false,
             theme: lightTheme,
@@ -63,24 +90,9 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
             themeMode: box.get('darkMode', defaultValue: false)
                 ? ThemeMode.dark
                 : ThemeMode.light,
-            initialRoute: '/',
-            routes: {
-              '/': (context) => FutureBuilder<String>(
-                    future: navigateScreen(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<String?> snapshot) {
-                      if (snapshot.hasData) {
-                        return MainScreen(
-                          db: db,
-                          initNote: initNote,
-                        );
-                      } else {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                    },
-                  ),
-              '/settings': (context) => SettingsScreen(db: db),
-            },
+            routeInformationProvider: _router.routeInformationProvider,
+            routeInformationParser: _router.routeInformationParser,
+            routerDelegate: _router.routerDelegate,
           );
         });
   }

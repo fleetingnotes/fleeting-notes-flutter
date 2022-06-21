@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
 
 class SideMenu extends StatelessWidget {
@@ -47,7 +48,7 @@ class SideMenu extends StatelessWidget {
                 title: const Text("Settings"),
                 leading: const Icon(Icons.settings),
                 onTap: () {
-                  Navigator.pushNamed(context, '/settings');
+                  context.push('/settings');
                 },
               ),
             ],
