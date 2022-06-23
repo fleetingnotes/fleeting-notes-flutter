@@ -224,6 +224,8 @@ class FirebaseDB implements DatabaseInterface {
   Future<Note?> getNoteById(String id) async {
     var doc = await notesCollection.doc(id).get();
     if (doc.exists) {
+      Note note = fromQueryDoc(doc);
+      if (note.isDeleted) return null;
       return fromQueryDoc(doc);
     } else {
       return null;
@@ -278,7 +280,10 @@ class FirebaseDB implements DatabaseInterface {
       content: doc["content"].toString(),
       source: doc["source"].toString(),
       partition: doc["_partition"].toString(),
-      isShared: (docContainsString('is_shared')) ? doc.get('is_shared') : false,
+      isDeleted:
+          (docContainsString('_isDeleted')) ? doc.get('_isDeleted') : false,
+      isShareable:
+          (docContainsString('is_shared')) ? doc.get('is_shared') : false,
       timestamp: dt.toIso8601String(),
     );
   }
@@ -292,6 +297,7 @@ class FirebaseDB implements DatabaseInterface {
       'created_timestamp': created,
       '_isDeleted': note.isDeleted,
       '_partition': currUser!.uid,
+      'is_shared': note.isShareable,
     };
   }
 }

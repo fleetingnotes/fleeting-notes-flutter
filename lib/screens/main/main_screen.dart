@@ -10,6 +10,8 @@ import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'components/analytics_dialog.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key, required this.db, this.initNote})
@@ -35,6 +37,25 @@ class _MainScreenState extends State<MainScreen> {
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
     if (!kDebugMode) analyticsDialogWorkflow();
+    if (widget.db.firebase.isSharedNotes && kIsWeb) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        MaterialBanner sharedNotesBanner = MaterialBanner(
+          content:
+              const Text('These are shared notes, edits will not be saved'),
+          actions: [
+            Builder(builder: (context) {
+              return TextButton(
+                onPressed: () {
+                  html.window.location.href = html.window.location.origin;
+                },
+                child: const Text('Your Notes'),
+              );
+            })
+          ],
+        );
+        ScaffoldMessenger.of(context).showMaterialBanner(sharedNotesBanner);
+      });
+    }
   }
 
   void analyticsDialogWorkflow() {

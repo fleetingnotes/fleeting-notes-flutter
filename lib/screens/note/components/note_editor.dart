@@ -38,6 +38,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   List<Note> backlinkNotes = [];
   List<String> linkSuggestions = [];
   bool hasNewChanges = false;
+  bool isNoteShareable = false;
 
   late bool autofocus;
   late TextEditingController titleController;
@@ -48,6 +49,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   void initState() {
     super.initState();
     hasNewChanges = widget.isShared;
+    isNoteShareable = widget.note.isShareable;
     autofocus = widget.note.isEmpty() || widget.isShared;
     titleController = TextEditingController(text: widget.note.title);
     sourceController = TextEditingController(text: widget.note.source);
@@ -149,6 +151,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     updatedNote.source = sourceController.text;
+    updatedNote.isShareable = isNoteShareable;
     if (updatedNote.title.isEmpty && updatedNote.content.isEmpty) return '';
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
@@ -230,9 +233,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   void onCopyUrl() {
     Clipboard.setData(ClipboardData(
-        text: p.join(Uri.base.origin, "?note=${widget.note.id}")));
+        text: p.join(
+            "https://my.fleetingnotes.app/", "?note=${widget.note.id}")));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Copied to clipboard'),
+      content: Text('URL copied to clipboard'),
       duration: Duration(seconds: 2),
     ));
   }
@@ -273,10 +277,21 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
               children: [
                 Header(
                   onSave: (hasNewChanges) ? _saveNote : null,
-                  onDelete: _deleteNote,
+                  onDelete:
+                      (widget.db.firebase.isSharedNotes) ? null : _deleteNote,
                   onSearch: () => onSearchNavigate(context),
                   onAddAttachment: onAddAttachment,
-                  onCopyUrl: onCopyUrl,
+                  onCopyUrl: (widget.db.isLoggedIn() ||
+                          widget.db.firebase.isSharedNotes)
+                      ? onCopyUrl
+                      : null,
+                  onShareChange: (bool isShareable) {
+                    setState(() {
+                      isNoteShareable = isShareable;
+                    });
+                    _saveNote();
+                  },
+                  isNoteShareable: isNoteShareable,
                   analytics: widget.db.firebase.analytics,
                 ),
                 const Divider(thickness: 1, height: 1),
