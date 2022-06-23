@@ -23,6 +23,9 @@ class Note {
   final bool hasAttachment;
   @HiveField(6)
   bool isDeleted;
+  @HiveField(7)
+  bool isShared;
+  final String partition;
   static const String invalidChars = r'\[\]\#\*';
   static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
 
@@ -31,6 +34,8 @@ class Note {
     required this.title,
     required this.content,
     required this.timestamp,
+    this.isShared = false,
+    this.partition = '',
     this.source = '',
     this.isDeleted = false,
     this.hasAttachment = false,

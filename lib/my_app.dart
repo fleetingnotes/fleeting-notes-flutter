@@ -25,10 +25,16 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
     if (noteId == null) return null;
     Note? note = await db.getNote(noteId);
     note ??= await db.firebase.getNoteById(noteId);
+    if (note != null && note.partition.isNotEmpty) {
+      db.firebase.userId = note.partition;
+    }
     return note;
   }
 
-  void refreshApp() {
+  void refreshApp(user) {
+    if (user != null) {
+      db.getAllNotes(forceSync: true);
+    }
     db.popAllRoutes();
     db.searchKey = GlobalKey();
     db.noteHistory = {Note.empty(): GlobalKey()};
@@ -37,7 +43,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    db.firebase.authChangeController.stream.listen((_) => refreshApp());
+    db.firebase.authChangeController.stream.listen(refreshApp);
     if (kIsWeb) {
       setState(() {
         initNote = db.getUnsavedNote();

@@ -38,6 +38,8 @@ class FirebaseDB implements DatabaseInterface {
 
   Stream<User?> get userChanges => FirebaseAuth.instance.userChanges();
 
+  bool get isSharedNotes => userId != 'local' && currUser?.uid != userId;
+
   Future<void> configRemoteConfig() async {
     await remoteConfig.setConfigSettings(RemoteConfigSettings(
       fetchTimeout: const Duration(minutes: 1),
@@ -53,7 +55,7 @@ class FirebaseDB implements DatabaseInterface {
   }
 
   Future<bool> isCurrUserPremium() async {
-    if (currUser == null) return false;
+    if (!isLoggedIn()) return false;
     await currUser!.getIdToken(true);
     var decodedToken = await currUser!.getIdTokenResult();
     Map claims = decodedToken.claims ?? {};
@@ -68,7 +70,7 @@ class FirebaseDB implements DatabaseInterface {
   }
 
   Future<bool> logoutAllSessions() async {
-    if (currUser == null) return false;
+    if (!isLoggedIn()) return false;
     try {
       await dio.post(
         'https://us-central1-fleetingnotes-22f77.cloudfunctions.net/new_logout_all_sessions',
@@ -123,7 +125,11 @@ class FirebaseDB implements DatabaseInterface {
 
   @override
   bool isLoggedIn() {
-    return currUser != null;
+    if (currUser == null || currUser!.uid != userId) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   @override
@@ -190,13 +196,14 @@ class FirebaseDB implements DatabaseInterface {
   Future<bool> insertNote(Note note) async => await updateNote(note);
 
   @override
-  Future<List<Note>> getAllNotes({int? limit}) async {
-    if (currUser == null) return [];
+  Future<List<Note>> getAllNotes({int? limit, bool isShared = false}) async {
     try {
       var query = notesCollection
-          .where('_partition', isEqualTo: currUser!.uid)
+          .where('_partition', isEqualTo: userId)
           .where('_isDeleted', isNotEqualTo: true);
-
+      if (isShared) {
+        query = query.where('is_shared', isEqualTo: true);
+      }
       if (limit != null) {
         query = query.limit(limit);
       }
@@ -225,7 +232,7 @@ class FirebaseDB implements DatabaseInterface {
 
   @override
   Future<bool> updateNotes(List<Note> notes) async {
-    if (currUser == null) return false;
+    if (!isLoggedIn()) return false;
     try {
       WriteBatch batch = FirebaseFirestore.instance.batch();
       for (var note in notes) {
@@ -240,7 +247,7 @@ class FirebaseDB implements DatabaseInterface {
 
   @override
   Future<bool> updateNote(Note note, {WriteBatch? batch}) async {
-    if (currUser == null) return false;
+    if (!isLoggedIn()) return false;
     try {
       var json = toFirebaseJson(note);
       json['last_modified_timestamp'] = Timestamp.now();
@@ -262,13 +269,16 @@ class FirebaseDB implements DatabaseInterface {
     return await updateNote(note);
   }
 
-  Note fromQueryDoc(DocumentSnapshot note) {
-    DateTime dt = (note['created_timestamp'] as Timestamp).toDate();
+  Note fromQueryDoc(DocumentSnapshot doc) {
+    bool docContainsString(String str) => doc.data().toString().contains(str);
+    DateTime dt = (doc['created_timestamp'] as Timestamp).toDate();
     return Note(
-      id: note.id,
-      title: note["title"].toString(),
-      content: note["content"].toString(),
-      source: note["source"].toString(),
+      id: doc.id,
+      title: doc["title"].toString(),
+      content: doc["content"].toString(),
+      source: doc["source"].toString(),
+      partition: doc["_partition"].toString(),
+      isShared: (docContainsString('is_shared')) ? doc.get('is_shared') : false,
       timestamp: dt.toIso8601String(),
     );
   }
