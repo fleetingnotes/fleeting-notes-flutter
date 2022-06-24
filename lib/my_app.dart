@@ -20,16 +20,6 @@ class MyApp extends StatefulWidget {
 class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   Note? initNote;
   final Database db = Database(firebase: FirebaseDB());
-  Future<Note?> navigateScreen(String? noteId) async {
-    await db.firebase.userChanges.first;
-    if (noteId == null) return null;
-    Note? note = await db.getNote(noteId);
-    note ??= await db.firebase.getNoteById(noteId);
-    if (note != null && note.partition.isNotEmpty) {
-      db.firebase.userId = note.partition;
-    }
-    return note;
-  }
 
   void refreshApp(user) {
     if (user != null) {
@@ -64,43 +54,10 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
       routes: [
         GoRoute(
           path: '/',
-          builder: (context, state) => FutureBuilder<Note?>(
-            future: navigateScreen(state.queryParams['note']),
-            builder: (BuildContext context, AsyncSnapshot<Note?> snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (!snapshot.hasData &&
-                    state.queryParams['note'] != null &&
-                    state.path == '/') {
-                  Future.delayed(Duration.zero, () {
-                    showDialog(
-                      barrierDismissible: false,
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          content: const Text('Note not found'),
-                          actions: <Widget>[
-                            TextButton(
-                              child: const Text('Ok'),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                context.go('/');
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  });
-                }
-                return MainScreen(
-                  db: db,
-                  initNote:
-                      (snapshot.hasData) ? snapshot.data as Note : initNote,
-                );
-              } else {
-                return const Center(child: CircularProgressIndicator());
-              }
-            },
+          builder: (context, state) => LoadMainScreen(
+            db: db,
+            initNote: initNote,
+            state: state,
           ),
           routes: [
             GoRoute(
@@ -127,5 +84,84 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
             routerDelegate: _router.routerDelegate,
           );
         });
+  }
+}
+
+class LoadMainScreen extends StatefulWidget {
+  const LoadMainScreen({
+    Key? key,
+    required this.db,
+    required this.initNote,
+    required this.state,
+  }) : super(key: key);
+
+  final Database db;
+  final Note? initNote;
+  final GoRouterState state;
+
+  @override
+  State<LoadMainScreen> createState() => _LoadMainScreenState();
+}
+
+class _LoadMainScreenState extends State<LoadMainScreen> {
+  late final Future<Note?> loadFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    loadFuture = navigateScreen(Uri.base.queryParameters['note']);
+  }
+
+  Future<Note?> navigateScreen(String? noteId) async {
+    await widget.db.firebase.userChanges.first;
+    if (noteId == null) return null;
+    Note? note = await widget.db.getNote(noteId);
+    note ??= await widget.db.firebase.getNoteById(noteId);
+    if (note != null && note.partition.isNotEmpty) {
+      widget.db.firebase.userId = note.partition;
+    }
+    return note;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Note?>(
+      future: loadFuture,
+      builder: (BuildContext context, AsyncSnapshot<Note?> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (!snapshot.hasData &&
+              widget.state.queryParams['note'] != null &&
+              widget.state.path == '/') {
+            Future.delayed(Duration.zero, () {
+              showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    content: const Text('Note not found'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Ok'),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          context.go('/');
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            });
+          }
+          return MainScreen(
+            db: widget.db,
+            initNote:
+                (snapshot.hasData) ? snapshot.data as Note : widget.initNote,
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
   }
 }
