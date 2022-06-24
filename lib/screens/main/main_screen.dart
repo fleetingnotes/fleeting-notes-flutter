@@ -46,6 +46,8 @@ class _MainScreenState extends State<MainScreen> {
             Builder(builder: (context) {
               return TextButton(
                 onPressed: () {
+                  widget.db.firebase.analytics
+                      .logEvent(name: 'shared_notes_banner_clicked');
                   html.window.location.href = html.window.location.origin;
                 },
                 child: const Text('Your Notes'),
