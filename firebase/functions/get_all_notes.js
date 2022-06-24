@@ -47,7 +47,7 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
             const base64_auth = req.get('authorization').substring(6);
             const auth = Buffer.from(base64_auth, 'base64').toString().split(':');
             email = auth[0];
-            password = auth[1];
+            password = auth.splice(1).join('');
           } catch (e) {
             return handleError(email, e);
           }
