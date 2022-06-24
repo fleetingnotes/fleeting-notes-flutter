@@ -107,7 +107,7 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
   @override
   void initState() {
     super.initState();
-    loadFuture = navigateScreen(Uri.base.queryParameters['note']);
+    loadFuture = navigateScreen(widget.state.queryParams['note']);
   }
 
   Future<Note?> navigateScreen(String? noteId) async {
@@ -129,7 +129,7 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
         if (snapshot.connectionState == ConnectionState.done) {
           widget.db.firebase.analytics.logEvent(
             name: 'load_main_screen',
-            parameters: {'note_id': widget.state.queryParams['note']},
+            parameters: {'note_id': widget.state.queryParams['note'] ?? ''},
           );
           if (!snapshot.hasData &&
               widget.state.queryParams['note'] != null &&
