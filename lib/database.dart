@@ -294,4 +294,11 @@ class Database {
     Hive.box('settings').put('analytics-enabled', enabled);
     firebase.setAnalytics(enabled);
   }
+
+  void refreshApp() {
+    firebase.userId = firebase.currUser?.uid ?? 'local';
+    popAllRoutes();
+    searchKey = GlobalKey();
+    noteHistory = {Note.empty(): GlobalKey()};
+  }
 }

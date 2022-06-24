@@ -25,9 +25,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
     if (user != null) {
       db.getAllNotes(forceSync: true);
     }
-    db.popAllRoutes();
-    db.searchKey = GlobalKey();
-    db.noteHistory = {Note.empty(): GlobalKey()};
+    db.refreshApp();
   }
 
   @override
