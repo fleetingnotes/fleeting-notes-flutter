@@ -20,9 +20,10 @@ class Note {
   @HiveField(4)
   String source;
   @HiveField(5)
-  final bool hasAttachment;
-  @HiveField(6)
   bool isDeleted;
+  @HiveField(6)
+  bool isShareable;
+  final String partition;
   static const String invalidChars = r'\[\]\#\*';
   static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
 
@@ -31,9 +32,10 @@ class Note {
     required this.title,
     required this.content,
     required this.timestamp,
+    this.isShareable = false,
+    this.partition = '',
     this.source = '',
     this.isDeleted = false,
-    this.hasAttachment = false,
   });
 
   static Note empty(
@@ -47,7 +49,6 @@ class Note {
       source: source,
       timestamp: dateStr,
       isDeleted: false,
-      hasAttachment: false,
     );
   }
 
@@ -80,7 +81,6 @@ class Note {
       source: jsonEncode(note.source),
       timestamp: jsonEncode(note.timestamp),
       isDeleted: note.isDeleted,
-      hasAttachment: note.hasAttachment,
     );
   }
 

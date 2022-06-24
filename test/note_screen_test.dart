@@ -23,6 +23,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
@@ -35,6 +36,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: 'backlink note')]));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
@@ -48,6 +50,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -74,6 +77,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -102,6 +106,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.upsertNote(any()))
@@ -121,6 +126,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.deleteNote(any()))
@@ -138,6 +144,7 @@ void main() {
     tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     mockDb.noteHistory = {Note.empty(title: 'hello'): GlobalKey()};
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: '[[hello]]')]));
@@ -160,6 +167,7 @@ void main() {
       (WidgetTester tester) async {
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: '[[hello]]')]));
     when(() => mockDb.upsertNote(any()))

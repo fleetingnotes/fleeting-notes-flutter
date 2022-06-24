@@ -21,9 +21,9 @@ class NoteAdapter extends TypeAdapter<Note> {
       title: fields[2] as String,
       content: fields[3] as String,
       timestamp: fields[1] as String,
+      isShareable: fields[6] as bool,
       source: fields[4] as String,
-      isDeleted: fields[6] as bool,
-      hasAttachment: fields[5] as bool,
+      isDeleted: fields[5] as bool,
     );
   }
 
@@ -42,9 +42,9 @@ class NoteAdapter extends TypeAdapter<Note> {
       ..writeByte(4)
       ..write(obj.source)
       ..writeByte(5)
-      ..write(obj.hasAttachment)
+      ..write(obj.isDeleted)
       ..writeByte(6)
-      ..write(obj.isDeleted);
+      ..write(obj.isShareable);
   }
 
   @override

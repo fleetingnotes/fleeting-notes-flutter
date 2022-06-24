@@ -9,6 +9,7 @@ import 'package:fleeting_notes_flutter/responsive.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:go_router/go_router.dart';
 import 'components/analytics_dialog.dart';
 
 class MainScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   FocusNode searchFocusNode = FocusNode();
   late bool hasInitNote;
+  bool bannerExists = false;
   @override
   void initState() {
     super.initState();
@@ -35,6 +37,31 @@ class _MainScreenState extends State<MainScreen> {
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
     if (!kDebugMode) analyticsDialogWorkflow();
+    if (widget.db.firebase.isSharedNotes && !bannerExists) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        MaterialBanner sharedNotesBanner = MaterialBanner(
+          content:
+              const Text('These are shared notes, edits will not be saved'),
+          actions: [
+            Builder(builder: (context) {
+              return TextButton(
+                onPressed: () {
+                  widget.db.firebase.analytics
+                      .logEvent(name: 'shared_notes_banner_clicked');
+                  ScaffoldMessenger.of(context).removeCurrentMaterialBanner();
+                  bannerExists = false;
+                  widget.db.refreshApp();
+                  context.go('/');
+                },
+                child: const Text('Your Notes'),
+              );
+            })
+          ],
+        );
+        ScaffoldMessenger.of(context).showMaterialBanner(sharedNotesBanner);
+        bannerExists = true;
+      });
+    }
   }
 
   void analyticsDialogWorkflow() {

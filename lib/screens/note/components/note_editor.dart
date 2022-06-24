@@ -11,11 +11,13 @@ import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:fleeting_notes_flutter/database.dart';
+import 'package:path/path.dart' as p;
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
+import 'package:flutter/services.dart';
 
 class NoteEditor extends StatefulWidget {
   const NoteEditor({
@@ -36,6 +38,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   List<Note> backlinkNotes = [];
   List<String> linkSuggestions = [];
   bool hasNewChanges = false;
+  bool isNoteShareable = false;
 
   late bool autofocus;
   late TextEditingController titleController;
@@ -46,6 +49,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   void initState() {
     super.initState();
     hasNewChanges = widget.isShared;
+    isNoteShareable = widget.note.isShareable;
     autofocus = widget.note.isEmpty() || widget.isShared;
     titleController = TextEditingController(text: widget.note.title);
     sourceController = TextEditingController(text: widget.note.source);
@@ -147,6 +151,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     updatedNote.source = sourceController.text;
+    updatedNote.isShareable = isNoteShareable;
     if (updatedNote.title.isEmpty && updatedNote.content.isEmpty) return '';
     String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
     if (errMessage == '') {
@@ -226,6 +231,16 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     widget.db.navigateToSearch('');
   }
 
+  void onCopyUrl() {
+    Clipboard.setData(ClipboardData(
+        text: p.join(
+            "https://my.fleetingnotes.app/", "?note=${widget.note.id}")));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('URL copied to clipboard'),
+      duration: Duration(seconds: 2),
+    ));
+  }
+
   void onAddAttachment(String filename, Uint8List? bytes) async {
     try {
       String newFileName = '${widget.note.id}/$filename';
@@ -262,9 +277,21 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
               children: [
                 Header(
                   onSave: (hasNewChanges) ? _saveNote : null,
-                  onDelete: _deleteNote,
+                  onDelete:
+                      (widget.db.firebase.isSharedNotes) ? null : _deleteNote,
                   onSearch: () => onSearchNavigate(context),
                   onAddAttachment: onAddAttachment,
+                  onCopyUrl: (widget.db.isLoggedIn() ||
+                          widget.db.firebase.isSharedNotes)
+                      ? onCopyUrl
+                      : null,
+                  onShareChange: (bool isShareable) {
+                    setState(() {
+                      isNoteShareable = isShareable;
+                    });
+                    _saveNote();
+                  },
+                  isNoteShareable: isNoteShareable,
                   analytics: widget.db.firebase.analytics,
                 ),
                 const Divider(thickness: 1, height: 1),

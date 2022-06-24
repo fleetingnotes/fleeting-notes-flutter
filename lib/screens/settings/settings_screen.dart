@@ -7,6 +7,7 @@ import 'package:file_saver/file_saver.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key, required this.db}) : super(key: key);
@@ -81,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () {
-                      Navigator.pop(context);
+                      context.pop();
                     },
                   ),
                   const Expanded(

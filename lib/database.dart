@@ -44,8 +44,10 @@ class Database {
   Future<List<Note>> getAllNotes({forceSync = false}) async {
     try {
       var box = await Hive.openBox(firebase.userId);
-      if ((box.isEmpty || forceSync) && isLoggedIn()) {
-        List<Note> notes = await firebase.getAllNotes();
+      if (((box.isEmpty || forceSync) &&
+          (isLoggedIn() || firebase.isSharedNotes))) {
+        List<Note> notes =
+            await firebase.getAllNotes(isShared: firebase.isSharedNotes);
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         // box.clear(); // TODO: investigate why this causes bugs
         await box.putAll(noteIdMap);
@@ -179,6 +181,10 @@ class Database {
   }
 
   Future<void> logout() async {
+    if (firebase.userId != 'local') {
+      var box = await Hive.openBox(firebase.userId);
+      box.clear();
+    }
     await firebase.logout();
   }
 
@@ -287,5 +293,12 @@ class Database {
   void setAnalyticsEnabled(enabled) {
     Hive.box('settings').put('analytics-enabled', enabled);
     firebase.setAnalytics(enabled);
+  }
+
+  void refreshApp() {
+    firebase.userId = firebase.currUser?.uid ?? 'local';
+    popAllRoutes();
+    searchKey = GlobalKey();
+    noteHistory = {Note.empty(): GlobalKey()};
   }
 }
