@@ -21,9 +21,9 @@ class NoteAdapter extends TypeAdapter<Note> {
       title: fields[2] as String,
       content: fields[3] as String,
       timestamp: fields[1] as String,
-      isShareable: fields[6] as bool,
+      isShareable: fields[7] == null ? false : fields[7] as bool,
       source: fields[4] as String,
-      isDeleted: fields[5] as bool,
+      isDeleted: fields[6] as bool,
     );
   }
 
@@ -41,9 +41,9 @@ class NoteAdapter extends TypeAdapter<Note> {
       ..write(obj.content)
       ..writeByte(4)
       ..write(obj.source)
-      ..writeByte(5)
-      ..write(obj.isDeleted)
       ..writeByte(6)
+      ..write(obj.isDeleted)
+      ..writeByte(7)
       ..write(obj.isShareable);
   }
 

@@ -19,9 +19,9 @@ class Note {
   String content;
   @HiveField(4)
   String source;
-  @HiveField(5)
-  bool isDeleted;
   @HiveField(6)
+  bool isDeleted;
+  @HiveField(7, defaultValue: false)
   bool isShareable;
   final String partition;
   static const String invalidChars = r'\[\]\#\*';
