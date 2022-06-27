@@ -49,6 +49,12 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final _router = GoRouter(
+      redirect: (state) {
+        if (state.subloc == '/' || state.subloc == '/settings') {
+          return null;
+        }
+        return '/';
+      },
       routes: [
         GoRoute(
           path: '/',
