@@ -5,7 +5,7 @@ set -e
 #Build the web version of the flutter app
 echo "Building flutter app for web extension"
 rm -rf build/web build/web-app
-flutter build web --release
+flutter build web --release --web-renderer=html
 mv build/web build/web-app
 echo "Finished building flutter app"
 
