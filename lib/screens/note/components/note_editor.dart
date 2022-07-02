@@ -121,7 +121,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
         await widget.db.titleExists(widget.note.id, titleController.text);
 
     if (invalidMatch != null) {
-      errMessage = 'Title cannot contain [, ], #, *';
+      errMessage = r'Title cannot contain [, ], #, *, :, ^, \, /';
       titleController.text = widget.note.title;
     } else if (titleExists) {
       errMessage = 'Title `${titleController.text}` already exists';

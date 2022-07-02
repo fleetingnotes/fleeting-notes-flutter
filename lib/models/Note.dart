@@ -24,7 +24,7 @@ class Note {
   @HiveField(7, defaultValue: false)
   bool isShareable;
   final String partition;
-  static const String invalidChars = r'\[\]\#\*';
+  static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
 
   Note({
