@@ -44,8 +44,8 @@ class Database {
   Future<List<Note>> getAllNotes({forceSync = false}) async {
     try {
       var box = await Hive.openBox(firebase.userId);
-      if (((box.isEmpty || forceSync) &&
-          (isLoggedIn() || firebase.isSharedNotes))) {
+      if ((((box.isEmpty || forceSync) && isLoggedIn()) ||
+          firebase.isSharedNotes)) {
         List<Note> notes =
             await firebase.getAllNotes(isShared: firebase.isSharedNotes);
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
