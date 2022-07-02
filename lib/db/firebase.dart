@@ -19,6 +19,7 @@ class FirebaseDB implements DatabaseInterface {
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
   final Dio dio = Dio();
   User? currUser;
   StreamController<User?> authChangeController = StreamController<User?>();
@@ -36,7 +37,7 @@ class FirebaseDB implements DatabaseInterface {
     notesCollection = FirebaseFirestore.instance.collection('notes');
   }
 
-  Stream<User?> get userChanges => FirebaseAuth.instance.userChanges();
+  Stream<User?> get userChanges => auth.userChanges();
 
   bool get isSharedNotes => userId != 'local' && currUser?.uid != userId;
 
@@ -135,8 +136,8 @@ class FirebaseDB implements DatabaseInterface {
   @override
   Future<bool> login(String email, String password) async {
     try {
-      UserCredential credentials = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+      UserCredential credentials = await auth.signInWithEmailAndPassword(
+          email: email, password: password);
       currUser = credentials.user;
       authChangeController.add(currUser);
       userId = (credentials.user == null) ? 'local' : credentials.user!.uid;
@@ -157,7 +158,7 @@ class FirebaseDB implements DatabaseInterface {
   @override
   Future<bool> register(String email, String password) async {
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      await auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -180,7 +181,7 @@ class FirebaseDB implements DatabaseInterface {
   @override
   Future<bool> logout() async {
     try {
-      await FirebaseAuth.instance.signOut();
+      await auth.signOut();
       await analytics.logEvent(name: 'sign_out', parameters: {
         'method': 'firebase',
       });
