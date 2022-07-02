@@ -257,6 +257,7 @@ class _ContentFieldState extends State<ContentField> {
       child: LayoutBuilder(builder: (context, size) {
         return TextField(
           focusNode: contentFocusNode,
+          textCapitalization: TextCapitalization.sentences,
           autofocus: widget.autofocus,
           controller: widget.controller,
           minLines: 5,
