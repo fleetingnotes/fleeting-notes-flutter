@@ -374,9 +374,10 @@ class _RecoverPasswordDialogState extends State<RecoverPasswordDialog> {
             } on FirebaseAuthException catch (e) {
               setState(() {
                 if (e.code == 'user-not-found') {
-                  errMessage = 'Email not found';
+                  errMessage =
+                      "The email address doesn't match an existing account";
                 } else if (e.code == 'invalid-email') {
-                  errMessage = 'Invalid email';
+                  errMessage = "The email address isn't correct";
                 } else {
                   errMessage = 'Password reset failed';
                 }
