@@ -129,6 +129,7 @@ class _AuthState extends State<Auth> {
               EmailForm(
                 action: _authAction,
                 onSubmit: onSubmit,
+                onResetPassword: widget.db.firebase.auth.sendPasswordResetEmail,
               ),
             ],
           );
@@ -172,10 +173,12 @@ class EmailForm extends StatefulWidget {
     Key? key,
     required this.action,
     required this.onSubmit,
+    required this.onResetPassword,
   }) : super(key: key);
 
   final AuthAction action;
   final Function onSubmit;
+  final Function onResetPassword;
 
   @override
   State<EmailForm> createState() => _EmailFormState();
@@ -282,8 +285,108 @@ class _EmailFormState extends State<EmailForm> {
               child: (widget.action == AuthAction.signUp)
                   ? const Text('Register', style: TextStyle(fontSize: 15))
                   : const Text('Sign in', style: TextStyle(fontSize: 15))),
+          if (widget.action == AuthAction.signIn) const SizedBox(height: 10),
+          if (widget.action == AuthAction.signIn)
+            TextButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (_) {
+                        return RecoverPasswordDialog(
+                          email: email,
+                          onResetPassword: widget.onResetPassword,
+                        );
+                      });
+                },
+                child: const Text('Trouble signing in?')),
         ],
       ),
+    );
+  }
+}
+
+class RecoverPasswordDialog extends StatefulWidget {
+  const RecoverPasswordDialog({
+    Key? key,
+    required this.email,
+    required this.onResetPassword,
+  }) : super(key: key);
+
+  final String email;
+  final Function onResetPassword;
+
+  @override
+  State<RecoverPasswordDialog> createState() => _RecoverPasswordDialogState();
+}
+
+class _RecoverPasswordDialogState extends State<RecoverPasswordDialog> {
+  String errMessage = '';
+  final TextEditingController _emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    _emailController.text = widget.email;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Recover Password'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+              'Get instructions sent to this email that explain how to reset your password'),
+          const SizedBox(height: 30),
+          Form(
+            key: _formKey,
+            child: TextFormField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+              validator: (_) {
+                if (errMessage.isEmpty) {
+                  return null;
+                }
+                return errMessage;
+              },
+            ),
+          )
+        ],
+      ),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        ElevatedButton(
+          child: const Text('Send'),
+          onPressed: () async {
+            try {
+              await widget.onResetPassword(email: _emailController.text);
+              Navigator.of(context).pop();
+            } on FirebaseAuthException catch (e) {
+              setState(() {
+                if (e.code == 'user-not-found') {
+                  errMessage =
+                      "The email address doesn't match an existing account";
+                } else if (e.code == 'invalid-email') {
+                  errMessage = "The email address isn't correct";
+                } else {
+                  errMessage = 'Password reset failed';
+                }
+              });
+              _formKey.currentState!.validate();
+            }
+          },
+        )
+      ],
     );
   }
 }

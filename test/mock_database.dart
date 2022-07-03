@@ -14,11 +14,15 @@ class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
 
 class MockRemoteConfig extends Mock implements FirebaseRemoteConfig {}
 
+class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
 class MockFirebaseDB extends Mock implements FirebaseDB {
   @override
   FirebaseAnalytics analytics = MockFirebaseAnalytics();
   @override
   FirebaseRemoteConfig remoteConfig = MockRemoteConfig();
+  @override
+  FirebaseAuth auth = MockFirebaseAuth();
   @override
   Stream<User?> get userChanges => const Stream.empty();
   @override
