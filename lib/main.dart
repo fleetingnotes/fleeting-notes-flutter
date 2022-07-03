@@ -36,10 +36,11 @@ void main() async {
   } else {
     runZonedGuarded<Future<void>>(() async {
       await initApp();
-      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
       runApp(const MyApp());
     },
-        (error, stack) =>
-            FirebaseCrashlytics.instance.recordError(error, stack));
+        (error, stack) => FirebaseCrashlytics.instance
+            .recordError(error, stack, fatal: true));
   }
 }
