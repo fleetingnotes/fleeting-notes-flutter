@@ -1,7 +1,7 @@
 {
     "name": "Fleeting Notes",
     "description": "A scratchpad for connected notes",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "content_security_policy": {
       "extension_pages": "script-src 'self' ; object-src 'self'"
     },
