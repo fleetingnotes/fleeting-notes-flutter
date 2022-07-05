@@ -1,9 +1,10 @@
 // ignore_for_file: file_names
 import 'dart:convert';
-
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import "package:yaml/yaml.dart";
 
 part 'Note.g.dart';
 
@@ -84,6 +85,30 @@ class Note {
     );
   }
 
+  static newNoteFromFile(String title, String content) {
+    // parse frontmatter of content
+    var frontmatter = {};
+    var match = RegExp(r'^---\n([\s\S]*?)\n---\n').firstMatch(content);
+    if (match != null) {
+      try {
+        frontmatter = loadYaml(match.group(1) ?? '');
+        content = content.replaceFirst(match.group(0) ?? '', '');
+      } catch (e) {
+        debugPrint('Error parsing frontmatter: $e');
+      }
+    }
+
+    return Note.empty(
+      title: (frontmatter.containsKey('title'))
+          ? frontmatter['title'].toString()
+          : title,
+      content: content,
+      source: (frontmatter.containsKey('source'))
+          ? frontmatter['source'].toString()
+          : '',
+    );
+  }
+
   bool isEmpty() {
     return title == '' && content == '' && source == '';
   }
@@ -122,20 +147,17 @@ class Note {
   }
 
   String getMarkdownFilename() {
-    String mdTime =
-        "${timestamp.replaceFirst(':', 'h').replaceFirst(':', 'm')}s";
-    return (title.isEmpty) ? "$mdTime.md" : "$title.md";
+    return (title.isEmpty) ? "$id.md" : "$title.md";
   }
 
   String getMarkdownContent() {
     String frontmatter = """---
-id: $id
-title: ${getMarkdownFilename().replaceFirst('.md', '')}
-date: ${timestamp.substring(0, 10)}
+id: "$id"
+title: "$title"
+source: "$source"
+created: "$timestamp"
 ---\n""";
     String mdContent = frontmatter + content;
-    mdContent =
-        (source.isEmpty) ? mdContent : mdContent + "\n\n---\n\n" + source;
     return mdContent;
   }
 }

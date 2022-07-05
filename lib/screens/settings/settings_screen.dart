@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
@@ -18,7 +19,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  String exportOption = 'Markdown';
+  String backupOption = 'Markdown';
   String email = '';
   bool isLoggedIn = false;
 
@@ -68,6 +69,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {}); // refresh settings screen
   }
 
+  void onExportPress() async {
+    List<Note> notes = await widget.db.getAllNotes();
+    if (backupOption == 'Markdown') {
+      _downloadNotesAsMarkdownZIP(notes);
+    } else {
+      _downloadNotesAsJSON(notes);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Exported ${notes.length} notes'),
+      duration: const Duration(seconds: 2),
+    ));
+    widget.db.firebase.analytics.logEvent(name: 'export_notes', parameters: {
+      'file_type': backupOption,
+    });
+  }
+
+  void onImportPress() async {
+    await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              title: const Text('Import Notes Notice'),
+              content: const Text(
+                  'Importing notes with duplicate or invalid titles will be skipped'),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('OK'))
+              ],
+            ));
+    widget.db.firebase.analytics.logEvent(name: 'click_import_notes');
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      withData: true,
+      allowMultiple: true,
+      allowedExtensions: ['md'],
+      type: FileType.custom,
+    );
+    List<Note> notes = [];
+    if (result != null) {
+      for (var file in result.files) {
+        var title = file.name.replaceFirst(r'.md$', '');
+        var content = String.fromCharCodes(file.bytes!);
+        // checks if title is invalid
+        if (RegExp('[${Note.invalidChars}]').firstMatch(title) != null ||
+            await widget.db.getNoteByTitle(title) != null) {
+          continue;
+        }
+        var note = Note.newNoteFromFile(title, content);
+        notes.add(note);
+      }
+    }
+    await widget.db.updateNotes(notes);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Imported ${notes.length} notes'),
+      duration: const Duration(seconds: 2),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,7 +142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () {
-                      context.pop();
+                      context.go('/');
                     },
                   ),
                   const Expanded(
@@ -121,8 +181,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SizedBox(
                             height:
                                 Theme.of(context).custom.kDefaultPadding / 2),
-                        const Text("Export Notes",
-                            style: TextStyle(fontSize: 12)),
+                        const Text("Backup", style: TextStyle(fontSize: 12)),
                         const Divider(thickness: 1, height: 1),
                         Padding(
                           padding: EdgeInsets.all(
@@ -130,10 +189,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Row(children: [
                             DropdownButton(
                               underline: const SizedBox(),
-                              value: exportOption,
+                              value: backupOption,
                               onChanged: (String? newValue) {
                                 setState(() {
-                                  exportOption = newValue!;
+                                  backupOption = newValue!;
                                 });
                               },
                               items: const [
@@ -149,20 +208,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             const Spacer(),
                             ElevatedButton(
-                                onPressed: () async {
-                                  List<Note> notes =
-                                      await widget.db.getAllNotes();
-                                  if (exportOption == 'Markdown') {
-                                    _downloadNotesAsMarkdownZIP(notes);
-                                  } else {
-                                    _downloadNotesAsJSON(notes);
-                                  }
-                                  widget.db.firebase.analytics.logEvent(
-                                      name: 'export_notes',
-                                      parameters: {
-                                        'file_type': exportOption,
-                                      });
-                                },
+                                onPressed: (backupOption) == 'Markdown'
+                                    ? onImportPress
+                                    : null,
+                                child: const Text('Import')),
+                            const SizedBox(width: 5),
+                            ElevatedButton(
+                                onPressed: onExportPress,
                                 child: const Text('Export')),
                           ]),
                         ),
