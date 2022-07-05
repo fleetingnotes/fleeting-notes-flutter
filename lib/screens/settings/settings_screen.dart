@@ -112,12 +112,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       for (var file in result.files) {
         var title = file.name.replaceFirst(r'.md$', '');
         var content = String.fromCharCodes(file.bytes!);
+        var note = Note.newNoteFromFile(title, content);
         // checks if title is invalid
-        if (RegExp('[${Note.invalidChars}]').firstMatch(title) != null ||
-            await widget.db.getNoteByTitle(title) != null) {
+        if (RegExp('[${Note.invalidChars}]').firstMatch(note.title) != null ||
+            (await widget.db.getNoteByTitle(note.title)) != null) {
           continue;
         }
-        var note = Note.newNoteFromFile(title, content);
         notes.add(note);
       }
     }
