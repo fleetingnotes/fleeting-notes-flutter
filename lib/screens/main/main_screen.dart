@@ -38,7 +38,9 @@ class _MainScreenState extends State<MainScreen> {
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
     if (!kDebugMode) analyticsDialogWorkflow();
-    if (widget.db.isFirstTimeOpen() && !widget.db.isLoggedIn()) {
+    if (!widget.db.isLoggedIn() &&
+        !widget.db.firebase.isSharedNotes &&
+        widget.db.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
             context: context,
