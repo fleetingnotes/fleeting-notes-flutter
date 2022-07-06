@@ -279,21 +279,38 @@ class Database {
     }
   }
 
+  // Settings
+  Future<void> setSettings(String key, dynamic value) async {
+    await Hive.box('settings').put(key, value);
+  }
+
+  dynamic getSettings(String key) {
+    return Hive.box('settings').get(key);
+  }
+
   Future<void> setFillSource(bool autoFillEnabled) async {
-    await Hive.box('settings').put('auto-fill-source', autoFillEnabled);
+    await setSettings('auto-fill-source', autoFillEnabled);
   }
 
   bool fillSource() {
-    return Hive.box('settings').get('auto-fill-source') ?? false;
+    return getSettings('auto-fill-source') ?? false;
   }
 
   bool? getAnalyticsEnabled() {
-    return Hive.box('settings').get('analytics-enabled');
+    return getSettings('analytics-enabled');
   }
 
-  void setAnalyticsEnabled(enabled) {
-    Hive.box('settings').put('analytics-enabled', enabled);
+  Future<void> setAnalyticsEnabled(enabled) async {
+    await setSettings('analytics-enabled', enabled);
     firebase.setAnalytics(enabled);
+  }
+
+  bool isFirstTimeOpen() {
+    bool isFirstTimeOpen = getSettings('first-time-open') ?? true;
+    if (isFirstTimeOpen) {
+      setSettings('first-time-open', false);
+    }
+    return isFirstTimeOpen;
   }
 
   void refreshApp() {

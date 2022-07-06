@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,27 @@ class _MainScreenState extends State<MainScreen> {
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
     if (!kDebugMode) analyticsDialogWorkflow();
+    if (widget.db.isFirstTimeOpen() && !widget.db.isLoggedIn()) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                title: const Text('Register / Sign In'),
+                content: Auth(
+                  db: widget.db,
+                  onLogin: (_) async {
+                    await widget.db.getAllNotes(forceSync: true);
+                    Navigator.pop(context);
+                    // wait to make sure the user is logged in
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      setState(() {
+                        widget.db.refreshApp();
+                      });
+                    });
+                  },
+                )));
+      });
+    }
     if (widget.db.firebase.isSharedNotes && !bannerExists) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         MaterialBanner sharedNotesBanner = MaterialBanner(

@@ -118,4 +118,9 @@ class MockDatabase extends Mock implements Database {
   bool? getAnalyticsEnabled() {
     return true;
   }
+
+  @override
+  bool isFirstTimeOpen() {
+    return false;
+  }
 }
