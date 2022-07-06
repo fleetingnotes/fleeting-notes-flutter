@@ -18,7 +18,7 @@ class Auth extends StatefulWidget {
 
 class _AuthState extends State<Auth> {
   bool isLoading = false;
-  AuthAction _authAction = AuthAction.signIn;
+  AuthAction _authAction = AuthAction.signUp;
 
   void onDialogContinue(String email, String password) async {
     Navigator.pop(context);
@@ -97,42 +97,51 @@ class _AuthState extends State<Auth> {
     });
   }
 
+  List<Widget> getColumnChildren() {
+    if (isLoading) {
+      return [
+        const Padding(
+          padding: EdgeInsets.all(20),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
+    } else {
+      return [
+        (_authAction == AuthAction.signIn)
+            ? AuthFlow(
+                text: "Don't have an account? ",
+                linkedText: "Register",
+                onTap: () {
+                  setState(() {
+                    _authAction = AuthAction.signUp;
+                  });
+                },
+              )
+            : AuthFlow(
+                text: "Already have an account? ",
+                linkedText: "Sign in",
+                onTap: () {
+                  setState(() {
+                    _authAction = AuthAction.signIn;
+                  });
+                },
+              ),
+        EmailForm(
+          action: _authAction,
+          onSubmit: onSubmit,
+          onResetPassword: widget.db.firebase.auth.sendPasswordResetEmail,
+        ),
+      ];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return (isLoading)
-        ? const Padding(
-            padding: EdgeInsets.all(20),
-            child: Center(child: CircularProgressIndicator()),
-          )
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              (_authAction == AuthAction.signIn)
-                  ? AuthFlow(
-                      text: "Don't have an account? ",
-                      linkedText: "Register",
-                      onTap: () {
-                        setState(() {
-                          _authAction = AuthAction.signUp;
-                        });
-                      },
-                    )
-                  : AuthFlow(
-                      text: "Already have an account? ",
-                      linkedText: "Sign in",
-                      onTap: () {
-                        setState(() {
-                          _authAction = AuthAction.signIn;
-                        });
-                      },
-                    ),
-              EmailForm(
-                action: _authAction,
-                onSubmit: onSubmit,
-                onResetPassword: widget.db.firebase.auth.sendPasswordResetEmail,
-              ),
-            ],
-          );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: getColumnChildren(),
+    );
   }
 }
 
