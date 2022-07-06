@@ -67,7 +67,8 @@ class Database {
     return notes;
   }
 
-  Future<Note?> getNoteByTitle(title) async {
+  Future<Note?> getNoteByTitle(String title) async {
+    if (title.isEmpty) return null;
     var allNotes = await getAllNotes();
     Note? note = allNotes.firstWhereOrNull((note) {
       return note.title == title;
