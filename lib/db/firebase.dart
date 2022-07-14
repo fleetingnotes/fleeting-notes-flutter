@@ -28,6 +28,8 @@ class FirebaseDB implements DatabaseInterface {
   User? currUser;
   StreamController<User?> authChangeController = StreamController<User?>();
   late CollectionReference notesCollection;
+  CollectionReference encryptionCollection =
+      FirebaseFirestore.instance.collection('encryption');
   FirebaseDB() {
     configRemoteConfig();
     userChanges.listen((User? user) {
@@ -45,23 +47,26 @@ class FirebaseDB implements DatabaseInterface {
 
   bool get isSharedNotes => userId != 'local' && currUser?.uid != userId;
 
+  Future<String?> getFirebaseHashedKey() async {
+    if (userId == 'local') return null;
+    var docRef = await encryptionCollection.doc(userId).get();
+    return (docRef.exists) ? docRef.get('key') : null;
+  }
+
   Future<String?> getEncryptionKey() async {
     return await secureStorage.read(key: 'encryption-key-$userId');
   }
 
   Future<void> setEncryptionKey(String key) async {
     String hashedKey = sha256Hash(key);
-    CollectionReference encryptionCollection =
-        FirebaseFirestore.instance.collection('encryption');
-    var docRef = await encryptionCollection.doc(userId).get();
-    if (!docRef.exists) {
+    String? firebaseHashedKey = await getFirebaseHashedKey();
+    if (firebaseHashedKey == null) {
       await encryptionCollection.doc(userId).set({'key': hashedKey});
-    } else {
-      if (docRef.get('key') != hashedKey) {
-        throw EncryptionException('Encryption key does not match');
-      }
+    } else if (firebaseHashedKey != hashedKey) {
+      throw EncryptionException('Encryption key does not match');
     }
     await secureStorage.write(key: 'encryption-key-$userId', value: key);
+    analytics.logEvent(name: 'set_encryption');
   }
 
   Future<void> configRemoteConfig() async {
@@ -221,25 +226,21 @@ class FirebaseDB implements DatabaseInterface {
 
   @override
   Future<List<Note>> getAllNotes({int? limit, bool isShared = false}) async {
-    try {
-      var query = notesCollection
-          .where('_partition', isEqualTo: userId)
-          .where('_isDeleted', isNotEqualTo: true);
-      if (isShared) {
-        query = query.where('is_shared', isEqualTo: true);
-      }
-      if (limit != null) {
-        query = query.limit(limit);
-      }
-      var docs = (await query.get()).docs;
-      String? encryptionKey = await getEncryptionKey();
-      List<Note> notes = [
-        for (var note in docs) fromQueryDoc(note, encryptionKey: encryptionKey)
-      ];
-      return notes;
-    } catch (e) {
-      return [];
+    var query = notesCollection
+        .where('_partition', isEqualTo: userId)
+        .where('_isDeleted', isNotEqualTo: true);
+    if (isShared) {
+      query = query.where('is_shared', isEqualTo: true);
     }
+    if (limit != null) {
+      query = query.limit(limit);
+    }
+    var docs = (await query.get()).docs;
+    String? encryptionKey = await getEncryptionKey();
+    List<Note> notes = [
+      for (var note in docs) fromQueryDoc(note, encryptionKey: encryptionKey)
+    ];
+    return notes;
   }
 
   Future<bool> isNotesEmpty() async {

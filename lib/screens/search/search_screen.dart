@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/exceptions.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:flutter/material.dart';
 import '../../models/search_query.dart';
@@ -52,14 +53,25 @@ class _SearchScreenState extends State<SearchScreen> {
         searchByContent: searchFilter['content'],
         searchBySource: searchFilter['source'],
         sortBy: sortOptionMap[sortBy]!);
-    var tempNotes = await widget.db.getSearchNotes(
-      query,
-      forceSync: forceSync,
-    );
-    if (!mounted) return;
-    setState(() {
-      notes = tempNotes;
-    });
+    try {
+      var tempNotes = await widget.db.getSearchNotes(
+        query,
+        forceSync: forceSync,
+      );
+      if (!mounted) return;
+      setState(() {
+        notes = tempNotes;
+      });
+    } catch (e) {
+      if (e is EncryptionException) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.message),
+          duration: const Duration(seconds: 2),
+        ));
+      } else {
+        rethrow;
+      }
+    }
   }
 
   void listenCallback(event) {
