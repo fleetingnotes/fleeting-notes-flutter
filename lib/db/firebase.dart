@@ -7,11 +7,14 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fleeting_notes_flutter/exceptions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mime/mime.dart';
 import '../models/Note.dart';
 import 'db_interface.dart';
 import 'package:dio/dio.dart';
+import '../crypt.dart';
 
 class FirebaseDB implements DatabaseInterface {
   @override
@@ -19,6 +22,7 @@ class FirebaseDB implements DatabaseInterface {
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final FirebaseAuth auth = FirebaseAuth.instance;
   final Dio dio = Dio();
   User? currUser;
@@ -40,6 +44,25 @@ class FirebaseDB implements DatabaseInterface {
   Stream<User?> get userChanges => auth.userChanges();
 
   bool get isSharedNotes => userId != 'local' && currUser?.uid != userId;
+
+  Future<String?> getEncryptionKey() async {
+    return await secureStorage.read(key: 'encryption-key-$userId');
+  }
+
+  Future<void> setEncryptionKey(String key) async {
+    String hashedKey = sha256Hash(key);
+    CollectionReference encryptionCollection =
+        FirebaseFirestore.instance.collection('encryption');
+    var docRef = await encryptionCollection.doc(userId).get();
+    if (!docRef.exists) {
+      await encryptionCollection.doc(userId).set({'key': hashedKey});
+    } else {
+      if (docRef.get('key') != hashedKey) {
+        throw EncryptionException('Encryption key does not match');
+      }
+    }
+    await secureStorage.write(key: 'encryption-key-$userId', value: key);
+  }
 
   Future<void> configRemoteConfig() async {
     await remoteConfig.setConfigSettings(RemoteConfigSettings(
@@ -209,8 +232,10 @@ class FirebaseDB implements DatabaseInterface {
         query = query.limit(limit);
       }
       var docs = (await query.get()).docs;
-
-      List<Note> notes = [for (var note in docs) fromQueryDoc(note)];
+      String? encryptionKey = await getEncryptionKey();
+      List<Note> notes = [
+        for (var note in docs) fromQueryDoc(note, encryptionKey: encryptionKey)
+      ];
       return notes;
     } catch (e) {
       return [];
@@ -225,9 +250,10 @@ class FirebaseDB implements DatabaseInterface {
   Future<Note?> getNoteById(String id) async {
     var doc = await notesCollection.doc(id).get();
     if (doc.exists) {
-      Note note = fromQueryDoc(doc);
+      String? encryptionKey = await getEncryptionKey();
+      Note note = fromQueryDoc(doc, encryptionKey: encryptionKey);
       if (note.isDeleted) return null;
-      return fromQueryDoc(doc);
+      return note;
     } else {
       return null;
     }
@@ -252,7 +278,8 @@ class FirebaseDB implements DatabaseInterface {
   Future<bool> updateNote(Note note, {WriteBatch? batch}) async {
     if (!isLoggedIn()) return false;
     try {
-      var json = toFirebaseJson(note);
+      String? encryptionKey = await getEncryptionKey();
+      var json = toFirebaseJson(note, encryptionKey: encryptionKey);
       json['last_modified_timestamp'] = Timestamp.now();
       DocumentReference docRef = notesCollection.doc(note.id);
       if (batch == null) {
@@ -272,14 +299,34 @@ class FirebaseDB implements DatabaseInterface {
     return await updateNote(note);
   }
 
-  Note fromQueryDoc(DocumentSnapshot doc) {
+  Note fromQueryDoc(DocumentSnapshot doc, {String? encryptionKey}) {
     bool docContainsString(String str) => doc.data().toString().contains(str);
+    bool isEncrypted =
+        docContainsString('is_encrypted') ? doc.get('is_encrypted') : false;
     DateTime dt = (doc['created_timestamp'] as Timestamp).toDate();
+    String title = doc["title"].toString();
+    String content = doc["content"].toString();
+    String source = doc["source"].toString();
+    if (isEncrypted) {
+      if (encryptionKey == null) {
+        throw EncryptionException(
+            'Encryption key is empty - Add key in settings');
+      }
+      if (title.isNotEmpty) {
+        title = decryptAESCryptoJS(title, encryptionKey);
+      }
+      if (content.isNotEmpty) {
+        content = decryptAESCryptoJS(content, encryptionKey);
+      }
+      if (source.isNotEmpty) {
+        source = decryptAESCryptoJS(source, encryptionKey);
+      }
+    }
     return Note(
       id: doc.id,
-      title: doc["title"].toString(),
-      content: doc["content"].toString(),
-      source: doc["source"].toString(),
+      title: title,
+      content: content,
+      source: source,
       partition: doc["_partition"].toString(),
       isDeleted:
           (docContainsString('_isDeleted')) ? doc.get('_isDeleted') : false,
@@ -289,16 +336,32 @@ class FirebaseDB implements DatabaseInterface {
     );
   }
 
-  toFirebaseJson(Note note) {
+  toFirebaseJson(Note note, {String? encryptionKey}) {
     Timestamp created = Timestamp.fromDate(note.getDateTime());
+    bool isEncrypted = encryptionKey != null;
+    String title = note.title;
+    String content = note.content;
+    String source = note.source;
+    if (isEncrypted) {
+      if (note.title.isNotEmpty) {
+        title = encryptAESCryptoJS(note.title, encryptionKey);
+      }
+      if (note.content.isNotEmpty) {
+        content = encryptAESCryptoJS(note.content, encryptionKey);
+      }
+      if (note.source.isNotEmpty) {
+        source = encryptAESCryptoJS(note.source, encryptionKey);
+      }
+    }
     return {
-      'title': note.title,
-      'content': note.content,
-      'source': note.source,
+      'title': title,
+      'content': content,
+      'source': source,
       'created_timestamp': created,
       '_isDeleted': note.isDeleted,
       '_partition': currUser!.uid,
       'is_shared': note.isShareable,
+      'is_encrypted': isEncrypted,
     };
   }
 }
