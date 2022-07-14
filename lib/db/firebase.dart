@@ -311,7 +311,7 @@ class FirebaseDB implements DatabaseInterface {
     if (isEncrypted) {
       if (encryptionKey == null) {
         throw EncryptionException(
-            'Encryption key is empty - Add key in settings');
+            'Note decryption failed - Add encryption key in settings');
       }
       if (title.isNotEmpty) {
         title = decryptAESCryptoJS(title, encryptionKey);
