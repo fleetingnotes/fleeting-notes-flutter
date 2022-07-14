@@ -26,8 +26,8 @@ void main() {
         home: SettingsScreen(
       db: mockDb,
     )));
-    // await tester.pumpAndSettle();
     expect(find.byType(Auth), findsNothing);
+    expect(find.byType(Account), findsOneWidget);
   });
 
   testWidgets('Render settings when not logged in',
@@ -40,5 +40,6 @@ void main() {
       db: mockDb,
     )));
     expect(find.byType(Auth), findsOneWidget);
+    expect(find.byType(Account), findsNothing);
   });
 }
