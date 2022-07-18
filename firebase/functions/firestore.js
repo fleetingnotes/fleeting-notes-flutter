@@ -22,13 +22,14 @@ const handleResponse = (res, email, status, body) => {
     {
       Response: {
         Status: status,
+        Body: body
       },
     }
   );
   if (body) {
-    return res.status(200).json(body);
+    return res.status(status).json(body);
   }
-  return res.sendStatus(status);
+  return res.status(status).json({});
 };
 
 const getAuthFromRequest = (req) => {
@@ -53,6 +54,18 @@ const getNotesFromRequest = (req) => {
   return notes;
 }
 
+const isEncryptionValid = async (req, uid) => {
+    // check hashed encryption key
+    const hashedKey = req.get('hashed-encryption-key')
+    const encryptionRef = db.collection("encryption").doc(uid);
+    const encryptionData = (await encryptionRef.get()).data()
+
+    if (encryptionData && encryptionData.key && hashedKey !== encryptionData.key) {
+      return false;
+    }
+    return true;
+}
+
 exports.get_all_notes = functions.https.onRequest(async (req, res) => {
     return cors(req, res, async () => {
       let email, password;
@@ -72,13 +85,16 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
         const valid = authRes['error'] === undefined;
         if (!valid) {
           functions.logger.error({ User: email }, authRes['error']);
-          return handleResponse(res, email, 401); // Invalid username/password
+          return handleResponse(res, email, 401, { error: 'Invalid username or password'});
         }
-        var notes = []
         const uid = authRes['localId'];
-        const snapshot = await db.collection("notes").where('_partition', '==', uid).get()
 
+        if (!await isEncryptionValid(req, uid)) {
+          return handleResponse(res, email, 400, { error: 'Invalid or missing encryption key' });
+        }
 
+        var notes = []
+        const snapshot = await db.collection("notes").where('_partition', '==', uid).where('_isDeleted', '==', false).get()
         snapshot.forEach(doc => {
           var newNote = {
             "_id": doc.id,
@@ -86,6 +102,7 @@ exports.get_all_notes = functions.https.onRequest(async (req, res) => {
             "content": doc.data().content,
             "source": doc.data().source,
             "timestamp": doc.data().created_timestamp.toDate(),
+            "is_encrypted": doc.data().is_encrypted,
             "_isDeleted": doc.data()._isDeleted,
           }
           notes = notes.concat(newNote);
@@ -119,6 +136,10 @@ exports.update_notes = functions.https.onRequest(async (req, res) => {
         }
         const uid = authRes['localId'];
 
+        if (!await isEncryptionValid(req, uid)) {
+          return handleResponse(res, email, 400, { error: 'Invalid or missing encryption key' });
+        }
+
         // get notes from request
         let notes = getNotesFromRequest(req);
         const batch = db.batch();
@@ -136,13 +157,14 @@ exports.update_notes = functions.https.onRequest(async (req, res) => {
               title: note.title,
               content: note.content,
               source: note.source,
+              is_encrypted: note.is_encrypted,
               last_modified_timestamp: last_modified_timestamp,
             });
           }
         }));
         await batch.commit();
         logEvent(uid, 'update_notes');
-        return handleResponse(res, email, 200);
+        return handleResponse(res, email, 200, {});
       } catch (error) {
         return handleError(res, email, error);
       }
