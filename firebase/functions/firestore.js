@@ -22,7 +22,6 @@ const handleResponse = (res, email, status, body) => {
     {
       Response: {
         Status: status,
-        Body: body
       },
     }
   );
