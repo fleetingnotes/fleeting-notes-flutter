@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:fleeting_notes_flutter/exceptions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
@@ -22,11 +23,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String backupOption = 'Markdown';
   String email = '';
   bool isLoggedIn = false;
+  bool encryptionEnabled = true;
 
   @override
   void initState() {
     super.initState();
 
+    widget.db.firebase.getEncryptionKey().then((key) {
+      setState(() {
+        encryptionEnabled = key != null;
+      });
+    });
     setState(() {
       isLoggedIn = widget.db.isLoggedIn();
       if (widget.db.firebase.currUser != null) {
@@ -128,6 +135,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ));
   }
 
+  void onLogoutPress() async {
+    await widget.db.logout();
+    setState(() {
+      isLoggedIn = false;
+    });
+  }
+
+  void onForceSyncPress() async {
+    widget.db.firebase.analytics.logEvent(name: 'force_sync_notes');
+    widget.db.getAllNotes(forceSync: true);
+  }
+
+  void onEnableEncryptionPress() async {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return EncryptionDialog(setEncryptionKey: (key) async {
+          await widget.db.firebase.setEncryptionKey(key);
+          setState(() {
+            encryptionEnabled = true;
+          });
+          widget.db.refreshApp();
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -170,17 +204,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(children: [
-                          const Text("Auto Fill Source",
-                              style: TextStyle(fontSize: 12)),
-                          Switch(
-                              value: widget.db.fillSource(),
-                              onChanged: autoFilledToggled)
-                        ]),
+                        const Text("Account", style: TextStyle(fontSize: 12)),
                         const Divider(thickness: 1, height: 1),
+                        (isLoggedIn)
+                            ? Account(
+                                email: email,
+                                onLogout: onLogoutPress,
+                                onForceSync: onForceSyncPress,
+                                onEnableEncryption: (encryptionEnabled)
+                                    ? null
+                                    : onEnableEncryptionPress,
+                              )
+                            : Auth(
+                                db: widget.db,
+                                onLogin: (e) {
+                                  setState(() {
+                                    isLoggedIn = true;
+                                    email = e;
+                                  });
+                                }),
                         SizedBox(
-                            height:
-                                Theme.of(context).custom.kDefaultPadding / 2),
+                            height: Theme.of(context).custom.kDefaultPadding),
                         const Text("Backup", style: TextStyle(fontSize: 12)),
                         const Divider(thickness: 1, height: 1),
                         Padding(
@@ -219,56 +263,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ]),
                         ),
                         SizedBox(
-                            height:
-                                Theme.of(context).custom.kDefaultPadding / 2),
-                        const Text("Sync", style: TextStyle(fontSize: 12)),
+                            height: Theme.of(context).custom.kDefaultPadding),
+                        const Text("Other Settings",
+                            style: TextStyle(fontSize: 12)),
                         const Divider(thickness: 1, height: 1),
-                        (isLoggedIn)
-                            ? Padding(
-                                padding: EdgeInsets.all(
-                                    Theme.of(context).custom.kDefaultPadding /
-                                        2),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(children: [
-                                      Text(email),
-                                      const Spacer(),
-                                      ElevatedButton(
-                                          onPressed: () async {
-                                            await widget.db.logout();
-                                            setState(() {
-                                              isLoggedIn = false;
-                                            });
-                                          },
-                                          child: const Text('Logout'))
-                                    ]),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: Theme.of(context)
-                                              .custom
-                                              .kDefaultPadding),
-                                      child: ElevatedButton(
-                                          onPressed: () {
-                                            widget.db.firebase.analytics
-                                                .logEvent(
-                                                    name: 'force_sync_notes');
-                                            widget.db
-                                                .getAllNotes(forceSync: true);
-                                          },
-                                          child: const Text('Force Sync')),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : Auth(
-                                db: widget.db,
-                                onLogin: (e) {
-                                  setState(() {
-                                    isLoggedIn = true;
-                                    email = e;
-                                  });
-                                }),
+                        Row(children: [
+                          const Text("Auto Fill Source",
+                              style: TextStyle(fontSize: 12)),
+                          Switch(
+                              value: widget.db.fillSource(),
+                              onChanged: autoFilledToggled)
+                        ]),
                       ],
                     )),
               )
@@ -276,6 +281,170 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class EncryptionDialog extends StatefulWidget {
+  const EncryptionDialog({
+    Key? key,
+    required this.setEncryptionKey,
+  }) : super(key: key);
+
+  final Function setEncryptionKey;
+
+  @override
+  State<EncryptionDialog> createState() => _EncryptionDialogState();
+}
+
+class _EncryptionDialogState extends State<EncryptionDialog> {
+  String errMessage = '';
+  TextEditingController controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  void onSubmit() async {
+    try {
+      await widget.setEncryptionKey(controller.text);
+      Navigator.pop(context);
+    } catch (e) {
+      setState(() {
+        if (e is EncryptionException) {
+          errMessage = e.message;
+        } else {
+          errMessage = 'Invalid encryption key';
+        }
+      });
+      _formKey.currentState!.validate();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Enable Encryption'),
+      content: Form(
+        key: _formKey,
+        child: SizedBox(
+          width: 300,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('This password cannot be changed later'),
+              const Text(
+                  'If you forget this password, data will remain unusable forever',
+                  style: TextStyle(color: Colors.red)),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  labelText: 'Enter your encryption key',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (_) => (errMessage.isEmpty) ? null : errMessage,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: onSubmit,
+          child: const Text('OK'),
+        ),
+      ],
+    );
+  }
+}
+
+class Account extends StatelessWidget {
+  const Account({
+    Key? key,
+    required this.email,
+    required this.onLogout,
+    required this.onForceSync,
+    required this.onEnableEncryption,
+  }) : super(key: key);
+
+  final String email;
+  final VoidCallback onLogout;
+  final VoidCallback onForceSync;
+  final VoidCallback? onEnableEncryption;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SettingItem(
+            title: 'Email',
+            description: email,
+            buttonLabel: 'Logout',
+            onPress: onLogout,
+          ),
+          SettingItem(
+            title: 'Force Sync',
+            description: 'Sync notes from the cloud to the device',
+            buttonLabel: 'Force Sync',
+            onPress: onForceSync,
+          ),
+          SettingItem(
+            title: 'End-to-end Encryption',
+            description: 'Encrypt notes with end-to-end encryption',
+            buttonLabel: (onEnableEncryption == null) ? 'Enabled' : 'Enable',
+            onPress: onEnableEncryption,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SettingItem extends StatelessWidget {
+  const SettingItem({
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.buttonLabel,
+    required this.onPress,
+  }) : super(key: key);
+
+  final String title;
+  final String description;
+  final String buttonLabel;
+  final VoidCallback? onPress;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                Text(description),
+              ],
+            ),
+          ),
+        ),
+        ElevatedButton(onPressed: onPress, child: Text(buttonLabel))
+      ]),
     );
   }
 }

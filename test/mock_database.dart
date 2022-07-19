@@ -27,6 +27,8 @@ class MockFirebaseDB extends Mock implements FirebaseDB {
   Stream<User?> get userChanges => const Stream.empty();
   @override
   bool get isSharedNotes => false;
+  @override
+  Future<String?> getEncryptionKey() async => null;
 }
 
 class MockDatabase extends Mock implements Database {
