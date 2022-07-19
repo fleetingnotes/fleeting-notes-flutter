@@ -59,7 +59,7 @@ const isEncryptionValid = async (req, uid) => {
     const encryptionRef = db.collection("encryption").doc(uid);
     const encryptionData = (await encryptionRef.get()).data()
 
-    if (encryptionData && encryptionData.key && hashedKey !== encryptionData.key) {
+    if ((hashedKey && !encryptionData) || (encryptionData && encryptionData.key && hashedKey !== encryptionData.key)) {
       return false;
     }
     return true;
