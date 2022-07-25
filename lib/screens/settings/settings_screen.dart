@@ -145,6 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void onDeleteAccountPress() async {
     try {
+      widget.db.firebase.analytics.logEvent(name: 'click_delete_account');
       await widget.db.firebase.deleteAccount();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
