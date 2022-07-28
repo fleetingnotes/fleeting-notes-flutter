@@ -261,7 +261,7 @@ class _ContentFieldState extends State<ContentField> {
           autofocus: widget.autofocus,
           controller: widget.controller,
           minLines: 5,
-          maxLines: 10,
+          maxLines: 20,
           style: Theme.of(context).textTheme.bodyText2,
           decoration: const InputDecoration(
             hintText: "Note and links to other ideas",
