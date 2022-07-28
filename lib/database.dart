@@ -275,6 +275,14 @@ class Database {
     }
   }
 
+  bool canPop() {
+    var nState = navigatorKey.currentState;
+    if (nState != null) {
+      return nState.canPop();
+    }
+    return false;
+  }
+
   // Settings
   Future<void> setSettings(String key, dynamic value) async {
     await Hive.box('settings').put(key, value);

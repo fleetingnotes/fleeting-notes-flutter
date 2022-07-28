@@ -121,70 +121,76 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Shortcuts(
-      shortcuts: shortcutMapping,
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          NewNoteIntent: CallbackAction(
-              onInvoke: (Intent intent) =>
-                  widget.db.navigateToNote(Note.empty())),
-          SearchIntent: CallbackAction(
-              onInvoke: (intent) => searchFocusNode.requestFocus())
-        },
-        child: Scaffold(
-          key: widget.db.scaffoldKey,
-          drawer: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 250),
-            child: SideMenu(db: widget.db),
-          ),
-          floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.add),
-            tooltip: 'Add note',
-            onPressed: () {
-              // This is bugged because floating action button isn't part of
-              // any route...
-              // Provider.of<NoteStackModel>(context, listen: false)
-              //     .pushNote(Note.empty());
-              widget.db.navigateToNote(Note.empty()); // TODO: Deprecate
-              widget.db.firebase.analytics.logEvent(name: 'click_new_note_fab');
-            },
-          ),
-          body: Responsive(
-            mobile:
-                SearchScreenNavigator(db: widget.db, hasInitNote: hasInitNote),
-            tablet: Row(
-              children: [
-                Expanded(
-                  flex: 6,
-                  child: SearchScreen(
-                    key: widget.db.searchKey,
-                    db: widget.db,
-                    searchFocusNode: searchFocusNode,
-                  ),
-                ),
-                Expanded(
-                  flex: 9,
-                  child: NoteScreenNavigator(
-                      db: widget.db, hasInitNote: hasInitNote),
-                ),
-              ],
+    return WillPopScope(
+      onWillPop: () async {
+        return !widget.db.canPop();
+      },
+      child: Shortcuts(
+        shortcuts: shortcutMapping,
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            NewNoteIntent: CallbackAction(
+                onInvoke: (Intent intent) =>
+                    widget.db.navigateToNote(Note.empty())),
+            SearchIntent: CallbackAction(
+                onInvoke: (intent) => searchFocusNode.requestFocus())
+          },
+          child: Scaffold(
+            key: widget.db.scaffoldKey,
+            drawer: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 250),
+              child: SideMenu(db: widget.db),
             ),
-            desktop: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: SearchScreen(
-                    key: widget.db.searchKey,
-                    db: widget.db,
-                    searchFocusNode: searchFocusNode,
+            floatingActionButton: FloatingActionButton(
+              child: const Icon(Icons.add),
+              tooltip: 'Add note',
+              onPressed: () {
+                // This is bugged because floating action button isn't part of
+                // any route...
+                // Provider.of<NoteStackModel>(context, listen: false)
+                //     .pushNote(Note.empty());
+                widget.db.navigateToNote(Note.empty()); // TODO: Deprecate
+                widget.db.firebase.analytics
+                    .logEvent(name: 'click_new_note_fab');
+              },
+            ),
+            body: Responsive(
+              mobile: SearchScreenNavigator(
+                  db: widget.db, hasInitNote: hasInitNote),
+              tablet: Row(
+                children: [
+                  Expanded(
+                    flex: 6,
+                    child: SearchScreen(
+                      key: widget.db.searchKey,
+                      db: widget.db,
+                      searchFocusNode: searchFocusNode,
+                    ),
                   ),
-                ),
-                Expanded(
-                  flex: 9,
-                  child: NoteScreenNavigator(
-                      db: widget.db, hasInitNote: hasInitNote),
-                ),
-              ],
+                  Expanded(
+                    flex: 9,
+                    child: NoteScreenNavigator(
+                        db: widget.db, hasInitNote: hasInitNote),
+                  ),
+                ],
+              ),
+              desktop: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: SearchScreen(
+                      key: widget.db.searchKey,
+                      db: widget.db,
+                      searchFocusNode: searchFocusNode,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: NoteScreenNavigator(
+                        db: widget.db, hasInitNote: hasInitNote),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
