@@ -53,7 +53,10 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
         if (state.subloc == '/' || state.subloc == '/settings') {
           return null;
         }
-        return '/';
+        final String _queryString = Uri(
+            queryParameters: state.queryParams
+                .map((key, value) => MapEntry(key, value.toString()))).query;
+        return (_queryString.isEmpty) ? '/' : '/?$_queryString';
       },
       routes: [
         GoRoute(

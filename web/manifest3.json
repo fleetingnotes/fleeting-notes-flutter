@@ -10,8 +10,12 @@
       "default_icon": "/icons/196.png"
     },
     "permissions": [
-      "tabs"
+      "tabs",
+      "contextMenus"
     ],
+    "background": {
+      "service_worker": "extension/background.js"
+    },
     "commands": {
       "_execute_action": {
         "suggested_key" : {
