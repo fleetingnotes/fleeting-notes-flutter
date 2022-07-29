@@ -20,6 +20,20 @@
         }
       }
     },
+    "web_accessible_resources": [{
+      "resources": ["web-ext.html", "styles.css", "jquery-3.6.0.min.js"],
+      "matches": ["<all_urls>"]  
+      }
+    ],
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content-script.js", "jquery-3.6.0.min.js"]
+      }
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
     "manifest_version": 3
   }
   
