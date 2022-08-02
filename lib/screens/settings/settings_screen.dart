@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fleeting_notes_flutter/exceptions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
@@ -142,6 +143,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  void onDeleteAccountPress() async {
+    try {
+      widget.db.firebase.analytics.logEvent(name: 'click_delete_account');
+      await widget.db.firebase.deleteAccount();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        onLogoutPress();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Deleting an account requires a recent login. Please log in again to delete your account'),
+          duration: Duration(seconds: 2),
+        ));
+      } else {
+        rethrow;
+      }
+    }
+    setState(() {
+      isLoggedIn = false;
+    });
+  }
+
   void onForceSyncPress() async {
     widget.db.firebase.analytics.logEvent(name: 'force_sync_notes');
     widget.db.getAllNotes(forceSync: true);
@@ -211,6 +233,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 email: email,
                                 onLogout: onLogoutPress,
                                 onForceSync: onForceSyncPress,
+                                onDeleteAccount: onDeleteAccountPress,
                                 onEnableEncryption: (encryptionEnabled)
                                     ? null
                                     : onEnableEncryptionPress,
@@ -369,12 +392,14 @@ class Account extends StatelessWidget {
     required this.email,
     required this.onLogout,
     required this.onForceSync,
+    required this.onDeleteAccount,
     required this.onEnableEncryption,
   }) : super(key: key);
 
   final String email;
   final VoidCallback onLogout;
   final VoidCallback onForceSync;
+  final VoidCallback onDeleteAccount;
   final VoidCallback? onEnableEncryption;
 
   @override
@@ -402,8 +427,79 @@ class Account extends StatelessWidget {
             buttonLabel: (onEnableEncryption == null) ? 'Enabled' : 'Enable',
             onPress: onEnableEncryption,
           ),
+          SettingItem(
+            title: 'Delete Account',
+            description: 'Delete your account and all your notes',
+            buttonLabel: 'Delete',
+            onPress: () {
+              showDialog(
+                context: context,
+                builder: (context) =>
+                    DeleteAccountWidget(onDelete: onDeleteAccount),
+              );
+            },
+          )
         ],
       ),
+    );
+  }
+}
+
+class DeleteAccountWidget extends StatefulWidget {
+  const DeleteAccountWidget({
+    Key? key,
+    required this.onDelete,
+  }) : super(key: key);
+
+  final VoidCallback onDelete;
+
+  @override
+  State<DeleteAccountWidget> createState() => _DeleteAccountWidgetState();
+}
+
+class _DeleteAccountWidgetState extends State<DeleteAccountWidget> {
+  bool canDeleteAccount = false;
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Delete account'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+              'Are you sure you want to delete your account and all your notes? This action cannot be undone.'),
+          const SizedBox(height: 10),
+          TextFormField(
+            decoration: const InputDecoration(
+              labelText: 'Type "delete" to confirm',
+              border: OutlineInputBorder(),
+            ),
+            validator: (_) => 'Type delete to confirm',
+            onChanged: (String? value) {
+              setState(() {
+                canDeleteAccount = value == 'delete';
+              });
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: canDeleteAccount
+              ? () {
+                  Navigator.pop(context);
+                  widget.onDelete();
+                }
+              : null,
+          child: const Text('Delete'),
+        ),
+      ],
     );
   }
 }

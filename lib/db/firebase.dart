@@ -264,10 +264,18 @@ class FirebaseDB implements DatabaseInterface {
   Future<bool> updateNotes(List<Note> notes) async {
     if (!isLoggedIn()) return false;
     try {
+      String? encryptionKey = await getEncryptionKey();
       WriteBatch batch = FirebaseFirestore.instance.batch();
+      List<Future> futures = [];
       for (var note in notes) {
-        updateNote(note, batch: batch);
+        futures.add(updateNote(
+          note,
+          batch: batch,
+          encryptionKey: encryptionKey,
+          tryGetEncryptionKey: false,
+        ));
       }
+      await Future.wait(futures);
       await batch.commit();
       return true;
     } catch (e) {
@@ -276,10 +284,15 @@ class FirebaseDB implements DatabaseInterface {
   }
 
   @override
-  Future<bool> updateNote(Note note, {WriteBatch? batch}) async {
+  Future<bool> updateNote(Note note,
+      {WriteBatch? batch,
+      String? encryptionKey,
+      bool tryGetEncryptionKey = true}) async {
     if (!isLoggedIn()) return false;
     try {
-      String? encryptionKey = await getEncryptionKey();
+      if (tryGetEncryptionKey) {
+        encryptionKey = await getEncryptionKey();
+      }
       var json = toFirebaseJson(note, encryptionKey: encryptionKey);
       json['last_modified_timestamp'] = Timestamp.now();
       DocumentReference docRef = notesCollection.doc(note.id);
@@ -298,6 +311,15 @@ class FirebaseDB implements DatabaseInterface {
   Future<bool> deleteNote(Note note) async {
     note.isDeleted = true;
     return await updateNote(note);
+  }
+
+  Future<void> deleteAccount() async {
+    List<Note> allNotes = await getAllNotes();
+    for (var note in allNotes) {
+      note.isDeleted = true;
+    }
+    await updateNotes(allNotes);
+    await currUser!.delete();
   }
 
   Note fromQueryDoc(DocumentSnapshot doc, {String? encryptionKey}) {
