@@ -1,29 +1,34 @@
 {
-    "name": "Fleeting Notes",
-    "description": "A scratchpad for connected notes",
-    "version": "0.4.1",
-    "content_security_policy": {
-      "extension_pages": "script-src 'self' ; object-src 'self'"
-    },
-    "action": {
-      "default_popup": "web-ext.html",
-      "default_icon": "/icons/196.png"
-    },
-    "permissions": [
-      "tabs",
-      "contextMenus"
-    ],
-    "background": {
-      "service_worker": "extension/background.js"
-    },
-    "commands": {
-      "_execute_action": {
-        "suggested_key" : {
-         "default": "Ctrl+Shift+E",
-         "mac": "Command+Shift+E"
-        }
+  "name": "Fleeting Notes",
+  "description": "A scratchpad for connected notes",
+  "icons": {
+    "16": "/icons/16.png",
+    "48": "/icons/48.png",
+    "128": "/icons/128.png"
+  },
+  "version": "0.4.1",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' ; object-src 'self'"
+  },
+  "action": {
+    "default_popup": "web-ext.html",
+    "default_icon": "/icons/196.png"
+  },
+  "permissions": [
+    "activeTab",
+    "contextMenus"
+  ],
+  "background": {
+    "service_worker": "extension/background3.js"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key" : {
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
       }
-    },
-    "manifest_version": 3
-  }
+    }
+  },
+  "manifest_version": 3
+}
   
