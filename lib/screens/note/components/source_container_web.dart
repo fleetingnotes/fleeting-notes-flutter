@@ -64,7 +64,11 @@ class _SourceContainerState extends State<SourceContainer> {
       } else {
         tabs = await promiseToFuture(queryTabsBrowser(queryOptions));
       }
-      return getProperty(tabs[0], 'url');
+      String url = getProperty(tabs[0], 'url');
+      if (url.startsWith(RegExp(r'.*-extension:\/\/'))) {
+        return defaultText;
+      }
+      return url;
     } catch (e) {
       return defaultText;
     }

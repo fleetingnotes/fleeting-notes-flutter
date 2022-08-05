@@ -1,22 +1,30 @@
 {
-    "name": "Fleeting Notes",
-    "description": "A scratchpad for connected notes",
-    "version": "0.4.1",
-    "browser_action": {
-      "default_popup": "popup.html",
-      "default_icon": "/icons/196.png"
-    },
-    "permissions": [
-      "activeTab"
-    ],
-    "commands": {
-      "_execute_browser_action": {
-        "suggested_key" : {
-         "default": "Ctrl+Shift+E",
-         "mac": "Command+Shift+E"
-        }
+  "name": "Fleeting Notes",
+  "description": "A scratchpad for connected notes",
+  "icons": {
+    "16": "/icons/16.png",
+    "48": "/icons/48.png",
+    "128": "/icons/128.png"
+  },
+  "version": "0.4.1",
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": "/icons/196.png"
+  },
+  "background": {
+    "scripts": ["extension/background2.js"]
+  },
+  "permissions": [
+    "activeTab",
+    "contextMenus"
+  ],
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key" : {
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
       }
-    },
-    "manifest_version": 2
-  }
-  
+    }
+  },
+  "manifest_version": 2
+}

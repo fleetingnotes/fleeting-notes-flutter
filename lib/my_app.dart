@@ -53,7 +53,10 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
         if (state.subloc == '/' || state.subloc == '/settings') {
           return null;
         }
-        return '/';
+        final String _queryString = Uri(
+            queryParameters: state.queryParams
+                .map((key, value) => MapEntry(key, value.toString()))).query;
+        return (_queryString.isEmpty) ? '/' : '/?$_queryString';
       },
       routes: [
         GoRoute(
@@ -113,12 +116,25 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
   @override
   void initState() {
     super.initState();
-    loadFuture = navigateScreen(widget.state.queryParams['note']);
+    loadFuture = getNoteFromQueryParam();
   }
 
-  Future<Note?> navigateScreen(String? noteId) async {
+  Future<Note?> getNoteFromQueryParam() async {
     await widget.db.firebase.userChanges.first;
-    if (noteId == null) return null;
+    Map params = widget.state.queryParams;
+    if (params['note'] != null) {
+      return await getNoteFromId(params['note']);
+    } else {
+      Note newNote = Note.empty(
+        title: params['title'] ?? '',
+        content: params['content'] ?? '',
+        source: params['source'] ?? '',
+      );
+      return (newNote.isEmpty()) ? null : newNote;
+    }
+  }
+
+  Future<Note?> getNoteFromId(String noteId) async {
     Note? note = await widget.db.getNote(noteId);
     note ??= await widget.db.firebase.getNoteById(noteId);
     if (note != null && note.partition.isNotEmpty) {
