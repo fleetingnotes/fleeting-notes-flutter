@@ -156,6 +156,7 @@ exports.update_notes = functions.https.onRequest(async (req, res) => {
               title: note.title,
               content: note.content,
               source: note.source,
+              _isDeleted: note._isDeleted,
               is_encrypted: note.is_encrypted,
               last_modified_timestamp: last_modified_timestamp,
             });
