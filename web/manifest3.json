@@ -1,6 +1,6 @@
 {
   "name": "Fleeting Notes",
-  "description": "A scratchpad for connected notes",
+  "description": "Quick notes from the browser to Obsidian",
   "icons": {
     "16": "/icons/16.png",
     "48": "/icons/48.png",
