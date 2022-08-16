@@ -74,7 +74,10 @@ class _AuthState extends State<Auth> {
     bool isRegistered = await widget.db.register(email, password);
     if (isRegistered) {
       bool isLoggedIn = await _login(email, password);
-      if (isLoggedIn && widget.onLogin != null) widget.onLogin!(email);
+      if (isLoggedIn) {
+        await widget.db.firebase.setInitialNotes().catchError((e) {});
+        widget.onLogin?.call(email);
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Registration failed'),
