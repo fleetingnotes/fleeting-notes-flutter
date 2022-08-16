@@ -77,6 +77,7 @@ class FirebaseDB implements DatabaseInterface {
     await remoteConfig.setDefaults(const {
       "use_firebase": true,
       "link_suggestion_threshold": 0.5,
+      "save_delay_ms": 1000,
       "max_attachment_size_mb": 10,
       "max_attachment_size_mb_premium": 25,
     });

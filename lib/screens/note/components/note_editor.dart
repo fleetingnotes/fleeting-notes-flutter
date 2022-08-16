@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:fleeting_notes_flutter/theme_data.dart';
@@ -39,6 +40,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   List<String> linkSuggestions = [];
   bool hasNewChanges = false;
   bool isNoteShareable = false;
+  Timer? saveTimer;
 
   late bool autofocus;
   late TextEditingController titleController;
@@ -48,6 +50,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void initState() {
     super.initState();
+    resetSaveTimer();
     hasNewChanges = widget.isShared;
     isNoteShareable = widget.note.isShareable;
     autofocus = widget.note.isEmpty() || widget.isShared;
@@ -71,6 +74,16 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     });
   }
 
+  void resetSaveTimer() {
+    var saveMs = widget.db.firebase.remoteConfig.getInt('save_delay_ms');
+    saveTimer?.cancel();
+    saveTimer = Timer(Duration(milliseconds: saveMs), () {
+      if (hasNewChanges) {
+        _saveNote();
+      }
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -81,6 +94,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void dispose() {
     super.dispose();
+    saveTimer?.cancel();
     widget.db.routeObserver.unsubscribe(this);
     if (hasNewChanges && !widget.isShared) {
       widget.db.firebase.analytics.logEvent(name: 'auto_save_note');
@@ -219,6 +233,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       setState(() {
         hasNewChanges = true;
       });
+      resetSaveTimer();
     } else {
       setState(() {
         hasNewChanges = false;
