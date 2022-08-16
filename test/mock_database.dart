@@ -12,7 +12,12 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
 
-class MockRemoteConfig extends Mock implements FirebaseRemoteConfig {}
+class MockRemoteConfig extends Mock implements FirebaseRemoteConfig {
+  @override
+  int getInt(String key) {
+    return 1;
+  }
+}
 
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 

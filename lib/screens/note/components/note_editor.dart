@@ -94,6 +94,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void dispose() {
     super.dispose();
+    saveTimer?.cancel();
     widget.db.routeObserver.unsubscribe(this);
     if (hasNewChanges && !widget.isShared) {
       widget.db.firebase.analytics.logEvent(name: 'auto_save_note');
