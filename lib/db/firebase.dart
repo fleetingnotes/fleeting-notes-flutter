@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -76,6 +77,7 @@ class FirebaseDB implements DatabaseInterface {
     ));
     await remoteConfig.setDefaults(const {
       "use_firebase": true,
+      "initial_notes": "[]",
       "link_suggestion_threshold": 0.5,
       "save_delay_ms": 1000,
       "max_attachment_size_mb": 10,
@@ -387,5 +389,27 @@ class FirebaseDB implements DatabaseInterface {
       'is_shared': note.isShareable,
       'is_encrypted': isEncrypted,
     };
+  }
+
+  Future<void> setInitialNotes() async {
+    try {
+      List remoteConfigInitNotes =
+          jsonDecode(remoteConfig.getString('initial_notes'));
+      List<Note> initNotes = remoteConfigInitNotes
+          .map((note) => Note.empty(
+                title: note['title'],
+                content: note['content'],
+                source: note['source'],
+              ))
+          .toList();
+      await updateNotes(initNotes);
+    } finally {
+      analytics.logEvent(
+        name: 'set_initial_notes',
+        parameters: {
+          'remote_config_init_notes': remoteConfig.getString('initial_notes'),
+        },
+      );
+    }
   }
 }
