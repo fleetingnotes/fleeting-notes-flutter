@@ -392,15 +392,24 @@ class FirebaseDB implements DatabaseInterface {
   }
 
   Future<void> setInitialNotes() async {
-    List remoteConfigInitNotes =
-        json.decode(remoteConfig.getString('initial_notes'));
-    List<Note> initNotes = remoteConfigInitNotes
-        .map((note) => Note.empty(
-              title: note['title'],
-              content: note['content'],
-              source: note['source'],
-            ))
-        .toList();
-    await updateNotes(initNotes);
+    try {
+      List remoteConfigInitNotes =
+          jsonDecode(remoteConfig.getString('initial_notes'));
+      List<Note> initNotes = remoteConfigInitNotes
+          .map((note) => Note.empty(
+                title: note['title'],
+                content: note['content'],
+                source: note['source'],
+              ))
+          .toList();
+      await updateNotes(initNotes);
+    } finally {
+      analytics.logEvent(
+        name: 'set_initial_notes',
+        parameters: {
+          'remote_config_init_notes': remoteConfig.getString('initial_notes'),
+        },
+      );
+    }
   }
 }
