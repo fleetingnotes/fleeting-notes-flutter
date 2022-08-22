@@ -83,7 +83,7 @@ class FirebaseDB implements DatabaseInterface {
       "max_attachment_size_mb": 10,
       "max_attachment_size_mb_premium": 25,
     });
-    remoteConfig.fetchAndActivate();
+    remoteConfig.fetchAndActivate().catchError((e) {});
   }
 
   Future<bool> isCurrUserPremium() async {
