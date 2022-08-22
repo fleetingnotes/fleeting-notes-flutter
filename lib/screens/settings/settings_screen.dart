@@ -331,7 +331,7 @@ class _EncryptionDialogState extends State<EncryptionDialog> {
       Navigator.pop(context);
     } catch (e) {
       setState(() {
-        if (e is EncryptionException) {
+        if (e is FleetingNotesException) {
           errMessage = e.message;
         } else {
           errMessage = 'Invalid encryption key';

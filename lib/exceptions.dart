@@ -1,5 +1,5 @@
-class EncryptionException implements Exception {
+class FleetingNotesException implements Exception {
   final String message;
 
-  EncryptionException(this.message);
+  FleetingNotesException(this.message);
 }

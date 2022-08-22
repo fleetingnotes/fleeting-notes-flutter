@@ -64,7 +64,7 @@ class _SearchScreenState extends State<SearchScreen> {
         notes = tempNotes;
       });
     } catch (e) {
-      if (e is EncryptionException) {
+      if (e is FleetingNotesException) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(e.message),
           duration: const Duration(seconds: 2),

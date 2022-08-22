@@ -49,20 +49,12 @@ class _HeaderState extends State<Header> {
   }
 
   void newSave(context) async {
-    String? errMessage = await widget.onSave?.call();
-    if (errMessage == null) return;
+    await widget.onSave?.call();
     widget.analytics.logEvent(name: 'click_save_note');
-    if (errMessage.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(errMessage),
-        duration: const Duration(seconds: 2),
-      ));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Saved'),
-        duration: Duration(seconds: 2),
-      ));
-    }
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Saved'),
+      duration: Duration(seconds: 2),
+    ));
   }
 
   void addAttachment() async {
