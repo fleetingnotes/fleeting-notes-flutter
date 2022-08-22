@@ -88,10 +88,15 @@ class FirebaseDB implements DatabaseInterface {
 
   Future<bool> isCurrUserPremium() async {
     if (!isLoggedIn()) return false;
-    await currUser!.getIdToken(true);
-    var decodedToken = await currUser!.getIdTokenResult();
-    Map claims = decodedToken.claims ?? {};
-    return claims['stripeRole'] == 'premium';
+    try {
+      await currUser!.getIdToken(true);
+      var decodedToken = await currUser!.getIdTokenResult();
+      Map claims = decodedToken.claims ?? {};
+      return claims['stripeRole'] == 'premium';
+    } catch (e) {
+      // TODO: store premium user so user can have premium features offline
+      return false;
+    }
   }
 
   void setAnalytics(enabled) {
