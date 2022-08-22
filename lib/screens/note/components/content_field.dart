@@ -82,9 +82,7 @@ class _ContentFieldState extends State<ContentField> {
   }
 
   void _onContentChanged(context, text, size) async {
-    if (widget.onChanged != null) {
-      widget.onChanged!();
-    }
+    widget.onChanged?.call();
     String beforeCaretText =
         text.substring(0, widget.controller.selection.baseOffset);
 
