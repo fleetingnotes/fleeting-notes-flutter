@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:fleeting_notes_flutter/exceptions.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
@@ -67,6 +68,12 @@ class _SearchScreenState extends State<SearchScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(e.message),
           duration: const Duration(seconds: 2),
+        ));
+      } else if (e is FirebaseException &&
+          e.code == 'cloud_firestore/permission-denied') {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Authentication failed, try logging in again'),
+          duration: Duration(seconds: 2),
         ));
       } else {
         rethrow;
