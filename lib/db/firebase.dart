@@ -64,7 +64,7 @@ class FirebaseDB implements DatabaseInterface {
     if (firebaseHashedKey == null) {
       await encryptionCollection.doc(userId).set({'key': hashedKey});
     } else if (firebaseHashedKey != hashedKey) {
-      throw EncryptionException('Encryption key does not match');
+      throw FleetingNotesException('Encryption key does not match');
     }
     await secureStorage.write(key: 'encryption-key-$userId', value: key);
     analytics.logEvent(name: 'set_encryption');
@@ -83,15 +83,20 @@ class FirebaseDB implements DatabaseInterface {
       "max_attachment_size_mb": 10,
       "max_attachment_size_mb_premium": 25,
     });
-    remoteConfig.fetchAndActivate();
+    remoteConfig.fetchAndActivate().catchError((e) {});
   }
 
   Future<bool> isCurrUserPremium() async {
     if (!isLoggedIn()) return false;
-    await currUser!.getIdToken(true);
-    var decodedToken = await currUser!.getIdTokenResult();
-    Map claims = decodedToken.claims ?? {};
-    return claims['stripeRole'] == 'premium';
+    try {
+      await currUser!.getIdToken(true);
+      var decodedToken = await currUser!.getIdTokenResult();
+      Map claims = decodedToken.claims ?? {};
+      return claims['stripeRole'] == 'premium';
+    } catch (e) {
+      // TODO: store premium user so user can have premium features offline
+      return false;
+    }
   }
 
   void setAnalytics(enabled) {
@@ -335,7 +340,7 @@ class FirebaseDB implements DatabaseInterface {
     String source = doc["source"].toString();
     if (isEncrypted) {
       if (encryptionKey == null) {
-        throw EncryptionException(
+        throw FleetingNotesException(
             'Note decryption failed - Add encryption key in settings');
       }
       if (title.isNotEmpty) {

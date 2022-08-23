@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fleeting_notes_flutter/db/firebase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,13 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
 
   void refreshApp(user) {
     if (user != null) {
-      db.getAllNotes(forceSync: true);
+      try {
+        db.getAllNotes(forceSync: true);
+      } on FirebaseException catch (e) {
+        if (e.code != "cloud_firestore/permission-denied") {
+          rethrow;
+        }
+      }
     }
     db.refreshApp();
   }

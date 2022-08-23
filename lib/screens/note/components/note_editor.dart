@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:fleeting_notes_flutter/exceptions.dart';
 import 'package:fleeting_notes_flutter/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/material.dart';
@@ -125,9 +126,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   // Helper functions
-  Future<String> checkTitle(id, title) async {
-    String errMessage = '';
-    if (title == '') return errMessage;
+  Future<void> checkTitle(id, title) async {
+    if (title == '') return;
 
     RegExp r = RegExp('[${Note.invalidChars}]');
     final invalidMatch = r.firstMatch(titleController.text);
@@ -135,13 +135,14 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
         await widget.db.titleExists(widget.note.id, titleController.text);
 
     if (invalidMatch != null) {
-      errMessage = r'Title cannot contain [, ], #, *, :, ^, \, /';
       titleController.text = widget.note.title;
+      throw FleetingNotesException(
+          r'Title cannot contain [, ], #, *, :, ^, \, /');
     } else if (titleExists) {
-      errMessage = 'Title `${titleController.text}` already exists';
       titleController.text = widget.note.title;
+      throw FleetingNotesException(
+          'Title `${widget.note.title}` already exists');
     }
-    return errMessage;
   }
 
   void _deleteNote() async {
@@ -159,16 +160,20 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     }
   }
 
-  Future<String> _saveNote({updateState = true}) async {
+  Future<void> _saveNote({updateState = true}) async {
     Note updatedNote = widget.note;
     String prevTitle = widget.note.title;
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     updatedNote.source = sourceController.text;
     updatedNote.isShareable = isNoteShareable;
-    if (updatedNote.title.isEmpty && updatedNote.content.isEmpty) return '';
-    String errMessage = await checkTitle(updatedNote.id, updatedNote.title);
-    if (errMessage == '') {
+    try {
+      try {
+        await checkTitle(updatedNote.id, updatedNote.title);
+      } on FleetingNotesException catch (_) {
+        titleController.text = prevTitle;
+        rethrow;
+      }
       if (updateState) {
         setState(() {
           hasNewChanges = false;
@@ -176,16 +181,18 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       }
       bool isSaveSuccess = await widget.db.upsertNote(updatedNote);
       if (!isSaveSuccess) {
-        errMessage = 'Failed to save note';
         if (updateState) onChanged();
+        throw FleetingNotesException('Failed to save note');
       } else {
         widget.db.clearUnsavedNote();
-        errMessage = await updateBacklinks(prevTitle, updatedNote.title);
+        await updateBacklinks(prevTitle, updatedNote.title);
       }
-    } else {
-      titleController.text = prevTitle;
+    } on FleetingNotesException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        duration: const Duration(seconds: 2),
+      ));
     }
-    return errMessage;
   }
 
   void storeUnsavedNote() {
@@ -199,9 +206,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     widget.db.setUnsavedNote(unsavedNote);
   }
 
-  Future<String> updateBacklinks(String prevTitle, String newTitle) async {
-    String errMessage = '';
-    if (backlinkNotes.isEmpty || prevTitle == newTitle) return errMessage;
+  Future<void> updateBacklinks(String prevTitle, String newTitle) async {
+    if (backlinkNotes.isEmpty || prevTitle == newTitle) return;
     // update backlinks
     List<Note> updatedBacklinks = backlinkNotes.map((n) {
       RegExp r = RegExp('\\[\\[$prevTitle\\]\\]', multiLine: true);
@@ -217,9 +223,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
         duration: const Duration(seconds: 2),
       ));
     } else {
-      errMessage = 'Failed to update backlinks';
+      throw FleetingNotesException('Failed to update backlinks');
     }
-    return errMessage;
   }
 
   void onChanged() async {

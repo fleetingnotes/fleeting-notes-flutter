@@ -77,7 +77,7 @@ class _SourceContainerState extends State<SourceContainer> {
   void setSourceUrl() async {
     widget.controller.text =
         await getSourceUrl(defaultText: widget.controller.text);
-    if (widget.onChanged != null) widget.onChanged!();
+    widget.onChanged?.call();
     setState(() {
       sourceFieldVisible = true;
     });

@@ -25,9 +25,7 @@ class TitleField extends StatelessWidget {
         border: InputBorder.none,
       ),
       onChanged: (text) {
-        if (onChanged != null) {
-          onChanged!();
-        }
+        onChanged?.call();
       },
       autofocus: autofocus,
     );
