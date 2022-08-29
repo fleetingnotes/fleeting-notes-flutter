@@ -137,6 +137,7 @@ class _MainScreenState extends State<MainScreen> {
           },
           child: Scaffold(
             key: widget.db.scaffoldKey,
+            resizeToAvoidBottomInset: false,
             drawer: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 250),
               child: SideMenu(db: widget.db),

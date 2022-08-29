@@ -1,9 +1,15 @@
+import 'dart:io';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/toolbar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/link_suggestions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/link_preview.dart';
 import 'package:fleeting_notes_flutter/database.dart';
 import 'package:flutter/services.dart';
+import 'package:keyboard_actions/keyboard_actions.dart';
 
 class ContentField extends StatefulWidget {
   const ContentField({
@@ -32,6 +38,7 @@ class _ContentFieldState extends State<ContentField> {
     builder: (context) => Container(),
   );
   bool titleLinksVisible = false;
+  late Toolbar _toolbar;
 
   @override
   void initState() {
@@ -42,6 +49,10 @@ class _ContentFieldState extends State<ContentField> {
         removeOverlay();
       }
     });
+    _toolbar = Toolbar(
+      controller: widget.controller,
+      bringEditorToFocus: contentFocusNode.requestFocus,
+    );
     widget.db.getAllLinks().then((links) {
       if (!mounted) return;
       setState(() {
@@ -253,20 +264,27 @@ class _ContentFieldState extends State<ContentField> {
     return CompositedTransformTarget(
       link: layerLink,
       child: LayoutBuilder(builder: (context, size) {
-        return TextField(
-          focusNode: contentFocusNode,
-          textCapitalization: TextCapitalization.sentences,
-          autofocus: widget.autofocus,
-          controller: widget.controller,
-          minLines: 5,
-          maxLines: 20,
-          style: Theme.of(context).textTheme.bodyText2,
-          decoration: const InputDecoration(
-            hintText: "Note and links to other ideas",
-            border: InputBorder.none,
+        return KeyboardActions(
+          enable: defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS,
+          disableScroll: true,
+          config: KeyboardActionsConfig(
+              actions: [KeyboardActionsItem(focusNode: contentFocusNode)]),
+          child: TextField(
+            focusNode: contentFocusNode,
+            textCapitalization: TextCapitalization.sentences,
+            autofocus: widget.autofocus,
+            controller: widget.controller,
+            minLines: 5,
+            maxLines: 20,
+            style: Theme.of(context).textTheme.bodyText2,
+            decoration: const InputDecoration(
+              hintText: "Note and links to other ideas",
+              border: InputBorder.none,
+            ),
+            onChanged: (text) => _onContentChanged(context, text, size),
+            onTap: () => _onContentTap(context, size),
           ),
-          onChanged: (text) => _onContentChanged(context, text, size),
-          onTap: () => _onContentTap(context, size),
         );
       }),
     );
