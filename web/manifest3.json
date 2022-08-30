@@ -21,6 +21,12 @@
   "background": {
     "service_worker": "extension/background3.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["extension/content.js"]
+    }
+  ],
   "commands": {
     "_execute_action": {
       "suggested_key" : {
