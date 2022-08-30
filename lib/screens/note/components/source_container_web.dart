@@ -12,11 +12,11 @@ import 'package:web_browser_detect/web_browser_detect.dart';
 
 import '../../../database.dart';
 
-@JS('chrome.tabs.query')
-external dynamic queryTabsChrome(dynamic queryInfo);
+@JS('window.getSourceUrlChrome')
+external dynamic getSourceUrlChrome();
 
-@JS('browser.tabs.query')
-external dynamic queryTabsBrowser(dynamic queryInfo);
+@JS('window.getSourceUrlBrowser')
+external dynamic getSourceUrlBrowser();
 
 class SourceContainer extends StatefulWidget {
   const SourceContainer({
@@ -57,14 +57,12 @@ class _SourceContainerState extends State<SourceContainer> {
       return defaultText;
     }
     try {
-      var queryOptions = jsify({'active': true, 'currentWindow': true});
-      dynamic tabs;
+      String url;
       if (Browser().browser == 'Chrome') {
-        tabs = await promiseToFuture(queryTabsChrome(queryOptions));
+        url = await promiseToFuture(getSourceUrlChrome());
       } else {
-        tabs = await promiseToFuture(queryTabsBrowser(queryOptions));
+        url = await promiseToFuture(getSourceUrlBrowser());
       }
-      String url = getProperty(tabs[0], 'url');
       if (url.startsWith(RegExp(r'.*-extension:\/\/'))) {
         return defaultText;
       }
