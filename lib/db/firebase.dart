@@ -48,6 +48,12 @@ class FirebaseDB implements DatabaseInterface {
 
   bool get isSharedNotes => userId != 'local' && currUser?.uid != userId;
 
+  Future<void> recordError(dynamic e, StackTrace? stack) async {
+    if (!kIsWeb) {
+      await FirebaseCrashlytics.instance.recordError(e, stack);
+    }
+  }
+
   Future<String?> getFirebaseHashedKey() async {
     if (userId == 'local') return null;
     var docRef = await encryptionCollection.doc(userId).get();
@@ -83,18 +89,23 @@ class FirebaseDB implements DatabaseInterface {
       "max_attachment_size_mb": 10,
       "max_attachment_size_mb_premium": 25,
     });
-    remoteConfig.fetchAndActivate().catchError((e) {});
+    try {
+      remoteConfig.fetchAndActivate();
+    } catch (e, stack) {
+      recordError(e, stack);
+    }
   }
 
   Future<bool> isCurrUserPremium() async {
-    if (!isLoggedIn()) return false;
     try {
+      if (!isLoggedIn()) return false;
       await currUser!.getIdToken(true);
       var decodedToken = await currUser!.getIdTokenResult();
       Map claims = decodedToken.claims ?? {};
       return claims['stripeRole'] == 'premium';
-    } catch (e) {
+    } catch (e, stack) {
       // TODO: store premium user so user can have premium features offline
+      recordError(e, stack);
       return false;
     }
   }
@@ -116,7 +127,8 @@ class FirebaseDB implements DatabaseInterface {
         },
       );
       return true;
-    } catch (e) {
+    } catch (e, stack) {
+      recordError(e, stack);
       return false;
     }
   }
@@ -179,13 +191,15 @@ class FirebaseDB implements DatabaseInterface {
       userId = (credentials.user == null) ? 'local' : credentials.user!.uid;
       await analytics.logLogin(loginMethod: 'firebase');
       return true;
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e, stack) {
       if (e.code == 'user-not-found') {
         // ignore: avoid_print
         print('No user found for that email.');
       } else if (e.code == 'wrong-password') {
         // ignore: avoid_print
         print('Wrong password provided for that user.');
+      } else {
+        recordError(e, stack);
       }
       return false;
     }
@@ -200,13 +214,15 @@ class FirebaseDB implements DatabaseInterface {
       );
       await analytics.logSignUp(signUpMethod: 'firebase');
       return true;
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e, stack) {
       if (e.code == 'weak-password') {
         // ignore: avoid_print
         print('The password provided is too weak.');
       } else if (e.code == 'email-already-in-use') {
         // ignore: avoid_print
         print('The account already exists for that email.');
+      } else {
+        recordError(e, stack);
       }
       return false;
     } catch (e) {
@@ -224,7 +240,8 @@ class FirebaseDB implements DatabaseInterface {
       currUser = null;
       authChangeController.add(currUser);
       return true;
-    } catch (e) {
+    } catch (e, stack) {
+      recordError(e, stack);
       return false;
     }
   }

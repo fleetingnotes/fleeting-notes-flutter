@@ -43,13 +43,17 @@ class Database {
 
   Future<List<Note>> getAllNotes({forceSync = false}) async {
     var box = await Hive.openBox(firebase.userId);
-    if ((((box.isEmpty || forceSync) && isLoggedIn()) ||
-        firebase.isSharedNotes)) {
-      List<Note> notes =
-          await firebase.getAllNotes(isShared: firebase.isSharedNotes);
-      Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
-      await box.clear();
-      await box.putAll(noteIdMap);
+    try {
+      if ((((box.isEmpty || forceSync) && isLoggedIn()) ||
+          firebase.isSharedNotes)) {
+        List<Note> notes =
+            await firebase.getAllNotes(isShared: firebase.isSharedNotes);
+        Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
+        await box.clear();
+        await box.putAll(noteIdMap);
+      }
+    } catch (e, stack) {
+      firebase.recordError(e, stack);
     }
     List<Note> notes = getAllNotesLocal(box);
     return notes;
