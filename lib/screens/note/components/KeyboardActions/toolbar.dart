@@ -36,8 +36,73 @@ class Toolbar {
         : selection;
   }
 
+  void insertTextAtCursor(String text) {
+    TextSelection selection = controller.selection;
+    String newText =
+        controller.text.replaceRange(selection.start, selection.end, text);
+    controller.value = TextEditingValue(
+      text: newText,
+      selection:
+          TextSelection.collapsed(offset: selection.baseOffset + text.length),
+    );
+  }
+
+  // adds text at the start of a line for all highlighted lintes
+  void startLineAction(String startStr, {Function? replaceLine}) {
+    RegExp r = RegExp('^.*', multiLine: true);
+    String currText = controller.text;
+    TextSelection selection = controller.selection;
+    int baseOffset = selection.start;
+    int extentOffset = selection.end;
+    Iterable<int> allMatchIndexes = r.allMatches(currText).map((m) => m.start);
+    List<int> replaceIndexes = [];
+    for (var i in allMatchIndexes) {
+      if (replaceIndexes.isEmpty) {
+        replaceIndexes.add(i);
+      } else if (i <= selection.start) {
+        replaceIndexes.remove(replaceIndexes.first);
+        replaceIndexes.add(i);
+      } else if (i > selection.start && i < selection.end) {
+        replaceIndexes.add(i);
+      }
+    }
+
+    String newText = currText.replaceAllMapped(r, (match) {
+      int i = match.start;
+      String prevLine = match.group(0) as String;
+      String newLine = prevLine;
+      if (replaceIndexes.contains(i)) {
+        if (replaceLine != null) {
+          newLine = replaceLine(newLine);
+        } else {
+          newLine = startStr + newLine;
+        }
+      }
+      if (baseOffset >= i && baseOffset <= i + prevLine.length) {
+        baseOffset += newLine.length - prevLine.length;
+      }
+      extentOffset += newLine.length - prevLine.length;
+      return newLine;
+    });
+    controller.value = controller.value.copyWith(
+      text: newText,
+      selection: selection.start == selection.end
+          ? TextSelection.collapsed(
+              offset: baseOffset,
+            )
+          : TextSelection(
+              baseOffset: baseOffset,
+              extentOffset: extentOffset,
+            ),
+    );
+  }
+
   // toolbar action
-  void action(String left, String right, {TextSelection? textSelection}) {
+  void action(
+    String left,
+    String right, {
+    TextSelection? textSelection,
+  }) {
     // Keep this as it is
     // Dont remove or place in the end
     bringEditorToFocus?.call();

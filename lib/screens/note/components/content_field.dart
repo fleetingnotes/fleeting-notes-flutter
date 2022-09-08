@@ -1,8 +1,6 @@
-import 'dart:io';
-
-import 'package:firebase_core/firebase_core.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/toolbar.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/KeyboardActions/shortcut_actions.dart';
 import 'package:flutter/foundation.dart';
+import 'KeyboardActions/keyboard_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/link_suggestions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -38,7 +36,7 @@ class _ContentFieldState extends State<ContentField> {
     builder: (context) => Container(),
   );
   bool titleLinksVisible = false;
-  late Toolbar _toolbar;
+  late ShortcutActions shortcuts;
 
   @override
   void initState() {
@@ -49,7 +47,7 @@ class _ContentFieldState extends State<ContentField> {
         removeOverlay();
       }
     });
-    _toolbar = Toolbar(
+    shortcuts = ShortcutActions(
       controller: widget.controller,
       bringEditorToFocus: contentFocusNode.requestFocus,
     );
@@ -126,13 +124,12 @@ class _ContentFieldState extends State<ContentField> {
   }
 
   // Helper Functions
-  bool isTitleLinksVisible(text) {
+  bool isTitleLinksVisible(String text) {
     var caretIndex = widget.controller.selection.baseOffset;
-    int i = text.substring(0, caretIndex).lastIndexOf('[[');
-    if (i == -1) return false;
-    int nextI = text.indexOf('[', i + 2);
-    nextI = (nextI > 0) ? nextI : text.length;
-    return !text.substring(i, nextI).contains(']');
+    String lastLine = text.substring(0, caretIndex).split('\n').last;
+    RegExp r = RegExp(r'\[\[((?!([\]])).)*$');
+    bool showTitleLinks = r.hasMatch(lastLine);
+    return showTitleLinks;
   }
 
   Offset getCaretOffset(TextEditingController textController,
@@ -269,7 +266,59 @@ class _ContentFieldState extends State<ContentField> {
               defaultTargetPlatform == TargetPlatform.iOS,
           disableScroll: true,
           config: KeyboardActionsConfig(
-              actions: [KeyboardActionsItem(focusNode: contentFocusNode)]),
+              keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
+              actions: [
+                KeyboardActionsItem(
+                  focusNode: contentFocusNode,
+                  displayArrows: false,
+                  displayDoneButton: false,
+                  toolbarAlignment: MainAxisAlignment.spaceAround,
+                  toolbarButtons: [
+                    (node) {
+                      return KeyboardButton(
+                        icon: '[]',
+                        onPressed: () {
+                          shortcuts.addLink();
+                          _onContentChanged(
+                              context, widget.controller.text, size);
+                        },
+                        tooltip: 'Add link',
+                      );
+                    },
+                    (node) {
+                      return KeyboardButton(
+                        icon: '#',
+                        onPressed: () {
+                          shortcuts.addTag();
+                          _onContentChanged(
+                              context, widget.controller.text, size);
+                        },
+                      );
+                    },
+                    (node) {
+                      return KeyboardButton(
+                        icon: Icons.checklist_outlined,
+                        onPressed: () {
+                          shortcuts.toggleCheckbox();
+                          _onContentChanged(
+                              context, widget.controller.text, size);
+                        },
+                      );
+                    },
+                    (node) {
+                      return KeyboardButton(
+                        icon: 'Aa',
+                        disabled: true,
+                        onPressed: () {
+                          shortcuts.addLink();
+                          _onContentChanged(
+                              context, widget.controller.text, size);
+                        },
+                      );
+                    },
+                  ],
+                )
+              ]),
           child: TextField(
             focusNode: contentFocusNode,
             textCapitalization: TextCapitalization.sentences,
