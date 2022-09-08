@@ -36,6 +36,24 @@ class Toolbar {
         : selection;
   }
 
+  void listOnEnter(RegExp listPattern) {
+    RegExp r = RegExp('^.*', multiLine: true);
+    String currText = controller.text;
+    TextSelection selection = controller.selection;
+    Iterable<RegExpMatch> allMatches = r.allMatches(currText);
+    String prevLine = "";
+    for (var match in allMatches) {
+      if (match.start < selection.start) {
+        prevLine = match.group(0) ?? "";
+      }
+    }
+    RegExpMatch? m = listPattern.firstMatch(prevLine);
+    String? matchStr = m?.group(0);
+    if (m != null && matchStr != null) {
+      insertTextAtCursor(matchStr);
+    }
+  }
+
   void insertTextAtCursor(String text) {
     TextSelection selection = controller.selection;
     String newText =
@@ -69,7 +87,7 @@ class Toolbar {
 
     String newText = currText.replaceAllMapped(r, (match) {
       int i = match.start;
-      String prevLine = match.group(0) as String;
+      String prevLine = match.group(0) ?? "";
       String newLine = prevLine;
       if (replaceIndexes.contains(i)) {
         if (replaceLine != null) {

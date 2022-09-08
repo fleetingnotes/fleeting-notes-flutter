@@ -161,7 +161,7 @@ class _ContentFieldState extends State<ContentField> {
       int linkIndex = beforeCaretText.lastIndexOf('[[');
       widget.controller.text = t.substring(0, linkIndex) +
           '[[$link]]' +
-          t.substring(caretI, t.length);
+          t.substring(caretI, t.length).replaceFirst(RegExp(r"^\]\]"), "");
       widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: linkIndex + link.length + 4));
       widget.db.firebase.analytics

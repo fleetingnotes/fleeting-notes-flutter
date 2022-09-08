@@ -71,7 +71,7 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
   }
 
   bool onKeyEvent(KeyEvent e) {
-    if (e is! KeyDownEvent) return false;
+    if (e is! KeyDownEvent || filteredTitles.isEmpty) return false;
     if (e.logicalKey == LogicalKeyboardKey.arrowDown) {
       setState(() {
         selectedIndex = min(selectedIndex + 1, filteredTitles.length - 1);
