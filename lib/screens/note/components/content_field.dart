@@ -111,7 +111,7 @@ class _ContentFieldState extends State<ContentField> {
     }
     if (widget.controller.text.length % 30 == 0 &&
         widget.controller.text.isNotEmpty &&
-        await widget.db.firebase.isCurrUserPremium()) {
+        await widget.db.firebase.isCurrUserPaying()) {
       widget.db.firebase
           .orderListByRelevance(widget.controller.text, allLinks)
           .then((newLinkSuggestions) {
