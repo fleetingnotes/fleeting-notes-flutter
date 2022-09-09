@@ -96,13 +96,14 @@ class FirebaseDB implements DatabaseInterface {
     }
   }
 
-  Future<bool> isCurrUserPremium() async {
+  Future<bool> isCurrUserPaying() async {
     try {
       if (!isLoggedIn()) return false;
       await currUser!.getIdToken(true);
       var decodedToken = await currUser!.getIdTokenResult();
       Map claims = decodedToken.claims ?? {};
-      return claims['stripeRole'] == 'premium';
+      return claims['stripeRole'] == 'premium' ||
+          claims['stripeRole'] == 'basic';
     } catch (e, stack) {
       // TODO: store premium user so user can have premium features offline
       recordError(e, stack);
@@ -137,7 +138,7 @@ class FirebaseDB implements DatabaseInterface {
     if (fileBytes == null || fileBytes.isEmpty) {
       throw Exception('File is empty');
     }
-    int maxSize = await isCurrUserPremium()
+    int maxSize = await isCurrUserPaying()
         ? remoteConfig.getInt('max_attachment_size_mb_premium')
         : remoteConfig.getInt('max_attachment_size_mb');
     if (fileBytes.lengthInBytes / 1000000 > maxSize) {

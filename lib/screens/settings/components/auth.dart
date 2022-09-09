@@ -34,7 +34,7 @@ class _AuthState extends State<Auth> {
 
   Future<void> onLoginPress(String email, String password) async {
     bool isLoggedIn = await _login(email, password);
-    if (isLoggedIn && !await widget.db.firebase.isCurrUserPremium()) {
+    if (isLoggedIn && !await widget.db.firebase.isCurrUserPaying()) {
       await widget.db.firebase.logoutAllSessions();
       try {
         // refresh user token to tell client to logout
