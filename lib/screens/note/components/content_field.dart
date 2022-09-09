@@ -278,6 +278,10 @@ class _ContentFieldState extends State<ContentField> {
                       return KeyboardButton(
                         icon: '[]',
                         onPressed: () {
+                          widget.db.firebase.analytics.logEvent(
+                            name: 'click_keyboard_actions',
+                            parameters: {'action': 'addLink'},
+                          );
                           shortcuts.addLink();
                           _onContentChanged(
                               context, widget.controller.text, size);
@@ -289,6 +293,10 @@ class _ContentFieldState extends State<ContentField> {
                       return KeyboardButton(
                         icon: '#',
                         onPressed: () {
+                          widget.db.firebase.analytics.logEvent(
+                            name: 'click_keyboard_actions',
+                            parameters: {'action': 'addTag'},
+                          );
                           shortcuts.addTag();
                           _onContentChanged(
                               context, widget.controller.text, size);
@@ -299,6 +307,10 @@ class _ContentFieldState extends State<ContentField> {
                       return KeyboardButton(
                         icon: Icons.checklist_outlined,
                         onPressed: () {
+                          widget.db.firebase.analytics.logEvent(
+                            name: 'click_keyboard_actions',
+                            parameters: {'action': 'toggleCheckBox'},
+                          );
                           shortcuts.toggleCheckbox();
                           _onContentChanged(
                               context, widget.controller.text, size);
@@ -306,14 +318,9 @@ class _ContentFieldState extends State<ContentField> {
                       );
                     },
                     (node) {
-                      return KeyboardButton(
+                      return const KeyboardButton(
                         icon: 'Aa',
                         disabled: true,
-                        onPressed: () {
-                          shortcuts.addLink();
-                          _onContentChanged(
-                              context, widget.controller.text, size);
-                        },
                       );
                     },
                   ],
