@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/KeyboardActions/toolbar.dart';
+import 'package:fleeting_notes_flutter/utils/toolbar.dart';
 
 class ShortcutActions {
   late String prevText;

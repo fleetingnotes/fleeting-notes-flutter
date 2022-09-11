@@ -6,11 +6,11 @@ import 'package:js/js.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:js_util';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
+import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart'
     as sc;
 import 'package:web_browser_detect/web_browser_detect.dart';
 
-import '../../../database.dart';
+import '../../../../services/database.dart';
 
 @JS('window.getSourceUrlChrome')
 external dynamic getSourceUrlChrome();

@@ -8,14 +8,14 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fleeting_notes_flutter/exceptions.dart';
+import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mime/mime.dart';
 import '../models/Note.dart';
-import 'db_interface.dart';
+import '../models/db_interface.dart';
 import 'package:dio/dio.dart';
-import '../crypt.dart';
+import '../utils/crypt.dart';
 
 class FirebaseDB implements DatabaseInterface {
   @override

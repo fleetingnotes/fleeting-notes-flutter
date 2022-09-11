@@ -1,7 +1,7 @@
 import 'package:fleeting_notes_flutter/models/search_query.dart';
-import 'package:fleeting_notes_flutter/db/firebase.dart';
+import 'package:fleeting_notes_flutter/services/firebase.dart';
 import 'package:test/test.dart';
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:mocktail/mocktail.dart';
 

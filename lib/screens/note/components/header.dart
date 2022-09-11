@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:fleeting_notes_flutter/responsive.dart';
-import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:fleeting_notes_flutter/utils/responsive.dart';
+import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 

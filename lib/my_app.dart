@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:fleeting_notes_flutter/db/firebase.dart';
+import 'package:fleeting_notes_flutter/services/firebase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:hive_flutter/adapters.dart';
 
 class MyApp extends StatefulWidget {
