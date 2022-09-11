@@ -1,11 +1,11 @@
-import 'package:fleeting_notes_flutter/screens/note/components/KeyboardActions/shortcut_actions.dart';
 import 'package:flutter/foundation.dart';
-import 'KeyboardActions/keyboard_button.dart';
+import 'keyboard_button.dart';
+import '../../../../utils/shortcut_actions.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/link_suggestions.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/link_preview.dart';
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
+import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 

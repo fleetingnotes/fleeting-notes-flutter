@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/Note.dart';
+import '../../../../models/Note.dart';
 
 class LinkPreview extends StatelessWidget {
   const LinkPreview({

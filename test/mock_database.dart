@@ -1,12 +1,12 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fleeting_notes_flutter/db/firebase.dart';
+import 'package:fleeting_notes_flutter/services/firebase.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/services/database.dart';
 import 'dart:async';
 import 'package:mocktail/mocktail.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 

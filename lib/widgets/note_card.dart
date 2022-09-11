@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
 
 import '../models/Note.dart';
-import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
 class NoteCard extends StatelessWidget {

@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:fleeting_notes_flutter/database.dart';
-import 'package:fleeting_notes_flutter/exceptions.dart';
-import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:fleeting_notes_flutter/services/database.dart';
+import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter/material.dart';
 import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
-import '../../responsive.dart';
+import '../../utils/responsive.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import '../note/components/note_editor.dart';
+import '../note/note_editor.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({

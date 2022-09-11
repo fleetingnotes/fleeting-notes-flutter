@@ -1,4 +1,4 @@
-import '../models/Note.dart';
+import 'Note.dart';
 
 abstract class DatabaseInterface {
   String get userId;

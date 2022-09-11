@@ -1,4 +1,4 @@
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 

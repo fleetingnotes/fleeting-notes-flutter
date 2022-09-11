@@ -1,13 +1,13 @@
 import 'dart:math';
-import 'package:fleeting_notes_flutter/screens/note/components/note_editor.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'db/firebase.dart';
-import 'models/Note.dart';
+import 'firebase.dart';
+import '../models/Note.dart';
 import 'dart:async';
 import 'package:collection/collection.dart';
-import 'models/search_query.dart';
+import '../models/search_query.dart';
 
 class Database {
   Database({

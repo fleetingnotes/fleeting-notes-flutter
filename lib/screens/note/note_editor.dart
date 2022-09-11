@@ -1,24 +1,24 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:fleeting_notes_flutter/exceptions.dart';
-import 'package:fleeting_notes_flutter/theme_data.dart';
+import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 
-import 'package:fleeting_notes_flutter/widgets/stylable_textfield_controller.dart';
+import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
-import 'package:fleeting_notes_flutter/database.dart';
+import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:path/path.dart' as p;
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/content_field.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/source_container.dart'
-    if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/source_container_web.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart'
+    if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container_web.dart';
 import 'package:flutter/services.dart';
 
 class NoteEditor extends StatefulWidget {
