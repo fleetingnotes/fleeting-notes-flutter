@@ -10,6 +10,7 @@ import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'services/browser_ext/browser_ext.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -123,22 +124,31 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
   @override
   void initState() {
     super.initState();
-    loadFuture = getNoteFromQueryParam();
+    loadFuture = loadInitNote();
   }
 
-  Future<Note?> getNoteFromQueryParam() async {
+  Future<Note?> loadInitNote() async {
     await widget.db.firebase.userChanges.first;
     Map params = widget.state.queryParams;
+    bool paramContains =
+        ['title', 'content', 'source'].any((key) => params.containsKey(key));
+    Note? newNote;
     if (params['note'] != null) {
       return await getNoteFromId(params['note']);
-    } else {
-      Note newNote = Note.empty(
+    } else if (paramContains) {
+      newNote = Note.empty(
         title: params['title'] ?? '',
         content: params['content'] ?? '',
         source: params['source'] ?? '',
       );
-      return (newNote.isEmpty()) ? null : newNote;
+    } else {
+      String selectionText = await BrowserExtension().getSelectionText();
+      if (selectionText.isNotEmpty) {
+        selectionText = "```\n$selectionText\n```\n";
+        newNote = Note.empty(content: selectionText);
+      }
     }
+    return (newNote == null || newNote.isEmpty()) ? null : newNote;
   }
 
   Future<Note?> getNoteFromId(String noteId) async {
