@@ -20,7 +20,7 @@ const onClicked = async({ menuItemId, linkUrl, pageUrl, srcUrl, selectionText })
             source = srcUrl;
             break;
         case 'save_highlight':
-            content = `\`\`\`\n${selectionText}\n\`\`\`\n`;
+            content = `${selectionText.trim()}`;
             source = pageUrl;
             break;
     }

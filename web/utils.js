@@ -44,7 +44,7 @@ window.getSourceUrl = async function getSourceUrl(browser_type) {
 window.getSelectionText = async (browser_type) => {
     const tabs = await queryCurrentTab(null, browser_type);
     const selectionText = await sendMessage(tabs[0].id, { msg: "get-selection-text" }, browser_type);
-    return selectionText;
+    return selectionText.trim();
 };
 
 async function modifyUrl(url, browser_type) {

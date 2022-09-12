@@ -144,7 +144,6 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
     } else {
       String selectionText = await BrowserExtension().getSelectionText();
       if (selectionText.isNotEmpty) {
-        selectionText = "```\n$selectionText\n```\n";
         newNote = Note.empty(content: selectionText);
       }
     }
