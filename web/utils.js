@@ -13,7 +13,7 @@ async function queryCurrentTab(url=null, browser_type="chrome") {
     }
 }
 
-function sendMessageOnVideo(tabId, message, browser_type) {
+function sendMessage(tabId, message, browser_type) {
     return new Promise((resolve) => {
         if (browser_type == "chrome") {
             chrome.tabs.sendMessage(
@@ -34,28 +34,25 @@ function sendMessageOnVideo(tabId, message, browser_type) {
 }
 
 // functions exposed to dart
-window.getSourceUrlBrowser = async function getSourceUrlBrowser() {
-    const tabs = await queryCurrentTab(null, 'browser');
+window.getSourceUrl = async function getSourceUrl(browser_type) {
+    const tabs = await queryCurrentTab(null, browser_type);
     var url = tabs[0].url
-    url = await modifyUrl(url, 'browser');
+    url = await modifyUrl(url, browser_type);
     return url;
 }
 
-window.getSourceUrlChrome = async function getSourceUrlChrome() {
-    const tabs = await queryCurrentTab(null, 'chrome');
-    var url = tabs[0].url
-    url = await modifyUrl(url, 'chrome');
-    return url;
-}
+window.getSelectionText = async (browser_type) => {
+    const tabs = await queryCurrentTab(null, browser_type);
+    const selectionText = await sendMessage(tabs[0].id, { msg: "get-selection-text" }, browser_type);
+    return selectionText.trim();
+};
 
 async function modifyUrl(url, browser_type) {
     const ytRegex = /https:\/\/www.youtube.com\/watch\?v=.+/;
     if (url.match(ytRegex)) {
         const tabs = await queryCurrentTab("https://www.youtube.com/watch?v=*", browser_type)
         if (tabs.length > 0) {
-            console.log('youtube tab');
-            const timestampData = await sendMessageOnVideo(tabs[0].id, {msg: "obtain-timestamp"}, browser_type);
-            console.log(timestampData);
+            const timestampData = await sendMessage(tabs[0].id, {msg: "obtain-timestamp"}, browser_type);
             url = `https://www.youtube.com/watch?v=${timestampData.videoId}&t=${timestampData.timestamp}`
         }
     }

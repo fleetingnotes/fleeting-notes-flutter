@@ -34,8 +34,10 @@ function listenMessages() {
     chrome.runtime.onMessage.addListener((request, sender, response) => {
         if (request.msg === "obtain-timestamp") {
             const timestampData = getCurrentTimestampInfo();
-            console.log('getCurrentTimestamp', timestampData)
             response(timestampData);
+        } else if (request.msg === "get-selection-text") {
+            const selectionText = window.getSelection().toString();
+            response(selectionText);
         }
         return true; // used to send response async
     });
