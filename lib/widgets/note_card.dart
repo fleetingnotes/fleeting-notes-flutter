@@ -10,12 +10,14 @@ class NoteCard extends StatelessWidget {
   const NoteCard({
     Key? key,
     required this.note,
+    required this.onLongPress,
     required this.onTap,
     this.sQuery,
     this.isActive = false,
   }) : super(key: key);
 
   final bool isActive;
+  final VoidCallback onLongPress; 
   final VoidCallback onTap;
   final Note note;
   final SearchQuery? sQuery;
@@ -54,95 +56,101 @@ class NoteCard extends StatelessWidget {
         padding: EdgeInsets.symmetric(
             horizontal: Theme.of(context).custom.kDefaultPadding,
             vertical: Theme.of(context).custom.kDefaultPadding / 2),
-        child: NeumorphicButton(
-          padding: const EdgeInsets.all(0),
-          style: NeumorphicStyle(
-            depth: (isActive) ? 0 : 2,
-            color: isActive
-                ? Theme.of(context).primaryColor
-                : Theme.of(context).scaffoldBackgroundColor,
-            shadowLightColor: Theme.of(context).custom.lightShadow,
-            shadowDarkColor: Theme.of(context).custom.darkShadow,
-          ),
-          onPressed: onTap,
-          child: Container(
-            padding: EdgeInsets.all(Theme.of(context).custom.kDefaultPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+        child: GestureDetector(
+            onLongPress: onLongPress,
+            child: NeumorphicButton(
+              padding: const EdgeInsets.all(0),
+              style: NeumorphicStyle(
+                depth: (isActive) ? 0 : 2,
+                color: isActive
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).scaffoldBackgroundColor,
+                shadowLightColor: Theme.of(context).custom.lightShadow,
+                shadowDarkColor: Theme.of(context).custom.darkShadow,
+              ),
+              onPressed: onTap,
+              child: Container(
+                padding:
+                    EdgeInsets.all(Theme.of(context).custom.kDefaultPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (note.title != '')
-                              RichText(
-                                  text: TextSpan(
-                                      children: highlightString(
-                                          (sQuery != null &&
-                                                  sQuery!.searchByTitle)
-                                              ? sQuery!.query
-                                              : '',
-                                          note.title,
-                                          Theme.of(context)
-                                              .textTheme
-                                              .bodyText1!
-                                              .copyWith(
-                                                color: isActive
-                                                    ? Colors.white
-                                                    : null,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                              ))),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis),
-                            if (note.content != '')
-                              RichText(
-                                  text: TextSpan(
-                                      children: highlightString(
-                                          (sQuery != null &&
-                                                  sQuery!.searchByContent)
-                                              ? sQuery!.query
-                                              : '',
-                                          note.content,
-                                          Theme.of(context)
-                                              .textTheme
-                                              .bodyText2!
-                                              .copyWith(
-                                                color: isActive
-                                                    ? Colors.white
-                                                    : null,
-                                              ))),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis),
-                          ]),
-                    ),
-                    SizedBox(width: Theme.of(context).custom.kDefaultPadding),
-                    Column(
+                    Row(
                       children: [
-                        Text(
-                          note.getShortDateTimeStr(),
-                          style: Theme.of(context).textTheme.caption!.copyWith(
-                                color: isActive ? Colors.white70 : null,
-                              ),
+                        Expanded(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (note.title != '')
+                                  RichText(
+                                      text: TextSpan(
+                                          children: highlightString(
+                                              (sQuery != null &&
+                                                      sQuery!.searchByTitle)
+                                                  ? sQuery!.query
+                                                  : '',
+                                              note.title,
+                                              Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText1!
+                                                  .copyWith(
+                                                    color: isActive
+                                                        ? Colors.white
+                                                        : null,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w600,
+                                                  ))),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis),
+                                if (note.content != '')
+                                  RichText(
+                                      text: TextSpan(
+                                          children: highlightString(
+                                              (sQuery != null &&
+                                                      sQuery!.searchByContent)
+                                                  ? sQuery!.query
+                                                  : '',
+                                              note.content,
+                                              Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText2!
+                                                  .copyWith(
+                                                    color: isActive
+                                                        ? Colors.white
+                                                        : null,
+                                                  ))),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis),
+                              ]),
                         ),
-                        const SizedBox(height: 5),
-                        // if (note.hasAttachment) // TODO: Add attachment
-                        //   Icon(
-                        //     Icons.attachment,
-                        //     size: 15,
-                        //     color: isActive
-                        //         ? Colors.white70
-                        //         : Theme.of(context).custom.kGrayColor,
-                        //   ),
+                        SizedBox(
+                            width: Theme.of(context).custom.kDefaultPadding),
+                        Column(
+                          children: [
+                            Text(
+                              note.getShortDateTimeStr(),
+                              style:
+                                  Theme.of(context).textTheme.caption!.copyWith(
+                                        color: isActive ? Colors.white70 : null,
+                                      ),
+                            ),
+                            const SizedBox(height: 5),
+                            // if (note.hasAttachment) // TODO: Add attachment
+                            //   Icon(
+                            //     Icons.attachment,
+                            //     size: 15,
+                            //     color: isActive
+                            //         ? Colors.white70
+                            //         : Theme.of(context).custom.kGrayColor,
+                            //   ),
+                          ],
+                        )
                       ],
-                    )
+                    ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        ));
+              ),
+            )));
+    // Add GestureDetector
   }
 }

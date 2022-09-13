@@ -114,6 +114,26 @@ class _SearchScreenState extends State<SearchScreen> {
     widget.db.navigateToNote(note);
   }
 
+  void _pressNoteSelect(BuildContext context, Note note) async {
+    note.isDeleted = true;
+    // only do if mobile app
+    if (Responsive.isMobile(context)) {
+      bool isSuccessDelete = await widget.db.deleteNote(note);
+      if (isSuccessDelete) {
+        widget.db.noteHistory.remove(note);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Note deleted'),
+          duration: Duration(seconds: 2),
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Fail to delete note'),
+          duration: Duration(seconds: 2),
+        ));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -244,6 +264,13 @@ class _SearchScreenState extends State<SearchScreen> {
                     isActive: Responsive.isMobile(context)
                         ? false
                         : notes[index].id == activeNoteId,
+                    onLongPress: () {
+                      widget.db.firebase.analytics
+                          .logEvent(name: 'long_press_note_card', parameters: {
+                        'note_id': notes[index].id,
+                      });
+                      _pressNoteSelect(context, notes[index]);
+                    },
                     onTap: () {
                       widget.db.firebase.analytics
                           .logEvent(name: 'click_search_notecard');
