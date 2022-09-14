@@ -18,6 +18,7 @@ class SearchScreen extends StatefulWidget {
     Key? key,
     required this.db,
     this.searchFocusNode,
+    // keep track of notes selected
   }) : super(key: key);
 
   final Database db;
@@ -32,6 +33,8 @@ class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
+  var selectedNotes = <Note>[];
+
   late List<Note> notes = [];
   String sortBy = 'Sort by date (new to old)';
   Map<String, SortOptions> sortOptionMap = {
@@ -105,38 +108,89 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _pressNote(BuildContext context, Note note) {
-    setState(() {
-      activeNoteId = note.id;
-    });
-    if (!Responsive.isMobile(context)) {
-      widget.db.popAllRoutes();
+    if (selectedNotes.isEmpty) {
+      setState(() {
+        activeNoteId = note.id;
+      });
+      if (!Responsive.isMobile(context)) {
+        widget.db.popAllRoutes();
+      }
+      widget.db.navigateToNote(note);
+    } else {
+      setState(() {
+        if (selectedNotes.contains(note)) {
+          selectedNotes.remove(note);
+        } else {
+          selectedNotes.add(note);
+        }
+      });
     }
-    widget.db.navigateToNote(note);
   }
 
-  void _pressNoteSelect(BuildContext context, Note note) async {
-    note.isDeleted = true;
-    // only do if mobile app
-    if (Responsive.isMobile(context)) {
-      bool isSuccessDelete = await widget.db.deleteNote(note);
-      if (isSuccessDelete) {
-        widget.db.noteHistory.remove(note);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Note deleted'),
-          duration: Duration(seconds: 2),
-        ));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Fail to delete note'),
-          duration: Duration(seconds: 2),
-        ));
+  void _longPressNote(BuildContext context, Note note) async {
+    if (selectedNotes.contains(note)) {
+      setState(() {
+        selectedNotes.remove(note);
+      });
+    } else {
+      setState(() {
+        selectedNotes.add(note);
+      });
+    }
+  }
+
+  void deleteNotes(BuildContext context) async {
+    for (var note in selectedNotes) {
+      note.isDeleted = true;
+      // only do if mobile app
+      if (Responsive.isMobile(context)) {
+        bool isSuccessDelete = await widget.db.deleteNote(note);
+        if (isSuccessDelete) {
+          widget.db.noteHistory.remove(note);
+          setState(() {
+            selectedNotes = [];
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Notes deletion failed'),
+            duration: Duration(seconds: 2),
+          ));
+        }
       }
     }
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Notes successfully deleted'),
+      duration: Duration(seconds: 2),
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: selectedNotes.isNotEmpty
+          ? AppBar(
+              // add a back button with icon cross
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  setState(() {
+                    selectedNotes = [];
+                  });
+                },
+              ),
+
+              title: Text(selectedNotes.length.toString() + ' notes selected'),
+              actions: <Widget>[
+                // action button
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    deleteNotes(context);
+                  },
+                )
+              ],
+            )
+          : null,
       body: Container(
         padding: EdgeInsets.only(
             top: kIsWeb ? Theme.of(context).custom.kDefaultPadding : 0),
@@ -145,7 +199,7 @@ class _SearchScreenState extends State<SearchScreen> {
           right: false,
           child: Column(
             children: [
-              // This is our Seearch bar
+              // This is our Search bar
               Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: Theme.of(context).custom.kDefaultPadding,
@@ -264,12 +318,13 @@ class _SearchScreenState extends State<SearchScreen> {
                     isActive: Responsive.isMobile(context)
                         ? false
                         : notes[index].id == activeNoteId,
+                    isSelected: selectedNotes.contains(notes[index]),
                     onLongPress: () {
                       widget.db.firebase.analytics
                           .logEvent(name: 'long_press_note_card', parameters: {
                         'note_id': notes[index].id,
                       });
-                      _pressNoteSelect(context, notes[index]);
+                      _longPressNote(context, notes[index]);
                     },
                     onTap: () {
                       widget.db.firebase.analytics

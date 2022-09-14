@@ -1,7 +1,5 @@
 import 'dart:math';
-
 import 'package:fleeting_notes_flutter/models/search_query.dart';
-
 import '../models/Note.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
@@ -14,9 +12,11 @@ class NoteCard extends StatelessWidget {
     required this.onTap,
     this.sQuery,
     this.isActive = false,
+    this.isSelected = false,
   }) : super(key: key);
 
   final bool isActive;
+  final bool isSelected;
   final VoidCallback onLongPress; 
   final VoidCallback onTap;
   final Note note;
@@ -149,6 +149,12 @@ class NoteCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                decoration: isSelected
+                    ? BoxDecoration(
+                        border: Border.all(color: Colors.blue,
+                            width: 4),
+                        borderRadius: BorderRadius.circular(8))
+                    : null,
               ),
             )));
     // Add GestureDetector
