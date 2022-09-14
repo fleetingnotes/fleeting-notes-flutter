@@ -142,9 +142,11 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
         source: params['source'] ?? '',
       );
     } else {
-      String selectionText = await BrowserExtension().getSelectionText();
+      BrowserExtension be = BrowserExtension();
+      String selectionText = await be.getSelectionText();
       if (selectionText.isNotEmpty) {
-        newNote = Note.empty(content: selectionText);
+        String sourceUrl = await be.getSourceUrl();
+        newNote = Note.empty(content: selectionText, source: sourceUrl);
       }
     }
     return (newNote == null || newNote.isEmpty()) ? null : newNote;
