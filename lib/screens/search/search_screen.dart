@@ -146,16 +146,14 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void deleteNotes(BuildContext context) async {
-    widget.db.firebase.analytics.logEvent(name: 'delete_notes');
+    widget.db.firebase.analytics.logEvent(name: 'delete_selected_notes');
     for (var note in selectedNotes) {
       note.isDeleted = true;
       // only do if mobile app
       bool isSuccessDelete = await widget.db.deleteNote(note);
       if (isSuccessDelete) {
         widget.db.noteHistory.remove(note);
-        setState(() {
-          selectedNotes = [];
-        });
+        clearNotes();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Notes deletion failed'),
@@ -350,19 +348,14 @@ class ModifyNotesAppBar extends StatelessWidget {
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.close),
-        onPressed: () {
-          clearNotes();
-        },
+        onPressed: clearNotes,
       ),
-
-      title: Text(selectedNotes.length.toString() + ' notes selected'),
+      title: Text('${selectedNotes.length} notes selected'),
       actions: <Widget>[
         // action button
         IconButton(
           icon: const Icon(Icons.delete),
-          onPressed: () {
-            deleteNotes(context);
-          },
+          onPressed: () => deleteNotes(context),
         )
       ],
     );
