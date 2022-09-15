@@ -139,23 +139,29 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
+  void clearNotes() {
+    setState(() {
+      selectedNotes = [];
+    });
+  }
+
   void deleteNotes(BuildContext context) async {
+    widget.db.firebase.analytics.logEvent(name: 'delete_notes');
     for (var note in selectedNotes) {
       note.isDeleted = true;
       // only do if mobile app
-      if (Responsive.isMobile(context)) {
-        bool isSuccessDelete = await widget.db.deleteNote(note);
-        if (isSuccessDelete) {
-          widget.db.noteHistory.remove(note);
-          setState(() {
-            selectedNotes = [];
-          });
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Notes deletion failed'),
-            duration: Duration(seconds: 2),
-          ));
-        }
+      bool isSuccessDelete = await widget.db.deleteNote(note);
+      if (isSuccessDelete) {
+        widget.db.noteHistory.remove(note);
+        setState(() {
+          selectedNotes = [];
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Notes deletion failed'),
+          duration: Duration(seconds: 2),
+        ));
+        return;
       }
     }
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -168,28 +174,13 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: selectedNotes.isNotEmpty
-          ? AppBar(
-              // add a back button with icon cross
-              leading: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () {
-                  setState(() {
-                    selectedNotes = [];
-                  });
-                },
-              ),
-
-              title: Text(selectedNotes.length.toString() + ' notes selected'),
-              actions: <Widget>[
-                // action button
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    deleteNotes(context);
-                  },
-                )
-              ],
-            )
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(50),
+              child: ModifyNotesAppBar(
+                selectedNotes: selectedNotes,
+                clearNotes: clearNotes,
+                deleteNotes: deleteNotes,
+              ))
           : null,
       body: Container(
         padding: EdgeInsets.only(
@@ -338,6 +329,42 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ModifyNotesAppBar extends StatelessWidget {
+  const ModifyNotesAppBar({
+    Key? key,
+    required this.selectedNotes,
+    required this.clearNotes,
+    required this.deleteNotes,
+  }) : super(key: key);
+
+  final List<Note> selectedNotes;
+  final Function() clearNotes;
+  final Function(BuildContext) deleteNotes;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.close),
+        onPressed: () {
+          clearNotes();
+        },
+      ),
+
+      title: Text(selectedNotes.length.toString() + ' notes selected'),
+      actions: <Widget>[
+        // action button
+        IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: () {
+            deleteNotes(context);
+          },
+        )
+      ],
     );
   }
 }
