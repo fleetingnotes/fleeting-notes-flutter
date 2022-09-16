@@ -18,6 +18,7 @@ class SearchScreen extends StatefulWidget {
     Key? key,
     required this.db,
     this.searchFocusNode,
+    // keep track of notes selected
   }) : super(key: key);
 
   final Database db;
@@ -32,6 +33,8 @@ class _SearchScreenState extends State<SearchScreen> {
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
+  var selectedNotes = <Note>[];
+
   late List<Note> notes = [];
   String sortBy = 'Sort by date (new to old)';
   Map<String, SortOptions> sortOptionMap = {
@@ -105,18 +108,78 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _pressNote(BuildContext context, Note note) {
-    setState(() {
-      activeNoteId = note.id;
-    });
-    if (!Responsive.isMobile(context)) {
-      widget.db.popAllRoutes();
+    if (selectedNotes.isEmpty) {
+      setState(() {
+        activeNoteId = note.id;
+      });
+      if (!Responsive.isMobile(context)) {
+        widget.db.popAllRoutes();
+      }
+      widget.db.navigateToNote(note);
+    } else {
+      setState(() {
+        if (selectedNotes.contains(note)) {
+          selectedNotes.remove(note);
+        } else {
+          selectedNotes.add(note);
+        }
+      });
     }
-    widget.db.navigateToNote(note);
+  }
+
+  void _longPressNote(BuildContext context, Note note) async {
+    if (selectedNotes.contains(note)) {
+      setState(() {
+        selectedNotes.remove(note);
+      });
+    } else {
+      setState(() {
+        selectedNotes.add(note);
+      });
+    }
+  }
+
+  void clearNotes() {
+    setState(() {
+      selectedNotes = [];
+    });
+  }
+
+  void deleteNotes(BuildContext context) async {
+    widget.db.firebase.analytics.logEvent(name: 'delete_selected_notes');
+    for (var note in selectedNotes) {
+      note.isDeleted = true;
+      // only do if mobile app
+      bool isSuccessDelete = await widget.db.deleteNote(note);
+      if (isSuccessDelete) {
+        widget.db.noteHistory.remove(note);
+        clearNotes();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Notes deletion failed'),
+          duration: Duration(seconds: 2),
+        ));
+        return;
+      }
+    }
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Notes successfully deleted'),
+      duration: Duration(seconds: 2),
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: selectedNotes.isNotEmpty
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(50),
+              child: ModifyNotesAppBar(
+                selectedNotes: selectedNotes,
+                clearNotes: clearNotes,
+                deleteNotes: deleteNotes,
+              ))
+          : null,
       body: Container(
         padding: EdgeInsets.only(
             top: kIsWeb ? Theme.of(context).custom.kDefaultPadding : 0),
@@ -125,7 +188,7 @@ class _SearchScreenState extends State<SearchScreen> {
           right: false,
           child: Column(
             children: [
-              // This is our Seearch bar
+              // This is our Search bar
               Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: Theme.of(context).custom.kDefaultPadding,
@@ -244,6 +307,14 @@ class _SearchScreenState extends State<SearchScreen> {
                     isActive: Responsive.isMobile(context)
                         ? false
                         : notes[index].id == activeNoteId,
+                    isSelected: selectedNotes.contains(notes[index]),
+                    onLongPress: () {
+                      widget.db.firebase.analytics
+                          .logEvent(name: 'long_press_note_card', parameters: {
+                        'note_id': notes[index].id,
+                      });
+                      _longPressNote(context, notes[index]);
+                    },
                     onTap: () {
                       widget.db.firebase.analytics
                           .logEvent(name: 'click_search_notecard');
@@ -256,6 +327,37 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ModifyNotesAppBar extends StatelessWidget {
+  const ModifyNotesAppBar({
+    Key? key,
+    required this.selectedNotes,
+    required this.clearNotes,
+    required this.deleteNotes,
+  }) : super(key: key);
+
+  final List<Note> selectedNotes;
+  final Function() clearNotes;
+  final Function(BuildContext) deleteNotes;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.close),
+        onPressed: clearNotes,
+      ),
+      title: Text('${selectedNotes.length} notes selected'),
+      actions: <Widget>[
+        // action button
+        IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: () => deleteNotes(context),
+        )
+      ],
     );
   }
 }

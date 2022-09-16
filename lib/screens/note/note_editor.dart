@@ -352,6 +352,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                                 Theme.of(context).custom.kDefaultPadding / 2),
                         ...backlinkNotes.map((note) => NoteCard(
                               note: note,
+                              onLongPress: () => {},
                               onTap: () {
                                 widget.db.firebase.analytics
                                     .logEvent(name: 'click_backlink');
