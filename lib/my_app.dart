@@ -85,14 +85,14 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
       ],
     );
     return ValueListenableBuilder(
-        valueListenable: db.settings.box.listenable(keys: ['darkMode']),
+        valueListenable: db.settings.box.listenable(keys: ['dark-mode']),
         builder: (context, Box box, _) {
           return MaterialApp.router(
             title: 'Fleeting Notes',
             debugShowCheckedModeBanner: false,
             theme: lightTheme,
             darkTheme: darkTheme,
-            themeMode: box.get('darkMode', defaultValue: false)
+            themeMode: box.get('dark-mode', defaultValue: false)
                 ? ThemeMode.dark
                 : ThemeMode.light,
             routeInformationProvider: _router.routeInformationProvider,

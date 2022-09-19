@@ -15,7 +15,7 @@ class SideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool darkMode = db.settings.get('darkMode', defaultValue: false);
+    bool darkMode = db.settings.get('dark-mode', defaultValue: false);
     return Container(
       height: double.infinity,
       padding: EdgeInsets.only(
@@ -37,7 +37,7 @@ class SideMenu extends StatelessWidget {
                   IconButton(
                     icon: Icon(darkMode ? Icons.dark_mode : Icons.light_mode),
                     onPressed: () {
-                      db.settings.set('darkMode', !darkMode);
+                      db.settings.set('dark-mode', !darkMode);
                     },
                     tooltip: 'Toggle Theme',
                   )
