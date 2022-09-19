@@ -184,7 +184,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
         if (updateState) onChanged();
         throw FleetingNotesException('Failed to save note');
       } else {
-        widget.db.clearUnsavedNote();
+        widget.db.settings.delete('unsaved-note');
         await updateBacklinks(prevTitle, updatedNote.title);
       }
     } on FleetingNotesException catch (e) {
@@ -203,7 +203,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       source: sourceController.text,
       timestamp: widget.note.timestamp,
     );
-    widget.db.setUnsavedNote(unsavedNote);
+    widget.db.settings.set('unsaved-note', unsavedNote);
   }
 
   Future<void> updateBacklinks(String prevTitle, String newTitle) async {

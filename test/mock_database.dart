@@ -9,6 +9,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:fleeting_notes_flutter/services/settings.dart';
 
 class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
 
@@ -17,6 +18,20 @@ class MockRemoteConfig extends Mock implements FirebaseRemoteConfig {
   int getInt(String key) {
     return 1;
   }
+}
+
+class MockSettings extends Mock implements Settings {
+  @override
+  get(String key, {defaultValue}) {
+    Map<String, dynamic> testSettings = {
+      "auto-fill-source": false,
+      "analytics-enabled": true,
+    };
+    return testSettings[key] ?? defaultValue;
+  }
+
+  @override
+  bool isFirstTimeOpen() => false;
 }
 
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
@@ -37,6 +52,8 @@ class MockFirebaseDB extends Mock implements FirebaseDB {
 }
 
 class MockDatabase extends Mock implements Database {
+  @override
+  Settings settings = MockSettings();
   @override
   final GlobalKey searchKey = GlobalKey();
   @override
@@ -111,23 +128,5 @@ class MockDatabase extends Mock implements Database {
   @override
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
-  }
-
-  @override
-  bool fillSource() {
-    return false;
-  }
-
-  @override
-  Future<void> setFillSource(bool autoFillEnabled) async {}
-
-  @override
-  bool? getAnalyticsEnabled() {
-    return true;
-  }
-
-  @override
-  bool isFirstTimeOpen() {
-    return false;
   }
 }

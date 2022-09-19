@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fleeting_notes_flutter/services/firebase.dart';
+import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatefulWidget {
 
 class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   Note? initNote;
-  final Database db = Database(firebase: FirebaseDB());
+  final Database db = Database(firebase: FirebaseDB(), settings: Settings());
 
   void refreshApp(user) {
     if (user != null) {
@@ -42,7 +43,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
     db.firebase.authChangeController.stream.listen(refreshApp);
     if (kIsWeb) {
       setState(() {
-        initNote = db.getUnsavedNote();
+        initNote = db.settings.get('unsaved-note');
       });
     }
   }
@@ -84,7 +85,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
       ],
     );
     return ValueListenableBuilder(
-        valueListenable: Hive.box('settings').listenable(keys: ['darkMode']),
+        valueListenable: db.settings.box.listenable(keys: ['darkMode']),
         builder: (context, Box box, _) {
           return MaterialApp.router(
             title: 'Fleeting Notes',

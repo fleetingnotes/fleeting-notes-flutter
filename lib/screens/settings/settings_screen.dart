@@ -73,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void autoFilledToggled(bool value) async {
-    await widget.db.setFillSource(value);
+    await widget.db.settings.set('auto-fill-source', value);
     setState(() {}); // refresh settings screen
   }
 
@@ -294,7 +294,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const Text("Auto Fill Source",
                               style: TextStyle(fontSize: 12)),
                           Switch(
-                              value: widget.db.fillSource(),
+                              value: widget.db.settings
+                                  .get('auto-fill-source', defaultValue: false),
                               onChanged: autoFilledToggled)
                         ]),
                       ],
