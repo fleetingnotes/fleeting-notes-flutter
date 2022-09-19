@@ -1,20 +1,12 @@
 import 'package:fleeting_notes_flutter/models/search_query.dart';
-import 'package:fleeting_notes_flutter/services/firebase.dart';
-import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:test/test.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:mocktail/mocktail.dart';
-
 import 'mock_database.dart';
-
-class MockFirebaseDB extends Mock implements FirebaseDB {}
 
 class MockDatabaseTests extends Database {
   MockDatabaseTests()
       : super(firebase: MockFirebaseDB(), settings: MockSettings());
-  @override
-  Settings settings = MockSettings();
 
   Note newNote(id, title, content, source) {
     String t = DateTime.now().toIso8601String();
