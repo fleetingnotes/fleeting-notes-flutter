@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive/hive.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({
