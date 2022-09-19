@@ -40,7 +40,7 @@ class _MainScreenState extends State<MainScreen> {
     if (!kDebugMode) analyticsDialogWorkflow();
     if (!widget.db.isLoggedIn() &&
         !widget.db.firebase.isSharedNotes &&
-        widget.db.isFirstTimeOpen()) {
+        widget.db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
             context: context,
@@ -105,7 +105,7 @@ class _MainScreenState extends State<MainScreen> {
           widget.db.setAnalyticsEnabled(analyticsEnabled);
         }
 
-        bool? analyticsEnabled = widget.db.getAnalyticsEnabled();
+        bool? analyticsEnabled = widget.db.settings.get('analytics-enabled');
         if (analyticsEnabled == null) {
           showDialog(
             context: context,

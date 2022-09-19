@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'settings.dart';
 import 'firebase.dart';
 import '../models/Note.dart';
 import 'dart:async';
@@ -12,9 +13,11 @@ import '../models/search_query.dart';
 class Database {
   Database({
     required this.firebase,
+    required this.settings,
   }) : super();
 
   final FirebaseDB firebase;
+  final Settings settings;
   GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
 
@@ -249,18 +252,6 @@ class Database {
     ));
   }
 
-  Note? getUnsavedNote() {
-    return Hive.box('settings').get('unsaved-note');
-  }
-
-  void setUnsavedNote(Note note) {
-    Hive.box('settings').put('unsaved-note', note);
-  }
-
-  void clearUnsavedNote() {
-    Hive.box('settings').delete('unsaved-note');
-  }
-
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
   }
@@ -287,38 +278,9 @@ class Database {
     return false;
   }
 
-  // Settings
-  Future<void> setSettings(String key, dynamic value) async {
-    await Hive.box('settings').put(key, value);
-  }
-
-  dynamic getSettings(String key) {
-    return Hive.box('settings').get(key);
-  }
-
-  Future<void> setFillSource(bool autoFillEnabled) async {
-    await setSettings('auto-fill-source', autoFillEnabled);
-  }
-
-  bool fillSource() {
-    return getSettings('auto-fill-source') ?? false;
-  }
-
-  bool? getAnalyticsEnabled() {
-    return getSettings('analytics-enabled');
-  }
-
   Future<void> setAnalyticsEnabled(enabled) async {
-    await setSettings('analytics-enabled', enabled);
+    await settings.set('analytics-enabled', enabled);
     firebase.setAnalytics(enabled);
-  }
-
-  bool isFirstTimeOpen() {
-    bool isFirstTimeOpen = getSettings('first-time-open') ?? true;
-    if (isFirstTimeOpen) {
-      setSettings('first-time-open', false);
-    }
-    return isFirstTimeOpen;
   }
 
   void refreshApp() {

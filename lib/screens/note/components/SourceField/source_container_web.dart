@@ -32,9 +32,8 @@ class _SourceContainerState extends State<SourceContainer> {
     setState(() {
       sourceFieldVisible = widget.controller.text.isNotEmpty || !kIsWeb;
     });
-    if (widget.db != null &&
-        widget.db!.fillSource() &&
-        widget.overrideSourceUrl) {
+    bool fillSource = widget.db?.settings.get('auto-fill-source') ?? false;
+    if (fillSource && widget.overrideSourceUrl) {
       setSourceUrl();
     }
   }
