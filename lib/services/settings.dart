@@ -11,6 +11,9 @@ class Settings {
     'auto-fill-source': bool,
     'dark-mode': bool,
     'first-time-open': bool,
+    'local-sync-enabled': bool,
+    'local-sync-dir': String,
+    'local-sync-template': String,
     'unsaved-note': Note,
   };
 

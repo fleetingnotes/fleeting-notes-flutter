@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
 import 'package:flutter/material.dart';
 
 class Account extends StatelessWidget {
@@ -26,32 +27,35 @@ class Account extends StatelessWidget {
           SettingItem(
             title: 'Email',
             description: email,
-            buttonLabel: 'Logout',
-            onPress: onLogout,
+            widget: ElevatedButton(
+                onPressed: onLogout, child: const Text('Logout')),
           ),
           SettingItem(
             title: 'Force Sync',
             description: 'Sync notes from the cloud to the device',
-            buttonLabel: 'Force Sync',
-            onPress: onForceSync,
+            widget: ElevatedButton(
+                onPressed: onForceSync, child: const Text('Force sync')),
           ),
           SettingItem(
             title: 'End-to-end Encryption',
             description: 'Encrypt notes with end-to-end encryption',
-            buttonLabel: (onEnableEncryption == null) ? 'Enabled' : 'Enable',
-            onPress: onEnableEncryption,
+            widget: ElevatedButton(
+                onPressed: onEnableEncryption,
+                child:
+                    Text((onEnableEncryption == null) ? 'Enabled' : 'Enable')),
           ),
           SettingItem(
             title: 'Delete Account',
             description: 'Delete your account and all your notes',
-            buttonLabel: 'Delete',
-            onPress: () {
-              showDialog(
-                context: context,
-                builder: (context) =>
-                    DeleteAccountWidget(onDelete: onDeleteAccount),
-              );
-            },
+            widget: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) =>
+                        DeleteAccountWidget(onDelete: onDeleteAccount),
+                  );
+                },
+                child: const Text('Delete')),
           )
         ],
       ),
@@ -114,47 +118,6 @@ class _DeleteAccountWidgetState extends State<DeleteAccountWidget> {
           child: const Text('Delete'),
         ),
       ],
-    );
-  }
-}
-
-class SettingItem extends StatelessWidget {
-  const SettingItem({
-    Key? key,
-    required this.title,
-    required this.description,
-    required this.buttonLabel,
-    required this.onPress,
-  }) : super(key: key);
-
-  final String title;
-  final String description;
-  final String buttonLabel;
-  final VoidCallback? onPress;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-                Text(description),
-              ],
-            ),
-          ),
-        ),
-        ElevatedButton(onPressed: onPress, child: Text(buttonLabel))
-      ]),
     );
   }
 }
