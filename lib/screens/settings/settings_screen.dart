@@ -1,6 +1,5 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
@@ -11,6 +10,9 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:go_router/go_router.dart';
+import 'components/account.dart';
+import 'components/back_up.dart';
+import 'components/encryption_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key, required this.db}) : super(key: key);
@@ -184,6 +186,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  void onBackupDropdownChange(String? newValue) {
+    setState(() {
+      backupOption = newValue!;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -250,40 +258,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             height: Theme.of(context).custom.kDefaultPadding),
                         const Text("Backup", style: TextStyle(fontSize: 12)),
                         const Divider(thickness: 1, height: 1),
-                        Padding(
-                          padding: EdgeInsets.all(
-                              Theme.of(context).custom.kDefaultPadding / 2),
-                          child: Row(children: [
-                            DropdownButton(
-                              underline: const SizedBox(),
-                              value: backupOption,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  backupOption = newValue!;
-                                });
-                              },
-                              items: const [
-                                DropdownMenuItem(
-                                  child: Text('Markdown'),
-                                  value: 'Markdown',
-                                ),
-                                DropdownMenuItem(
-                                  child: Text('JSON'),
-                                  value: 'JSON',
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            ElevatedButton(
-                                onPressed: (backupOption) == 'Markdown'
-                                    ? onImportPress
-                                    : null,
-                                child: const Text('Import')),
-                            const SizedBox(width: 5),
-                            ElevatedButton(
-                                onPressed: onExportPress,
-                                child: const Text('Export')),
-                          ]),
+                        Backup(
+                          backupOption: backupOption,
+                          onImportPress: onImportPress,
+                          onExportPress: onExportPress,
+                          onBackupOptionChange: onBackupDropdownChange,
                         ),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
@@ -305,243 +284,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class EncryptionDialog extends StatefulWidget {
-  const EncryptionDialog({
-    Key? key,
-    required this.setEncryptionKey,
-  }) : super(key: key);
-
-  final Function setEncryptionKey;
-
-  @override
-  State<EncryptionDialog> createState() => _EncryptionDialogState();
-}
-
-class _EncryptionDialogState extends State<EncryptionDialog> {
-  String errMessage = '';
-  TextEditingController controller = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-
-  void onSubmit() async {
-    try {
-      await widget.setEncryptionKey(controller.text);
-      Navigator.pop(context);
-    } catch (e) {
-      setState(() {
-        if (e is FleetingNotesException) {
-          errMessage = e.message;
-        } else {
-          errMessage = 'Invalid encryption key';
-        }
-      });
-      _formKey.currentState!.validate();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Enable Encryption'),
-      content: Form(
-        key: _formKey,
-        child: SizedBox(
-          width: 300,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('This password cannot be changed later'),
-              const Text(
-                  'If you forget this password, data will remain unusable forever',
-                  style: TextStyle(color: Colors.red)),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'Enter your encryption key',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (_) => (errMessage.isEmpty) ? null : errMessage,
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: onSubmit,
-          child: const Text('OK'),
-        ),
-      ],
-    );
-  }
-}
-
-class Account extends StatelessWidget {
-  const Account({
-    Key? key,
-    required this.email,
-    required this.onLogout,
-    required this.onForceSync,
-    required this.onDeleteAccount,
-    required this.onEnableEncryption,
-  }) : super(key: key);
-
-  final String email;
-  final VoidCallback onLogout;
-  final VoidCallback onForceSync;
-  final VoidCallback onDeleteAccount;
-  final VoidCallback? onEnableEncryption;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SettingItem(
-            title: 'Email',
-            description: email,
-            buttonLabel: 'Logout',
-            onPress: onLogout,
-          ),
-          SettingItem(
-            title: 'Force Sync',
-            description: 'Sync notes from the cloud to the device',
-            buttonLabel: 'Force Sync',
-            onPress: onForceSync,
-          ),
-          SettingItem(
-            title: 'End-to-end Encryption',
-            description: 'Encrypt notes with end-to-end encryption',
-            buttonLabel: (onEnableEncryption == null) ? 'Enabled' : 'Enable',
-            onPress: onEnableEncryption,
-          ),
-          SettingItem(
-            title: 'Delete Account',
-            description: 'Delete your account and all your notes',
-            buttonLabel: 'Delete',
-            onPress: () {
-              showDialog(
-                context: context,
-                builder: (context) =>
-                    DeleteAccountWidget(onDelete: onDeleteAccount),
-              );
-            },
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class DeleteAccountWidget extends StatefulWidget {
-  const DeleteAccountWidget({
-    Key? key,
-    required this.onDelete,
-  }) : super(key: key);
-
-  final VoidCallback onDelete;
-
-  @override
-  State<DeleteAccountWidget> createState() => _DeleteAccountWidgetState();
-}
-
-class _DeleteAccountWidgetState extends State<DeleteAccountWidget> {
-  bool canDeleteAccount = false;
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Delete account'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-              'Are you sure you want to delete your account and all your notes? This action cannot be undone.'),
-          const SizedBox(height: 10),
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Type "delete" to confirm',
-              border: OutlineInputBorder(),
-            ),
-            validator: (_) => 'Type delete to confirm',
-            onChanged: (String? value) {
-              setState(() {
-                canDeleteAccount = value == 'delete';
-              });
-            },
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: canDeleteAccount
-              ? () {
-                  Navigator.pop(context);
-                  widget.onDelete();
-                }
-              : null,
-          child: const Text('Delete'),
-        ),
-      ],
-    );
-  }
-}
-
-class SettingItem extends StatelessWidget {
-  const SettingItem({
-    Key? key,
-    required this.title,
-    required this.description,
-    required this.buttonLabel,
-    required this.onPress,
-  }) : super(key: key);
-
-  final String title;
-  final String description;
-  final String buttonLabel;
-  final VoidCallback? onPress;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-                Text(description),
-              ],
-            ),
-          ),
-        ),
-        ElevatedButton(onPressed: onPress, child: Text(buttonLabel))
-      ]),
     );
   }
 }
