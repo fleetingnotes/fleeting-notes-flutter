@@ -3,37 +3,33 @@ import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
+import 'package:fleeting_notes_flutter/services/local_sync.dart';
 
-class LocalSync extends StatefulWidget {
-  const LocalSync({
+import '../../../models/Note.dart';
+
+class LocalSyncSetting extends StatefulWidget {
+  const LocalSyncSetting({
     Key? key,
     required this.settings,
+    required this.getAllNotes,
   }) : super(key: key);
 
   final Settings settings;
+  final Function getAllNotes;
   @override
-  State<LocalSync> createState() => _LocalSyncState();
+  State<LocalSyncSetting> createState() => _LocalSyncSettingState();
 }
 
-class _LocalSyncState extends State<LocalSync> {
+class _LocalSyncSettingState extends State<LocalSyncSetting> {
   bool enabled = false;
   String? syncDir;
   TextEditingController controller = TextEditingController();
-  String initNoteTemplate = r'''
----
-id: "${id}"
-title: "${title}"
-source: "${source}"
-created_date: "${created_time}"
-modified_date: "${last_modified_time}"
----
-${content}''';
   @override
   void initState() {
     enabled = widget.settings.get('local-sync-enabled', defaultValue: false);
     syncDir = widget.settings.get('local-sync-dir');
     controller.text = widget.settings
-        .get('local-sync-template', defaultValue: initNoteTemplate);
+        .get('local-sync-template', defaultValue: Note.defaultNoteTemplate);
     super.initState();
   }
 
@@ -47,11 +43,16 @@ ${content}''';
     updateHiveDb();
   }
 
-  void onSwitchChange(bool val) {
+  void onSwitchChange(bool val) async {
     setState(() {
       enabled = val;
     });
-    updateHiveDb();
+    await updateHiveDb();
+    if (val && syncDir != null) {
+      List<Note> notes = await widget.getAllNotes();
+      var ls = LocalSync(settings: widget.settings);
+      ls.pushNotes(notes);
+    }
   }
 
   void onNoteTemplateChange(String val) {
@@ -63,15 +64,17 @@ ${content}''';
 
   void onRefreshNoteTemplate() {
     setState(() {
-      controller.text = initNoteTemplate;
+      controller.text = Note.defaultNoteTemplate;
     });
     updateHiveDb();
   }
 
-  void updateHiveDb() {
-    widget.settings.set('local-sync-enabled', enabled);
-    widget.settings.set('local-sync-dir', syncDir);
-    widget.settings.set('local-sync-template', controller.text);
+  Future<void> updateHiveDb() async {
+    await Future.wait([
+      widget.settings.set('local-sync-enabled', enabled),
+      widget.settings.set('local-sync-dir', syncDir),
+      widget.settings.set('local-sync-template', controller.text)
+    ]);
   }
 
   @override

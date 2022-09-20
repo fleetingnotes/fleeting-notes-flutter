@@ -13,7 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
-import 'components/local_sync.dart';
+import 'components/local_sync_setting.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key, required this.db}) : super(key: key);
@@ -269,8 +269,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             height: Theme.of(context).custom.kDefaultPadding),
                         const Text("Sync", style: TextStyle(fontSize: 12)),
                         const Divider(thickness: 1, height: 1),
-                        LocalSync(
+                        LocalSyncSetting(
                           settings: widget.db.settings,
+                          getAllNotes: widget.db.getAllNotes,
                         ),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
