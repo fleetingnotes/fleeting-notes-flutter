@@ -57,6 +57,7 @@ class Database {
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         await box.clear();
         await box.putAll(noteIdMap);
+        syncManager?.pushNotes(notes);
       }
     } catch (e, stack) {
       firebase.recordError(e, stack);
