@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import "package:yaml/yaml.dart";
 
@@ -21,10 +22,16 @@ class LocalSync extends SyncTerface {
 
   @override
   void pushNotes(List<Note> notes) {
+    var idToPath = getNoteIdToPathMapping();
     for (var n in notes) {
-      String fileName = n.getMarkdownFilename();
       String mdContent = n.getMarkdownContent(template: template);
-      var f = File(p.join(syncDir, fileName));
+      File f;
+      if (idToPath.containsKey(n.id)) {
+        f = File(idToPath[n.id] as String);
+      } else {
+        String fileName = n.getMarkdownFilename();
+        f = File(p.join(syncDir, fileName));
+      }
       f.writeAsString(mdContent);
     }
   }
@@ -45,11 +52,15 @@ class LocalSync extends SyncTerface {
     Map<String, String> idToPathMap = {};
     for (var f in files) {
       if (f is File) {
-        String mdStr = f.readAsStringSync();
-        var md = parseMDFile(mdStr);
-        Map frontmatter = md["frontmatter"];
-        if (frontmatter.containsKey('id')) {
-          idToPathMap[frontmatter['id']] = f.path;
+        try {
+          String mdStr = f.readAsStringSync();
+          var md = parseMDFile(mdStr);
+          Map frontmatter = md["frontmatter"];
+          if (frontmatter.containsKey('id')) {
+            idToPathMap[frontmatter['id']] = f.path;
+          }
+        } on FileSystemException catch (e) {
+          debugPrint(e.toString());
         }
       }
     }
