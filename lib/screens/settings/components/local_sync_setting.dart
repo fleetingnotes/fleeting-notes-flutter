@@ -3,7 +3,7 @@ import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
-import 'package:fleeting_notes_flutter/services/local_sync.dart';
+import 'package:fleeting_notes_flutter/services/sync/local_sync.dart';
 
 import '../../../models/Note.dart';
 
