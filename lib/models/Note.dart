@@ -27,6 +27,14 @@ class Note {
   final String partition;
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
+  static const String defaultNoteTemplate = r'''
+---
+id: "${id}"
+title: "${title}"
+source: "${source}"
+created_time: "${created_time}"
+---
+${content}''';
 
   Note({
     required this.id,
@@ -150,14 +158,26 @@ class Note {
     return (title.isEmpty) ? "$id.md" : "$title.md";
   }
 
-  String getMarkdownContent() {
-    String frontmatter = """---
-id: "$id"
-title: "$title"
-source: "$source"
-created: "$timestamp"
----\n""";
-    String mdContent = frontmatter + content;
+  String getMarkdownContent({String? template}) {
+    template = (template == null) ? defaultNoteTemplate : template;
+    var r = RegExp(r"\$\{(.*)\}", multiLine: true);
+    var mdContent = template.replaceAllMapped(r, (m) {
+      var variable = m.group(1);
+      switch (variable) {
+        case 'id':
+          return id;
+        case 'title':
+          return title;
+        case 'source':
+          return source;
+        case 'created_time':
+          return timestamp;
+        case 'content':
+          return content;
+        default:
+          return m.group(0) ?? '';
+      }
+    });
     return mdContent;
   }
 }

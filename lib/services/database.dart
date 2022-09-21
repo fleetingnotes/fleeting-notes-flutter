@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
+import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'settings.dart';
@@ -11,13 +12,15 @@ import 'package:collection/collection.dart';
 import '../models/search_query.dart';
 
 class Database {
+  final FirebaseDB firebase;
+  final Settings settings;
+  SyncManager? syncManager;
   Database({
     required this.firebase,
     required this.settings,
-  }) : super();
-
-  final FirebaseDB firebase;
-  final Settings settings;
+  }) {
+    syncManager = SyncManager(settings: settings);
+  }
   GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
 
@@ -134,7 +137,8 @@ class Database {
         if (!isSuccess) return false;
       }
       var box = await Hive.openBox(firebase.userId);
-      box.put(note.id, note);
+      await box.put(note.id, note);
+      syncManager?.pushNotes([note]);
       return true;
     } catch (e) {
       return false;
@@ -148,7 +152,8 @@ class Database {
         if (!isSuccess) return false;
       }
       var box = await Hive.openBox(firebase.userId);
-      box.put(note.id, note);
+      await box.put(note.id, note);
+      syncManager?.pushNotes([note]);
       return true;
     } catch (e) {
       return false;
@@ -164,6 +169,7 @@ class Database {
       var box = await Hive.openBox(firebase.userId);
       Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
       await box.putAll(noteIdMap);
+      syncManager?.pushNotes(notes);
       return true;
     } catch (e) {
       return false;
@@ -177,7 +183,8 @@ class Database {
         if (!isSuccess) return false;
       }
       var box = await Hive.openBox(firebase.userId);
-      box.delete(note.id);
+      await box.delete(note.id);
+      syncManager?.deleteNotes([note]);
       return true;
     } catch (e) {
       return false;
