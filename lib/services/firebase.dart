@@ -60,8 +60,23 @@ class FirebaseDB implements DatabaseInterface {
     return (docRef.exists) ? docRef.get('key') : null;
   }
 
+  Future<String?> getFirebaseHashedNotionCredentials() async {
+    if (userId == 'local') return null;
+    var docRef = await encryptionCollection.doc(userId).get();
+    return (docRef.exists) ? docRef.get('notion-credentials') : null;
+  }
+
   Future<String?> getEncryptionKey() async {
     return await secureStorage.read(key: 'encryption-key-$userId');
+  }
+
+  Future<Object> getNotionCredentials() async {
+    final token = await secureStorage.read(key: 'notion-token-$userId');
+    final dbId = await secureStorage.read(key: 'notion-db-id-$userId');
+    return {
+      'token': token,
+      'dbId': dbId,
+    };
   }
 
   Future<void> setEncryptionKey(String key) async {
@@ -74,6 +89,16 @@ class FirebaseDB implements DatabaseInterface {
     }
     await secureStorage.write(key: 'encryption-key-$userId', value: key);
     analytics.logEvent(name: 'set_encryption');
+  }
+
+  Future<void> setNotionCredentials(String key, String databaseId) async {
+    String hashedKey = sha256Hash(key);
+    await encryptionCollection.doc(userId).set({
+      'notion': {'integration-token': hashedKey, 'database-id': databaseId}
+    });
+    await secureStorage.write(key: 'notion-token-$userId', value: key);
+    await secureStorage.write(key: 'notion-db-id-$userId', value: key);
+    analytics.logEvent(name: 'set_notion_sync');
   }
 
   Future<void> configRemoteConfig() async {

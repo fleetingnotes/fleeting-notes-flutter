@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
@@ -13,6 +14,7 @@ import 'package:go_router/go_router.dart';
 import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
+import 'components/notion_sync_dialog.dart';
 import 'components/local_sync_setting.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -187,6 +189,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  void onNotionSyncPress() async {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return NotionDialog(setNotionCredentials: (token, id) async {
+          await widget.db.firebase.setNotionCredentials(token, id);
+          widget.db.refreshApp();
+        });
+      },
+    );
+  }
+
   void onBackupDropdownChange(String? newValue) {
     setState(() {
       backupOption = newValue!;
@@ -269,6 +283,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             height: Theme.of(context).custom.kDefaultPadding),
                         const Text("Sync", style: TextStyle(fontSize: 12)),
                         const Divider(thickness: 1, height: 1),
+                        SettingItem(
+                          title: 'Notion Sync (One-way)',
+                          description: 'Add notes to a database',
+                          widget: ElevatedButton(
+                            onPressed: onNotionSyncPress,
+                            child: const Text('Modify'),
+                          ),
+                        ),
                         LocalSyncSetting(
                           settings: widget.db.settings,
                           getAllNotes: widget.db.getAllNotes,
