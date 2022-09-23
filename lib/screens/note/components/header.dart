@@ -90,7 +90,7 @@ class _HeaderState extends State<Header> {
             ),
           ),
           const Spacer(),
-          ElevatedButton.icon(
+          OutlinedButton.icon(
             icon: const Icon(Icons.save),
             label: const Text("Save"),
             onPressed: widget.onSave == null ? null : () => newSave(context),
