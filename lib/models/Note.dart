@@ -172,7 +172,7 @@ ${content}''';
     return title == '' && content == '' && source == '';
   }
 
-  String getShortDateTimeStr(DateTime dateTime) {
+  static String getShortDateTimeStr(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final noteDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
@@ -186,7 +186,7 @@ ${content}''';
     }
   }
 
-  String getLongDateTimeStr(DateTime dateTime) {
+  static String getLongDateTimeStr(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final noteDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
