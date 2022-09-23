@@ -159,20 +159,42 @@ ${content}''';
   }
 
   String getMarkdownContent({String? template}) {
+    bool matchInMetadata(Match m, String template) {
+      RegExpMatch? metadataMatch =
+          RegExp(r'^---\n([\s\S]*?)\n---\n').firstMatch(template);
+      if (metadataMatch == null) return false;
+      return m.start > metadataMatch.start && m.end < metadataMatch.end;
+    }
+
     template = (template == null) ? defaultNoteTemplate : template;
     var r = RegExp(r"\$\{(.*)\}", multiLine: true);
     var mdContent = template.replaceAllMapped(r, (m) {
       var variable = m.group(1);
       switch (variable) {
         case 'id':
+          if (matchInMetadata(m, template ?? '')) {
+            return id.replaceAll('"', r'\"');
+          }
           return id;
         case 'title':
+          if (matchInMetadata(m, template ?? '')) {
+            return title.replaceAll('"', r'\"');
+          }
           return title;
         case 'source':
+          if (matchInMetadata(m, template ?? '')) {
+            return source.replaceAll('"', r'\"');
+          }
           return source;
         case 'created_time':
+          if (matchInMetadata(m, template ?? '')) {
+            return timestamp.replaceAll('"', r'\"');
+          }
           return timestamp;
         case 'content':
+          if (matchInMetadata(m, template ?? '')) {
+            return content.replaceAll('"', r'\"');
+          }
           return content;
         default:
           return m.group(0) ?? '';
