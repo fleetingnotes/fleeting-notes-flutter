@@ -4,6 +4,7 @@ import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'settings.dart';
 import 'firebase.dart';
 import '../models/Note.dart';
@@ -60,7 +61,7 @@ class Database {
         syncManager?.pushNotes(notes);
       }
     } catch (e, stack) {
-      firebase.recordError(e, stack);
+      Sentry.captureException(e, stackTrace: stack);
     }
     List<Note> notes = getAllNotesLocal(box);
     return notes;
