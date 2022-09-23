@@ -25,7 +25,7 @@ class Note {
   @HiveField(7, defaultValue: false)
   bool _isShareable;
   @HiveField(8)
-  String _lastModifiedTime;
+  String? _lastModifiedTime;
   final String partition;
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
@@ -63,7 +63,8 @@ ${content}''';
   String get content => _content;
   String get source => _source;
   DateTime get createdTime => DateTime.parse(_createdTime);
-  DateTime get lastModifiedTime => DateTime.parse(_lastModifiedTime);
+  DateTime get lastModifiedTime =>
+      DateTime.parse(_lastModifiedTime ?? _createdTime);
   String get shortCreated => getShortDateTimeStr(createdTime);
   String get shortLastModified => getShortDateTimeStr(lastModifiedTime);
   String get longCreated => getLongDateTimeStr(createdTime);

@@ -21,7 +21,7 @@ class NoteAdapter extends TypeAdapter<Note> {
       title: fields[2] as String,
       content: fields[3] as String,
       createdTime: fields[1] as String,
-      lastModifiedTime: fields[8] as String,
+      lastModifiedTime: fields[8] as String?,
       isShareable: fields[7] == null ? false : fields[7] as bool,
       source: fields[4] as String,
       isDeleted: fields[6] as bool,
