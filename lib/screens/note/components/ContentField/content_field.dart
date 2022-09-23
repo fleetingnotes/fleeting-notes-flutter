@@ -331,6 +331,7 @@ class _ContentFieldState extends State<ContentField> {
             textCapitalization: TextCapitalization.sentences,
             autofocus: widget.autofocus,
             controller: widget.controller,
+            keyboardType: TextInputType.multiline,
             minLines: 5,
             maxLines: null,
             style: Theme.of(context).textTheme.bodyText2,
