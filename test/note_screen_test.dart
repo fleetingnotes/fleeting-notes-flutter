@@ -62,11 +62,11 @@ void main() {
 
     expect(
         tester
-            .widget<ElevatedButton>(
+            .widget<OutlinedButton>(
               find.ancestor(
                   of: find.text('Save'),
                   matching: find
-                      .byWidgetPredicate((widget) => widget is ElevatedButton)),
+                      .byWidgetPredicate((widget) => widget is OutlinedButton)),
             )
             .enabled,
         isTrue);
@@ -91,11 +91,11 @@ void main() {
 
     expect(
         tester
-            .widget<ElevatedButton>(
+            .widget<OutlinedButton>(
               find.ancestor(
                   of: find.text('Save'),
                   matching: find
-                      .byWidgetPredicate((widget) => widget is ElevatedButton)),
+                      .byWidgetPredicate((widget) => widget is OutlinedButton)),
             )
             .enabled,
         isFalse);
