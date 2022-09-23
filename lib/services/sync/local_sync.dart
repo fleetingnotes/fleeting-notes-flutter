@@ -74,8 +74,14 @@ class LocalSync extends SyncTerface {
     if (m != null) {
       String yamlStr = m.group(1) ?? '';
       String content = m.group(0) ?? '';
-      parsedDict['frontmatter'] = loadYaml(yamlStr) ?? {};
-      parsedDict['content'] = content.replaceFirst(yamlStr, '');
+      try {
+        parsedDict['frontmatter'] = loadYaml(yamlStr) ?? {};
+        parsedDict['content'] = content.replaceFirst(yamlStr, '');
+      } catch (e) {
+        debugPrint(e.toString());
+        parsedDict['frontmatter'] = {};
+        parsedDict['content'] = content;
+      }
     }
     return parsedDict;
   }
