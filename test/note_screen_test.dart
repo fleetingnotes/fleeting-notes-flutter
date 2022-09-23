@@ -62,7 +62,7 @@ void main() {
 
     expect(
         tester
-            .widget<ElevatedButton>(
+            .widget<OutlinedButton>(
               find.ancestor(
                   of: find.text('Save'),
                   matching: find
@@ -91,7 +91,7 @@ void main() {
 
     expect(
         tester
-            .widget<ElevatedButton>(
+            .widget<OutlinedButton>(
               find.ancestor(
                   of: find.text('Save'),
                   matching: find
