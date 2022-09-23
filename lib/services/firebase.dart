@@ -320,7 +320,6 @@ class FirebaseDB implements DatabaseInterface {
         encryptionKey = await getEncryptionKey();
       }
       var json = toFirebaseJson(note, encryptionKey: encryptionKey);
-      json['last_modified_timestamp'] = Timestamp.now();
       DocumentReference docRef = notesCollection.doc(note.id);
       if (batch == null) {
         await docRef.set(json, SetOptions(merge: true));
@@ -381,12 +380,13 @@ class FirebaseDB implements DatabaseInterface {
           (docContainsString('_isDeleted')) ? doc.get('_isDeleted') : false,
       isShareable:
           (docContainsString('is_shared')) ? doc.get('is_shared') : false,
-      timestamp: dt.toIso8601String(),
+      createdTime: dt.toIso8601String(),
     );
   }
 
   toFirebaseJson(Note note, {String? encryptionKey}) {
-    Timestamp created = Timestamp.fromDate(note.getDateTime());
+    Timestamp created = Timestamp.fromDate(note.createdTime);
+    Timestamp lastModified = Timestamp.fromDate(note.lastModifiedTime);
     bool isEncrypted = encryptionKey != null;
     String title = note.title;
     String content = note.content;
@@ -407,6 +407,7 @@ class FirebaseDB implements DatabaseInterface {
       'content': content,
       'source': source,
       'created_timestamp': created,
+      'last_modified_timestamp': lastModified,
       '_isDeleted': note.isDeleted,
       '_partition': currUser!.uid,
       'is_shared': note.isShareable,

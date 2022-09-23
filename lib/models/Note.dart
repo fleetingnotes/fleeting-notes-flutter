@@ -11,19 +11,21 @@ part 'Note.g.dart';
 @HiveType(typeId: 1)
 class Note {
   @HiveField(0)
-  final String id;
+  final String _id;
   @HiveField(1)
-  final String timestamp;
+  final String _createdTime;
   @HiveField(2)
-  String title;
+  String _title;
   @HiveField(3)
-  String content;
+  String _content;
   @HiveField(4)
-  String source;
+  String _source;
   @HiveField(6)
-  bool isDeleted;
+  bool _isDeleted;
   @HiveField(7, defaultValue: false)
-  bool isShareable;
+  bool _isShareable;
+  @HiveField(8)
+  String _lastModifiedTime;
   final String partition;
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
@@ -37,15 +39,63 @@ created_time: "${created_time}"
 ${content}''';
 
   Note({
-    required this.id,
-    required this.title,
-    required this.content,
-    required this.timestamp,
-    this.isShareable = false,
+    required String id,
+    required String createdTime,
+    String? lastModifiedTime,
+    String title = '',
+    String content = '',
+    String source = '',
+    bool isShareable = false,
+    bool isDeleted = false,
     this.partition = '',
-    this.source = '',
-    this.isDeleted = false,
-  });
+  })  : _id = id,
+        _title = title,
+        _content = content,
+        _source = source,
+        _createdTime = createdTime,
+        _lastModifiedTime = lastModifiedTime ?? createdTime,
+        _isDeleted = isDeleted,
+        _isShareable = isShareable;
+
+  // getters
+  String get id => _id;
+  String get title => _title;
+  String get content => _content;
+  String get source => _source;
+  DateTime get createdTime => DateTime.parse(_createdTime);
+  DateTime get lastModifiedTime => DateTime.parse(_lastModifiedTime);
+  String get shortCreated => getShortDateTimeStr(createdTime);
+  String get shortLastModified => getShortDateTimeStr(lastModifiedTime);
+  String get longCreated => getLongDateTimeStr(createdTime);
+  String get longLastModified => getLongDateTimeStr(lastModifiedTime);
+  bool get isShareable => _isShareable;
+  bool get isDeleted => _isDeleted;
+
+  // setters
+  set title(String val) {
+    _title = val;
+    _lastModifiedTime = DateTime.now().toIso8601String();
+  }
+
+  set content(String val) {
+    _content = val;
+    _lastModifiedTime = DateTime.now().toIso8601String();
+  }
+
+  set source(String val) {
+    _source = val;
+    _lastModifiedTime = DateTime.now().toIso8601String();
+  }
+
+  set isShareable(bool val) {
+    _isShareable = val;
+    _lastModifiedTime = DateTime.now().toIso8601String();
+  }
+
+  set isDeleted(bool val) {
+    _isDeleted = val;
+    _lastModifiedTime = DateTime.now().toIso8601String();
+  }
 
   static Note empty(
       {String title = '', String content = '', String source = ''}) {
@@ -56,7 +106,7 @@ ${content}''';
       title: title,
       content: content,
       source: source,
-      timestamp: dateStr,
+      createdTime: dateStr,
       isDeleted: false,
     );
   }
@@ -67,7 +117,7 @@ ${content}''';
       'title': title,
       'content': content,
       'source': source,
-      'timestamp': timestamp,
+      'timestamp': createdTime.toIso8601String(),
     };
   }
 
@@ -78,17 +128,17 @@ ${content}''';
       title: noteMap["title"].toString(),
       content: noteMap["content"].toString(),
       source: noteMap["source"].toString(),
-      timestamp: noteMap["timestamp"].toString(),
+      createdTime: noteMap["timestamp"].toString(),
     );
   }
 
   static Note encodeNote(Note note) {
     return Note(
-      id: jsonEncode(note.id),
+      id: note.id,
       title: jsonEncode(note.title),
       content: jsonEncode(note.content),
       source: jsonEncode(note.source),
-      timestamp: jsonEncode(note.timestamp),
+      createdTime: note.createdTime.toIso8601String(),
       isDeleted: note.isDeleted,
     );
   }
@@ -121,37 +171,29 @@ ${content}''';
     return title == '' && content == '' && source == '';
   }
 
-  DateTime getDateTime() {
-    return DateTime.parse(timestamp);
-  }
-
-  String getShortDateTimeStr() {
+  String getShortDateTimeStr(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final noteDateTime = getDateTime();
-    final noteDate =
-        DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
+    final noteDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 
     if (noteDate == today) {
-      return DateFormat('jm').format(noteDateTime);
+      return DateFormat('jm').format(dateTime);
     } else if (today.year == noteDate.year) {
-      return DateFormat('MMM. d').format(noteDateTime);
+      return DateFormat('MMM. d').format(dateTime);
     } else {
-      return DateFormat('yyyy-M-d').format(noteDateTime);
+      return DateFormat('yyyy-M-d').format(dateTime);
     }
   }
 
-  String getDateTimeStr() {
+  String getLongDateTimeStr(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final noteDateTime = getDateTime();
-    final noteDate =
-        DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
+    final noteDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
 
     if (noteDate == today) {
-      return 'Today at ${DateFormat('jm').format(noteDateTime)}';
+      return 'Today at ${DateFormat('jm').format(dateTime)}';
     }
-    return DateFormat('MMMM d, y').format(noteDateTime);
+    return DateFormat('MMMM d, y').format(dateTime);
   }
 
   String getMarkdownFilename() {
@@ -171,7 +213,7 @@ ${content}''';
         case 'source':
           return source;
         case 'created_time':
-          return timestamp;
+          return createdTime.toIso8601String();
         case 'content':
           return content;
         default:

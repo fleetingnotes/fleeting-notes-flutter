@@ -20,7 +20,8 @@ class NoteAdapter extends TypeAdapter<Note> {
       id: fields[0] as String,
       title: fields[2] as String,
       content: fields[3] as String,
-      timestamp: fields[1] as String,
+      createdTime: fields[1] as String,
+      lastModifiedTime: fields[8] as String,
       isShareable: fields[7] == null ? false : fields[7] as bool,
       source: fields[4] as String,
       isDeleted: fields[6] as bool,
@@ -30,11 +31,11 @@ class NoteAdapter extends TypeAdapter<Note> {
   @override
   void write(BinaryWriter writer, Note obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.timestamp)
+      ..write(obj.createdTime.toIso8601String())
       ..writeByte(2)
       ..write(obj.title)
       ..writeByte(3)
@@ -44,7 +45,9 @@ class NoteAdapter extends TypeAdapter<Note> {
       ..writeByte(6)
       ..write(obj.isDeleted)
       ..writeByte(7)
-      ..write(obj.isShareable);
+      ..write(obj.isShareable)
+      ..writeByte(8)
+      ..write(obj.lastModifiedTime.toIso8601String());
   }
 
   @override

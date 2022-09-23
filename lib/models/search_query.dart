@@ -26,11 +26,12 @@ enum SortOptions {
   sourceASC,
   sourceDESC,
 }
+
 final Map sortMap = {
   SortOptions.dateASC: (Note n1, Note n2) =>
-      n2.timestamp.compareTo(n1.timestamp),
+      n2.createdTime.compareTo(n1.createdTime),
   SortOptions.dateDESC: (Note n1, Note n2) =>
-      n1.timestamp.compareTo(n2.timestamp),
+      n1.createdTime.compareTo(n2.createdTime),
   SortOptions.titleASC: (Note n1, Note n2) =>
       n1.title.toLowerCase().compareTo(n2.title.toLowerCase()),
   SortOptions.titleDSC: (Note n1, Note n2) =>

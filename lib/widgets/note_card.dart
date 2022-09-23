@@ -17,7 +17,7 @@ class NoteCard extends StatelessWidget {
 
   final bool isActive;
   final bool isSelected;
-  final VoidCallback onLongPress; 
+  final VoidCallback onLongPress;
   final VoidCallback onTap;
   final Note note;
   final SearchQuery? sQuery;
@@ -128,7 +128,7 @@ class NoteCard extends StatelessWidget {
                         Column(
                           children: [
                             Text(
-                              note.getShortDateTimeStr(),
+                              note.shortCreated,
                               style:
                                   Theme.of(context).textTheme.caption!.copyWith(
                                         color: isActive ? Colors.white70 : null,
@@ -151,8 +151,7 @@ class NoteCard extends StatelessWidget {
                 ),
                 decoration: isSelected
                     ? BoxDecoration(
-                        border: Border.all(color: Colors.blue,
-                            width: 4),
+                        border: Border.all(color: Colors.blue, width: 4),
                         borderRadius: BorderRadius.circular(8))
                     : null,
               ),

@@ -11,7 +11,7 @@ class MockDatabaseTests extends Database {
   Note newNote(id, title, content, source) {
     String t = DateTime.now().toIso8601String();
     var note = Note(
-        id: id, title: title, content: content, timestamp: t, source: source);
+        id: id, title: title, content: content, createdTime: t, source: source);
     return note;
   }
 

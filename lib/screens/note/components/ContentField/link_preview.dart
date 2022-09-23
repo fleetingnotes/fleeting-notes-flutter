@@ -56,7 +56,7 @@ class LinkPreview extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyText2,
                   ),
                   const Spacer(),
-                  Text(note.getDateTimeStr(),
+                  Text(note.longCreated,
                       style: Theme.of(context).textTheme.caption),
                   const SizedBox(height: 15)
                 ],

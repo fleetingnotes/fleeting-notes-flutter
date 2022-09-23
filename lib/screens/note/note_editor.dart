@@ -201,7 +201,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       title: titleController.text,
       content: contentController.text,
       source: sourceController.text,
-      timestamp: widget.note.timestamp,
+      createdTime: widget.note.createdTime.toIso8601String(),
     );
     widget.db.settings.set('unsaved-note', unsavedNote);
   }
@@ -324,7 +324,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.note.getDateTimeStr(),
+                          widget.note.longCreated,
                           style: Theme.of(context).textTheme.caption,
                         ),
                         TitleField(
