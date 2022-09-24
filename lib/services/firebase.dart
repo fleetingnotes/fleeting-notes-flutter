@@ -4,14 +4,13 @@ import 'dart:typed_data';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mime/mime.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import '../models/Note.dart';
 import '../models/db_interface.dart';
 import 'package:dio/dio.dart';
@@ -47,12 +46,6 @@ class FirebaseDB implements DatabaseInterface {
   Stream<User?> get userChanges => auth.userChanges();
 
   bool get isSharedNotes => userId != 'local' && currUser?.uid != userId;
-
-  Future<void> recordError(dynamic e, StackTrace? stack) async {
-    if (!kIsWeb) {
-      await FirebaseCrashlytics.instance.recordError(e, stack);
-    }
-  }
 
   Future<String?> getFirebaseHashedKey() async {
     if (userId == 'local') return null;
@@ -92,7 +85,7 @@ class FirebaseDB implements DatabaseInterface {
     try {
       remoteConfig.fetchAndActivate();
     } catch (e, stack) {
-      recordError(e, stack);
+      Sentry.captureException(e, stackTrace: stack);
     }
   }
 
@@ -106,16 +99,13 @@ class FirebaseDB implements DatabaseInterface {
           claims['stripeRole'] == 'basic';
     } catch (e, stack) {
       // TODO: store premium user so user can have premium features offline
-      recordError(e, stack);
+      Sentry.captureException(e, stackTrace: stack);
       return false;
     }
   }
 
   void setAnalytics(enabled) {
     analytics.setAnalyticsCollectionEnabled(enabled);
-    if (!kIsWeb) {
-      FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(enabled);
-    }
   }
 
   Future<bool> logoutAllSessions() async {
@@ -129,7 +119,7 @@ class FirebaseDB implements DatabaseInterface {
       );
       return true;
     } catch (e, stack) {
-      recordError(e, stack);
+      Sentry.captureException(e, stackTrace: stack);
       return false;
     }
   }
@@ -200,7 +190,7 @@ class FirebaseDB implements DatabaseInterface {
         // ignore: avoid_print
         print('Wrong password provided for that user.');
       } else {
-        recordError(e, stack);
+        Sentry.captureException(e, stackTrace: stack);
       }
       return false;
     }
@@ -223,7 +213,7 @@ class FirebaseDB implements DatabaseInterface {
         // ignore: avoid_print
         print('The account already exists for that email.');
       } else {
-        recordError(e, stack);
+        Sentry.captureException(e, stackTrace: stack);
       }
       return false;
     } catch (e) {
@@ -242,7 +232,7 @@ class FirebaseDB implements DatabaseInterface {
       authChangeController.add(currUser);
       return true;
     } catch (e, stack) {
-      recordError(e, stack);
+      Sentry.captureException(e, stackTrace: stack);
       return false;
     }
   }

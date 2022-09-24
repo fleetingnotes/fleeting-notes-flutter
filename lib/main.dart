@@ -6,10 +6,10 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'firebase_options.dart';
 import 'package:fleeting_notes_flutter/my_app_mobile.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/my_app.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 Future<Box> openHiveBox(String boxName) async {
   if (!kIsWeb && !Hive.isBoxOpen(boxName)) {
@@ -30,16 +30,16 @@ Future<void> initApp() async {
 
 void main() async {
   GoRouter.setUrlPathStrategy(UrlPathStrategy.path);
-  if (kIsWeb) {
-    await initApp();
-    runApp(const MyApp());
-  } else {
-    runZonedGuarded<Future<void>>(() async {
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = kDebugMode
+          ? ''
+          : 'https://49ad5c0ab4f142e7a2a10926a1579125@o1423992.ingest.sentry.io/6771762';
+    },
+    // Init your App.
+    appRunner: () async {
       await initApp();
-      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
       runApp(const MyApp());
     },
-        (error, stack) => FirebaseCrashlytics.instance
-            .recordError(error, stack, fatal: true));
-  }
+  );
 }
