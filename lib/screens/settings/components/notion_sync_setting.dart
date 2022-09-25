@@ -24,8 +24,6 @@ class NotionSyncSetting extends StatefulWidget {
 
 class _NotionSyncSettingState extends State<NotionSyncSetting> {
   bool enabled = false;
-  String? notionToken;
-  String? notionDatabaseId;
   String errMessage = '';
   TextEditingController controller = TextEditingController();
   TextEditingController tokenController = TextEditingController();
@@ -43,7 +41,7 @@ class _NotionSyncSettingState extends State<NotionSyncSetting> {
       enabled = val;
     });
     await updateHiveDb();
-    if (val && notionToken != null && notionDatabaseId != null) {
+    if (val && tokenController.text != '' && databaseIdController.text != '') {
       List<Note> notes = await widget.getAllNotes();
       var ls = NotionSync(settings: widget.settings);
       ls.pushNotes(notes);
@@ -65,7 +63,6 @@ class _NotionSyncSettingState extends State<NotionSyncSetting> {
   }
 
   Future<void> updateHiveDb() async {
-    var tokenText = tokenController.text;
     await Future.wait([
       widget.settings.set('notion-sync-enabled', enabled),
       widget.settings.set('notion-token', tokenController.text),
