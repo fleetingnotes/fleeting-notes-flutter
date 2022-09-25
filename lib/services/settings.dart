@@ -14,6 +14,9 @@ class Settings {
     'local-sync-enabled': bool,
     'local-sync-dir': String,
     'local-sync-template': String,
+    'notion-sync-enabled': bool,
+    'notion-token': String,
+    'notion-database-id': String,
     'unsaved-note': Note,
   };
 

@@ -14,8 +14,8 @@ import 'package:go_router/go_router.dart';
 import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
-import 'components/notion_sync_dialog.dart';
 import 'components/local_sync_setting.dart';
+import 'components/notion_sync_setting.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key, required this.db}) : super(key: key);
@@ -189,18 +189,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void onNotionSyncPress() async {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return NotionDialog(setNotionCredentials: (token, id) async {
-          await widget.db.firebase.setNotionCredentials(token, id);
-          widget.db.refreshApp();
-        });
-      },
-    );
-  }
-
   void onBackupDropdownChange(String? newValue) {
     setState(() {
       backupOption = newValue!;
@@ -283,15 +271,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             height: Theme.of(context).custom.kDefaultPadding),
                         const Text("Sync", style: TextStyle(fontSize: 12)),
                         const Divider(thickness: 1, height: 1),
-                        SettingItem(
-                          title: 'Notion Sync (One-way)',
-                          description: 'Add notes to a database',
-                          widget: ElevatedButton(
-                            onPressed: onNotionSyncPress,
-                            child: const Text('Modify'),
-                          ),
-                        ),
                         LocalSyncSetting(
+                          settings: widget.db.settings,
+                          getAllNotes: widget.db.getAllNotes,
+                        ),
+                        NotionSyncSetting(
                           settings: widget.db.settings,
                           getAllNotes: widget.db.getAllNotes,
                         ),

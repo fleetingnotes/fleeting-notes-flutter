@@ -2,6 +2,7 @@ import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import '../../models/Note.dart';
 import '../settings.dart';
 import 'local_sync.dart';
+import 'notion_sync.dart';
 
 class SyncManager {
   List<SyncTerface> allSyncs = [];
@@ -11,6 +12,7 @@ class SyncManager {
   }) {
     allSyncs = [
       LocalSync(settings: settings),
+      NotionSync(settings: settings),
     ];
   }
   void pushNotes(List<Note> notes) {
