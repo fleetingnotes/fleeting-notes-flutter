@@ -36,9 +36,9 @@ class NotionSync extends SyncTerface {
     required this.settings,
   }) : super();
   final Settings settings;
-  bool get enabled => settings.get('local-sync-enabled', defaultValue: false);
-  String get notionToken => settings.get('notion-token-dir', defaultValue: '');
-  String? get notionDatabaseId => settings.get('notion-sync-template');
+  bool get enabled => settings.get('notion-sync-enabled', defaultValue: false);
+  String get notionToken => settings.get('notion-token', defaultValue: '');
+  String? get notionDatabaseId => settings.get('notion-database-id', defaultValue: '');
   NotionClient notion =
       NotionClient(token: 'secret_uLhLrE77KJJYLjfgSfwvPJ22CFfTqAquOUotnnEkRxb');
 
