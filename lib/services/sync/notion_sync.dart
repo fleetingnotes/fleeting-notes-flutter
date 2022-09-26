@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:notion_api/base_client.dart';
 import 'package:notion_api/notion.dart';
@@ -18,10 +19,10 @@ import 'package:notion_api/notion/general/lists/children.dart';
 import 'package:notion_api/notion/general/lists/pagination.dart';
 import 'package:notion_api/notion/general/lists/properties.dart';
 import 'package:notion_api/notion/general/property.dart';
-import 'package:notion_api/notion/general/rich_text.dart' as notion_rich_text;
+import 'package:notion_api/notion/general/rich_text.dart' as n_text;
 import 'package:notion_api/notion/general/types/notion_types.dart';
 import 'package:notion_api/notion/objects/database.dart';
-import 'package:notion_api/notion/objects/pages.dart' as notion_pages;
+import 'package:notion_api/notion/objects/pages.dart' as n_pages;
 import 'package:notion_api/notion/objects/parent.dart';
 import 'package:notion_api/notion_blocks.dart';
 import 'package:notion_api/notion_databases.dart';
@@ -31,48 +32,69 @@ import 'package:notion_api/statics.dart';
 import 'package:notion_api/utils/utils.dart';
 
 import 'package:http/http.dart' as http;
+
 class NotionSync extends SyncTerface {
   NotionSync({
     required this.settings,
   }) : super();
   final Settings settings;
+
   bool get enabled => settings.get('notion-sync-enabled', defaultValue: false);
   String get notionToken => settings.get('notion-token', defaultValue: '');
-  String? get notionDatabaseId => settings.get('notion-database-id', defaultValue: '');
-  NotionClient notion =
-      NotionClient(token: 'secret_uLhLrE77KJJYLjfgSfwvPJ22CFfTqAquOUotnnEkRxb');
+  String get notionDatabaseId =>
+      settings.get('notion-database-id', defaultValue: '');
+  //initialize notionclient with token
+  late NotionClient notion = NotionClient(token: notionToken);
 
   @override
   bool canSync() {
-    return enabled && notionToken.isNotEmpty && notionDatabaseId != null;
+    return enabled && notionToken.isNotEmpty && notionDatabaseId.isNotEmpty;
   }
 
   @override
-  void pushNotes(List<Note> notes) {
-    print('NotionSync: pushNotes');
-    // var idToPath = getNoteIdToPathMapping();
-    // for (var n in notes) {
-    //   String mdContent = n.getMarkdownContent(template: template);
-    //   File f;
-    //   if (idToPath.containsKey(n.id)) {
-    //     f = File(idToPath[n.id] as String);
-    //   } else {
-    //     String fileName = n.getMarkdownFilename();
-    //     f = File(p.join(syncDir, fileName));
-    //   }
-    //   f.writeAsString(mdContent);
-    // }
+  void pushNotes(List<Note> notes) async {
+    for (var note in notes) {
+      // get all notes 
+      var findPage = await notion.pages.fetch(note.id);
+      debugPrint('pushNotes note $note');
+      n_pages.Page page = n_pages.Page(
+        parent: Parent.database(id: notionDatabaseId),
+        title: n_text.Text(note.title),
+        id: note.id,
+      );
+      var newPage = await notion.pages.create(page);
+      // var response = notion.databases.fetch('95467b238a14477d89ba3faefa7e6a52');
+      debugPrint('response $newPage');
+      // Send the instance to Notion API
 
-    // Create a page instance
-    notion_pages.Page page = notion_pages.Page(
-      parent: const Parent.database(id: '95467b238a14477d89ba3faefa7e6a52'),
-      title: notion_rich_text.Text('NotionClient (v1): Page test'),
-    );
+      // Get the new id generated for the created page
+      String newPageId = newPage.page!.id;
 
-  // Send the instance to Notion.
-    // var response = notion.pages.create(page);
-    var response = notion.databases.fetch('95467b238a14477d89ba3faefa7e6a52');
-    print('NotionSync: pushNotes: response: $response');
+      // Create the instance of the content of the page
+      Children fullContent = Children.withBlocks([
+        Paragraph(texts: [
+          n_text.Text(note.content),
+        ])
+      ]);
+
+      // Append the content to the page
+      var res = await notion.blocks.append(
+        to: newPageId,
+        children: fullContent,
+      );
+
+      notion.pages.update(
+        newPageId,
+        properties: Properties(map: {
+          'Source': RichTextProp(content: [
+            n_text.Text(note.source),
+          ]),
+          'Created': RichTextProp(content: [
+            n_text.Text(note.timestamp),
+          ]),
+        }),
+      );
+    }
   }
 
   @override

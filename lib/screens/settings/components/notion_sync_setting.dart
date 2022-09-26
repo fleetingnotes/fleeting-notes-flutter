@@ -40,10 +40,10 @@ class _NotionSyncSettingState extends State<NotionSyncSetting> {
       enabled = val;
     });
     await updateHiveDb();
-    if (val && tokenController.text != '' && databaseIdController.text != '') {
-      // List<Note> notes = await widget.getAllNotes();
-      // var ls = NotionSync(settings: widget.settings);
-      // ls.pushNotes(notes);
+    if (val && tokenController.text.isNotEmpty && databaseIdController.text.isNotEmpty) {
+      List<Note> notes = await widget.getAllNotes();
+      var ls = NotionSync(settings: widget.settings);
+      ls.pushNotes(notes);
     }
   }
 
