@@ -91,9 +91,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       content: Text('Exported ${notes.length} notes'),
       duration: const Duration(seconds: 2),
     ));
-    widget.db.firebase.analytics.logEvent(name: 'export_notes', parameters: {
-      'file_type': backupOption,
-    });
   }
 
   void onImportPress() async {
@@ -111,7 +108,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: const Text('OK'))
               ],
             ));
-    widget.db.firebase.analytics.logEvent(name: 'click_import_notes');
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       withData: true,
       allowMultiple: true,
@@ -148,7 +144,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void onDeleteAccountPress() async {
     try {
-      widget.db.firebase.analytics.logEvent(name: 'click_delete_account');
       await widget.db.firebase.deleteAccount();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
@@ -168,7 +163,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void onForceSyncPress() async {
-    widget.db.firebase.analytics.logEvent(name: 'force_sync_notes');
     widget.db.getAllNotes(forceSync: true);
   }
 

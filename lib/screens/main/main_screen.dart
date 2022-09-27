@@ -70,8 +70,6 @@ class _MainScreenState extends State<MainScreen> {
             Builder(builder: (context) {
               return TextButton(
                 onPressed: () {
-                  widget.db.firebase.analytics
-                      .logEvent(name: 'shared_notes_banner_clicked');
                   ScaffoldMessenger.of(context).removeCurrentMaterialBanner();
                   bannerExists = false;
                   widget.db.refreshApp();
@@ -151,8 +149,6 @@ class _MainScreenState extends State<MainScreen> {
                 // Provider.of<NoteStackModel>(context, listen: false)
                 //     .pushNote(Note.empty());
                 widget.db.navigateToNote(Note.empty()); // TODO: Deprecate
-                widget.db.firebase.analytics
-                    .logEvent(name: 'click_new_note_fab');
               },
             ),
             body: Responsive(

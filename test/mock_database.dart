@@ -1,4 +1,3 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fleeting_notes_flutter/services/firebase.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
@@ -10,8 +9,6 @@ import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
-
-class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
 
 class MockRemoteConfig extends Mock implements FirebaseRemoteConfig {
   @override
@@ -37,8 +34,6 @@ class MockSettings extends Mock implements Settings {
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 
 class MockFirebaseDB extends Mock implements FirebaseDB {
-  @override
-  FirebaseAnalytics analytics = MockFirebaseAnalytics();
   @override
   FirebaseRemoteConfig remoteConfig = MockRemoteConfig();
   @override
