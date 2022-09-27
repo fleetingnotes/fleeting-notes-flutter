@@ -32,17 +32,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-
-    widget.db.firebase.getEncryptionKey().then((key) {
-      setState(() {
-        encryptionEnabled = key != null;
-      });
-    });
+    getEncryptionKey();
     setState(() {
       isLoggedIn = widget.db.isLoggedIn();
       if (widget.db.firebase.currUser != null) {
         email = widget.db.firebase.currUser!.email ?? '';
       }
+    });
+  }
+
+  void getEncryptionKey() {
+    widget.db.firebase.getEncryptionKey().then((key) {
+      setState(() {
+        encryptionEnabled = key != null;
+      });
     });
   }
 
@@ -172,9 +175,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (_) {
         return EncryptionDialog(setEncryptionKey: (key) async {
           await widget.db.firebase.setEncryptionKey(key);
-          setState(() {
-            encryptionEnabled = true;
-          });
+          getEncryptionKey();
           widget.db.refreshApp();
         });
       },
@@ -244,6 +245,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             : Auth(
                                 db: widget.db,
                                 onLogin: (e) {
+                                  getEncryptionKey();
                                   setState(() {
                                     isLoggedIn = true;
                                     email = e;
