@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -19,7 +18,6 @@ import '../utils/crypt.dart';
 class FirebaseDB implements DatabaseInterface {
   @override
   String userId = 'local';
-  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
@@ -38,7 +36,6 @@ class FirebaseDB implements DatabaseInterface {
       }
       currUser = user;
       userId = (user == null) ? 'local' : user.uid;
-      analytics.setUserId(id: (user == null) ? null : user.uid);
     });
     notesCollection = FirebaseFirestore.instance.collection('notes');
   }
@@ -66,7 +63,6 @@ class FirebaseDB implements DatabaseInterface {
       throw FleetingNotesException('Encryption key does not match');
     }
     await secureStorage.write(key: 'encryption-key-$userId', value: key);
-    analytics.logEvent(name: 'set_encryption');
   }
 
   Future<void> configRemoteConfig() async {
@@ -104,9 +100,7 @@ class FirebaseDB implements DatabaseInterface {
     }
   }
 
-  void setAnalytics(enabled) {
-    analytics.setAnalyticsCollectionEnabled(enabled);
-  }
+  void setAnalytics(enabled) {}
 
   Future<bool> logoutAllSessions() async {
     if (!isLoggedIn()) return false;
@@ -180,7 +174,6 @@ class FirebaseDB implements DatabaseInterface {
       currUser = credentials.user;
       authChangeController.add(currUser);
       userId = (credentials.user == null) ? 'local' : credentials.user!.uid;
-      await analytics.logLogin(loginMethod: 'firebase');
       return true;
     } on FirebaseAuthException catch (e, stack) {
       if (e.code == 'user-not-found') {
@@ -203,7 +196,6 @@ class FirebaseDB implements DatabaseInterface {
         email: email,
         password: password,
       );
-      await analytics.logSignUp(signUpMethod: 'firebase');
       return true;
     } on FirebaseAuthException catch (e, stack) {
       if (e.code == 'weak-password') {
@@ -225,9 +217,6 @@ class FirebaseDB implements DatabaseInterface {
   Future<bool> logout() async {
     try {
       await auth.signOut();
-      await analytics.logEvent(name: 'sign_out', parameters: {
-        'method': 'firebase',
-      });
       currUser = null;
       authChangeController.add(currUser);
       return true;
@@ -405,24 +394,15 @@ class FirebaseDB implements DatabaseInterface {
   }
 
   Future<void> setInitialNotes() async {
-    try {
-      List remoteConfigInitNotes =
-          jsonDecode(remoteConfig.getString('initial_notes'));
-      List<Note> initNotes = remoteConfigInitNotes
-          .map((note) => Note.empty(
-                title: note['title'],
-                content: note['content'],
-                source: note['source'],
-              ))
-          .toList();
-      await updateNotes(initNotes);
-    } finally {
-      analytics.logEvent(
-        name: 'set_initial_notes',
-        parameters: {
-          'remote_config_init_notes': remoteConfig.getString('initial_notes'),
-        },
-      );
-    }
+    List remoteConfigInitNotes =
+        jsonDecode(remoteConfig.getString('initial_notes'));
+    List<Note> initNotes = remoteConfigInitNotes
+        .map((note) => Note.empty(
+              title: note['title'],
+              content: note['content'],
+              source: note['source'],
+            ))
+        .toList();
+    await updateNotes(initNotes);
   }
 }

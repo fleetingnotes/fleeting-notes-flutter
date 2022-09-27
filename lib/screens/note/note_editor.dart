@@ -98,7 +98,6 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     saveTimer?.cancel();
     widget.db.routeObserver.unsubscribe(this);
     if (hasNewChanges && !widget.isShared) {
-      widget.db.firebase.analytics.logEvent(name: 'auto_save_note');
       _saveNote(updateState: false);
     }
   }
@@ -120,7 +119,6 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     // Autosave if the note was previously saved
     // If we autosave every note, we would pollute pretty fast.
     if (hasNewChanges) {
-      widget.db.firebase.analytics.logEvent(name: 'auto_save_note');
       _saveNote();
     }
   }
@@ -312,7 +310,6 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                     _saveNote();
                   },
                   isNoteShareable: isNoteShareable,
-                  analytics: widget.db.firebase.analytics,
                 ),
                 const Divider(thickness: 1, height: 1),
                 Expanded(
@@ -354,8 +351,6 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                               note: note,
                               onLongPress: () => {},
                               onTap: () {
-                                widget.db.firebase.analytics
-                                    .logEvent(name: 'click_backlink');
                                 widget.db
                                     .navigateToNote(note); // TODO: Deprecate
                               },

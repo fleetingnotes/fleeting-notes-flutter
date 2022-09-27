@@ -33,7 +33,6 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       // For sharing or opening urls/text coming from outside the app while the app is in the memory
       ReceiveSharingIntent.getTextStream().listen((String sharedText) {
         db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
-        db.firebase.analytics.logEvent(name: 'receive_share');
       }, onError: (err) {
         // ignore: avoid_print
         print("getLinkStream error: $err");
@@ -44,7 +43,6 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
         if (sharedText != null) {
           db.popAllRoutes();
           db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
-          db.firebase.analytics.logEvent(name: 'receive_share');
         }
       });
     }

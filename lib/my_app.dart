@@ -168,10 +168,6 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
       future: loadFuture,
       builder: (BuildContext context, AsyncSnapshot<Note?> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          widget.db.firebase.analytics.logEvent(
-            name: 'load_main_screen',
-            parameters: {'note_id': widget.state.queryParams['note'] ?? ''},
-          );
           if (!snapshot.hasData &&
               widget.state.queryParams['note'] != null &&
               widget.state.path == '/') {
@@ -186,12 +182,6 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
                       TextButton(
                         child: const Text('Ok'),
                         onPressed: () {
-                          widget.db.firebase.analytics.logEvent(
-                            name: 'note_not_found',
-                            parameters: {
-                              'note_id': widget.state.queryParams['note']
-                            },
-                          );
                           Navigator.pop(context);
                           context.go('/');
                         },

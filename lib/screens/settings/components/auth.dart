@@ -23,13 +23,11 @@ class _AuthState extends State<Auth> {
   void onDialogContinue(String email, String password) async {
     Navigator.pop(context);
     await widget.db.login(email, password);
-    widget.db.firebase.analytics.logEvent(name: 'login_dialog_continue');
   }
 
   void onSeePricing() {
     String pricingUrl = "https://fleetingnotes.app/pricing?ref=app";
     launch(pricingUrl);
-    widget.db.firebase.analytics.logEvent(name: 'login_dialog_see_pricing');
   }
 
   Future<void> onLoginPress(String email, String password) async {

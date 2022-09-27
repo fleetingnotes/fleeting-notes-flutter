@@ -146,7 +146,6 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void deleteNotes(BuildContext context) async {
-    widget.db.firebase.analytics.logEvent(name: 'delete_selected_notes');
     for (var note in selectedNotes) {
       note.isDeleted = true;
       // only do if mobile app
@@ -205,10 +204,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         focusNode: widget.searchFocusNode,
                         controller: queryController,
                         onChanged: loadNotes,
-                        onTap: () {
-                          widget.db.firebase.analytics
-                              .logEvent(name: 'click_search_bar');
-                        },
+                        onTap: () {},
                         decoration: InputDecoration(
                           hintText: 'Search',
                           fillColor: Theme.of(context).dialogBackgroundColor,
@@ -241,11 +237,6 @@ class _SearchScreenState extends State<SearchScreen> {
                             iconSize: 16,
                             style: Theme.of(context).textTheme.bodyText1,
                             onChanged: (String? newValue) {
-                              widget.db.firebase.analytics.logEvent(
-                                  name: 'change_sort_by',
-                                  parameters: {
-                                    'sort_by': newValue,
-                                  });
                               setState(() {
                                 sortBy = newValue!;
                               });
@@ -267,8 +258,6 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: MaterialButton(
                         minWidth: 20,
                         onPressed: () {
-                          widget.db.firebase.analytics
-                              .logEvent(name: 'click_search_filter');
                           showDialog(
                             context: context,
                             builder: (_) {
@@ -309,15 +298,9 @@ class _SearchScreenState extends State<SearchScreen> {
                         : notes[index].id == activeNoteId,
                     isSelected: selectedNotes.contains(notes[index]),
                     onLongPress: () {
-                      widget.db.firebase.analytics
-                          .logEvent(name: 'long_press_note_card', parameters: {
-                        'note_id': notes[index].id,
-                      });
                       _longPressNote(context, notes[index]);
                     },
                     onTap: () {
-                      widget.db.firebase.analytics
-                          .logEvent(name: 'click_search_notecard');
                       _pressNote(context, notes[index]);
                     },
                   ),

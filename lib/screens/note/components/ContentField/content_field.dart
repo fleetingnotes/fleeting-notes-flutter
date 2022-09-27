@@ -164,11 +164,6 @@ class _ContentFieldState extends State<ContentField> {
           t.substring(caretI, t.length).replaceFirst(RegExp(r"^\]\]"), "");
       widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: linkIndex + link.length + 4));
-      widget.db.firebase.analytics
-          .logEvent(name: 'link_suggestion_select', parameters: {
-        'query': beforeCaretText.substring(linkIndex).replaceAll('[', ''),
-        'selected_link': link,
-      });
       removeOverlay();
     }
 
@@ -208,7 +203,6 @@ class _ContentFieldState extends State<ContentField> {
 
     void _onFollowLinkTap(Note note) async {
       widget.db.navigateToNote(note); // TODO: Deprecate
-      await widget.db.firebase.analytics.logEvent(name: 'follow_link');
       removeOverlay();
     }
 
@@ -278,10 +272,6 @@ class _ContentFieldState extends State<ContentField> {
                       return KeyboardButton(
                         icon: '[]',
                         onPressed: () {
-                          widget.db.firebase.analytics.logEvent(
-                            name: 'click_keyboard_actions',
-                            parameters: {'action': 'addLink'},
-                          );
                           shortcuts.addLink();
                           _onContentChanged(
                               context, widget.controller.text, size);
@@ -293,10 +283,6 @@ class _ContentFieldState extends State<ContentField> {
                       return KeyboardButton(
                         icon: '#',
                         onPressed: () {
-                          widget.db.firebase.analytics.logEvent(
-                            name: 'click_keyboard_actions',
-                            parameters: {'action': 'addTag'},
-                          );
                           shortcuts.addTag();
                           _onContentChanged(
                               context, widget.controller.text, size);
@@ -307,10 +293,6 @@ class _ContentFieldState extends State<ContentField> {
                       return KeyboardButton(
                         icon: Icons.checklist_outlined,
                         onPressed: () {
-                          widget.db.firebase.analytics.logEvent(
-                            name: 'click_keyboard_actions',
-                            parameters: {'action': 'toggleCheckBox'},
-                          );
                           shortcuts.toggleCheckbox();
                           _onContentChanged(
                               context, widget.controller.text, size);
