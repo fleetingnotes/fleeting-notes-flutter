@@ -76,7 +76,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void resetSaveTimer() {
-    var saveMs = widget.db.firebase.remoteConfig.getInt('save_delay_ms');
+    var saveMs = widget.db.settings.get('save-delay-ms');
     saveTimer?.cancel();
     saveTimer = Timer(Duration(milliseconds: saveMs), () {
       if (hasNewChanges) {

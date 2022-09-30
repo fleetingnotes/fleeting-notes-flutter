@@ -7,15 +7,7 @@ import 'dart:async';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
-
-class MockRemoteConfig extends Mock implements FirebaseRemoteConfig {
-  @override
-  int getInt(String key) {
-    return 1;
-  }
-}
 
 class MockSettings extends Mock implements Settings {
   @override
@@ -23,9 +15,19 @@ class MockSettings extends Mock implements Settings {
     Map<String, dynamic> testSettings = {
       "auto-fill-source": false,
       "analytics-enabled": true,
+      "save-delay-ms": 1000,
+      "max-attachment-size-mb": 1,
+      "max-attachment-size-mb-premium": 1,
+      "initial-notes": [],
     };
     return testSettings[key] ?? defaultValue;
   }
+
+  @override
+  Future<void> set(String key, dynamic value) async {}
+
+  @override
+  Future<void> delete(String key) async {}
 
   @override
   bool isFirstTimeOpen() => false;
@@ -34,8 +36,6 @@ class MockSettings extends Mock implements Settings {
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 
 class MockFirebaseDB extends Mock implements FirebaseDB {
-  @override
-  FirebaseRemoteConfig remoteConfig = MockRemoteConfig();
   @override
   FirebaseAuth auth = MockFirebaseAuth();
   @override

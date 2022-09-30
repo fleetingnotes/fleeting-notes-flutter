@@ -22,7 +22,8 @@ class MyApp extends StatefulWidget {
 
 class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   Note? initNote;
-  final Database db = Database(firebase: FirebaseDB(), settings: Settings());
+  final Settings settings = Settings();
+  late final Database db;
 
   void refreshApp(user) {
     if (user != null) {
@@ -39,6 +40,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
 
   @override
   void initState() {
+    db = Database(firebase: FirebaseDB(settings: settings), settings: settings);
     super.initState();
     db.firebase.authChangeController.stream.listen(refreshApp);
     if (kIsWeb) {

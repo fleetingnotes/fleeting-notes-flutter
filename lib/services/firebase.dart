@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
@@ -14,11 +13,12 @@ import '../models/Note.dart';
 import '../models/db_interface.dart';
 import 'package:dio/dio.dart';
 import '../utils/crypt.dart';
+import 'settings.dart' as s;
 
 class FirebaseDB implements DatabaseInterface {
   @override
   String userId = 'local';
-  final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+  final s.Settings settings;
   final FirebaseStorage storage = FirebaseStorage.instance;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -28,8 +28,9 @@ class FirebaseDB implements DatabaseInterface {
   late CollectionReference notesCollection;
   CollectionReference encryptionCollection =
       FirebaseFirestore.instance.collection('encryption');
-  FirebaseDB() {
-    configRemoteConfig();
+  FirebaseDB({
+    required this.settings,
+  }) {
     userChanges.listen((User? user) {
       if (currUser?.uid != user?.uid) {
         authChangeController.add(user);
@@ -63,26 +64,6 @@ class FirebaseDB implements DatabaseInterface {
       throw FleetingNotesException('Encryption key does not match');
     }
     await secureStorage.write(key: 'encryption-key-$userId', value: key);
-  }
-
-  Future<void> configRemoteConfig() async {
-    await remoteConfig.setConfigSettings(RemoteConfigSettings(
-      fetchTimeout: const Duration(minutes: 1),
-      minimumFetchInterval: const Duration(seconds: 1),
-    ));
-    await remoteConfig.setDefaults(const {
-      "use_firebase": true,
-      "initial_notes": "[]",
-      "link_suggestion_threshold": 0.5,
-      "save_delay_ms": 1000,
-      "max_attachment_size_mb": 10,
-      "max_attachment_size_mb_premium": 25,
-    });
-    try {
-      remoteConfig.fetchAndActivate();
-    } catch (e, stack) {
-      Sentry.captureException(e, stackTrace: stack);
-    }
   }
 
   Future<bool> isCurrUserPaying() async {
@@ -123,8 +104,8 @@ class FirebaseDB implements DatabaseInterface {
       throw Exception('File is empty');
     }
     int maxSize = await isCurrUserPaying()
-        ? remoteConfig.getInt('max_attachment_size_mb_premium')
-        : remoteConfig.getInt('max_attachment_size_mb');
+        ? settings.get('max-attachment-size-mb-premium')
+        : settings.get('max-attachment-size-mb');
     if (fileBytes.lengthInBytes / 1000000 > maxSize) {
       throw Exception('File cannot be larger than $maxSize MB');
     }
@@ -394,8 +375,7 @@ class FirebaseDB implements DatabaseInterface {
   }
 
   Future<void> setInitialNotes() async {
-    List remoteConfigInitNotes =
-        jsonDecode(remoteConfig.getString('initial_notes'));
+    List remoteConfigInitNotes = jsonDecode(settings.get('initial-notes'));
     List<Note> initNotes = remoteConfigInitNotes
         .map((note) => Note.empty(
               title: note['title'],
