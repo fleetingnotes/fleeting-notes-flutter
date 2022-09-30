@@ -39,9 +39,9 @@ class _SourceContainerState extends State<SourceContainer> {
     newUrl =
         (uri.scheme.isEmpty) ? 'https://' + uri.toString() : uri.toString();
 
-    if (await canLaunch(newUrl)) {
+    try {
       await launch(newUrl);
-    } else {
+    } catch (e) {
       String errText = 'Could not launch `$url`';
       _failUrlSnackbar(errText);
     }
