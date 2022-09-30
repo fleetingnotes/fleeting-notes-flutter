@@ -7,15 +7,7 @@ import 'dart:async';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
-
-class MockRemoteConfig extends Mock implements FirebaseRemoteConfig {
-  @override
-  int getInt(String key) {
-    return 1;
-  }
-}
 
 class MockSettings extends Mock implements Settings {
   @override
