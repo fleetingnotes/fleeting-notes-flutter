@@ -171,10 +171,10 @@ void main() {
     when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
         (_) async => Future.value([Note.empty(content: '[[hello]]')]));
     when(() => mockDb.upsertNote(any()))
-        .thenAnswer((_) async => Future.value(false));
+        .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
     await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), '[[test]]');
+        find.bySemanticsLabel('Note and links to other ideas'), 'hello world');
     await tester.pump();
     await tester.tapAt(tester
         .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
