@@ -16,9 +16,6 @@ PODS:
   - Firebase/Firestore (8.14.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 8.14.0)
-  - Firebase/RemoteConfig (8.14.0):
-    - Firebase/CoreOnly
-    - FirebaseRemoteConfig (~> 8.14.0)
   - Firebase/Storage (8.14.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 8.14.0)
@@ -30,18 +27,11 @@ PODS:
   - firebase_core (1.14.1):
     - Firebase/CoreOnly (~> 8.14.0)
     - FlutterMacOS
-  - firebase_remote_config (2.0.5):
-    - Firebase/CoreOnly (~> 8.14.0)
-    - Firebase/RemoteConfig (~> 8.14.0)
-    - firebase_core
-    - FlutterMacOS
   - firebase_storage (10.2.17):
     - Firebase/CoreOnly (~> 8.14.0)
     - Firebase/Storage (~> 8.14.0)
     - firebase_core
     - FlutterMacOS
-  - FirebaseABTesting (8.15.0):
-    - FirebaseCore (~> 8.0)
   - FirebaseAuth (8.14.0):
     - FirebaseCore (~> 8.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.7)
@@ -64,17 +54,6 @@ PODS:
   - FirebaseFirestore/Base (8.14.0)
   - FirebaseFirestore/WithLeveldb (8.14.0):
     - FirebaseFirestore/Base
-  - FirebaseInstallations (8.15.0):
-    - FirebaseCore (~> 8.0)
-    - GoogleUtilities/Environment (~> 7.7)
-    - GoogleUtilities/UserDefaults (~> 7.7)
-    - PromisesObjC (< 3.0, >= 1.2)
-  - FirebaseRemoteConfig (8.14.0):
-    - FirebaseABTesting (~> 8.0)
-    - FirebaseCore (~> 8.0)
-    - FirebaseInstallations (~> 8.0)
-    - GoogleUtilities/Environment (~> 7.7)
-    - "GoogleUtilities/NSData+zlib (~> 7.7)"
   - FirebaseStorage (8.14.0):
     - FirebaseCore (~> 8.0)
     - GTMSessionFetcher/Core (~> 1.5)
@@ -99,8 +78,6 @@ PODS:
     - GoogleUtilities/Reachability
   - "GoogleUtilities/NSData+zlib (7.7.0)"
   - GoogleUtilities/Reachability (7.7.0):
-    - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.7.0):
     - GoogleUtilities/Logger
   - GTMSessionFetcher/Core (1.7.1)
   - nanopb (2.30908.0):
@@ -129,7 +106,6 @@ DEPENDENCIES:
   - file_saver (from `Flutter/ephemeral/.symlinks/plugins/file_saver/macos`)
   - firebase_auth (from `Flutter/ephemeral/.symlinks/plugins/firebase_auth/macos`)
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
-  - firebase_remote_config (from `Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos`)
   - firebase_storage (from `Flutter/ephemeral/.symlinks/plugins/firebase_storage/macos`)
   - FirebaseFirestore (from `https://github.com/invertase/firestore-ios-sdk-frameworks.git`, tag `8.14.0`)
   - flutter_secure_storage_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos`)
@@ -142,12 +118,9 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Firebase
-    - FirebaseABTesting
     - FirebaseAuth
     - FirebaseCore
     - FirebaseCoreDiagnostics
-    - FirebaseInstallations
-    - FirebaseRemoteConfig
     - FirebaseStorage
     - GoogleDataTransport
     - GoogleUtilities
@@ -167,8 +140,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_auth/macos
   firebase_core:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_core/macos
-  firebase_remote_config:
-    :path: Flutter/ephemeral/.symlinks/plugins/firebase_remote_config/macos
   firebase_storage:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_storage/macos
   FirebaseFirestore:
@@ -199,15 +170,11 @@ SPEC CHECKSUMS:
   Firebase: 7e8fe528c161b9271d365217a74c16aaf834578e
   firebase_auth: 07fa61609f0c9e1db414b345d8bd9d7dab08e44b
   firebase_core: b35001a38661f4a882510bff98e2c3af2d35a46f
-  firebase_remote_config: d0e7550cf082a54a3b9c8834a4ace8a4445435a1
   firebase_storage: 2915315923f023009f48fa3a4f19f45cbb356a73
-  FirebaseABTesting: 10cbce8db9985ae2e3847ea44e9947dd18f94e10
   FirebaseAuth: c5fde343630090253d3af7e2d35697b414b40202
   FirebaseCore: b84a44ee7ba999e0f9f76d198a9c7f60a797b848
   FirebaseCoreDiagnostics: fd0c8490f34287229c1d6c103d3a55f81ec85712
   FirebaseFirestore: 44356395b75c6528f2aec5ca26acc85dcc83c4e0
-  FirebaseInstallations: 40bd9054049b2eae9a2c38ef1c3dd213df3605cd
-  FirebaseRemoteConfig: a5d9188d8f57f602636f111eca6460ebe32b9b71
   FirebaseStorage: 32ab036ce11eb7e94c279a238a65efa24f81593d
   flutter_secure_storage_macos: 6ceee8fbc7f484553ad17f79361b556259df89aa
   FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
