@@ -204,9 +204,8 @@ class _EmailFormState extends State<EmailForm> {
     if (email.isEmpty) {
       return 'Email is required';
     }
-    if (!RegExp(
-            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-        .hasMatch(email)) {
+    // https://stackoverflow.com/a/4964766/13659833
+    if (!RegExp(r"^\S+@\S+\.\S+$").hasMatch(email)) {
       return 'Invalid email';
     }
     return null;
