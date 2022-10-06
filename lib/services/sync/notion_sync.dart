@@ -4,6 +4,7 @@ import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
 
 import 'package:notion_api/base_client.dart';
 import 'package:notion_api/notion.dart';
@@ -54,18 +55,14 @@ class NotionSync extends SyncTerface {
   @override
   void pushNotes(List<Note> notes) async {
     for (var note in notes) {
-      // get all notes 
-      var findPage = await notion.pages.fetch(note.id);
-      debugPrint('pushNotes note $note');
+
+      //create a new page
       n_pages.Page page = n_pages.Page(
         parent: Parent.database(id: notionDatabaseId),
         title: n_text.Text(note.title),
         id: note.id,
       );
       var newPage = await notion.pages.create(page);
-      // var response = notion.databases.fetch('95467b238a14477d89ba3faefa7e6a52');
-      debugPrint('response $newPage');
-      // Send the instance to Notion API
 
       // Get the new id generated for the created page
       String newPageId = newPage.page!.id;
@@ -74,7 +71,7 @@ class NotionSync extends SyncTerface {
       Children fullContent = Children.withBlocks([
         Paragraph(texts: [
           n_text.Text(note.content),
-        ])
+        ]),
       ]);
 
       // Append the content to the page
