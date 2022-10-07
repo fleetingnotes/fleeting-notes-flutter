@@ -17,6 +17,7 @@ class Settings {
     'notion-sync-enabled': bool,
     'notion-token': String,
     'notion-database-id': String,
+    'notion-ids-map': Map<String, String>,
     'unsaved-note': Note,
   };
 
@@ -38,9 +39,12 @@ class Settings {
 
   checkValidKeyValue(String key, {dynamic value}) {
     if (!settingsMap.containsKey(key)) {
+      print('Invalid key: $key');
       throw FleetingNotesException('Key provided is not in settingsMap');
     }
     if (value != null && value.runtimeType != settingsMap[key]) {
+      print('Invalid value runtimeType: ${value.runtimeType} settingsMap[$key] = ${settingsMap[key]}');
+      print('Invalid value: $value');
       throw FleetingNotesException('Settings type mismatch');
     }
   }

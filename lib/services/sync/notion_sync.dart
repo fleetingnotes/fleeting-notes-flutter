@@ -4,7 +4,6 @@ import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:convert';
 
 import 'package:notion_api/base_client.dart';
 import 'package:notion_api/notion.dart';
@@ -44,6 +43,9 @@ class NotionSync extends SyncTerface {
   String get notionToken => settings.get('notion-token', defaultValue: '');
   String get notionDatabaseId =>
       settings.get('notion-database-id', defaultValue: '');
+  Map<String, String> get notionIdsMap =>
+      settings.get('notion-ids-map', defaultValue: {'empty': 'empty'});
+
   //initialize notionclient with token
   late NotionClient notion = NotionClient(token: notionToken);
 
@@ -54,18 +56,24 @@ class NotionSync extends SyncTerface {
 
   @override
   void pushNotes(List<Note> notes) async {
+    var pageId = '';
     for (var note in notes) {
+      //skip page creation if note exists
+      if (notionIdsMap.containsKey(note.id)) {
+        print('page exists ${note.id}');
+      } else {
+        print('creating page ${note.id}');
+        n_pages.Page page = n_pages.Page(
+          parent: Parent.database(id: notionDatabaseId),
+          title: n_text.Text(note.title),
+          id: note.id,
+        );
 
-      //create a new page
-      n_pages.Page page = n_pages.Page(
-        parent: Parent.database(id: notionDatabaseId),
-        title: n_text.Text(note.title),
-        id: note.id,
-      );
-      var newPage = await notion.pages.create(page);
-
-      // Get the new id generated for the created page
-      String newPageId = newPage.page!.id;
+        var newPage = await notion.pages.create(page);
+        String newPageId = newPage.page!.id;
+        notionIdsMap[note.id] = newPageId;
+        pageId = newPageId;
+      }
 
       // Create the instance of the content of the page
       Children fullContent = Children.withBlocks([
@@ -76,12 +84,12 @@ class NotionSync extends SyncTerface {
 
       // Append the content to the page
       var res = await notion.blocks.append(
-        to: newPageId,
+        to: pageId,
         children: fullContent,
       );
 
       notion.pages.update(
-        newPageId,
+        pageId,
         properties: Properties(map: {
           'Source': RichTextProp(content: [
             n_text.Text(note.source),
@@ -103,5 +111,11 @@ class NotionSync extends SyncTerface {
     //     f.delete();
     //   }
     // }
+    // remove the item from the map
+    var newMap = notionIdsMap;
+    for (var n in notes) {
+      newMap.remove(n.id);
+    }
+    settings.set('notion-ids-map', newMap);
   }
 }
