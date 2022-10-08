@@ -33,6 +33,14 @@
         "default": "Ctrl+Shift+E",
         "mac": "Command+Shift+E"
       }
+    },
+    "open-persistent-window": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Open persistent window",
+      "global": true
     }
   },
   "manifest_version": 3

@@ -27,6 +27,15 @@ const onClicked = async({ menuItemId, linkUrl, pageUrl, srcUrl, selectionText })
     const url = `${chrome.runtime.getURL("web-ext.html")}?content=${encodeURIComponent(content)}&source=${encodeURIComponent(source)}`;
     open(url, closeOnFocusChange);
 }
+const onCommand = (command) => {
+  console.log(command);
+  switch (command) {
+    case "open-persistent-window":
+      const url = chrome.runtime.getURL("web-ext.html");
+      open(url, false);
+      break;
+  }
+}
 
 const initContextMenu = async () => {
     //remove all to be sure
@@ -71,6 +80,11 @@ const initContextMenu = async () => {
     chrome.contextMenus.onClicked.addListener(onClicked);
 }
 
+const initCommands = () => {
+  chrome.commands.onCommand.removeListener(onCommand);
+  chrome.commands.onCommand.addListener(onCommand);
+}
+
 // popup.js
 const winIds = new Set()
 const open = async (url, closeOnFocusChange = true) => {
@@ -107,3 +121,4 @@ const initPopup = () => {
 // init
 initContextMenu();
 initPopup();
+initCommands();
