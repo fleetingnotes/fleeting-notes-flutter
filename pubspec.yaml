@@ -64,6 +64,7 @@ dependencies:
   flutter_secure_storage: ^5.0.2
   keyboard_actions: ^4.0.1
   sentry_flutter: ^6.10.0
+  supabase: ^1.0.0-dev.9
 
 
 dev_dependencies:
