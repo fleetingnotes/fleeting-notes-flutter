@@ -61,7 +61,7 @@ class MockDatabase extends Mock implements Database {
   @override
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
   @override
-  FirebaseDB firebase = MockFirebaseDB();
+  FirebaseDB supabase = MockFirebaseDB();
 
   @override
   Future<bool> noteExists(Note note) async => true;

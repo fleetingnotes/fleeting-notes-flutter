@@ -37,9 +37,10 @@ class _MainScreenState extends State<MainScreen> {
       hasInitNote = true;
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
+    var isSharedNotes = widget.db.shareUserId != null;
     if (!kDebugMode) analyticsDialogWorkflow();
     if (!widget.db.isLoggedIn() &&
-        !widget.db.firebase.isSharedNotes &&
+        !isSharedNotes &&
         widget.db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
@@ -61,7 +62,7 @@ class _MainScreenState extends State<MainScreen> {
                 )));
       });
     }
-    if (widget.db.firebase.isSharedNotes && !bannerExists) {
+    if (isSharedNotes && !bannerExists) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         MaterialBanner sharedNotesBanner = MaterialBanner(
           content:

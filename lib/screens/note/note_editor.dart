@@ -146,7 +146,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   void _deleteNote() async {
     Note deletedNote = widget.note;
     deletedNote.isDeleted = true;
-    bool isSuccessDelete = await widget.db.deleteNote(widget.note);
+    bool isSuccessDelete = await widget.db.deleteNotes([widget.note]);
     if (isSuccessDelete) {
       Navigator.pop(context);
       widget.db.noteHistory.remove(widget.note);
@@ -212,7 +212,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       n.content = n.content.replaceAll(r, '[[${widget.note.title}]]');
       return n;
     }).toList();
-    if (await widget.db.updateNotes(updatedBacklinks)) {
+    if (await widget.db.upsertNotes(updatedBacklinks)) {
       setState(() {
         backlinkNotes = updatedBacklinks;
       });
@@ -263,7 +263,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
     try {
       String newFileName = '${widget.note.id}/$filename';
       String? downloadUrl =
-          await widget.db.firebase.addAttachment(newFileName, bytes);
+          await widget.db.supabase.addAttachment(newFileName, bytes);
       if (mounted) {
         sourceController.text = downloadUrl;
         onChanged();
@@ -278,6 +278,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    var isSharedNotes = widget.db.shareUserId != null;
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {
@@ -295,12 +296,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
               children: [
                 Header(
                   onSave: (hasNewChanges) ? _saveNote : null,
-                  onDelete:
-                      (widget.db.firebase.isSharedNotes) ? null : _deleteNote,
+                  onDelete: (isSharedNotes) ? null : _deleteNote,
                   onSearch: () => onSearchNavigate(context),
                   onAddAttachment: onAddAttachment,
-                  onCopyUrl: (widget.db.isLoggedIn() ||
-                          widget.db.firebase.isSharedNotes)
+                  onCopyUrl: (widget.db.isLoggedIn() || isSharedNotes)
                       ? onCopyUrl
                       : null,
                   onShareChange: (bool isShareable) {

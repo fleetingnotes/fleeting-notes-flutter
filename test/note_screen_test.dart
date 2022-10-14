@@ -152,7 +152,7 @@ void main() {
         .thenAnswer((_) async => Future.value(true));
     when(() => mockDb.titleExists(any(), any()))
         .thenAnswer((_) async => Future.value(false));
-    when(() => mockDb.updateNotes(any()))
+    when(() => mockDb.upsertNotes(any()))
         .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
     await tester.enterText(

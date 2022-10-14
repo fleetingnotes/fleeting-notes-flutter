@@ -1,5 +1,4 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
@@ -35,14 +34,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     getEncryptionKey();
     setState(() {
       isLoggedIn = widget.db.isLoggedIn();
-      if (widget.db.firebase.currUser != null) {
-        email = widget.db.firebase.currUser!.email ?? '';
+      if (widget.db.supabase.currUser != null) {
+        email = widget.db.supabase.currUser!.email ?? '';
       }
     });
   }
 
   void getEncryptionKey() {
-    widget.db.firebase.getEncryptionKey().then((key) {
+    widget.db.supabase.getEncryptionKey().then((key) {
       setState(() {
         encryptionEnabled = key != null;
       });
@@ -131,7 +130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         notes.add(note);
       }
     }
-    await widget.db.updateNotes(notes);
+    await widget.db.upsertNotes(notes);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('Imported ${notes.length} notes'),
       duration: const Duration(seconds: 2),
@@ -146,20 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void onDeleteAccountPress() async {
-    try {
-      await widget.db.firebase.deleteAccount();
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'requires-recent-login') {
-        onLogoutPress();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Deleting an account requires a recent login. Please log in again to delete your account'),
-          duration: Duration(seconds: 2),
-        ));
-      } else {
-        rethrow;
-      }
-    }
+    await widget.db.supabase.deleteAccount();
     setState(() {
       isLoggedIn = false;
     });
@@ -174,7 +160,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (_) {
         return EncryptionDialog(setEncryptionKey: (key) async {
-          await widget.db.firebase.setEncryptionKey(key);
+          await widget.db.supabase.setEncryptionKey(key);
           getEncryptionKey();
           widget.db.refreshApp();
         });

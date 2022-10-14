@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:mime/mime.dart';
 import '../models/Note.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/crypt.dart';
@@ -10,14 +14,19 @@ class SupabaseDB {
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGN3ZXlxd2txeXZlYnBtZHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjQ4MDMyMTgsImV4cCI6MTk4MDM3OTIxOH0.awfZKRuaLOPzniEJ2CIth8NWPYnelLfsWrMWH2Bz3w8";
   late final SupabaseClient client;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  StreamController<User?> authChangeController = StreamController<User?>();
   SupabaseDB() {
     client = SupabaseClient(_supabaseUrl, _supabaseKey);
+    client.auth.onAuthStateChange((event, session) {
+      authChangeController.add(session?.user);
+    });
   }
   User? get currUser => client.auth.currentUser;
   String? get userId =>
       (currUser?.userMetadata ?? {})['firebaseUid'] ?? currUser?.id;
   bool get canSync => currUser != null;
 
+  // auth stuff
   Future<bool> login(String email, String password) async {
     await client.auth.signIn(
       email: email,
@@ -43,12 +52,24 @@ class SupabaseDB {
     return true;
   }
 
-  Future<List<Note>> getAllNotes({DateTime? modifiedAfter}) async {
-    var baseFilter = client
-        .from('notes')
-        .select()
-        .neq('deleted', true)
-        .in_('_partition', [userId, currUser?.id]);
+  Future<String> getSubscriptionTier() async {
+    if (currUser == null) return 'free';
+    return (await client
+                .from('stripe')
+                .select('subscription_tier')
+                .eq('id', currUser?.id)
+                .single() ??
+            {})['subscription_tier'] ??
+        'free';
+  }
+
+  // get, update, & delete notes
+  Future<List<Note>> getAllNotes(
+      {String? partition, DateTime? modifiedAfter}) async {
+    var baseFilter = client.from('notes').select().neq('deleted', true);
+    baseFilter = (partition == null)
+        ? baseFilter.in_('_partition', [userId, currUser?.id])
+        : baseFilter.eq('_partition', partition);
 
     List<dynamic> supaNotes = (modifiedAfter == null)
         ? (await baseFilter)
@@ -59,6 +80,11 @@ class SupabaseDB {
             fromSupabaseJson(supaNote, encryptionKey: encryptionKey))
         .toList();
     return notes;
+  }
+
+  Future<Note?> getNoteById(String id) async {
+    var supaNote = await client.from('notes').select().eq('id', id).single();
+    return fromSupabaseJson(supaNote);
   }
 
   Future<bool> deleteNotes(List<Note> notes) async {
@@ -75,6 +101,7 @@ class SupabaseDB {
         .map((note) => toSupabaseJson(note, encryptionKey: encryptionKey))
         .toList();
     var res = await client.from('notes').upsert(supaNotes);
+    // TODO: create a cache to store unsaved notes and attempts to save the note next time they try to save
     if (res.error) {
       print(res.error);
       throw FleetingNotesException("Failed to upsert note");
@@ -82,12 +109,62 @@ class SupabaseDB {
     return true;
   }
 
+  // storage
+  // TODO; double check this works
+  Future<String> addAttachment(String filename, Uint8List? fileBytes) async {
+    if (fileBytes == null || fileBytes.isEmpty) {
+      throw Exception('File is empty');
+    }
+    var isPaying = await getSubscriptionTier() != 'free';
+    // TODO: add settings
+    int maxSize = (isPaying) ? 25 : 10;
+    if (fileBytes.lengthInBytes / 1000000 > maxSize) {
+      throw Exception('File cannot be larger than $maxSize MB');
+    }
+    final mimeType = lookupMimeType(filename);
+    await client.storage.from('attachments').uploadBinary(filename, fileBytes,
+        fileOptions: FileOptions(contentType: mimeType));
+    final publicUrl = client.storage.from('attachments').getPublicUrl(filename);
+    return publicUrl;
+  }
+
   // helpers
+
   Future<String?> getEncryptionKey() async {
     if (userId != null) {
       return await secureStorage.read(key: 'encryption-key-$userId');
     }
     return null;
+  }
+
+  Future<void> setEncryptionKey(String key) async {
+    String hashedKey = sha256Hash(key);
+    String? supabaseHashedKey = await getHashedKey();
+    if (supabaseHashedKey == null) {
+      await client.from('user_data').insert({'encryption_key', hashedKey});
+    } else if (supabaseHashedKey != hashedKey) {
+      throw FleetingNotesException('Encryption key does not match');
+    }
+    await secureStorage.write(key: 'encryption-key-$userId', value: key);
+  }
+
+  Future<String?> getHashedKey() async {
+    if (currUser == null) return null;
+    // TODO: update stripe to reflect this
+    // TODO: double check that this works!
+    var userData = await client
+        .from('user_data')
+        .select('encryption_key')
+        .eq('id', currUser?.id)
+        .single();
+    return userData['encryption_key'];
+  }
+
+  Future<void> deleteAccount() async {
+    List<Note> allNotes = await getAllNotes();
+    await deleteNotes(allNotes);
+    // TODO: add option to delete account (rather than just logging out)
+    await logout();
   }
 
   Note fromSupabaseJson(dynamic supaNote, {String? encryptionKey}) {

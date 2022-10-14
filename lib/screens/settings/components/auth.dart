@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -31,17 +31,10 @@ class _AuthState extends State<Auth> {
   }
 
   Future<void> onLoginPress(String email, String password) async {
-    bool isLoggedIn = await _login(email, password);
-    if (isLoggedIn && !await widget.db.firebase.isCurrUserPaying()) {
-      await widget.db.firebase.logoutAllSessions();
-      try {
-        // refresh user token to tell client to logout
-        await widget.db.firebase.currUser?.getIdToken(true);
-      } on FirebaseAuthException catch (e) {
-        if (e.code != 'user-token-expired') {
-          rethrow;
-        }
-      }
+    bool isLoggedIn = await widget.db.login(email, password);
+    if (isLoggedIn &&
+        (await widget.db.supabase.getSubscriptionTier() != 'free')) {
+      await widget.db.supabase.logout();
       await showDialog(
         context: context,
         barrierDismissible: false,
@@ -63,17 +56,12 @@ class _AuthState extends State<Auth> {
     }
   }
 
-  Future<bool> _login(String email, String password) async {
-    bool isLoggedIn = await widget.db.login(email, password);
-    return isLoggedIn;
-  }
-
   Future<void> _register(String email, String password) async {
     bool isRegistered = await widget.db.register(email, password);
     if (isRegistered) {
-      bool isLoggedIn = await _login(email, password);
+      bool isLoggedIn = await widget.db.login(email, password);
       if (isLoggedIn) {
-        await widget.db.firebase.setInitialNotes().catchError((e) {});
+        await widget.db.setInitialNotes().catchError((e) {});
         widget.onLogin?.call(email);
       }
     } else {
@@ -130,7 +118,8 @@ class _AuthState extends State<Auth> {
         EmailForm(
           action: _authAction,
           onSubmit: onSubmit,
-          onResetPassword: widget.db.firebase.auth.sendPasswordResetEmail,
+          onResetPassword:
+              widget.db.supabase.client.auth.api.resetPasswordForEmail,
         ),
       ];
     }
@@ -378,18 +367,11 @@ class _RecoverPasswordDialogState extends State<RecoverPasswordDialog> {
           child: const Text('Send'),
           onPressed: () async {
             try {
-              await widget.onResetPassword(email: _emailController.text);
+              await widget.onResetPassword(_emailController.text);
               Navigator.of(context).pop();
-            } on FirebaseAuthException catch (e) {
+            } on FleetingNotesException catch (e) {
               setState(() {
-                if (e.code == 'user-not-found') {
-                  errMessage =
-                      "The email address doesn't match an existing account";
-                } else if (e.code == 'invalid-email') {
-                  errMessage = "The email address isn't correct";
-                } else {
-                  errMessage = 'Password reset failed';
-                }
+                errMessage = e.message;
               });
               _formKey.currentState!.validate();
             }
