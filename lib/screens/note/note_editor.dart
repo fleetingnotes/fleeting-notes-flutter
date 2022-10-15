@@ -254,7 +254,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   void onCopyUrl() {
     Clipboard.setData(ClipboardData(
         text: p.join(
-            "https://my.fleetingnotes.app/", "?note=${widget.note.id}")));
+            "https://share.fleetingnotes.app/", "notes/${widget.note.id}")));
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('URL copied to clipboard'),
       duration: Duration(seconds: 2),
