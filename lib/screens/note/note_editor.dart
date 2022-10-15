@@ -252,6 +252,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void onCopyUrl() {
+    // Don't push until share is finished
     Clipboard.setData(ClipboardData(
         text: p.join(
             "https://share.fleetingnotes.app/", "notes/${widget.note.id}")));
