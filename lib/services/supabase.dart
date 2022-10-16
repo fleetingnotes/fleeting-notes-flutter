@@ -50,13 +50,12 @@ class SupabaseDB {
 
   Future<String> getSubscriptionTier() async {
     if (currUser == null) return 'free';
-    return (await client
-                .from('stripe')
-                .select('subscription_tier')
-                .eq('id', currUser?.id)
-                .single() ??
-            {})['subscription_tier'] ??
-        'free';
+    var retrievedTier = await client
+        .from('stripe')
+        .select('subscription_tier')
+        .eq('id', currUser?.id)
+        .single();
+    return (retrievedTier ?? {})['subscription_tier'] ?? 'free';
   }
 
   // get, update, & delete notes

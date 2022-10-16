@@ -32,8 +32,8 @@ class _AuthState extends State<Auth> {
 
   Future<void> onLoginPress(String email, String password) async {
     bool isLoggedIn = await widget.db.login(email, password);
-    if (isLoggedIn &&
-        (await widget.db.supabase.getSubscriptionTier() != 'free')) {
+    var subTier = await widget.db.supabase.getSubscriptionTier();
+    if (isLoggedIn && subTier == 'free') {
       await widget.db.supabase.logout();
       await showDialog(
         context: context,
