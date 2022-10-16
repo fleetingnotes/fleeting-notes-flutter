@@ -148,17 +148,23 @@ class Database {
       syncManager?.pushNotes(notes);
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }
 
   Future<bool> deleteNotes(List<Note> notes) async {
-    var deletedNotes = notes.map((note) {
-      note.isDeleted = true;
-      return note;
-    }).toList();
-    return await upsertNotes(deletedNotes);
+    try {
+      if (isLoggedIn()) {
+        bool isSuccess = await supabase.deleteNotes(notes);
+        if (!isSuccess) return false;
+      }
+      var box = await getBox();
+      await box.deleteAll(notes.map((n) => n.id));
+      syncManager?.deleteNotes(notes);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<void> logout() async {
