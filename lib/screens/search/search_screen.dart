@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
@@ -95,6 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    setInitSearchQuery();
     loadNotes(queryController.text);
     widget.db.listenNoteChange(listenCallback).then((stream) {
       noteChangeStream = stream;
@@ -165,6 +167,16 @@ class _SearchScreenState extends State<SearchScreen> {
       content: Text('Notes successfully deleted'),
       duration: Duration(seconds: 2),
     ));
+  }
+
+  void setInitSearchQuery() async {
+    var url = await BrowserExtension().getSourceUrl();
+    if (url == '') {
+      return;
+    }
+    //parse to only get base url
+    var uri = Uri.parse(url);
+    queryController.text = uri.origin;
   }
 
   @override
