@@ -3,20 +3,16 @@ import 'dart:typed_data';
 
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:mime/mime.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/Note.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/crypt.dart';
-import 'package:supabase/supabase.dart';
 
 class SupabaseDB {
-  final _supabaseUrl = "https://yixcweyqwkqyvebpmdvr.supabase.co";
-  final _supabaseKey =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGN3ZXlxd2txeXZlYnBtZHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjQ4MDMyMTgsImV4cCI6MTk4MDM3OTIxOH0.awfZKRuaLOPzniEJ2CIth8NWPYnelLfsWrMWH2Bz3w8";
-  late final SupabaseClient client;
+  final SupabaseClient client = Supabase.instance.client;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   StreamController<User?> authChangeController = StreamController<User?>();
   SupabaseDB() {
-    client = SupabaseClient(_supabaseUrl, _supabaseKey);
     client.auth.onAuthStateChange((event, session) {
       authChangeController.add(session?.user);
     });
@@ -102,7 +98,7 @@ class SupabaseDB {
         .toList();
     var res = await client.from('notes').upsert(supaNotes);
     // TODO: create a cache to store unsaved notes and attempts to save the note next time they try to save
-    if (res.error) {
+    if (res?.error != null) {
       print(res.error);
       throw FleetingNotesException("Failed to upsert note");
     }
@@ -217,13 +213,14 @@ class SupabaseDB {
       }
     }
     return {
+      'id': note.id,
       'title': title,
       'content': content,
       'source': source,
       'created_at': note.timestamp,
       'modified_at': DateTime.now().toIso8601String(),
       'deleted': note.isDeleted,
-      '_partition': currUser!.id,
+      '_partition': userId,
       'shared': note.isShareable,
       'encrypted': isEncrypted,
     };

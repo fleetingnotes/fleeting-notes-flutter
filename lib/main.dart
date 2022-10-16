@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:fleeting_notes_flutter/my_app_mobile.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/my_app.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<Box> openHiveBox(String boxName) async {
   if (!kIsWeb && !Hive.isBoxOpen(boxName)) {
@@ -20,6 +21,11 @@ Future<void> initApp() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(NoteAdapter());
+  await Supabase.initialize(
+    url: "https://yixcweyqwkqyvebpmdvr.supabase.co",
+    anonKey:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGN3ZXlxd2txeXZlYnBtZHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjQ4MDMyMTgsImV4cCI6MTk4MDM3OTIxOH0.awfZKRuaLOPzniEJ2CIth8NWPYnelLfsWrMWH2Bz3w8",
+  );
   await openHiveBox('settings');
 }
 
