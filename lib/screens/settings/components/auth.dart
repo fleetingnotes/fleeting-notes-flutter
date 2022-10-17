@@ -118,8 +118,7 @@ class _AuthState extends State<Auth> {
         EmailForm(
           action: _authAction,
           onSubmit: onSubmit,
-          onResetPassword:
-              widget.db.supabase.client.auth.api.resetPasswordForEmail,
+          onResetPassword: widget.db.supabase.resetPassword,
         ),
       ];
     }

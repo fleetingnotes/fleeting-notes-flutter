@@ -1,6 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fleeting_notes_flutter/services/firebase.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
+import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 import 'dart:async';
@@ -8,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockSettings extends Mock implements Settings {
   @override
@@ -33,17 +33,14 @@ class MockSettings extends Mock implements Settings {
   bool isFirstTimeOpen() => false;
 }
 
-class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+class MockSupabaseClient extends Mock implements SupabaseClient {}
 
-class MockFirebaseDB extends Mock implements FirebaseDB {
-  @override
-  FirebaseAuth auth = MockFirebaseAuth();
-  @override
-  Stream<User?> get userChanges => const Stream.empty();
-  @override
-  bool get isSharedNotes => false;
+class MockSupabaseDB extends Mock implements SupabaseDB {
   @override
   Future<String?> getEncryptionKey() async => null;
+
+  @override
+  SupabaseClient client = MockSupabaseClient();
 }
 
 class MockDatabase extends Mock implements Database {
@@ -61,7 +58,7 @@ class MockDatabase extends Mock implements Database {
   @override
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
   @override
-  FirebaseDB supabase = MockFirebaseDB();
+  SupabaseDB supabase = MockSupabaseDB();
 
   @override
   Future<bool> noteExists(Note note) async => true;

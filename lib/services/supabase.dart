@@ -48,6 +48,10 @@ class SupabaseDB {
     return true;
   }
 
+  Future<void> resetPassword(String email) async {
+    await client.auth.api.resetPasswordForEmail(email);
+  }
+
   Future<String> getSubscriptionTier() async {
     if (currUser == null) return 'free';
     var retrievedTier = await client
