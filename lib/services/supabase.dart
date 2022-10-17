@@ -108,23 +108,31 @@ class SupabaseDB {
   // TODO; double check this works
   Future<String> addAttachment(String filename, Uint8List? fileBytes) async {
     if (fileBytes == null || fileBytes.isEmpty) {
-      throw Exception('File is empty');
+      throw FleetingNotesException('File is empty');
     }
     var isPaying = await getSubscriptionTier() != 'free';
-    // TODO: add settings
+    // TODO: add settings from remote config
     int maxSize = (isPaying) ? 25 : 10;
     if (fileBytes.lengthInBytes / 1000000 > maxSize) {
-      throw Exception('File cannot be larger than $maxSize MB');
+      throw FleetingNotesException('File cannot be larger than $maxSize MB');
     }
     final mimeType = lookupMimeType(filename);
-    await client.storage.from('attachments').uploadBinary(filename, fileBytes,
-        fileOptions: FileOptions(contentType: mimeType));
-    final publicUrl = client.storage.from('attachments').getPublicUrl(filename);
-    return publicUrl;
+    try {
+      await client.storage.from('attachments').uploadBinary(filename, fileBytes,
+          fileOptions: FileOptions(contentType: mimeType));
+
+      final publicUrl =
+          client.storage.from('attachments').getPublicUrl(filename);
+      return publicUrl;
+    } on StorageException catch (e) {
+      if (e.error == "Invalid key") {
+        throw FleetingNotesException('Invalid filename');
+      }
+      rethrow;
+    }
   }
 
   // helpers
-
   Future<String?> getEncryptionKey() async {
     if (userId != null) {
       return await secureStorage.read(key: 'encryption-key-$userId');

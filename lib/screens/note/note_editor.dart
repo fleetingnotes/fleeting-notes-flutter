@@ -268,9 +268,9 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
         sourceController.text = downloadUrl;
         onChanged();
       }
-    } on Exception catch (e) {
+    } on FleetingNotesException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("$e"),
+        content: Text(e.message),
         duration: const Duration(seconds: 2),
       ));
     }
