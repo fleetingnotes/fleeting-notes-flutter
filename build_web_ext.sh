@@ -9,11 +9,6 @@ mv build/web build/web-ext
 rm -rf build/web-ext/canvaskit
 echo "Finished building flutter app"
 
-#Replace remote library references with packed js
-echo "Replacing remote js libraries with packed versions"
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-sed -i -e 's|https\:\/\/www.gstatic\.com\/||g' $SCRIPT_DIR/build/web-ext/main.dart.js
-
 cd build/web-ext
 #ZIP chrome 
 cp manifest3.json manifest.json
