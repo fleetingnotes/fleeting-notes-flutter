@@ -26,8 +26,8 @@ class _AuthState extends State<Auth> {
   }
 
   void onSeePricing() {
-    String pricingUrl = "https://fleetingnotes.app/pricing?ref=app";
-    launch(pricingUrl);
+    Uri pricingUrl = Uri.parse("https://fleetingnotes.app/pricing?ref=app");
+    launchUrl(pricingUrl);
   }
 
   Future<void> onLoginPress(String email, String password) async {

@@ -102,7 +102,6 @@ class SupabaseDB {
     var res = await client.from('notes').upsert(supaNotes);
     // TODO: create a cache to store unsaved notes and attempts to save the note next time they try to save
     if (res?.error != null) {
-      print(res.error);
       throw FleetingNotesException("Failed to upsert note");
     }
     return true;
