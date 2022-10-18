@@ -67,7 +67,11 @@ class SupabaseDB {
   }
 
   Future<void> registerFirebase(String email, String password) async {
-    await firedart.register(email, password);
+    try {
+      await firedart.register(email, password);
+    } catch (e) {
+      throw FleetingNotesException('Registration failed');
+    }
   }
 
   Future<MigrationStatus> loginMigration(String email, String password) async {
