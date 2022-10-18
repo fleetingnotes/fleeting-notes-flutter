@@ -59,6 +59,8 @@ class MockDatabase extends Mock implements Database {
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
   @override
   SupabaseDB supabase = MockSupabaseDB();
+  @override
+  bool get isSharedNotes => false;
 
   @override
   Future<bool> noteExists(Note note) async => true;
