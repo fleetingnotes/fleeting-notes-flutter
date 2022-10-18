@@ -72,8 +72,11 @@ class _MainScreenState extends State<MainScreen> {
               return TextButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).removeCurrentMaterialBanner();
-                  bannerExists = false;
-                  widget.db.refreshApp();
+                  setState(() {
+                    hasInitNote = false;
+                    bannerExists = false;
+                    widget.db.refreshApp();
+                  });
                   context.go('/');
                 },
                 child: const Text('Your Notes'),
