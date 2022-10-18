@@ -212,7 +212,7 @@ class SupabaseDB {
     String hashedKey = sha256Hash(key);
     String? supabaseHashedKey = await getHashedKey();
     if (supabaseHashedKey == null) {
-      await client.from('user_data').insert({
+      await client.from('user_data').upsert({
         'id': currUser?.id,
         'encryption_key': hashedKey,
       });
