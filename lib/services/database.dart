@@ -34,6 +34,9 @@ class Database {
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
   String? shareUserId;
   Box? _currBox;
+  bool get isSharedNotes =>
+      shareUserId != null &&
+      !(shareUserId == supabase.userId || shareUserId == supabase.currUser?.id);
   Future<Box> getBox() async {
     var boxName = shareUserId ?? supabase.userId ?? 'local';
     if (_currBox?.name != boxName) {
@@ -62,7 +65,7 @@ class Database {
   Future<List<Note>> getAllNotes({forceSync = false}) async {
     var box = await getBox();
     try {
-      if ((box.isEmpty || forceSync) && isLoggedIn()) {
+      if ((box.isEmpty || forceSync) && (isLoggedIn() || isSharedNotes)) {
         List<Note> notes = await supabase.getAllNotes(partition: shareUserId);
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         await box.clear();

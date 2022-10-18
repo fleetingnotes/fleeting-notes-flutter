@@ -278,7 +278,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    var isSharedNotes = widget.db.shareUserId != null;
+    var isSharedNotes = widget.db.isSharedNotes;
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {

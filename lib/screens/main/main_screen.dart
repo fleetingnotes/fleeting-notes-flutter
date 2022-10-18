@@ -37,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
       hasInitNote = true;
       widget.db.noteHistory = {widget.initNote!: GlobalKey()};
     }
-    var isSharedNotes = widget.db.shareUserId != null;
+    var isSharedNotes = widget.db.isSharedNotes;
     if (!kDebugMode) analyticsDialogWorkflow();
     if (!widget.db.isLoggedIn() &&
         !isSharedNotes &&
