@@ -2,14 +2,25 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/services/firedart.dart';
+import 'package:firedart/auth/user_gateway.dart' as fd;
 import 'package:mime/mime.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/Note.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/crypt.dart';
 
+enum MigrationStatus {
+  supaFireLogin,
+  supaLoginOnly,
+  fireLoginOnly,
+  noLogin,
+}
+
 class SupabaseDB {
   final SupabaseClient client = Supabase.instance.client;
+  final FireDart firedart = FireDart();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   StreamController<User?> authChangeController = StreamController<User?>();
   SupabaseDB() {
@@ -23,29 +34,83 @@ class SupabaseDB {
   bool get canSync => currUser != null;
 
   // auth stuff
-  Future<bool> login(String email, String password) async {
-    await client.auth.signIn(
+  Future<User> login(String email, String password) async {
+    final res = await client.auth.signIn(
       email: email,
       password: password,
     );
-    if (currUser == null) {
-      throw FleetingNotesException('Login Failed');
+    var user = res.user;
+    if (user == null) {
+      throw FleetingNotesException('Login failed');
+    } else {
+      return user;
     }
-    return true;
   }
 
-  Future<bool> register(String email, String password) async {
-    final res = await client.auth.signUp(
-      email,
-      password,
-    );
-    if (res.user == null) throw FleetingNotesException('Registration failed');
-    return true;
+  Future<User> register(String email, String password,
+      {String? firebaseUid}) async {
+    var userMetadata =
+        (firebaseUid == null) ? null : {"firebaseUid": firebaseUid};
+    final res =
+        await client.auth.signUp(email, password, userMetadata: userMetadata);
+    var newUser = res.user;
+    if (newUser == null) {
+      throw FleetingNotesException('Registration failed');
+    } else {
+      return newUser;
+    }
   }
 
   Future<bool> logout() async {
     await client.auth.signOut();
     return true;
+  }
+
+  Future<void> registerFirebase(String email, String password) async {
+    await firedart.register(email, password);
+  }
+
+  Future<MigrationStatus> loginMigration(String email, String password) async {
+    Future<User?> supaLogin(String email, String password) async {
+      try {
+        return await login(email, password);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    Future<fd.User?> fireLogin(String email, String password) async {
+      try {
+        return await firedart.login(email, password);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    var res = await Future.wait([
+      supaLogin(email, password),
+      fireLogin(email, password),
+    ]);
+    var supaUser = res[0] as User?;
+    var fireUser = res[1] as fd.User?;
+
+    if (supaUser != null && fireUser != null) {
+      return MigrationStatus.supaFireLogin;
+    } else if (supaUser == null && fireUser != null) {
+      try {
+        await register(email, password, firebaseUid: fireUser.id);
+        supaUser = await login(email, password);
+      } on FleetingNotesException catch (e, stack) {
+        Sentry.captureException(e, stackTrace: stack);
+        throw FleetingNotesException(
+            'Failed account migration, check credentials');
+      }
+      return MigrationStatus.fireLoginOnly;
+    } else if (supaUser != null && fireUser == null) {
+      return MigrationStatus.supaLoginOnly;
+    } else {
+      throw FleetingNotesException('Login Failed');
+    }
   }
 
   Future<void> resetPassword(String email) async {
@@ -147,7 +212,10 @@ class SupabaseDB {
     String hashedKey = sha256Hash(key);
     String? supabaseHashedKey = await getHashedKey();
     if (supabaseHashedKey == null) {
-      await client.from('user_data').insert({'encryption_key', hashedKey});
+      await client.from('user_data').insert({
+        'id': currUser?.id,
+        'encryption_key': hashedKey,
+      });
     } else if (supabaseHashedKey != hashedKey) {
       throw FleetingNotesException('Encryption key does not match');
     }
@@ -156,14 +224,16 @@ class SupabaseDB {
 
   Future<String?> getHashedKey() async {
     if (currUser == null) return null;
-    // TODO: update stripe to reflect this
-    // TODO: double check that this works!
-    var userData = await client
-        .from('user_data')
-        .select('encryption_key')
-        .eq('id', currUser?.id)
-        .single();
-    return userData['encryption_key'];
+    try {
+      var userData = await client
+          .from('user_data')
+          .select('encryption_key')
+          .eq('id', currUser?.id)
+          .single();
+      return userData['encryption_key'];
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<void> deleteAccount() async {

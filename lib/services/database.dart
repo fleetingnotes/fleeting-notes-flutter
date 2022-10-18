@@ -175,19 +175,15 @@ class Database {
     await supabase.logout();
   }
 
-  Future<bool> register(String email, String password) async {
-    return await supabase.register(email, password);
+  Future<void> register(String email, String password) async {
+    await supabase.registerFirebase(email, password);
   }
 
-  Future<bool> login(String email, String password) async {
-    if (!isLoggedIn()) {
-      bool isSuccess = await supabase.login(email, password);
-      // clear box
-      var box = await getBox();
-      box.clear();
-      if (!isSuccess) return false;
-    }
-    return true;
+  Future<MigrationStatus> login(String email, String password) async {
+    var migrationStatus = await supabase.loginMigration(email, password);
+    var box = await getBox();
+    box.clear();
+    return migrationStatus;
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {

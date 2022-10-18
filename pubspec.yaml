@@ -61,6 +61,7 @@ dependencies:
   keyboard_actions: ^4.0.1
   sentry_flutter: ^6.10.0
   supabase_flutter: ^1.0.0-dev.9
+  firedart: ^0.9.0+1
 
 
 dev_dependencies:

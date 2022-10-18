@@ -1,4 +1,5 @@
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -31,43 +32,42 @@ class _AuthState extends State<Auth> {
   }
 
   Future<void> onLoginPress(String email, String password) async {
-    bool isLoggedIn = await widget.db.login(email, password);
-    var subTier = await widget.db.supabase.getSubscriptionTier();
-    if (isLoggedIn && subTier == 'free') {
-      await widget.db.supabase.logout();
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return LoginDialog(
-            onContinue: () => onDialogContinue(email, password),
-            onSeePricing: onSeePricing,
-          );
-        },
-      );
-    }
-    if (isLoggedIn) {
+    try {
+      var migrationStatus = await widget.db.login(email, password);
+      var subTier = await widget.db.supabase.getSubscriptionTier();
+      if (subTier == 'free' &&
+          migrationStatus != MigrationStatus.fireLoginOnly) {
+        await widget.db.supabase.logout();
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return LoginDialog(
+              onContinue: () => onDialogContinue(email, password),
+              onSeePricing: onSeePricing,
+            );
+          },
+        );
+      }
       if (widget.onLogin != null) widget.onLogin!(email);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Login failed'),
-        duration: Duration(seconds: 2),
+    } on FleetingNotesException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        duration: const Duration(seconds: 2),
       ));
     }
   }
 
   Future<void> _register(String email, String password) async {
-    bool isRegistered = await widget.db.register(email, password);
-    if (isRegistered) {
-      bool isLoggedIn = await widget.db.login(email, password);
-      if (isLoggedIn) {
-        await widget.db.setInitialNotes().catchError((e) {});
-        widget.onLogin?.call(email);
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Registration failed'),
-        duration: Duration(seconds: 2),
+    await widget.db.register(email, password);
+    try {
+      await widget.db.login(email, password);
+      await widget.db.setInitialNotes().catchError((e) {});
+      widget.onLogin?.call(email);
+    } on FleetingNotesException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        duration: const Duration(seconds: 2),
       ));
     }
   }
