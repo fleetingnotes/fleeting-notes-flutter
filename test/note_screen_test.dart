@@ -129,7 +129,7 @@ void main() {
     when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.deleteNote(any()))
+    when(() => mockDb.deleteNotes(any()))
         .thenAnswer((_) async => Future.value(false));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
     await tester.tap(find.byIcon(Icons.more_vert));
@@ -152,7 +152,7 @@ void main() {
         .thenAnswer((_) async => Future.value(true));
     when(() => mockDb.titleExists(any(), any()))
         .thenAnswer((_) async => Future.value(false));
-    when(() => mockDb.updateNotes(any()))
+    when(() => mockDb.upsertNotes(any()))
         .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
     await tester.enterText(

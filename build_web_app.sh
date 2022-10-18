@@ -13,7 +13,6 @@ echo "Finished building flutter app"
 echo "Remove unnecessary files"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR/build/web-app
-rm -rf firebasejs
 rm manifest3.json manifest2.json popup.html web-ext.html
 zip -q -r ../web-app.zip .
 

@@ -1,23 +1,26 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
+import 'package:fleeting_notes_flutter/services/text_similarity.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'settings.dart';
-import 'firebase.dart';
 import '../models/Note.dart';
 import 'dart:async';
 import 'package:collection/collection.dart';
 import '../models/search_query.dart';
+import 'supabase.dart';
 
 class Database {
-  final FirebaseDB firebase;
+  final SupabaseDB supabase;
   final Settings settings;
+  final TextSimilarity textSimilarity = TextSimilarity();
   SyncManager? syncManager;
   Database({
-    required this.firebase,
+    required this.supabase,
     required this.settings,
   }) {
     syncManager = SyncManager(settings: settings);
@@ -28,11 +31,22 @@ class Database {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey searchKey = GlobalKey();
   Map<Note, GlobalKey> noteHistory = {};
-
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+  String? shareUserId;
+  Box? _currBox;
+  bool get isSharedNotes =>
+      shareUserId != null &&
+      !(shareUserId == supabase.userId || shareUserId == supabase.currUser?.id);
+  Future<Box> getBox() async {
+    var boxName = shareUserId ?? supabase.userId ?? 'local';
+    if (_currBox?.name != boxName) {
+      _currBox = await Hive.openBox(boxName);
+    }
+    return _currBox as Box;
+  }
 
   bool isLoggedIn() {
-    return firebase.isLoggedIn();
+    return supabase.currUser != null;
   }
 
   Future<List<Note>> getSearchNotes(SearchQuery query,
@@ -49,12 +63,10 @@ class Database {
   }
 
   Future<List<Note>> getAllNotes({forceSync = false}) async {
-    var box = await Hive.openBox(firebase.userId);
+    var box = await getBox();
     try {
-      if ((box.isEmpty || forceSync) &&
-          (isLoggedIn() || firebase.isSharedNotes)) {
-        List<Note> notes =
-            await firebase.getAllNotes(isShared: firebase.isSharedNotes);
+      if ((box.isEmpty || forceSync) && (isLoggedIn() || isSharedNotes)) {
+        List<Note> notes = await supabase.getAllNotes(partition: shareUserId);
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         await box.clear();
         await box.putAll(noteIdMap);
@@ -85,7 +97,7 @@ class Database {
   }
 
   Future<Note?> getNote(id) async {
-    var box = await Hive.openBox(firebase.userId);
+    var box = await getBox();
     return box.get(id) as Note?;
   }
 
@@ -119,56 +131,21 @@ class Database {
   }
 
   Future<Note?> getNoteById(String id) async {
-    var box = await Hive.openBox(firebase.userId);
+    var box = await getBox();
     return box.get(id);
   }
 
   Future<bool> upsertNote(Note note) async {
-    bool isNoteInDb = await noteExists(note);
-    if (isNoteInDb) {
-      return await updateNote(note);
-    } else {
-      return await insertNote(note);
-    }
+    return await upsertNotes([note]);
   }
 
-  Future<bool> insertNote(Note note) async {
+  Future<bool> upsertNotes(List<Note> notes) async {
     try {
-      if (firebase.isLoggedIn()) {
-        bool isSuccess = await firebase.insertNote(note);
+      if (isLoggedIn()) {
+        bool isSuccess = await supabase.upsertNotes(notes);
         if (!isSuccess) return false;
       }
-      var box = await Hive.openBox(firebase.userId);
-      await box.put(note.id, note);
-      syncManager?.pushNotes([note]);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> updateNote(Note note) async {
-    try {
-      if (firebase.isLoggedIn()) {
-        bool isSuccess = await firebase.updateNote(note);
-        if (!isSuccess) return false;
-      }
-      var box = await Hive.openBox(firebase.userId);
-      await box.put(note.id, note);
-      syncManager?.pushNotes([note]);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  Future<bool> updateNotes(List<Note> notes) async {
-    try {
-      if (firebase.isLoggedIn()) {
-        bool isSuccess = await firebase.updateNotes(notes);
-        if (!isSuccess) return false;
-      }
-      var box = await Hive.openBox(firebase.userId);
+      var box = await getBox();
       Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
       await box.putAll(noteIdMap);
       syncManager?.pushNotes(notes);
@@ -178,15 +155,15 @@ class Database {
     }
   }
 
-  Future<bool> deleteNote(Note note) async {
+  Future<bool> deleteNotes(List<Note> notes) async {
     try {
-      if (firebase.isLoggedIn()) {
-        bool isSuccess = await firebase.deleteNote(note);
+      if (isLoggedIn()) {
+        bool isSuccess = await supabase.deleteNotes(notes);
         if (!isSuccess) return false;
       }
-      var box = await Hive.openBox(firebase.userId);
-      await box.delete(note.id);
-      syncManager?.deleteNotes([note]);
+      var box = await getBox();
+      await box.deleteAll(notes.map((n) => n.id));
+      syncManager?.deleteNotes(notes);
       return true;
     } catch (e) {
       return false;
@@ -194,23 +171,22 @@ class Database {
   }
 
   Future<void> logout() async {
-    if (firebase.userId != 'local') {
-      var box = await Hive.openBox(firebase.userId);
+    if (supabase.userId != 'local') {
+      var box = await getBox();
       box.clear();
     }
-    await firebase.logout();
+    await supabase.logout();
   }
 
-  Future<bool> register(String email, String password) async {
-    return await firebase.register(email, password);
+  Future<void> register(String email, String password) async {
+    await supabase.registerFirebase(email, password);
   }
 
-  Future<bool> login(String email, String password) async {
-    if (!firebase.isLoggedIn()) {
-      bool isSuccess = await firebase.login(email, password);
-      if (!isSuccess) return false;
-    }
-    return true;
+  Future<MigrationStatus> login(String email, String password) async {
+    var migrationStatus = await supabase.loginMigration(email, password);
+    var box = await getBox();
+    box.clear();
+    return migrationStatus;
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
@@ -266,7 +242,7 @@ class Database {
   }
 
   Future<StreamSubscription> listenNoteChange(Function callback) async {
-    var box = await Hive.openBox(firebase.userId);
+    var box = await getBox();
     return box.watch().listen((event) {
       callback(event);
     });
@@ -289,11 +265,22 @@ class Database {
 
   Future<void> setAnalyticsEnabled(enabled) async {
     await settings.set('analytics-enabled', enabled);
-    firebase.setAnalytics(enabled);
+  }
+
+  Future<void> setInitialNotes() async {
+    List remoteConfigInitNotes = jsonDecode(settings.get('initial-notes'));
+    List<Note> initNotes = remoteConfigInitNotes
+        .map((note) => Note.empty(
+              title: note['title'],
+              content: note['content'],
+              source: note['source'],
+            ))
+        .toList();
+    await upsertNotes(initNotes);
   }
 
   void refreshApp() {
-    firebase.userId = firebase.currUser?.uid ?? 'local';
+    shareUserId = null;
     popAllRoutes();
     searchKey = GlobalKey();
     noteHistory = {Note.empty(): GlobalKey()};

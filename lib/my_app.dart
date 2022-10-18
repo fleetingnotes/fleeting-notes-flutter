@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:fleeting_notes_flutter/services/firebase.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
+import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -27,22 +26,16 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
 
   void refreshApp(user) {
     if (user != null) {
-      try {
-        db.getAllNotes(forceSync: true);
-      } on FirebaseException catch (e) {
-        if (e.code != "cloud_firestore/permission-denied") {
-          rethrow;
-        }
-      }
+      db.getAllNotes(forceSync: true);
     }
     db.refreshApp();
   }
 
   @override
   void initState() {
-    db = Database(firebase: FirebaseDB(settings: settings), settings: settings);
+    db = Database(supabase: SupabaseDB(), settings: settings);
     super.initState();
-    db.firebase.authChangeController.stream.listen(refreshApp);
+    db.supabase.authChangeController.stream.listen(refreshApp);
     if (kIsWeb) {
       setState(() {
         initNote = db.settings.get('unsaved-note');
@@ -53,7 +46,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   @override
   void dispose() {
     super.dispose();
-    db.firebase.authChangeController.close();
+    db.supabase.authChangeController.close();
   }
 
   // This widget is the root of your application.
@@ -131,7 +124,7 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
   }
 
   Future<Note?> loadInitNote() async {
-    await widget.db.firebase.userChanges.first;
+    // await widget.db.supabase.userChanges.first;
     Map params = widget.state.queryParams;
     bool paramContains =
         ['title', 'content', 'source'].any((key) => params.containsKey(key));
@@ -157,9 +150,9 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
 
   Future<Note?> getNoteFromId(String noteId) async {
     Note? note = await widget.db.getNote(noteId);
-    note ??= await widget.db.firebase.getNoteById(noteId);
+    note ??= await widget.db.supabase.getNoteById(noteId);
     if (note != null && note.partition.isNotEmpty) {
-      widget.db.firebase.userId = note.partition;
+      widget.db.shareUserId = note.partition;
     }
     return note;
   }

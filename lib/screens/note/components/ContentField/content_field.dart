@@ -109,10 +109,11 @@ class _ContentFieldState extends State<ContentField> {
       titleLinksVisible = false;
       removeOverlay();
     }
+    var isPremium = await widget.db.supabase.getSubscriptionTier() == 'premium';
     if (widget.controller.text.length % 30 == 0 &&
         widget.controller.text.isNotEmpty &&
-        await widget.db.firebase.isCurrUserPaying()) {
-      widget.db.firebase
+        isPremium) {
+      widget.db.textSimilarity
           .orderListByRelevance(widget.controller.text, allLinks)
           .then((newLinkSuggestions) {
         if (!mounted) return;

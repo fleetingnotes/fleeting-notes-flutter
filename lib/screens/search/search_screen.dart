@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
@@ -72,12 +71,6 @@ class _SearchScreenState extends State<SearchScreen> {
           content: Text(e.message),
           duration: const Duration(seconds: 2),
         ));
-      } else if (e is FirebaseException &&
-          e.code == 'cloud_firestore/permission-denied') {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Authentication failed, try logging in again'),
-          duration: Duration(seconds: 2),
-        ));
       } else {
         rethrow;
       }
@@ -146,20 +139,18 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void deleteNotes(BuildContext context) async {
-    for (var note in selectedNotes) {
-      note.isDeleted = true;
-      // only do if mobile app
-      bool isSuccessDelete = await widget.db.deleteNote(note);
-      if (isSuccessDelete) {
+    bool isSuccessDelete = await widget.db.deleteNotes(selectedNotes);
+    if (isSuccessDelete) {
+      for (var note in selectedNotes) {
         widget.db.noteHistory.remove(note);
-        clearNotes();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Notes deletion failed'),
-          duration: Duration(seconds: 2),
-        ));
-        return;
       }
+      clearNotes();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Notes deletion failed'),
+        duration: Duration(seconds: 2),
+      ));
+      return;
     }
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('Notes successfully deleted'),

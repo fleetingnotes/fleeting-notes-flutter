@@ -2,7 +2,6 @@ import UIKit
 import Social
 import MobileCoreServices
 import Photos
-import FirebaseCore
 
 class ShareViewController: SLComposeServiceViewController {
     var hostAppBundleIdentifier = ""
@@ -40,10 +39,6 @@ class ShareViewController: SLComposeServiceViewController {
 
         // load group and app id from build info
         loadIds();
-        // load firebase
-        if FirebaseApp.app() == nil {
-            FirebaseApp.configure()            
-        }
     }
 
     override func viewDidAppear(_ animated: Bool) {

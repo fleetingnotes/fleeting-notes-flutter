@@ -203,7 +203,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.deleteNote(any()))
+    when(() => mockDb.deleteNotes(any()))
         .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
 

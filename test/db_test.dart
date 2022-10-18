@@ -6,7 +6,7 @@ import 'mock_database.dart';
 
 class MockDatabaseTests extends Database {
   MockDatabaseTests()
-      : super(firebase: MockFirebaseDB(), settings: MockSettings());
+      : super(supabase: MockSupabaseDB(), settings: MockSettings());
 
   Note newNote(id, title, content, source) {
     String t = DateTime.now().toIso8601String();
