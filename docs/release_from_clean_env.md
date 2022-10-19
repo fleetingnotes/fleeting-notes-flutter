@@ -1,5 +1,5 @@
 ## Get web builds from file
-1. Install flutter v3.0.1
+1. Install flutter v3.3.4
 ```
 apt-get update
 apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev curl file git unzip xz-utils zip

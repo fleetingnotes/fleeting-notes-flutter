@@ -1,5 +1,5 @@
 1. Ubuntu 20.04
-2. Install Flutter (v3.0.1) (https://docs.flutter.dev/get-started/install)
+2. Install Flutter (v3.3.4) (https://docs.flutter.dev/get-started/install)
 3. Run `flutter pub get`
 4. Run `./build_web_app.sh`
 5. Run `./build_web_ext.sh`
