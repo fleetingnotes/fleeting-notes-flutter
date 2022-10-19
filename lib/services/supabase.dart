@@ -25,9 +25,13 @@ class SupabaseDB {
   StreamController<User?> authChangeController = StreamController<User?>();
   SupabaseDB() {
     client.auth.onAuthStateChange((event, session) {
-      authChangeController.add(session?.user);
+      if (prevUser?.id != session?.user?.id) {
+        authChangeController.add(session?.user);
+      }
+      prevUser = session?.user;
     });
   }
+  User? prevUser;
   User? get currUser => client.auth.currentUser;
   String? get userId =>
       (currUser?.userMetadata ?? {})['firebaseUid'] ?? currUser?.id;
