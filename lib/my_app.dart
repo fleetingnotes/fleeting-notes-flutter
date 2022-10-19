@@ -124,7 +124,6 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
   }
 
   Future<Note?> loadInitNote() async {
-    // await widget.db.supabase.userChanges.first;
     Map params = widget.state.queryParams;
     bool paramContains =
         ['title', 'content', 'source'].any((key) => params.containsKey(key));
