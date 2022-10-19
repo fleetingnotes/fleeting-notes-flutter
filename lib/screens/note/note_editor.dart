@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
