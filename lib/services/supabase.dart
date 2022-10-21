@@ -24,6 +24,7 @@ class SupabaseDB {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   StreamController<User?> authChangeController = StreamController<User?>();
   SupabaseDB() {
+    prevUser = currUser;
     client.auth.onAuthStateChange((event, session) {
       if (prevUser?.id != session?.user?.id) {
         authChangeController.add(session?.user);
