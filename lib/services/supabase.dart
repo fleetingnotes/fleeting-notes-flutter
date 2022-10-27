@@ -307,7 +307,7 @@ class SupabaseDB {
       'content': content,
       'source': source,
       'created_at': note.timestamp,
-      'modified_at': DateTime.now().toIso8601String(),
+      'modified_at': DateTime.now().toUtc().toIso8601String(),
       'deleted': note.isDeleted,
       '_partition': userId,
       'shared': note.isShareable,

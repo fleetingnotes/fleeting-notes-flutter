@@ -50,7 +50,7 @@ ${content}''';
   static Note empty(
       {String title = '', String content = '', String source = ''}) {
     Uuid uuid = const Uuid();
-    String dateStr = DateTime.now().toIso8601String();
+    String dateStr = DateTime.now().toUtc().toIso8601String();
     return Note(
       id: uuid.v1(),
       title: title,
@@ -126,7 +126,7 @@ ${content}''';
   }
 
   String getShortDateTimeStr() {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     final today = DateTime(now.year, now.month, now.day);
     final noteDateTime = getDateTime();
     final noteDate =
@@ -142,7 +142,7 @@ ${content}''';
   }
 
   String getDateTimeStr() {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     final today = DateTime(now.year, now.month, now.day);
     final noteDateTime = getDateTime();
     final noteDate =

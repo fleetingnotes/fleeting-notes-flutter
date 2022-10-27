@@ -9,7 +9,7 @@ class MockDatabaseTests extends Database {
       : super(supabase: MockSupabaseDB(), settings: MockSettings());
 
   Note newNote(id, title, content, source) {
-    String t = DateTime.now().toIso8601String();
+    String t = DateTime.now().toUtc().toIso8601String();
     var note = Note(
         id: id, title: title, content: content, timestamp: t, source: source);
     return note;
