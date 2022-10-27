@@ -63,6 +63,7 @@ dependencies:
   supabase_flutter: ^1.0.0-dev.9
   firedart: ^0.9.0+1
   in_app_purchase: ^3.0.8
+  home_widget: ^0.1.6
 
 
 dev_dependencies:
