@@ -133,11 +133,11 @@ ${content}''';
         DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
 
     if (noteDate == today) {
-      return DateFormat('jm').format(noteDateTime);
+      return DateFormat('jm').format(noteDateTime.toLocal());
     } else if (today.year == noteDate.year) {
-      return DateFormat('MMM. d').format(noteDateTime);
+      return DateFormat('MMM. d').format(noteDateTime.toLocal());
     } else {
-      return DateFormat('yyyy-M-d').format(noteDateTime);
+      return DateFormat('yyyy-M-d').format(noteDateTime.toLocal());
     }
   }
 
@@ -149,9 +149,9 @@ ${content}''';
         DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
 
     if (noteDate == today) {
-      return 'Today at ${DateFormat('jm').format(noteDateTime)}';
+      return 'Today at ${DateFormat('jm').format(noteDateTime.toLocal())}';
     }
-    return DateFormat('MMMM d, y').format(noteDateTime);
+    return DateFormat('MMMM d, y').format(noteDateTime.toLocal());
   }
 
   String getMarkdownFilename() {
