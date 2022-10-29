@@ -81,10 +81,9 @@ class _SearchScreenState extends State<SearchScreen> {
     loadNotes(queryController.text);
   }
 
-  void listenCallbackForceSync(event) {
-    loadNotes(queryController.text, forceSync: true);
+    Future<void> _pullRefreshNotes() async {
+    await loadNotes(queryController.text, forceSync: true);
   }
-
   @override
   void initState() {
     super.initState();
@@ -272,28 +271,32 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               SizedBox(height: Theme.of(context).custom.kDefaultPadding),
               Expanded(
-                child: ListView.builder(
-                  key: const PageStorageKey('ListOfNotes'),
-                  controller: scrollController,
-                  itemCount: notes.length,
-                  itemBuilder: (context, index) => NoteCard(
-                    sQuery: SearchQuery(
-                        query: queryController.text,
-                        searchByTitle: searchFilter['title'],
-                        searchByContent: searchFilter['content'],
-                        searchBySource: searchFilter['source'],
-                        sortBy: sortOptionMap[sortBy]!),
-                    note: notes[index],
-                    isActive: Responsive.isMobile(context)
-                        ? false
-                        : notes[index].id == activeNoteId,
-                    isSelected: selectedNotes.contains(notes[index]),
-                    onLongPress: () {
-                      _longPressNote(context, notes[index]);
-                    },
-                    onTap: () {
-                      _pressNote(context, notes[index]);
-                    },
+                child: RefreshIndicator(
+                  onRefresh: _pullRefreshNotes,
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    key: const PageStorageKey('ListOfNotes'),
+                    controller: scrollController,
+                    itemCount: notes.length,
+                    itemBuilder: (context, index) => NoteCard(
+                      sQuery: SearchQuery(
+                          query: queryController.text,
+                          searchByTitle: searchFilter['title'],
+                          searchByContent: searchFilter['content'],
+                          searchBySource: searchFilter['source'],
+                          sortBy: sortOptionMap[sortBy]!),
+                      note: notes[index],
+                      isActive: Responsive.isMobile(context)
+                          ? false
+                          : notes[index].id == activeNoteId,
+                      isSelected: selectedNotes.contains(notes[index]),
+                      onLongPress: () {
+                        _longPressNote(context, notes[index]);
+                      },
+                      onTap: () {
+                        _pressNote(context, notes[index]);
+                      },
+                    ),
                   ),
                 ),
               ),
