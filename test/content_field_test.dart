@@ -7,7 +7,7 @@
 
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/suggestions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,8 +23,11 @@ void main() {
   testWidgets('LinkPreview appears on link tap', (WidgetTester tester) async {
     MockDatabase mockDb = MockDatabase();
     TextEditingController controller = TextEditingController();
-    when(() => mockDb.getAllLinks())
-        .thenAnswer((_) async => Future.value(['hello', 'world']));
+    when(() => mockDb.getAllSuggestions())
+        .thenAnswer((_) async => Future.value({
+          'links': ['hello', 'world'],
+          'tags': []
+        }));
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
       body: ContentField(
@@ -48,8 +51,11 @@ void main() {
       (WidgetTester tester) async {
     MockDatabase mockDb = MockDatabase();
     TextEditingController controller = TextEditingController();
-    when(() => mockDb.getAllLinks())
-        .thenAnswer((_) async => Future.value(['hello']));
+    when(() => mockDb.getAllSuggestions())
+        .thenAnswer((_) async => Future.value({
+          'links': ['hello'],
+          'tags': []
+        }));
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
       body: ContentField(
@@ -62,15 +68,18 @@ void main() {
         find.bySemanticsLabel('Note and links to other ideas'), '[[');
     await tester.pump();
 
-    expect(find.byType(LinkSuggestions), findsOneWidget);
+    expect(find.byType(Suggestions), findsOneWidget);
   });
 
   testWidgets('Key navigation works in TitleLinks',
       (WidgetTester tester) async {
     MockDatabase mockDb = MockDatabase();
     TextEditingController controller = TextEditingController();
-    when(() => mockDb.getAllLinks())
-        .thenAnswer((_) async => Future.value(['hello', 'world']));
+    when(() => mockDb.getAllSuggestions())
+        .thenAnswer((_) async => Future.value({
+          'links': ['hello', 'world'],
+          'tags': []
+        }));
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
       body: ContentField(
@@ -86,7 +95,7 @@ void main() {
     await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
     await tester.pump();
 
-    expect(find.byType(LinkSuggestions), findsNothing);
+    expect(find.byType(Suggestions), findsNothing);
     expect(find.text('[[world]]'), findsOneWidget);
   });
 
@@ -94,8 +103,11 @@ void main() {
       (WidgetTester tester) async {
     MockDatabase mockDb = MockDatabase();
     TextEditingController controller = TextEditingController();
-    when(() => mockDb.getAllLinks())
-        .thenAnswer((_) async => Future.value(['hello', 'world']));
+    when(() => mockDb.getAllSuggestions())
+        .thenAnswer((_) async => Future.value({
+          'links': ['hello', 'world'],
+          'tags': []
+        }));
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
       body: ContentField(
@@ -111,6 +123,6 @@ void main() {
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
 
-    expect(find.byType(LinkSuggestions), findsNothing);
+    expect(find.byType(Suggestions), findsNothing);
   });
 }

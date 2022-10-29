@@ -3,31 +3,31 @@ import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class LinkSuggestions extends StatefulWidget {
-  const LinkSuggestions({
+class Suggestions extends StatefulWidget {
+  const Suggestions({
     Key? key,
     required this.caretOffset,
-    required this.allLinks,
+    required this.allOptions,
     required this.query,
     required this.onLinkSelect,
     required this.layerLink,
   }) : super(key: key);
 
   final Offset caretOffset;
-  final List allLinks;
+  final List allOptions;
   final String query;
   final Function onLinkSelect;
   final LayerLink layerLink;
 
   @override
-  State<LinkSuggestions> createState() => _LinkSuggestionsState();
+  State<Suggestions> createState() => _SuggestionsState();
 }
 
-class _LinkSuggestionsState extends State<LinkSuggestions> {
+class _SuggestionsState extends State<Suggestions> {
   int selectedIndex = 0;
   double width = 300;
   late Offset newCaretOffset;
-  late List filteredTitles = filterTitles(widget.query);
+  late List filteredTitles = filterOptions(widget.query);
 
   @override
   void initState() {
@@ -64,9 +64,9 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
     return textSpanner;
   }
 
-  List filterTitles(query) {
-    return widget.allLinks
-        .where((title) => title.toLowerCase().contains(query.toLowerCase()))
+  List filterOptions(query) {
+    return widget.allOptions
+        .where((option) => option.toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
 
@@ -91,7 +91,7 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
 
   @override
   Widget build(BuildContext context) {
-    filteredTitles = filterTitles(widget.query);
+    filteredTitles = filterOptions(widget.query);
     double tileHeight = 50;
     return Positioned(
       width: width,

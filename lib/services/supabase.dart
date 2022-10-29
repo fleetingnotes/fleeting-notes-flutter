@@ -24,15 +24,10 @@ class SupabaseDB {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   StreamController<User?> authChangeController = StreamController<User?>();
   SupabaseDB() {
-    prevUser = currUser;
     client.auth.onAuthStateChange((event, session) {
-      if (prevUser?.id != session?.user?.id) {
-        authChangeController.add(session?.user);
-      }
-      prevUser = session?.user;
+      authChangeController.add(session?.user);
     });
   }
-  User? prevUser;
   User? get currUser => client.auth.currentUser;
   String? get userId =>
       (currUser?.userMetadata ?? {})['firebaseUid'] ?? currUser?.id;
@@ -307,7 +302,7 @@ class SupabaseDB {
       'content': content,
       'source': source,
       'created_at': note.timestamp,
-      'modified_at': DateTime.now().toUtc().toIso8601String(),
+      'modified_at': DateTime.now().toIso8601String(),
       'deleted': note.isDeleted,
       '_partition': userId,
       'shared': note.isShareable,

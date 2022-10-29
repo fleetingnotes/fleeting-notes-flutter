@@ -9,7 +9,7 @@ class MockDatabaseTests extends Database {
       : super(supabase: MockSupabaseDB(), settings: MockSettings());
 
   Note newNote(id, title, content, source) {
-    String t = DateTime.now().toUtc().toIso8601String();
+    String t = DateTime.now().toIso8601String();
     var note = Note(
         id: id, title: title, content: content, timestamp: t, source: source);
     return note;
@@ -75,10 +75,13 @@ void main() {
     });
   });
 
-  test('getAllLinks', () async {
+  test('getAllSuggestions', () async {
     final db = MockDatabaseTests();
-    List allLinks = await db.getAllLinks();
-    expect(allLinks, ['title', 'link']);
+    Map allLinks = await db.getAllSuggestions();
+    expect(allLinks, {
+      "links": ['title', 'link'],
+      "tags": ['tag1', 'tag2'],
+    });
   });
 
   group("noteExists", () {

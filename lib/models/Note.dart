@@ -27,6 +27,7 @@ class Note {
   final String partition;
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
+  static const String tagRegex = "#[a-zA-Z0-9_]+(/[a-zA-Z0-9_]+)*";
   static const String defaultNoteTemplate = r'''
 ---
 id: "${id}"
@@ -50,7 +51,7 @@ ${content}''';
   static Note empty(
       {String title = '', String content = '', String source = ''}) {
     Uuid uuid = const Uuid();
-    String dateStr = DateTime.now().toUtc().toIso8601String();
+    String dateStr = DateTime.now().toIso8601String();
     return Note(
       id: uuid.v1(),
       title: title,
@@ -126,32 +127,32 @@ ${content}''';
   }
 
   String getShortDateTimeStr() {
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final noteDateTime = getDateTime();
     final noteDate =
         DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
 
     if (noteDate == today) {
-      return DateFormat('jm').format(noteDateTime.toLocal());
+      return DateFormat('jm').format(noteDateTime);
     } else if (today.year == noteDate.year) {
-      return DateFormat('MMM. d').format(noteDateTime.toLocal());
+      return DateFormat('MMM. d').format(noteDateTime);
     } else {
-      return DateFormat('yyyy-M-d').format(noteDateTime.toLocal());
+      return DateFormat('yyyy-M-d').format(noteDateTime);
     }
   }
 
   String getDateTimeStr() {
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final noteDateTime = getDateTime();
     final noteDate =
         DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
 
     if (noteDate == today) {
-      return 'Today at ${DateFormat('jm').format(noteDateTime.toLocal())}';
+      return 'Today at ${DateFormat('jm').format(noteDateTime)}';
     }
-    return DateFormat('MMMM d, y').format(noteDateTime.toLocal());
+    return DateFormat('MMMM d, y').format(noteDateTime);
   }
 
   String getMarkdownFilename() {

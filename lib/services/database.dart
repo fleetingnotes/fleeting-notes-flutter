@@ -109,20 +109,28 @@ class Database {
     return note != null;
   }
 
-  Future<List<String>> getAllLinks() async {
+  Future<Map<String, List<String>>> getAllSuggestions() async {
     var allNotes = await getAllNotes();
     RegExp linkRegex = RegExp(Note.linkRegex, multiLine: true);
+    RegExp tagRegex = RegExp(Note.tagRegex, multiLine: true);
     var linkSet = <String>{};
+    var tagSet = <String>{};
     for (var note in allNotes) {
       linkSet.add(note.title);
-      var matches = linkRegex.allMatches(note.content);
-      for (var match in matches) {
+      var linkMatches = linkRegex.allMatches(note.content);
+      var tagMatches = tagRegex.allMatches(note.content);
+      for (var match in tagMatches) {
+        String tag = match.group(0).toString();
+        tagSet.add(tag.substring(1, tag.length));
+      }
+      for (var match in linkMatches) {
         String link = match.group(0).toString();
         linkSet.add(link.substring(2, link.length - 2));
       }
     }
     linkSet.remove('');
-    return linkSet.toList();
+    tagSet.remove('');
+    return {'links': linkSet.toList(), 'tags': tagSet.toList()};
   }
 
   Future<bool> noteExists(Note note) async {

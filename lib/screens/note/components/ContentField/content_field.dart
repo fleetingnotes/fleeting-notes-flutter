@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'keyboard_button.dart';
 import '../../../../utils/shortcut_actions.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/suggestions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
@@ -30,16 +30,19 @@ class ContentField extends StatefulWidget {
 class _ContentFieldState extends State<ContentField> {
   final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
   List<String> allLinks = [];
+  List<String> allTags = [];
   final LayerLink layerLink = LayerLink();
   late final FocusNode contentFocusNode;
   OverlayEntry? overlayEntry = OverlayEntry(
     builder: (context) => Container(),
   );
   bool titleLinksVisible = false;
+  bool tagsVisible = false;
   late ShortcutActions shortcuts;
 
   @override
   void initState() {
+    super.initState();
     // NOTE: onKeyEvent doesn't ignore enter key press
     contentFocusNode = FocusNode(onKey: onKeyEvent);
     contentFocusNode.addListener(() {
@@ -51,13 +54,13 @@ class _ContentFieldState extends State<ContentField> {
       controller: widget.controller,
       bringEditorToFocus: contentFocusNode.requestFocus,
     );
-    widget.db.getAllLinks().then((links) {
+    widget.db.getAllSuggestions().then((suggestionsMap) {
       if (!mounted) return;
       setState(() {
-        allLinks = links;
+        allLinks = suggestionsMap['links'] ?? [];
+        allTags = suggestionsMap['tags'] ?? [];
       });
     });
-    super.initState();
   }
 
   @override
@@ -95,8 +98,11 @@ class _ContentFieldState extends State<ContentField> {
     String beforeCaretText =
         text.substring(0, widget.controller.selection.baseOffset);
 
-    bool isVisible = isTitleLinksVisible(text);
-    if (isVisible) {
+    bool isTitleLinksVisible =
+        checkIsSuggestionsVisible(text, RegExp(r'\[\[((?!([\]])).)*$'));
+    bool isTagsVisible =
+        checkIsSuggestionsVisible(text, RegExp(r'#((?!([\ ])).)*$'));
+    if (isTitleLinksVisible) {
       if (!titleLinksVisible) {
         showTitleLinksOverlay(context, size);
         titleLinksVisible = true;
@@ -107,6 +113,20 @@ class _ContentFieldState extends State<ContentField> {
       }
     } else {
       titleLinksVisible = false;
+      removeOverlay();
+    }
+
+    if (isTagsVisible) {
+      if (!tagsVisible) {
+        showTagsOverlay(context, size);
+        tagsVisible = true;
+      } else {
+        String query = beforeCaretText.substring(
+            beforeCaretText.lastIndexOf('#') + 1, beforeCaretText.length);
+        titleLinkQuery.value = query;
+      }
+    } else {
+      tagsVisible = false;
       removeOverlay();
     }
     var isPremium = await widget.db.supabase.getSubscriptionTier() == 'premium';
@@ -125,12 +145,11 @@ class _ContentFieldState extends State<ContentField> {
   }
 
   // Helper Functions
-  bool isTitleLinksVisible(String text) {
+  bool checkIsSuggestionsVisible(String text, RegExp r) {
     var caretIndex = widget.controller.selection.baseOffset;
     String lastLine = text.substring(0, caretIndex).split('\n').last;
-    RegExp r = RegExp(r'\[\[((?!([\]])).)*$');
-    bool showTitleLinks = r.hasMatch(lastLine);
-    return showTitleLinks;
+    bool showSuggestions = r.hasMatch(lastLine);
+    return showSuggestions;
   }
 
   Offset getCaretOffset(TextEditingController textController,
@@ -181,9 +200,49 @@ class _ContentFieldState extends State<ContentField> {
         child: ValueListenableBuilder(
             valueListenable: titleLinkQuery,
             builder: (context, value, child) {
-              return LinkSuggestions(
+              return Suggestions(
                 caretOffset: caretOffset,
-                allLinks: allLinks,
+                allOptions: allLinks,
+                query: titleLinkQuery.value,
+                onLinkSelect: _onLinkSelect,
+                layerLink: layerLink,
+              );
+            }),
+      );
+    }
+
+    overlayContent(builder);
+  }
+
+  void showTagsOverlay(context, BoxConstraints size) async {
+    _onLinkSelect(String tag) {
+      String t = widget.controller.text;
+      int caretI = widget.controller.selection.baseOffset;
+      String beforeCaretText = t.substring(0, caretI);
+      int tagIndex = beforeCaretText.lastIndexOf('#');
+      widget.controller.text =
+          t.substring(0, tagIndex) + '#$tag' + t.substring(caretI, t.length);
+      widget.controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: tagIndex + tag.length + 1));
+      removeOverlay();
+    }
+
+    removeOverlay();
+    Offset caretOffset = getCaretOffset(
+      widget.controller,
+      Theme.of(context).textTheme.bodyText2!,
+      size,
+    );
+
+    Widget builder(context) {
+      // ignore: avoid_unnecessary_containers
+      return Container(
+        child: ValueListenableBuilder(
+            valueListenable: titleLinkQuery,
+            builder: (context, value, child) {
+              return Suggestions(
+                caretOffset: caretOffset,
+                allOptions: allTags,
                 query: titleLinkQuery.value,
                 onLinkSelect: _onLinkSelect,
                 layerLink: layerLink,
