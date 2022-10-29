@@ -47,33 +47,33 @@ void main() {
     expect(find.text('backlink note', findRichText: true), findsOneWidget);
   });
 
-  // testWidgets('Save note button is enabled when note is changed',
-  //     (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllSuggestions())
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.upsertNote(any()))
-  //       .thenAnswer((_) async => Future.value(true));
-  //   await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
-  //   await tester.enterText(
-  //       find.bySemanticsLabel('Note and links to other ideas'), 'new note');
-  //   await tester.pump();
+  testWidgets('Save note button is enabled when note is changed',
+      (WidgetTester tester) async {
+    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
+    MockDatabase mockDb = MockDatabase();
+    when(() => mockDb.getAllSuggestions())
+        .thenAnswer((_) async => Future.value({'links': [], 'tags': []}));
+    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
+    when(() => mockDb.getBacklinkNotes(any()))
+        .thenAnswer((_) async => Future.value([]));
+    when(() => mockDb.upsertNote(any()))
+        .thenAnswer((_) async => Future.value(true));
+    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator(db: mockDb)));
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), 'new note');
+    await tester.pump();
 
-  //   expect(
-  //       tester
-  //           .widget<ElevatedButton>(
-  //             find.ancestor(
-  //                 of: find.text('Save'),
-  //                 matching: find
-  //                     .byWidgetPredicate((widget) => widget is ElevatedButton)),
-  //           )
-  //           .enabled,
-  //       isTrue);
-  // });
+    expect(
+        tester
+            .widget<OutlinedButton>(
+              find.ancestor(
+                  of: find.text('Save'),
+                  matching: find
+                      .byWidgetPredicate((widget) => widget is OutlinedButton)),
+            )
+            .enabled,
+        isTrue);
+  });
 
   testWidgets('Save note button is disabled when pressed',
       (WidgetTester tester) async {
