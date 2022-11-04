@@ -1,0 +1,54 @@
+{
+  "identifier" : "63D25330",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "1615226800",
+    "_developerTeamID" : "4MLDMH9QYL",
+    "_lastSynchronizedDate" : 689259287.16510499
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21046936",
+      "localizations" : [
+
+      ],
+      "name" : "subscriptions",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "2.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6444211819",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlock features in the basic plan",
+              "displayName" : "Basic Plan",
+              "locale" : "en_CA"
+            }
+          ],
+          "productID" : "fn_basic_plan",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Fleeting Notes Basic Plan",
+          "subscriptionGroupID" : "21046936",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+}

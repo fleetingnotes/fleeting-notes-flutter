@@ -62,6 +62,7 @@ dependencies:
   sentry_flutter: ^6.10.0
   supabase_flutter: ^1.0.0-dev.9
   firedart: ^0.9.0+1
+  in_app_purchase: ^3.0.8
 
 
 dev_dependencies:
