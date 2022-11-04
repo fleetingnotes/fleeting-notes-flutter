@@ -37,6 +37,7 @@ class _AuthState extends State<Auth> {
       var subTier = await widget.db.supabase.getSubscriptionTier();
       if (subTier == 'free' &&
           migrationStatus != MigrationStatus.fireLoginOnly) {
+        var uid = widget.db.supabase.currUser!.id;
         await widget.db.supabase.logout();
         await showDialog(
           context: context,
@@ -45,6 +46,7 @@ class _AuthState extends State<Auth> {
             return LoginDialog(
               onContinue: () => onDialogContinue(email, password),
               onSeePricing: onSeePricing,
+              userId: uid,
             );
           },
         );
