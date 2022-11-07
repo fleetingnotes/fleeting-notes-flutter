@@ -126,14 +126,24 @@ class SupabaseDB {
     await client.auth.api.resetPasswordForEmail(email);
   }
 
+  // TODO: use a join table to only make 1 request
   Future<String> getSubscriptionTier() async {
     if (currUser == null) return 'free';
-    var retrievedTier = await client
+    var stripeTier = await client
         .from('stripe')
         .select('subscription_tier')
         .eq('id', currUser?.id)
         .single();
-    return (retrievedTier ?? {})['subscription_tier'] ?? 'free';
+    var subscriptionTier = (stripeTier ?? {})['subscription_tier'] ?? 'free';
+    if (subscriptionTier == 'free') {
+      var appleTier = await client
+          .from('apple_iap')
+          .select('subscription_tier')
+          .eq('id', currUser?.id)
+          .single();
+      subscriptionTier = (appleTier ?? {})['subscription_tier'] ?? 'free';
+    }
+    return subscriptionTier;
   }
 
   // get, update, & delete notes

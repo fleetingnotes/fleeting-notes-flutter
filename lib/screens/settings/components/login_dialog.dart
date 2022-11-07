@@ -19,24 +19,13 @@ class LoginDialog extends StatelessWidget {
     // ignore: avoid_function_literals_in_foreach_calls
     purchaseDetailsList.forEach((PurchaseDetails purchaseDetails) async {
       if (purchaseDetails.status == PurchaseStatus.pending) {
-        // var iosPlatformAddition = InAppPurchase.instance.getPlatformAddition();
-        // _showPendingUI();
       } else {
         if (purchaseDetails.status == PurchaseStatus.error) {
-          // _handleError(purchaseDetails.error!);
         } else if (purchaseDetails.status == PurchaseStatus.purchased ||
-            purchaseDetails.status == PurchaseStatus.restored) {
-          // bool valid = await _verifyPurchase(purchaseDetails);
-          // if (valid) {
-          // _deliverProduct(purchaseDetails);
-          // } else {
-          // _handleInvalidPurchase(purchaseDetails);
-          // }
-        }
+            purchaseDetails.status == PurchaseStatus.restored) {}
         if (purchaseDetails.pendingCompletePurchase) {
           await InAppPurchase.instance.completePurchase(purchaseDetails);
         }
-        onContinue();
       }
     });
   }
