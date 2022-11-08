@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:typed_data';
-
+import 'package:hive/hive.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/firedart.dart';
 import 'package:firedart/auth/user_gateway.dart' as fd;
+import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -146,6 +147,17 @@ class SupabaseDB {
     return subscriptionTier;
   }
 
+  Future<void> refreshSession() async {
+    try {
+      await client.auth.refreshSession();
+    } on GoTrueException catch (e) {
+      debugPrint(e.message);
+      if (e.statusCode == "400") {
+        // TODO: Logout of only current session
+      }
+    }
+  }
+
   // get, update, & delete notes
   Future<List<Note>> getAllNotes(
       {String? partition, DateTime? modifiedAfter}) async {
@@ -154,6 +166,7 @@ class SupabaseDB {
         ? baseFilter.in_('_partition', [userId, currUser?.id])
         : baseFilter.eq('_partition', partition);
 
+    await upsertNotes([]); // pushes cached notes if any
     List<dynamic> supaNotes = (modifiedAfter == null)
         ? (await baseFilter)
         : (await baseFilter.gt('modified_at', modifiedAfter.toIso8601String()));
@@ -162,6 +175,8 @@ class SupabaseDB {
         .map((supaNote) =>
             fromSupabaseJson(supaNote, encryptionKey: encryptionKey))
         .toList();
+    // TODO: intention is to refresh everytime user opens the app
+    refreshSession();
     return notes;
   }
 
@@ -179,16 +194,59 @@ class SupabaseDB {
   }
 
   Future<bool> upsertNotes(List<Note> notes) async {
+    // recent notes override unsaved cache notes
+    var notesCache = await getNotesCache();
+    notesCache.addAll({for (var note in notes) note.id: note});
+    notes = notesCache.values.toList();
+    if (notes.isEmpty) return true;
+
+    // attempt to upsert notes to supabase
     String? encryptionKey = await getEncryptionKey();
     var supaNotes = notes
         .map((note) => toSupabaseJson(note, encryptionKey: encryptionKey))
         .toList();
-    var res = await client.from('notes').upsert(supaNotes);
-    // TODO: create a cache to store unsaved notes and attempts to save the note next time they try to save
-    if (res?.error != null) {
-      throw FleetingNotesException("Failed to upsert note");
+    try {
+      var res = await client.from('notes').upsert(supaNotes);
+      if (res?.error != null) {
+        throw FleetingNotesException("Failed to upsert note");
+      }
+      // clear note cache if successful
+      await clearNotesCache();
+    } catch (e) {
+      if (e.toString().contains('XMLHttpRequest')) {
+        // if failed http request
+        await saveNotesCache(notes);
+      } else {
+        rethrow;
+      }
     }
     return true;
+  }
+
+  // cache for offline support
+  Future<Box?> getNotesCacheBox() async {
+    var currUserId = currUser?.id;
+    if (currUserId != null) {
+      return await Hive.openBox("$currUserId-notes-cache");
+    }
+    return null;
+  }
+
+  Future<Map<String, Note>> getNotesCache() async {
+    var box = await getNotesCacheBox();
+    Map<String, Note> mapping = {for (var note in box!.values) note.id: note};
+    return mapping;
+  }
+
+  Future<void> saveNotesCache(List<Note> notes) async {
+    var box = await getNotesCacheBox();
+    Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
+    box!.putAll(noteIdMap);
+  }
+
+  Future<void> clearNotesCache() async {
+    var box = await getNotesCacheBox();
+    box?.clear();
   }
 
   // storage
