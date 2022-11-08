@@ -213,12 +213,10 @@ class SupabaseDB {
       // clear note cache if successful
       await clearNotesCache();
     } catch (e) {
-      if (e.toString().contains('XMLHttpRequest')) {
-        // if failed http request
-        await saveNotesCache(notes);
-      } else {
-        rethrow;
-      }
+      // if failed http request
+      debugPrint(e.toString());
+      await saveNotesCache(notes);
+      if (e is FleetingNotesException) rethrow;
     }
     return true;
   }
