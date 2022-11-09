@@ -36,6 +36,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
     db = Database(supabase: SupabaseDB(), settings: settings);
     super.initState();
     db.supabase.authChangeController.stream.listen(refreshApp);
+    refreshApp(db.supabase.currUser);
     if (kIsWeb) {
       setState(() {
         initNote = db.settings.get('unsaved-note');
