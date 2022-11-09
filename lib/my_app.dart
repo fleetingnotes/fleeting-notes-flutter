@@ -10,7 +10,6 @@ import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'services/browser_ext/browser_ext.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
