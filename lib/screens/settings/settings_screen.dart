@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:file_saver/file_saver.dart';
@@ -9,6 +10,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
@@ -268,6 +270,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   .get('auto-fill-source', defaultValue: false),
                               onChanged: autoFilledToggled)
                         ]),
+                        SizedBox(
+                            height: Theme.of(context).custom.kDefaultPadding),
+                        const LegalLinks(),
                       ],
                     )),
               )
@@ -276,5 +281,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+}
+
+class LegalLinks extends StatelessWidget {
+  const LegalLinks({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+      RichText(
+        text: TextSpan(
+          text: 'Privacy Policy',
+          style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                color: Colors.blue,
+              ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              Uri pricingUrl =
+                  Uri.parse("https://fleetingnotes.app/privacy-policy");
+              launchUrl(pricingUrl);
+            },
+        ),
+      ),
+      RichText(
+        text: TextSpan(
+          text: 'Terms and Conditions',
+          style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                color: Colors.blue,
+              ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              Uri pricingUrl =
+                  Uri.parse("https://fleetingnotes.app/terms-and-conditions");
+              launchUrl(pricingUrl);
+            },
+        ),
+      ),
+    ]);
   }
 }
