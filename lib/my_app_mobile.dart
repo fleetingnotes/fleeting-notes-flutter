@@ -12,19 +12,41 @@ class MyApp extends base_app.MyApp {
   State<base_app.MyApp> createState() => _MyAppState();
 }
 
+class ParsedHighlight {
+  String content = '';
+  String source = '';
+
+  ParsedHighlight(this.content, this.source);
+}
+
 class _MyAppState extends base_app.MyAppState<MyApp> {
+  ParsedHighlight? findAndroidHighlight(String sharedText) {
+    if (!Platform.isAndroid) return null;
+    var r = RegExp(r'^"(.+)"[\n\r\s]+(.+)', multiLine: true);
+    var m = r.firstMatch(sharedText);
+    if (m != null) {
+      String content = m.group(1) ?? '';
+      String source = m.group(2)?.trim() ?? '';
+      bool validSource = Uri.tryParse(source)?.hasAbsolutePath ?? false;
+      if (validSource) {
+        return ParsedHighlight(content, source);
+      }
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
     Note getNoteFromShareText(String sharedText) {
-      try {
-        bool _validURL = Uri.parse(sharedText).isAbsolute;
-        if (_validURL) {
-          return Note.empty(source: sharedText);
-        } else {
-          return Note.empty(content: sharedText);
-        }
-      } on FormatException {
+      var ph = findAndroidHighlight(sharedText);
+      if (ph != null) {
+        return Note.empty(content: ph.content, source: ph.source);
+      }
+      bool _validURL = Uri.tryParse(sharedText)?.hasAbsolutePath ?? false;
+      if (_validURL) {
+        return Note.empty(source: sharedText);
+      } else {
         return Note.empty(content: sharedText);
       }
     }
