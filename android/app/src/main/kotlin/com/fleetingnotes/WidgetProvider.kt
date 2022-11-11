@@ -1,4 +1,4 @@
-package com.appwidgetflutter
+package com.fleetingnotes
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -19,7 +19,8 @@ class WidgetProvider : HomeWidgetProvider() {
 
                 // Open App on Widget Click
                 val pendingIntent = HomeWidgetLaunchIntent.getActivity(context,
-                        MainActivity::class.java)
+                        MainActivity::class.java,
+                        Uri.parse("fleetingNotesWidget://note?id=createNote"))
                 setOnClickPendingIntent(R.id.widget_root, pendingIntent)
                 // setOnClickPendingIntent(R.id.bt_add, pendingIntent)
 

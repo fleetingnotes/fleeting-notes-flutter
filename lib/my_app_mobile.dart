@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'my_app.dart' as base_app;
 
@@ -66,6 +67,18 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
           db.popAllRoutes();
           db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
         }
+      });
+
+      // When app is started from widget
+      debugPrint('initStateMobile');
+      HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
+        debugPrint('----------------- initiallyLaunchedFromHomeWidget');
+        debugPrint(uri.toString());
+      });
+
+      HomeWidget.widgetClicked.listen((uri) {
+        debugPrint('-----------------');
+        debugPrint(uri.toString());
       });
     }
   }
