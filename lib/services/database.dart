@@ -59,7 +59,7 @@ class Database {
           (query.searchBySource && r.hasMatch(note.source));
     }).toList();
     notes.sort(sortMap[query.sortBy]);
-    return notes.sublist(0, min(notes.length, 50));
+    return notes.sublist(0, min(notes.length, query.limit));
   }
 
   Future<List<Note>> getAllNotes({forceSync = false}) async {
@@ -96,7 +96,7 @@ class Database {
     return note;
   }
 
-  Future<Note?> getNote(id) async {
+  Future<Note?> getNote(String id) async {
     var box = await getBox();
     return box.get(id) as Note?;
   }

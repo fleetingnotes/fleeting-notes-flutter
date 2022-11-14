@@ -6,6 +6,7 @@ class SearchQuery {
   final bool searchByContent;
   final bool searchBySource;
   final SortOptions sortBy;
+  final int limit;
 
   SearchQuery({
     required this.query,
@@ -13,6 +14,7 @@ class SearchQuery {
     this.searchByContent = true,
     this.searchBySource = true,
     this.sortBy = SortOptions.dateASC,
+    this.limit = 50,
   });
 }
 
@@ -26,6 +28,7 @@ enum SortOptions {
   sourceASC,
   sourceDESC,
 }
+
 final Map sortMap = {
   SortOptions.dateASC: (Note n1, Note n2) =>
       n2.timestamp.compareTo(n1.timestamp),

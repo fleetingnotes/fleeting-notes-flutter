@@ -63,7 +63,7 @@ ${content}''';
 
   toJson() {
     return {
-      '_id': id,
+      'id': id,
       'title': title,
       'content': content,
       'source': source,
@@ -74,7 +74,7 @@ ${content}''';
   static Note fromMap(dynamic note) {
     Map noteMap = Map.from(note);
     return Note(
-      id: noteMap["_id"].toString(),
+      id: noteMap["id"].toString(),
       title: noteMap["title"].toString(),
       content: noteMap["content"].toString(),
       source: noteMap["source"].toString(),
