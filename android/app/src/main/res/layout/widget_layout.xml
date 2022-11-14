@@ -1,31 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     android:id="@+id/widget_root"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="40dp"
-    android:layout_height="40dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#26abff">
-
-        <TextView
-            android:id="@+id/tv_counter"
-            android:layout_alignParentTop="true"
-            android:layout_width="match_parent" 
-            android:layout_height="match_parent" 
-            android:gravity="center"
-            android:text="+"
-            android:textColor="@android:color/white"
-            android:textSize="24sp" />
-
-        <!-- <Button
-            android:id="@+id/bt_add"
+        <ListView
+            android:id="@+id/notes_list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true" />
+
+        <Button
+            android:id="@+id/add_note_bt"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_alignParentBottom="true"
-            android:text="Update Counter"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="3dp"
+            android:layout_marginRight="3dp"
+            android:text="+"
             android:textColor="@android:color/holo_blue_dark"
-            android:textSize="12sp" /> -->
+            android:textSize="24sp" />
     </RelativeLayout>
 </FrameLayout>

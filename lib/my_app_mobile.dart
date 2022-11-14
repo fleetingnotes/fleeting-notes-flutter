@@ -1,5 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:home_widget/home_widget.dart';
@@ -21,6 +23,8 @@ class ParsedHighlight {
 }
 
 class _MyAppState extends base_app.MyAppState<MyApp> {
+  late final StreamSubscription noteChangeStream;
+
   ParsedHighlight? findAndroidHighlight(String sharedText) {
     if (!Platform.isAndroid) return null;
     var r = RegExp(r'^"(.+)"[\n\r\s]+(.+)', multiLine: true);
@@ -36,9 +40,35 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
     return null;
   }
 
+  Future<Note> getNoteFromWidgetUri(Uri uri) async {
+    var noteId = uri.queryParameters['id'];
+    if (noteId != null) {
+      try {
+        Note? note = await db.getNote(noteId);
+        return note ?? Note.empty();
+      } catch (e) {
+        debugPrint(e.toString());
+        return Note.empty();
+      }
+    }
+    return Note.empty();
+  }
+
+  void backgroundCallback(event) async {
+    debugPrint('backgroundCallback');
+    var q = SearchQuery(query: '', sortBy: SortOptions.dateASC);
+    var notes = await db.getSearchNotes(q);
+    await HomeWidget.saveWidgetData('notes', jsonEncode(notes));
+    await HomeWidget.updateWidget(
+        name: 'WidgetProvider', iOSName: 'WidgetProvider');
+  }
+
   @override
   void initState() {
     super.initState();
+    db.listenNoteChange(backgroundCallback).then((stream) {
+      noteChangeStream = stream;
+    });
     Note getNoteFromShareText(String sharedText) {
       var ph = findAndroidHighlight(sharedText);
       if (ph != null) {
@@ -70,16 +100,28 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       });
 
       // When app is started from widget
-      debugPrint('initStateMobile');
       HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
-        debugPrint('----------------- initiallyLaunchedFromHomeWidget');
-        debugPrint(uri.toString());
+        if (uri != null) {
+          db.popAllRoutes();
+          getNoteFromWidgetUri(uri).then((note) {
+            db.navigateToNote(note);
+          });
+        }
       });
 
       HomeWidget.widgetClicked.listen((uri) {
-        debugPrint('-----------------');
-        debugPrint(uri.toString());
+        if (uri != null) {
+          getNoteFromWidgetUri(uri).then((note) {
+            db.navigateToNote(note);
+          });
+        }
       });
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    noteChangeStream.cancel();
   }
 }

@@ -100,6 +100,8 @@
                <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
            </intent-filter>
        </receiver >
+       <service android:name="ListWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
        <service android:name="es.antonborri.home_widget.HomeWidgetBackgroundService"
            android:permission="android.permission.BIND_JOB_SERVICE" android:exported="true"/>
         <!-- Don't delete the meta-data below.
