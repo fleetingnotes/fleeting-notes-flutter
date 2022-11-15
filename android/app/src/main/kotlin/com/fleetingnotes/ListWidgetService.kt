@@ -21,7 +21,6 @@ public class ListWidgetService: RemoteViewsService() {
   }
 }
 
-private const val REMOTE_VIEW_COUNT: Int = 10
 @Serializable
 data class NoteItem(val id: String, val title: String, val content: String, val source: String, val timestamp: String)
 
