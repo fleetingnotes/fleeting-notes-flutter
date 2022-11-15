@@ -20,7 +20,7 @@ const val EXTRA_ITEM = "com.fleetingnotes.EXTRA_ITEM"
 class WidgetProvider : HomeWidgetProvider() {
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray, widgetData: SharedPreferences) {
         appWidgetIds.forEach { widgetId ->
-            Log.d("TAG", "onUpdate")
+            Log.d("TAG", "onHomeWidgetUpdate")
             val intent = Intent(context, ListWidgetService::class.java).apply {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
                 // When intents are compared, the extras are ignored, so we need to embed the extras

@@ -23,7 +23,7 @@ class ParsedHighlight {
 }
 
 class _MyAppState extends base_app.MyAppState<MyApp> {
-  late final StreamSubscription noteChangeStream;
+  StreamSubscription? noteChangeStream;
 
   ParsedHighlight? findAndroidHighlight(String sharedText) {
     if (!Platform.isAndroid) return null;
@@ -54,8 +54,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
     return Note.empty();
   }
 
-  void backgroundCallback(event) async {
-    debugPrint('backgroundCallback');
+  void homeWidgetRefresh(event) async {
+    debugPrint("homeWidgetRefresh");
     var q = SearchQuery(query: '', sortBy: SortOptions.dateASC);
     var notes = await db.getSearchNotes(q);
     await HomeWidget.saveWidgetData('notes', jsonEncode(notes));
@@ -64,11 +64,18 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    db.listenNoteChange(backgroundCallback).then((stream) {
+  void refreshApp(user) {
+    super.refreshApp(user);
+    homeWidgetRefresh(null);
+    noteChangeStream?.cancel();
+    db.listenNoteChange(homeWidgetRefresh).then((stream) {
       noteChangeStream = stream;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
     Note getNoteFromShareText(String sharedText) {
       var ph = findAndroidHighlight(sharedText);
       if (ph != null) {
@@ -122,6 +129,6 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   @override
   void dispose() {
     super.dispose();
-    noteChangeStream.cancel();
+    noteChangeStream?.cancel();
   }
 }
