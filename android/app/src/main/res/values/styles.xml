@@ -15,4 +15,9 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+    <style name="MyWidgetTheme" parent="Theme.Material3.DynamicColors.DayNight">
+        <!-- Override default colorBackground attribute with custom color -->
+        <!-- <item name="android:colorBackground">@color/my_background_color</item> -->
+        <!-- Add other colors/attributes -->
+    </style>
 </resources>
