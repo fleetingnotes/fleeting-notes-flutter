@@ -81,9 +81,10 @@ class _SearchScreenState extends State<SearchScreen> {
     loadNotes(queryController.text);
   }
 
-    Future<void> _pullRefreshNotes() async {
+  Future<void> _pullRefreshNotes() async {
     await loadNotes(queryController.text, forceSync: true);
   }
+
   @override
   void initState() {
     super.initState();
