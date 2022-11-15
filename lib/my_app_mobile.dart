@@ -1,7 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'my_app.dart' as base_app;
 
@@ -20,6 +23,8 @@ class ParsedHighlight {
 }
 
 class _MyAppState extends base_app.MyAppState<MyApp> {
+  StreamSubscription? noteChangeStream;
+
   ParsedHighlight? findAndroidHighlight(String sharedText) {
     if (!Platform.isAndroid) return null;
     var r = RegExp(r'^"(.+)"[\n\r\s]+(.+)', multiLine: true);
@@ -33,6 +38,39 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       }
     }
     return null;
+  }
+
+  Future<Note> getNoteFromWidgetUri(Uri uri) async {
+    var noteId = uri.queryParameters['id'];
+    if (noteId != null) {
+      try {
+        Note? note = await db.getNote(noteId);
+        return note ?? Note.empty();
+      } catch (e) {
+        debugPrint(e.toString());
+        return Note.empty();
+      }
+    }
+    return Note.empty();
+  }
+
+  void homeWidgetRefresh(event) async {
+    debugPrint("homeWidgetRefresh");
+    var q = SearchQuery(query: '', sortBy: SortOptions.dateASC);
+    var notes = await db.getSearchNotes(q);
+    await HomeWidget.saveWidgetData('notes', jsonEncode(notes));
+    await HomeWidget.updateWidget(
+        name: 'WidgetProvider', iOSName: 'WidgetProvider');
+  }
+
+  @override
+  void refreshApp(user) {
+    super.refreshApp(user);
+    homeWidgetRefresh(null);
+    noteChangeStream?.cancel();
+    db.listenNoteChange(homeWidgetRefresh).then((stream) {
+      noteChangeStream = stream;
+    });
   }
 
   @override
@@ -67,6 +105,30 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
           db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
         }
       });
+
+      // When app is started from widget
+      HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
+        if (uri != null) {
+          db.popAllRoutes();
+          getNoteFromWidgetUri(uri).then((note) {
+            db.navigateToNote(note);
+          });
+        }
+      });
+
+      HomeWidget.widgetClicked.listen((uri) {
+        if (uri != null) {
+          getNoteFromWidgetUri(uri).then((note) {
+            db.navigateToNote(note);
+          });
+        }
+      });
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    noteChangeStream?.cancel();
   }
 }

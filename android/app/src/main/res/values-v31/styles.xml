@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Do not override any color attribute -->
+  <style name="MyWidgetTheme" parent="Theme.Material3.DynamicColors.DayNight">
+  </style>
+</resources>

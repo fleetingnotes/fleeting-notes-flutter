@@ -10,6 +10,7 @@ import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/browser_ext/browser_ext.dart';
 
 class MyApp extends StatefulWidget {
@@ -24,7 +25,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   final Settings settings = Settings();
   late final Database db;
 
-  void refreshApp(user) {
+  void refreshApp(User? user) {
     if (user != null) {
       db.getAllNotes(forceSync: true);
     }

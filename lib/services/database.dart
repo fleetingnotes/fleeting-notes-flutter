@@ -32,6 +32,7 @@ class Database {
   GlobalKey searchKey = GlobalKey();
   Map<Note, GlobalKey> noteHistory = {};
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+  StreamController<String> noteChangeController = StreamController.broadcast();
   String? shareUserId;
   Box? _currBox;
   bool get isSharedNotes =>
@@ -59,7 +60,7 @@ class Database {
           (query.searchBySource && r.hasMatch(note.source));
     }).toList();
     notes.sort(sortMap[query.sortBy]);
-    return notes.sublist(0, min(notes.length, 50));
+    return notes.sublist(0, min(notes.length, query.limit));
   }
 
   Future<List<Note>> getAllNotes({forceSync = false}) async {
@@ -70,6 +71,7 @@ class Database {
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         await box.clear();
         await box.putAll(noteIdMap);
+        noteChangeController.add('getAllNotes');
         syncManager?.pushNotes(notes);
       }
     } catch (e, stack) {
@@ -96,7 +98,7 @@ class Database {
     return note;
   }
 
-  Future<Note?> getNote(id) async {
+  Future<Note?> getNote(String id) async {
     var box = await getBox();
     return box.get(id) as Note?;
   }
@@ -148,6 +150,7 @@ class Database {
       var box = await getBox();
       Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
       await box.putAll(noteIdMap);
+      noteChangeController.add('upsertNotes');
       syncManager?.pushNotes(notes);
       return true;
     } catch (e) {
@@ -163,6 +166,7 @@ class Database {
       }
       var box = await getBox();
       await box.deleteAll(notes.map((n) => n.id));
+      noteChangeController.add('deleteNotes');
       syncManager?.deleteNotes(notes);
       return true;
     } catch (e) {
@@ -242,8 +246,7 @@ class Database {
   }
 
   Future<StreamSubscription> listenNoteChange(Function callback) async {
-    var box = await getBox();
-    return box.watch().listen((event) {
+    return noteChangeController.stream.listen((event) {
       callback(event);
     });
   }

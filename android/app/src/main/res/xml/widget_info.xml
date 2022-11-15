@@ -1,0 +1,13 @@
+<appwidget-provider 
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:label="Note List"
+  android:initialLayout="@layout/widget_layout" 
+  android:minWidth="60dp"
+  android:minHeight="100dp"
+  targetCellHeight="2"
+  targetCellWidth="2"
+  android:resizeMode="horizontal|vertical"
+  android:widgetCategory="home_screen"
+  android:previewLayout="@layout/widget_preview_layout"
+  android:description="@string/widget_description"
+/>

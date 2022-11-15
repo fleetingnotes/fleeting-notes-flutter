@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+  android:id="@+id/widget_root"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:theme="@style/MyWidgetTheme">
+  <RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    >
+    <ListView
+      android:id="@+id/notes_list"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_alignParentTop="true"
+      android:divider="@null" />
+    <Button
+        android:id="@+id/add_note_bt"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="5dp"
+        android:text="+"
+        android:textColor="?attr/colorOnPrimaryContainer"
+        android:background="@drawable/fab_background"
+        android:textSize="24dp" />
+</RelativeLayout>
+</FrameLayout>

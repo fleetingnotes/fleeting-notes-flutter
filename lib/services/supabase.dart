@@ -23,7 +23,8 @@ class SupabaseDB {
   final SupabaseClient client = Supabase.instance.client;
   final FireDart firedart = FireDart();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
-  StreamController<User?> authChangeController = StreamController<User?>();
+  StreamController<User?> authChangeController =
+      StreamController<User?>.broadcast();
   SupabaseDB() {
     prevUser = currUser;
     client.auth.onAuthStateChange((event, session) {
