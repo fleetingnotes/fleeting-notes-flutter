@@ -56,11 +56,11 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
 
   void homeWidgetRefresh(event) async {
     debugPrint("homeWidgetRefresh");
-    var q = SearchQuery(query: '', sortBy: SortOptions.dateASC);
+    var q = SearchQuery(query: '', sortBy: SortOptions.dateASC, limit: 10);
     var notes = await db.getSearchNotes(q);
     await HomeWidget.saveWidgetData('notes', jsonEncode(notes));
     await HomeWidget.updateWidget(
-        name: 'WidgetProvider', iOSName: 'WidgetProvider');
+        name: 'WidgetProvider', iOSName: 'NoteListWidgetExtension');
   }
 
   @override
@@ -107,6 +107,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       });
 
       // When app is started from widget
+      HomeWidget.setAppGroupId('group.com.fleetingnotes');
       HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
         if (uri != null) {
           db.popAllRoutes();
