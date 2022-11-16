@@ -71,50 +71,53 @@ struct NoteListWidgetExtensionEntryView : View {
         ZStack(alignment: .bottomTrailing) {
             VStack(alignment: .leading) {
                 ForEach(Array(entry.notes.prefix(5))) { note in
-                    VStack(alignment: .leading) {
-                        // if title isn't empty
-                        if (!note.title.isEmpty) {
-                            VStack(alignment: .leading) {
-                                Text(note.title)
-                                    .font(.headline)
-                                    .lineLimit(1)
+                    Link(destination: URL(string: "fleetingNotesWidget://note?id=\(note.id)&homeWidget")!) {
+                        VStack(alignment: .leading) {
+                            // if title isn't empty
+                            if (!note.title.isEmpty) {
+                                VStack(alignment: .leading) {
+                                    Text(note.title)
+                                        .font(.headline)
+                                        .lineLimit(1)
+                                    Text(note.content)
+                                        .font(.subheadline)
+                                }
+                                .padding(3)
+                                
+                            } else {
                                 Text(note.content)
                                     .font(.subheadline)
+                                    .padding(3)
                             }
-                            .padding(3)
-                            
-                        } else {
-                            Text(note.content)
-                                .font(.subheadline)
-                                .padding(3)
                         }
+                        // small / med: 45 height, large: 65 height
+                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 45, maxHeight: 70, alignment: .topLeading)
+                        .background(Color.secondaryBackground)
+                        .cornerRadius(10)
                     }
-                    // small / med: 45 height, large: 65 height
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 45, maxHeight: 70, alignment: .topLeading)
-                    .background(Color.secondaryBackground)
-                    .cornerRadius(10)
-                    .widgetURL(URL(string: "fleetingNotesWidget://note?id=\(note.id)"))
                 }
                 
             }
             .padding(5)
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
             .background(Color(UIColor.systemBackground))
-            Button(action: {
-                // action here
-            }) {
-                Image(systemName: "plus")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 15, height: 15)
-                    .padding(15)
+            Link(destination: URL(string: "fleetingNotesWidget://note&homeWidget")!) {
+                Button(action: {
+                    // action here
+                }) {
+                    Image(systemName: "plus")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 15, height: 15)
+                        .padding(15)
+                }
+                .background(Color.accentColor)
+                .foregroundColor(Color.white)
+                .cornerRadius(10)
+                .padding(5)
+                .frame(alignment: .bottomTrailing)
             }
-            .background(Color.accentColor)
-            .foregroundColor(Color.white)
-            .cornerRadius(10)
-            .padding(5)
-            .frame(alignment: .bottomTrailing)
-            .widgetURL(URL(string: "fleetingNotesWidget://note"))
+            
         }
     }
 }
