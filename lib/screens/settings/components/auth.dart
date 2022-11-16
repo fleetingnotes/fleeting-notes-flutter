@@ -51,7 +51,7 @@ class _AuthState extends State<Auth> {
           },
         );
       }
-      if (widget.onLogin != null) widget.onLogin!(email);
+      widget.onLogin?.call(email);
     } on FleetingNotesException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.message),
@@ -61,8 +61,8 @@ class _AuthState extends State<Auth> {
   }
 
   Future<void> _register(String email, String password) async {
-    await widget.db.register(email, password);
     try {
+      await widget.db.register(email, password);
       await widget.db.login(email, password);
       await widget.db.setInitialNotes().catchError((e) {});
       widget.onLogin?.call(email);

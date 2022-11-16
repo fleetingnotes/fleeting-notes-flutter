@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:firedart/auth/exceptions.dart';
 import 'package:hive/hive.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/firedart.dart';
@@ -56,15 +57,19 @@ class SupabaseDB {
 
   Future<User> register(String email, String password,
       {String? firebaseUid}) async {
-    var userMetadata =
-        (firebaseUid == null) ? null : {"firebaseUid": firebaseUid};
-    final res =
-        await client.auth.signUp(email, password, userMetadata: userMetadata);
-    var newUser = res.user;
-    if (newUser == null) {
-      throw FleetingNotesException('Registration failed');
-    } else {
-      return newUser;
+    try {
+      var userMetadata =
+          (firebaseUid == null) ? null : {"firebaseUid": firebaseUid};
+      final res =
+          await client.auth.signUp(email, password, userMetadata: userMetadata);
+      var newUser = res.user;
+      if (newUser == null) {
+        throw FleetingNotesException('Registration failed');
+      } else {
+        return newUser;
+      }
+    } on GoTrueException catch (e) {
+      throw FleetingNotesException('Registration failed: ${e.message}');
     }
   }
 
@@ -76,6 +81,8 @@ class SupabaseDB {
   Future<void> registerFirebase(String email, String password) async {
     try {
       await firedart.register(email, password);
+    } on AuthException catch (e) {
+      throw FleetingNotesException('Registration failed: ${e.message}');
     } catch (e) {
       throw FleetingNotesException('Registration failed');
     }
