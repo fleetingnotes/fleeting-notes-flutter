@@ -21,6 +21,8 @@ enum MigrationStatus {
   noLogin,
 }
 
+enum SubscriptionTier { freeSub, basicSub, premiumSub }
+
 class SupabaseDB {
   final SupabaseClient client = Supabase.instance.client;
   final FireDart firedart = FireDart();
@@ -135,17 +137,24 @@ class SupabaseDB {
   }
 
   // TODO: use a join table to only make 1 request
-  Future<String> getSubscriptionTier() async {
-    if (currUser == null) return 'free';
+  Future<SubscriptionTier> getSubscriptionTier() async {
+    if (currUser == null) return SubscriptionTier.freeSub;
     try {
       var subscriptionTier = await getSubscriptionTierFromTable('stripe');
       if (subscriptionTier == 'free') {
         subscriptionTier = await getSubscriptionTierFromTable('apple_iap');
       }
-      return subscriptionTier;
+      switch (subscriptionTier) {
+        case 'basic':
+          return SubscriptionTier.basicSub;
+        case 'premium':
+          return SubscriptionTier.premiumSub;
+        default:
+          return SubscriptionTier.freeSub;
+      }
     } catch (e) {
       debugPrint(e.toString());
-      return 'free';
+      return SubscriptionTier.freeSub;
     }
   }
 
@@ -268,7 +277,7 @@ class SupabaseDB {
     if (fileBytes == null || fileBytes.isEmpty) {
       throw FleetingNotesException('File is empty');
     }
-    var isPaying = await getSubscriptionTier() != 'free';
+    var isPaying = await getSubscriptionTier() != SubscriptionTier.freeSub;
     // TODO: add settings from remote config
     int maxSize = (isPaying) ? 25 : 10;
     if (fileBytes.lengthInBytes / 1000000 > maxSize) {
