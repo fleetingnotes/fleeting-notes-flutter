@@ -73,18 +73,22 @@ jobs:
         P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
         RUNNER_BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.RUNNER_BUILD_PROVISION_PROFILE_BASE64 }}
         SHARE_EXT_BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.SHARE_EXT_BUILD_PROVISION_PROFILE_BASE64 }}
+        NOTE_LIST_WIDGET_EXT_BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.NOTE_LIST_WIDGET_EXT_BUILD_PROVISION_PROFILE_BASE64 }}
         KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
       run: |
+        # https://medium.com/team-rockstars-it/the-easiest-way-to-build-a-flutter-ios-app-using-github-actions-plus-a-key-takeaway-for-developers-48cf2ad7c72a
         # create variables
         CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
         RUNNER_PP_PATH=$RUNNER_TEMP/runner_build_pp.mobileprovision
         SHARE_EXT_PP_PATH=$RUNNER_TEMP/share_ext_build_pp.mobileprovision
+        NOTE_LIST_WIDGET_EXT_PP_PATH=$RUNNER_TEMP/note_list_widget_ext_build_pp.mobileprovision
         KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
         # import certificate and provisioning profile from secrets
         echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output $CERTIFICATE_PATH
         echo -n "$RUNNER_BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $RUNNER_PP_PATH
         echo -n "$SHARE_EXT_BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $SHARE_EXT_PP_PATH
+        echo -n "$NOTE_LIST_WIDGET_EXT_BUILD_PROVISION_PROFILE_BASE64" | base64 --decode --output $NOTE_LIST_WIDGET_EXT_PP_PATH
 
         # create temporary keychain
         security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -99,6 +103,7 @@ jobs:
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
         cp $RUNNER_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
         cp $SHARE_EXT_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+        cp $NOTE_LIST_WIDGET_EXT_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
     - uses: actions/checkout@v2
     - uses: subosito/flutter-action@v2
       with:
