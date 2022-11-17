@@ -171,13 +171,13 @@ class SupabaseDB {
   }
 
   Future<void> refreshSession() async {
+    if (currUser == null) return;
     try {
       await client.auth.refreshSession();
     } on GoTrueException catch (e) {
       debugPrint("${e.statusCode} ${e.message}");
       if (e.statusCode == "400") {
-        currUser = null;
-        authChangeController.add(currUser);
+        logout();
       }
     }
   }
