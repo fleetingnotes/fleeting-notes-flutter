@@ -159,13 +159,13 @@ class SupabaseDB {
   }
 
   Future<String> getSubscriptionTierFromTable(String table) async {
-    List<dynamic> stripeTier = await client
+    List<dynamic> tableSubTier = await client
         .from(table)
         .select('subscription_tier')
         .eq('id', currUser?.id);
 
     var subscriptionTier =
-        (stripeTier.firstOrNull ?? {})['subscription_tier'] as String? ??
+        (tableSubTier.firstOrNull ?? {})['subscription_tier'] as String? ??
             'free';
     return subscriptionTier.isEmpty ? 'free' : subscriptionTier;
   }
