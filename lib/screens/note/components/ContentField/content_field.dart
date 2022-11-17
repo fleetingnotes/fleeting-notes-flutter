@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/foundation.dart';
 import 'keyboard_button.dart';
 import '../../../../utils/shortcut_actions.dart';
@@ -109,7 +110,8 @@ class _ContentFieldState extends State<ContentField> {
       titleLinksVisible = false;
       removeOverlay();
     }
-    var isPremium = await widget.db.supabase.getSubscriptionTier() == 'premium';
+    var isPremium = await widget.db.supabase.getSubscriptionTier() ==
+        SubscriptionTier.premiumSub;
     if (widget.controller.text.length % 30 == 0 &&
         widget.controller.text.isNotEmpty &&
         isPremium) {

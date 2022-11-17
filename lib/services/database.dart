@@ -207,7 +207,7 @@ class Database {
 
   // TODO: Move this out of db
   void navigateToSearch(String query) {
-    navigatorKey.currentState!.push(
+    navigatorKey.currentState?.push(
       PageRouteBuilder(
         pageBuilder: (context, _, __) => SearchScreen(db: this),
         transitionsBuilder: _transitionBuilder,
@@ -234,7 +234,7 @@ class Database {
   void navigateToNote(Note note, {bool isShared = false}) {
     GlobalKey noteKey = GlobalKey();
     noteHistory[note] = noteKey;
-    navigatorKey.currentState!.push(PageRouteBuilder(
+    navigatorKey.currentState?.push(PageRouteBuilder(
       pageBuilder: (context, _, __) =>
           NoteEditor(key: noteKey, db: this, note: note, isShared: isShared),
       transitionsBuilder: _transitionBuilder,
@@ -287,5 +287,6 @@ class Database {
     popAllRoutes();
     searchKey = GlobalKey();
     noteHistory = {Note.empty(): GlobalKey()};
+    navigateToSearch('');
   }
 }

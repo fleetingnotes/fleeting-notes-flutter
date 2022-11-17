@@ -35,7 +35,7 @@ class _AuthState extends State<Auth> {
     try {
       var migrationStatus = await widget.db.login(email, password);
       var subTier = await widget.db.supabase.getSubscriptionTier();
-      if (subTier == 'free' &&
+      if (subTier == SubscriptionTier.freeSub &&
           migrationStatus != MigrationStatus.fireLoginOnly) {
         var uid = widget.db.supabase.currUser!.id;
         await widget.db.supabase.logout();

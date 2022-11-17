@@ -12,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/Note.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/crypt.dart';
+import 'package:collection/collection.dart';
 
 enum MigrationStatus {
   supaFireLogin,
@@ -20,6 +21,8 @@ enum MigrationStatus {
   noLogin,
 }
 
+enum SubscriptionTier { freeSub, basicSub, premiumSub }
+
 class SupabaseDB {
   final SupabaseClient client = Supabase.instance.client;
   final FireDart firedart = FireDart();
@@ -27,16 +30,14 @@ class SupabaseDB {
   StreamController<User?> authChangeController =
       StreamController<User?>.broadcast();
   SupabaseDB() {
-    prevUser = currUser;
     client.auth.onAuthStateChange((event, session) {
-      if (prevUser?.id != session?.user?.id) {
+      if (currUser?.id != session?.user?.id) {
         authChangeController.add(session?.user);
       }
-      prevUser = session?.user;
+      currUser = session?.user;
     });
   }
-  User? prevUser;
-  User? get currUser => client.auth.currentUser;
+  User? currUser;
   String? get userId =>
       (currUser?.userMetadata ?? {})['firebaseUid'] ?? currUser?.id;
   bool get canSync => currUser != null;
@@ -136,32 +137,47 @@ class SupabaseDB {
   }
 
   // TODO: use a join table to only make 1 request
-  Future<String> getSubscriptionTier() async {
-    if (currUser == null) return 'free';
-    var stripeTier = await client
-        .from('stripe')
-        .select('subscription_tier')
-        .eq('id', currUser?.id)
-        .single();
-    var subscriptionTier = (stripeTier ?? {})['subscription_tier'] ?? 'free';
-    if (subscriptionTier == 'free') {
-      var appleTier = await client
-          .from('apple_iap')
-          .select('subscription_tier')
-          .eq('id', currUser?.id)
-          .single();
-      subscriptionTier = (appleTier ?? {})['subscription_tier'] ?? 'free';
+  Future<SubscriptionTier> getSubscriptionTier() async {
+    if (currUser == null) return SubscriptionTier.freeSub;
+    try {
+      var subscriptionTier = await getSubscriptionTierFromTable('stripe');
+      if (subscriptionTier == 'free') {
+        subscriptionTier = await getSubscriptionTierFromTable('apple_iap');
+      }
+      switch (subscriptionTier) {
+        case 'basic':
+          return SubscriptionTier.basicSub;
+        case 'premium':
+          return SubscriptionTier.premiumSub;
+        default:
+          return SubscriptionTier.freeSub;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      return SubscriptionTier.freeSub;
     }
-    return subscriptionTier;
+  }
+
+  Future<String> getSubscriptionTierFromTable(String table) async {
+    List<dynamic> tableSubTier = await client
+        .from(table)
+        .select('subscription_tier')
+        .eq('id', currUser?.id);
+
+    var subscriptionTier =
+        (tableSubTier.firstOrNull ?? {})['subscription_tier'] as String? ??
+            'free';
+    return subscriptionTier.isEmpty ? 'free' : subscriptionTier;
   }
 
   Future<void> refreshSession() async {
+    if (currUser == null) return;
     try {
       await client.auth.refreshSession();
     } on GoTrueException catch (e) {
-      debugPrint(e.message);
+      debugPrint("${e.statusCode} ${e.message}");
       if (e.statusCode == "400") {
-        // TODO: Logout of only current session
+        logout();
       }
     }
   }
@@ -261,7 +277,7 @@ class SupabaseDB {
     if (fileBytes == null || fileBytes.isEmpty) {
       throw FleetingNotesException('File is empty');
     }
-    var isPaying = await getSubscriptionTier() != 'free';
+    var isPaying = await getSubscriptionTier() != SubscriptionTier.freeSub;
     // TODO: add settings from remote config
     int maxSize = (isPaying) ? 25 : 10;
     if (fileBytes.lengthInBytes / 1000000 > maxSize) {
