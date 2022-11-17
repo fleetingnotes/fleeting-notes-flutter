@@ -12,8 +12,10 @@
     <dict>
         <key>com.fleetingnotes</key>
         <string>runner</string>
-		<key>com.fleetingnotes.Share-Extension</key>
+        <key>com.fleetingnotes.Share-Extension</key>
         <string>share_ext</string>
+        <key>com.fleetingnotes.NoteListWidgetExtension</key>
+        <string>note_list_widget_ext</string>
     </dict>
 	<key>signingCertificate</key>
     <string>iOS Distribution</string>
