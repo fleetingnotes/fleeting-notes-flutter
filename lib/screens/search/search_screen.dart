@@ -28,7 +28,7 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  late final StreamSubscription noteChangeStream;
+  StreamSubscription? noteChangeStream;
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
@@ -97,7 +97,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void dispose() {
     super.dispose();
-    noteChangeStream.cancel();
+    noteChangeStream?.cancel();
   }
 
   void _pressNote(BuildContext context, Note note) {

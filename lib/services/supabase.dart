@@ -30,6 +30,7 @@ class SupabaseDB {
   StreamController<User?> authChangeController =
       StreamController<User?>.broadcast();
   SupabaseDB() {
+    currUser = client.auth.currentUser;
     client.auth.onAuthStateChange((event, session) {
       if (currUser?.id != session?.user?.id) {
         authChangeController.add(session?.user);
