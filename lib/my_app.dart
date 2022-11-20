@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'package:fleeting_notes_flutter/services/settings.dart';
-import 'package:fleeting_notes_flutter/services/supabase.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -12,20 +10,20 @@ import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/browser_ext/browser_ext.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  State<MyApp> createState() => MyAppState();
+  ConsumerState<MyApp> createState() => MyAppState();
 }
 
-class MyAppState<T extends StatefulWidget> extends State<MyApp> {
+class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   Note? initNote;
-  final Settings settings = Settings();
-  late final Database db;
 
   void refreshApp(User? user) {
+    final db = ref.read(dbProvider);
     if (user != null) {
       db.getAllNotes(forceSync: true);
     }
@@ -34,8 +32,8 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
 
   @override
   void initState() {
-    db = Database(supabase: SupabaseDB(), settings: settings);
     super.initState();
+    final db = ref.read(dbProvider);
     db.supabase.authChangeController.stream.listen(refreshApp);
     refreshApp(db.supabase.currUser);
     if (kIsWeb) {
@@ -48,6 +46,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   @override
   void dispose() {
     super.dispose();
+    final db = ref.read(dbProvider);
     db.supabase.authChangeController.close();
     db.supabase.authSubscription?.cancel();
   }
@@ -55,6 +54,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final db = ref.watch(dbProvider);
     final _router = GoRouter(
       redirect: (state) {
         if (state.subloc == '/' || state.subloc == '/settings') {
@@ -69,7 +69,6 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
         GoRoute(
           path: '/',
           builder: (context, state) => LoadMainScreen(
-            db: db,
             initNote: initNote,
             state: state,
           ),
@@ -101,23 +100,21 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   }
 }
 
-class LoadMainScreen extends StatefulWidget {
+class LoadMainScreen extends ConsumerStatefulWidget {
   const LoadMainScreen({
     Key? key,
-    required this.db,
     required this.initNote,
     required this.state,
   }) : super(key: key);
 
-  final Database db;
   final Note? initNote;
   final GoRouterState state;
 
   @override
-  State<LoadMainScreen> createState() => _LoadMainScreenState();
+  ConsumerState<LoadMainScreen> createState() => _LoadMainScreenState();
 }
 
-class _LoadMainScreenState extends State<LoadMainScreen> {
+class _LoadMainScreenState extends ConsumerState<LoadMainScreen> {
   late final Future<Note?> loadFuture;
 
   @override
@@ -151,10 +148,11 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
   }
 
   Future<Note?> getNoteFromId(String noteId) async {
-    Note? note = await widget.db.getNote(noteId);
-    note ??= await widget.db.supabase.getNoteById(noteId);
+    final db = ref.read(dbProvider);
+    Note? note = await db.getNote(noteId);
+    note ??= await db.supabase.getNoteById(noteId);
     if (note != null && note.partition.isNotEmpty) {
-      widget.db.shareUserId = note.partition;
+      db.shareUserId = note.partition;
     }
     return note;
   }
@@ -190,7 +188,6 @@ class _LoadMainScreenState extends State<LoadMainScreen> {
             });
           }
           return MainScreen(
-            db: widget.db,
             initNote:
                 (snapshot.hasData) ? snapshot.data as Note : widget.initNote,
           );

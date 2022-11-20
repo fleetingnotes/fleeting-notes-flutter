@@ -1,8 +1,8 @@
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_menu.dart';
@@ -10,52 +10,50 @@ import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'components/analytics_dialog.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key, required this.db, this.initNote})
-      : super(key: key);
+class MainScreen extends ConsumerStatefulWidget {
+  const MainScreen({Key? key, this.initNote}) : super(key: key);
 
-  final Database db;
   final Note? initNote;
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen> {
   FocusNode searchFocusNode = FocusNode();
   late bool hasInitNote;
   bool bannerExists = false;
   @override
   void initState() {
     super.initState();
+    final db = ref.read(dbProvider);
     if (widget.initNote == null) {
       hasInitNote = false;
-      widget.db.noteHistory = {Note.empty(): GlobalKey()};
+      db.noteHistory = {Note.empty(): GlobalKey()};
     } else {
       hasInitNote = true;
-      widget.db.noteHistory = {widget.initNote!: GlobalKey()};
+      db.noteHistory = {widget.initNote!: GlobalKey()};
     }
-    var isSharedNotes = widget.db.isSharedNotes;
+    var isSharedNotes = db.isSharedNotes;
     if (!kDebugMode) analyticsDialogWorkflow();
-    if (!widget.db.isLoggedIn() &&
-        !isSharedNotes &&
-        widget.db.settings.isFirstTimeOpen()) {
+    if (!db.isLoggedIn() && !isSharedNotes && db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
             context: context,
             builder: (_) => AlertDialog(
                 title: const Text('Register / Sign In'),
                 content: Auth(
-                  db: widget.db,
+                  db: db,
                   onLogin: (_) async {
-                    await widget.db.getAllNotes(forceSync: true);
+                    await db.getAllNotes(forceSync: true);
                     Navigator.pop(context);
                     // wait to make sure the user is logged in
                     Future.delayed(const Duration(milliseconds: 500), () {
                       setState(() {
-                        widget.db.refreshApp();
+                        db.refreshApp();
                       });
                     });
                   },
@@ -75,7 +73,7 @@ class _MainScreenState extends State<MainScreen> {
                   setState(() {
                     hasInitNote = false;
                     bannerExists = false;
-                    widget.db.refreshApp();
+                    db.refreshApp();
                   });
                   context.go('/');
                 },
@@ -91,23 +89,24 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void analyticsDialogWorkflow() {
+    final db = ref.read(dbProvider);
     // Privacy Alert Dialog
     if (!kIsWeb) {
-      widget.db.setAnalyticsEnabled(true);
+      db.setAnalyticsEnabled(true);
       return;
     }
     DeviceInfoPlugin().webBrowserInfo.then((info) {
       if (info.browserName != BrowserName.firefox) {
-        widget.db.setAnalyticsEnabled(true);
+        db.setAnalyticsEnabled(true);
         return;
       }
       SchedulerBinding.instance.addPostFrameCallback((_) {
         void onAnalyticsPress(analyticsEnabled) {
           Navigator.pop(context);
-          widget.db.setAnalyticsEnabled(analyticsEnabled);
+          db.setAnalyticsEnabled(analyticsEnabled);
         }
 
-        bool? analyticsEnabled = widget.db.settings.get('analytics-enabled');
+        bool? analyticsEnabled = db.settings.get('analytics-enabled');
         if (analyticsEnabled == null) {
           showDialog(
             context: context,
@@ -123,26 +122,26 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final db = ref.watch(dbProvider);
     return WillPopScope(
       onWillPop: () async {
-        return !widget.db.canPop();
+        return !db.canPop();
       },
       child: Shortcuts(
         shortcuts: shortcutMapping,
         child: Actions(
           actions: <Type, Action<Intent>>{
             NewNoteIntent: CallbackAction(
-                onInvoke: (Intent intent) =>
-                    widget.db.navigateToNote(Note.empty())),
+                onInvoke: (Intent intent) => db.navigateToNote(Note.empty())),
             SearchIntent: CallbackAction(
                 onInvoke: (intent) => searchFocusNode.requestFocus())
           },
           child: Scaffold(
-            key: widget.db.scaffoldKey,
+            key: db.scaffoldKey,
             resizeToAvoidBottomInset: false,
             drawer: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 250),
-              child: SideMenu(db: widget.db),
+              child: const SideMenu(),
             ),
             floatingActionButton: FloatingActionButton(
               child: const Icon(Icons.add),
@@ -152,26 +151,25 @@ class _MainScreenState extends State<MainScreen> {
                 // any route...
                 // Provider.of<NoteStackModel>(context, listen: false)
                 //     .pushNote(Note.empty());
-                widget.db.navigateToNote(Note.empty()); // TODO: Deprecate
+                db.navigateToNote(Note.empty()); // TODO: Deprecate
               },
             ),
             body: Responsive(
-              mobile: SearchScreenNavigator(
-                  db: widget.db, hasInitNote: hasInitNote),
+              mobile: SearchScreenNavigator(db: db, hasInitNote: hasInitNote),
               tablet: Row(
                 children: [
                   Expanded(
                     flex: 6,
                     child: SearchScreen(
-                      key: widget.db.searchKey,
-                      db: widget.db,
+                      key: db.searchKey,
+                      db: db,
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
                   Expanded(
                     flex: 9,
-                    child: NoteScreenNavigator(
-                        db: widget.db, hasInitNote: hasInitNote),
+                    child:
+                        NoteScreenNavigator(db: db, hasInitNote: hasInitNote),
                   ),
                 ],
               ),
@@ -180,15 +178,15 @@ class _MainScreenState extends State<MainScreen> {
                   Expanded(
                     flex: 3,
                     child: SearchScreen(
-                      key: widget.db.searchKey,
-                      db: widget.db,
+                      key: db.searchKey,
+                      db: db,
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
                   Expanded(
                     flex: 9,
-                    child: NoteScreenNavigator(
-                        db: widget.db, hasInitNote: hasInitNote),
+                    child:
+                        NoteScreenNavigator(db: db, hasInitNote: hasInitNote),
                   ),
                 ],
               ),
