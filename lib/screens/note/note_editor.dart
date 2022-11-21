@@ -37,6 +37,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   bool hasNewChanges = false;
   bool isNoteShareable = false;
   Timer? saveTimer;
+  RouteObserver? routeObserver;
 
   late bool autofocus;
   late TextEditingController titleController;
@@ -48,6 +49,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     super.initState();
     final db = ref.read(dbProvider);
     resetSaveTimer();
+    routeObserver = db.routeObserver;
     hasNewChanges = widget.isShared;
     isNoteShareable = widget.note.isShareable;
     autofocus = widget.note.isEmpty() || widget.isShared;
@@ -85,16 +87,14 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final db = ref.read(dbProvider);
-    db.routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
+    routeObserver?.subscribe(this, ModalRoute.of(context) as PageRoute);
   }
 
   @override
   void dispose() {
     super.dispose();
-    final db = ref.read(dbProvider);
     saveTimer?.cancel();
-    db.routeObserver.unsubscribe(this);
+    routeObserver?.unsubscribe(this);
     if (hasNewChanges && !widget.isShared) {
       _saveNote(updateState: false);
     }

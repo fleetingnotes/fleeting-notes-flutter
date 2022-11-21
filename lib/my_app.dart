@@ -21,6 +21,8 @@ class MyApp extends ConsumerStatefulWidget {
 
 class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   Note? initNote;
+  StreamController<User?>? authChangeController;
+  StreamSubscription? authSubscription;
 
   void refreshApp(User? user) {
     final db = ref.read(dbProvider);
@@ -34,7 +36,9 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    db.supabase.authChangeController.stream.listen(refreshApp);
+    authChangeController = db.supabase.authChangeController;
+    authSubscription = db.supabase.authSubscription;
+    authChangeController?.stream.listen(refreshApp);
     refreshApp(db.supabase.currUser);
     if (kIsWeb) {
       setState(() {
@@ -46,9 +50,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   @override
   void dispose() {
     super.dispose();
-    final db = ref.read(dbProvider);
-    db.supabase.authChangeController.close();
-    db.supabase.authSubscription?.cancel();
+    authSubscription?.cancel();
+    authChangeController?.close();
   }
 
   // This widget is the root of your application.
