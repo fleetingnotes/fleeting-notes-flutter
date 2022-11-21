@@ -2,7 +2,8 @@ import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:test/test.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'mocks/mock_database.dart';
+import 'mocks/mock_settings.dart';
+import 'mocks/mock_supabase.dart';
 
 class MockDatabaseTests extends Database {
   MockDatabaseTests()
