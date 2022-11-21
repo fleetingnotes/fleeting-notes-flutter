@@ -75,7 +75,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
           routes: [
             GoRoute(
               path: 'settings',
-              builder: (context, _) => SettingsScreen(db: db),
+              builder: (context, _) => const SettingsScreen(),
             ),
           ],
         ),

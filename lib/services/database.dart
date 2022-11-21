@@ -236,7 +236,7 @@ class Database {
     noteHistory[note] = noteKey;
     navigatorKey.currentState?.push(PageRouteBuilder(
       pageBuilder: (context, _, __) =>
-          NoteEditor(key: noteKey, db: this, note: note, isShared: isShared),
+          NoteEditor(key: noteKey, note: note, isShared: isShared),
       transitionsBuilder: _transitionBuilder,
     ));
   }

@@ -31,7 +31,6 @@ class NoteScreenNavigator extends ConsumerWidget {
             key: history.first.value,
             note: history.first.key,
             isShared: hasInitNote,
-            db: db,
           );
         },
       ),

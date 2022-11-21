@@ -28,7 +28,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
       body: ContentField(
-        db: mockDb,
         controller: controller,
         onChanged: () {},
       ),
@@ -53,7 +52,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
       body: ContentField(
-        db: mockDb,
         controller: controller,
         onChanged: () {},
       ),
@@ -74,7 +72,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
       body: ContentField(
-        db: mockDb,
         controller: controller,
         onChanged: () {},
       ),
@@ -99,7 +96,6 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: Scaffold(
       body: ContentField(
-        db: mockDb,
         controller: controller,
         onChanged: () {},
       ),

@@ -370,7 +370,6 @@ class SearchScreenNavigator extends ConsumerWidget {
               return NoteEditor(
                 key: history.first.value,
                 note: history.first.key,
-                db: db,
                 isShared: hasInitNote,
               );
             }

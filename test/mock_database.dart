@@ -71,8 +71,7 @@ class MockDatabase extends Mock implements Database {
     GlobalKey noteKey = GlobalKey();
     noteHistory[note] = noteKey;
     navigatorKey.currentState!.push(
-      PageRouteBuilder(
-          pageBuilder: (context, _, __) => NoteEditor(db: this, note: note)),
+      PageRouteBuilder(pageBuilder: (context, _, __) => NoteEditor(note: note)),
     );
   }
 

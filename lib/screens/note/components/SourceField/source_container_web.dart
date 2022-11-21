@@ -1,15 +1,15 @@
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart'
     as sc;
-import '../../../../services/database.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SourceContainer extends StatefulWidget {
+class SourceContainer extends ConsumerStatefulWidget {
   const SourceContainer({
     Key? key,
     required this.controller,
-    this.db,
     this.onChanged,
     this.overrideSourceUrl = false,
   }) : super(key: key);
@@ -17,22 +17,22 @@ class SourceContainer extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onChanged;
   final bool overrideSourceUrl;
-  final Database? db;
 
   @override
-  State<SourceContainer> createState() => _SourceContainerState();
+  ConsumerState<SourceContainer> createState() => _SourceContainerState();
 }
 
-class _SourceContainerState extends State<SourceContainer> {
+class _SourceContainerState extends ConsumerState<SourceContainer> {
   bool sourceFieldVisible = !kIsWeb;
 
   @override
   void initState() {
     super.initState();
+    final settings = ref.read(settingsProvider);
     setState(() {
       sourceFieldVisible = widget.controller.text.isNotEmpty || !kIsWeb;
     });
-    bool fillSource = widget.db?.settings.get('auto-fill-source') ?? false;
+    bool fillSource = settings.get('auto-fill-source') ?? false;
     if (fillSource && widget.overrideSourceUrl) {
       setSourceUrl();
     }

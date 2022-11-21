@@ -1,34 +1,33 @@
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'keyboard_button.dart';
 import '../../../../utils/shortcut_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
-import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
-class ContentField extends StatefulWidget {
+class ContentField extends ConsumerStatefulWidget {
   const ContentField({
     Key? key,
     required this.controller,
-    required this.db,
     this.autofocus = false,
     this.onChanged,
   }) : super(key: key);
 
   final TextEditingController controller;
-  final Database db;
   final VoidCallback? onChanged;
   final bool autofocus;
 
   @override
-  State<ContentField> createState() => _ContentFieldState();
+  ConsumerState<ContentField> createState() => _ContentFieldState();
 }
 
-class _ContentFieldState extends State<ContentField> {
+class _ContentFieldState extends ConsumerState<ContentField> {
   final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
   List<String> allLinks = [];
   final LayerLink layerLink = LayerLink();
@@ -41,6 +40,8 @@ class _ContentFieldState extends State<ContentField> {
 
   @override
   void initState() {
+    super.initState();
+    final db = ref.read(dbProvider);
     // NOTE: onKeyEvent doesn't ignore enter key press
     contentFocusNode = FocusNode(onKey: onKeyEvent);
     contentFocusNode.addListener(() {
@@ -52,13 +53,12 @@ class _ContentFieldState extends State<ContentField> {
       controller: widget.controller,
       bringEditorToFocus: contentFocusNode.requestFocus,
     );
-    widget.db.getAllLinks().then((links) {
+    db.getAllLinks().then((links) {
       if (!mounted) return;
       setState(() {
         allLinks = links;
       });
     });
-    super.initState();
   }
 
   @override
@@ -92,6 +92,7 @@ class _ContentFieldState extends State<ContentField> {
   }
 
   void _onContentChanged(context, text, size) async {
+    final db = ref.read(dbProvider);
     widget.onChanged?.call();
     String beforeCaretText =
         text.substring(0, widget.controller.selection.baseOffset);
@@ -110,12 +111,12 @@ class _ContentFieldState extends State<ContentField> {
       titleLinksVisible = false;
       removeOverlay();
     }
-    var isPremium = await widget.db.supabase.getSubscriptionTier() ==
-        SubscriptionTier.premiumSub;
+    var isPremium =
+        await db.supabase.getSubscriptionTier() == SubscriptionTier.premiumSub;
     if (widget.controller.text.length % 30 == 0 &&
         widget.controller.text.isNotEmpty &&
         isPremium) {
-      widget.db.textSimilarity
+      db.textSimilarity
           .orderListByRelevance(widget.controller.text, allLinks)
           .then((newLinkSuggestions) {
         if (!mounted) return;
@@ -199,13 +200,15 @@ class _ContentFieldState extends State<ContentField> {
 
   void showFollowLinkOverlay(context, String title, BoxConstraints size) async {
     Future<Note> getFollowLinkNote() async {
-      Note? note = await widget.db.getNoteByTitle(title);
+      final db = ref.read(dbProvider);
+      Note? note = await db.getNoteByTitle(title);
       note ??= Note.empty(title: title);
       return note;
     }
 
     void _onFollowLinkTap(Note note) async {
-      widget.db.navigateToNote(note); // TODO: Deprecate
+      final db = ref.read(dbProvider);
+      db.navigateToNote(note); // TODO: Deprecate
       removeOverlay();
     }
 
