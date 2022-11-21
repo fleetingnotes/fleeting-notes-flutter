@@ -34,7 +34,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
     expect(find.byType(NoteEditor), findsOneWidget);
     expect(find.byType(SearchScreen), findsOneWidget);
   });
@@ -50,7 +50,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
     await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
     expect(find.byType(NoteEditor), findsNWidgets(2));
@@ -71,7 +71,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when((() => mockDb.upsertNote(any())))
         .thenAnswer((_) async => Future.value(true));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
     await tester.pump();
     await tester.tap(find.text('Click me note!', findRichText: true));
     await tester.pumpAndSettle(); // Wait for animation to finish
@@ -99,7 +99,7 @@ void main() {
         .thenAnswer((_) async => Future.value(false));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
     await tester.enterText(
         find.bySemanticsLabel('Title of the idea'), 'Test save note!');
     await tester.pump();
@@ -121,7 +121,7 @@ void main() {
         .thenAnswer((_) async => Future.value([newNote]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
     await tester.pump();
     await tester.tap(find.widgetWithText(NoteCard, 'Test delete note!'));
     await tester.pumpAndSettle(); // Wait for animation to finish
@@ -143,7 +143,7 @@ void main() {
     when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
     expect(find.byType(NoteEditor), findsNothing);
     expect(find.byType(SearchScreen), findsOneWidget);
   });
@@ -162,7 +162,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when((() => mockDb.upsertNote(any())))
         .thenAnswer((_) async => Future.value(true));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
     await tester.pump();
     await tester.tap(find.text('Click me note!', findRichText: true));
     await tester.pumpAndSettle(); // Wait for animation to finish
@@ -182,7 +182,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
 
     // Change to mobile
     tester.binding.window.physicalSizeTestValue = const Size(300, 500);
@@ -205,7 +205,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.deleteNotes(any()))
         .thenAnswer((_) async => Future.value(true));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
 
     // Delete screen
     await tester.tap(find.byIcon(Icons.more_vert));
@@ -234,7 +234,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
 
     // Mobile on Search Screen
     expect(find.byType(SearchScreen), findsOneWidget);
@@ -259,7 +259,7 @@ void main() {
         .thenAnswer((_) async => Future.value([]));
     when(() => mockDb.getBacklinkNotes(any()))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: MainScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: MainScreen()));
 
     // Mobile on Note Screen
     await tester.tap(find.byIcon(Icons.add));
@@ -289,8 +289,7 @@ void main() {
     when(() => mockDb.upsertNote(any()))
         .thenAnswer((_) async => Future.value(true));
     await tester.pumpWidget(MaterialApp(
-        home: MainScreen(
-            db: mockDb, initNote: Note.empty(content: 'init note'))));
+        home: MainScreen(initNote: Note.empty(content: 'init note'))));
 
     // Mobile on Note Screen
     expect(find.byType(SearchScreen), findsNothing);
@@ -311,8 +310,7 @@ void main() {
         .thenAnswer((_) async => Future.value(true));
 
     await tester.pumpWidget(MaterialApp(
-        home: MainScreen(
-            db: mockDb, initNote: Note.empty(content: 'init note'))));
+        home: MainScreen(initNote: Note.empty(content: 'init note'))));
 
     // Mobile on Note Screen
     expect(find.byType(SearchScreen), findsOneWidget);

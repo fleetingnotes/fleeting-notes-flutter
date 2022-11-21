@@ -46,7 +46,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             builder: (_) => AlertDialog(
                 title: const Text('Register / Sign In'),
                 content: Auth(
-                  db: db,
                   onLogin: (_) async {
                     await db.getAllNotes(forceSync: true);
                     Navigator.pop(context);
@@ -155,21 +154,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               },
             ),
             body: Responsive(
-              mobile: SearchScreenNavigator(db: db, hasInitNote: hasInitNote),
+              mobile: SearchScreenNavigator(hasInitNote: hasInitNote),
               tablet: Row(
                 children: [
                   Expanded(
                     flex: 6,
                     child: SearchScreen(
                       key: db.searchKey,
-                      db: db,
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
                   Expanded(
                     flex: 9,
-                    child:
-                        NoteScreenNavigator(db: db, hasInitNote: hasInitNote),
+                    child: NoteScreenNavigator(hasInitNote: hasInitNote),
                   ),
                 ],
               ),
@@ -179,14 +176,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     flex: 3,
                     child: SearchScreen(
                       key: db.searchKey,
-                      db: db,
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
                   Expanded(
                     flex: 9,
-                    child:
-                        NoteScreenNavigator(db: db, hasInitNote: hasInitNote),
+                    child: NoteScreenNavigator(hasInitNote: hasInitNote),
                   ),
                 ],
               ),

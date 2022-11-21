@@ -209,7 +209,7 @@ class Database {
   void navigateToSearch(String query) {
     navigatorKey.currentState?.push(
       PageRouteBuilder(
-        pageBuilder: (context, _, __) => SearchScreen(db: this),
+        pageBuilder: (context, _, __) => const SearchScreen(),
         transitionsBuilder: _transitionBuilder,
       ),
     );

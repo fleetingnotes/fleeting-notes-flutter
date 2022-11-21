@@ -26,7 +26,7 @@ void main() {
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([Note.empty()]));
-    await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: SearchScreen()));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Search'), findsOneWidget);
     expect(find.byIcon(Icons.menu), findsOneWidget);
@@ -42,7 +42,7 @@ void main() {
     when(() => mockDb.getSearchNotes(SearchQuery(query: 'hello'),
             forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: SearchScreen()));
     await tester.pumpAndSettle();
     expect(find.byType(NoteCard), findsOneWidget);
     await tester.enterText(find.bySemanticsLabel('Search'), 'hello');
@@ -56,7 +56,7 @@ void main() {
     MockDatabase mockDb = MockDatabase();
     when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
         .thenAnswer((_) async => Future.value([Note.empty()]));
-    await tester.pumpWidget(MaterialApp(home: SearchScreen(db: mockDb)));
+    await tester.pumpWidget(const MaterialApp(home: SearchScreen()));
     await tester.tap(find.byIcon(Icons.filter_list));
     await tester.pumpAndSettle();
     expect(find.byType(SearchDialog), findsOneWidget);

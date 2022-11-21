@@ -230,15 +230,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ? null
                                     : onEnableEncryptionPress,
                               )
-                            : Auth(
-                                db: widget.db,
-                                onLogin: (e) {
-                                  getEncryptionKey();
-                                  setState(() {
-                                    isLoggedIn = true;
-                                    email = e;
-                                  });
-                                }),
+                            : Auth(onLogin: (e) {
+                                getEncryptionKey();
+                                setState(() {
+                                  isLoggedIn = true;
+                                  email = e;
+                                });
+                              }),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
                         const Text("Backup", style: TextStyle(fontSize: 12)),
