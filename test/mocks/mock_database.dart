@@ -9,7 +9,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'mocks/mock_box.dart';
+import 'mock_box.dart';
 
 Future<void> fnPumpWidget(WidgetTester tester, Widget widget) async {
   MockSettings mockSettings = MockSettings();

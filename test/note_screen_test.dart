@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
-import 'mock_database.dart';
+import 'mocks/mock_database.dart';
 
 void main() {
   setUpAll(() {
