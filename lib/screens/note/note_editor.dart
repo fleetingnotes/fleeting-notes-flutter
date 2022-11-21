@@ -95,9 +95,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     super.dispose();
     saveTimer?.cancel();
     routeObserver?.unsubscribe(this);
-    if (hasNewChanges && !widget.isShared) {
-      _saveNote(updateState: false);
-    }
   }
 
   @override
