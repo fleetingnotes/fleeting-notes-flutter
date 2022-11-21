@@ -118,7 +118,7 @@ class MockBox implements Box {
 
   @override
   // TODO: implement name
-  String get name => throw UnimplementedError();
+  String get name => 'local';
 
   @override
   // TODO: implement path

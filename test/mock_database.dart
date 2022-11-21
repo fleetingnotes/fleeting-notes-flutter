@@ -1,13 +1,30 @@
-import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
-import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
-import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'mocks/mock_box.dart';
+
+Future<void> fnPumpWidget(WidgetTester tester, Widget widget) async {
+  MockSettings mockSettings = MockSettings();
+  MockSupabaseDB mockSupabase = MockSupabaseDB();
+  MockDatabase mockDb =
+      MockDatabase(settings: mockSettings, supabase: mockSupabase);
+  await tester.pumpWidget(ProviderScope(
+    overrides: [
+      dbProvider.overrideWithValue(mockDb),
+      settingsProvider.overrideWithValue(MockSettings()),
+      supabaseProvider.overrideWithValue(MockSupabaseDB())
+    ],
+    child: widget,
+  ));
+}
 
 class MockSettings extends Mock implements Settings {
   @override
@@ -41,85 +58,19 @@ class MockSupabaseDB extends Mock implements SupabaseDB {
 
   @override
   SupabaseClient client = MockSupabaseClient();
+
+  @override
+  Future<SubscriptionTier> getSubscriptionTier() async =>
+      SubscriptionTier.freeSub;
 }
 
-class MockDatabase extends Mock implements Database {
-  @override
-  Settings settings = MockSettings();
-  @override
-  final GlobalKey searchKey = GlobalKey();
-  @override
-  Map<Note, GlobalKey> noteHistory = {Note.empty(): GlobalKey()};
-  @override
-  GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  @override
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  StreamController streamController = StreamController();
-  @override
-  RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
-  @override
-  SupabaseDB supabase = MockSupabaseDB();
-  @override
-  bool get isSharedNotes => false;
+class MockDatabase extends Database {
+  MockDatabase({required super.supabase, required super.settings});
+  Box? _currBox;
 
   @override
-  Future<bool> noteExists(Note note) async => true;
-
-  // not ideal that i have to copy below from the real class
-  @override
-  void navigateToNote(Note note, {bool isShared = false}) {
-    GlobalKey noteKey = GlobalKey();
-    noteHistory[note] = noteKey;
-    navigatorKey.currentState!.push(
-      PageRouteBuilder(pageBuilder: (context, _, __) => NoteEditor(note: note)),
-    );
-  }
-
-  @override
-  void navigateToSearch(String query) {
-    navigatorKey.currentState!.push(
-      PageRouteBuilder(
-        pageBuilder: (context, _, __) => const SearchScreen(),
-        transitionsBuilder: _transitionBuilder,
-      ),
-    );
-  }
-
-  SlideTransition _transitionBuilder(
-      context, animation, secondaryAnimation, child) {
-    const begin = Offset(0.0, 1.0);
-    const end = Offset.zero;
-    const curve = Curves.ease;
-
-    final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-    final offsetAnimation = animation.drive(tween);
-    return SlideTransition(
-      position: offsetAnimation,
-      child: child,
-    );
-  }
-
-  @override
-  Future<StreamSubscription> listenNoteChange(Function callback) async {
-    unlistenNoteChange();
-    Stream stream = streamController.stream;
-    return stream.listen((note) {
-      callback(note);
-    });
-  }
-
-  void unlistenNoteChange() {
-    streamController.close();
-    streamController = StreamController();
-  }
-
-  @override
-  void popAllRoutes() {
-    navigatorKey.currentState!.popUntil((route) => false);
-  }
-
-  @override
-  void openDrawer() {
-    scaffoldKey.currentState?.openDrawer();
+  Future<Box> getBox() async {
+    _currBox ??= MockBox();
+    return _currBox!;
   }
 }
