@@ -182,12 +182,6 @@ class SupabaseDB {
       await client.auth.refreshSession();
     } on AuthException catch (e) {
       debugPrint("${e.statusCode} ${e.message}");
-      // var subTier = await getSubscriptionTier();
-      // var isInvalidRefresh =
-      //     e.statusCode == "400" && e.message == "Invalid Refresh Token";
-      // if (isInvalidRefresh && subTier == SubscriptionTier.freeSub) {
-      //   logout();
-      // }
     }
   }
 
