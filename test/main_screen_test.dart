@@ -18,6 +18,7 @@ import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'mocks/mock_database.dart';
+import 'utils.dart';
 
 // Currently Only Testing Web
 void main() {
@@ -27,36 +28,27 @@ void main() {
   });
 
   // Desktop / Tablet Tests
-  // testWidgets('Render Main Screen (Desktop/Tablet)',
-  //     (WidgetTester tester) async {
-  //   // tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  //   // tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-  //   expect(find.byType(NoteEditor), findsOneWidget);
-  //   expect(find.byType(SearchScreen), findsOneWidget);
-  // });
+  testWidgets('Render Main Screen (Desktop/Tablet)',
+      (WidgetTester tester) async {
+    resizeToDesktop(tester);
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.byType(SearchScreen), findsOneWidget);
+  });
 
-  // testWidgets('Press new note button adds new note',
-  //     (WidgetTester tester) async {
-  //   // tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  //   // tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-  //   expect(find.byType(NoteEditor), findsNWidgets(1));
-  //   await tester.tap(find.byIcon(Icons.add));
-  //   await tester.pump();
-  //   expect(find.byType(NoteEditor), findsNWidgets(2));
-  // });
+  testWidgets('Press new note button adds new note',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    expect(find.byType(NoteEditor), findsNWidgets(1));
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+    expect(find.byType(NoteEditor), findsNWidgets(2));
+  });
 
   testWidgets('Clicking NoteCard populates NoteScreen and sets active note',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    // save note
-    await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'),
-        'Click me note!');
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle(); // Wait for animation to finish
-    await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+    await addNote(tester, content: 'Click me note!');
     await tester.tap(find.descendant(
         of: find.byType(SearchScreen),
         matching: find.text(
@@ -75,28 +67,16 @@ void main() {
         Colors.blue);
   });
 
-  // testWidgets('Save note updates list of notes', (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.titleExists(any(), any()))
-  //       .thenAnswer((_) async => Future.value(false));
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   await tester.pumpWidget(const MaterialApp(home: MainScreen()));
-  //   await tester.enterText(
-  //       find.bySemanticsLabel('Title of the idea'), 'Test save note!');
-  //   await tester.pump();
-  //   await tester.tap(find.text('Save'));
-  //   await tester.pump();
-  //   expect(
-  //       find.widgetWithText(SearchScreen, 'Test save note!'), findsOneWidget);
-  //   expect(find.byType(NoteEditor), findsOneWidget);
-  // }, skip: true);
+  testWidgets('Save note updates list of notes', (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await addNote(tester, content: 'Test save note!');
+    expect(
+        find.descendant(
+            of: find.byType(NoteCard),
+            matching: find.text('Test save note!', findRichText: true)),
+        findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
+  });
 
   // testWidgets('Delete note updates list of notes', (WidgetTester tester) async {
   //   tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
