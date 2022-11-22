@@ -21,7 +21,7 @@ enum MigrationStatus {
   noLogin,
 }
 
-enum SubscriptionTier { freeSub, basicSub, premiumSub }
+enum SubscriptionTier { freeSub, basicSub, premiumSub, unknownSub }
 
 class SupabaseDB {
   final SupabaseClient client = Supabase.instance.client;
@@ -155,7 +155,7 @@ class SupabaseDB {
       }
     } catch (e) {
       debugPrint(e.toString());
-      return SubscriptionTier.freeSub;
+      return SubscriptionTier.unknownSub;
     }
   }
 
@@ -177,7 +177,8 @@ class SupabaseDB {
       await client.auth.refreshSession();
     } on GoTrueException catch (e) {
       debugPrint("${e.statusCode} ${e.message}");
-      if (e.statusCode == "400") {
+      var subTier = await getSubscriptionTier();
+      if (e.statusCode == "400" && subTier == SubscriptionTier.freeSub) {
         logout();
       }
     }
