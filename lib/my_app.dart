@@ -49,6 +49,7 @@ class MyAppState<T extends StatefulWidget> extends State<MyApp> {
   void dispose() {
     super.dispose();
     db.supabase.authChangeController.close();
+    db.supabase.authSubscription?.cancel();
   }
 
   // This widget is the root of your application.

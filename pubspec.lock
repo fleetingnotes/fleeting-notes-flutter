@@ -444,7 +444,7 @@ packages:
       name: functions_client
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0-dev.4"
+    version: "1.0.0"
   glob:
     dependency: transitive
     description:
@@ -472,7 +472,7 @@ packages:
       name: gotrue
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0-dev.4"
+    version: "1.2.0"
   graphs:
     dependency: transitive
     description:
@@ -836,7 +836,7 @@ packages:
       name: postgrest
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0-dev.4"
+    version: "1.1.1"
   process:
     dependency: transitive
     description:
@@ -885,7 +885,7 @@ packages:
       name: realtime_client
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0-dev.5"
+    version: "1.0.0"
   receive_sharing_intent:
     dependency: "direct main"
     description:
@@ -893,6 +893,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.4.5"
+  retry:
+    dependency: transitive
+    description:
+      name: retry
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.1.0"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.27.7"
   sentry:
     dependency: transitive
     description:
@@ -988,7 +1002,7 @@ packages:
       name: storage_client
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0-dev.4"
+    version: "1.1.0"
   stream_channel:
     dependency: transitive
     description:
@@ -1016,14 +1030,14 @@ packages:
       name: supabase
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0-dev.9"
+    version: "1.2.0"
   supabase_flutter:
     dependency: "direct main"
     description:
       name: supabase_flutter
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0-dev.9"
+    version: "1.2.0"
   term_glyph:
     dependency: transitive
     description:
