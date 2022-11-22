@@ -178,7 +178,9 @@ class SupabaseDB {
     } on GoTrueException catch (e) {
       debugPrint("${e.statusCode} ${e.message}");
       var subTier = await getSubscriptionTier();
-      if (e.statusCode == "400" && subTier == SubscriptionTier.freeSub) {
+      var isInvalidRefresh =
+          e.statusCode == "400" && e.message == "Invalid Refresh Token";
+      if (isInvalidRefresh && subTier == SubscriptionTier.freeSub) {
         logout();
       }
     }
