@@ -1,14 +1,5 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-// @TestOn('browser')
-import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
@@ -19,11 +10,6 @@ import 'utils.dart';
 
 // Currently Only Testing Web
 void main() {
-  setUpAll(() {
-    registerFallbackValue(Note.empty());
-    registerFallbackValue(SearchQuery(query: ''));
-  });
-
   // Desktop / Tablet Tests
   testWidgets('Render Main Screen (Desktop/Tablet)',
       (WidgetTester tester) async {

@@ -1,61 +1,39 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
+import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
-import 'mocks/mock_database.dart';
+import 'utils.dart';
 
 void main() {
   setUpAll(() {
     registerFallbackValue(Note.empty());
   });
-
   testWidgets('Render Note Screen', (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    when(() => mockDb.getBacklinkNotes(any()))
-        .thenAnswer((_) async => Future.value([]));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator()));
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
     expect(find.bySemanticsLabel('Title of the idea'), findsOneWidget);
     expect(
         find.bySemanticsLabel('Note and links to other ideas'), findsOneWidget);
   });
 
   testWidgets('Backlinks are populated', (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
-        (_) async => Future.value([Note.empty(content: 'backlink note')]));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator()));
-    await tester.pumpAndSettle();
-
-    expect(find.text('backlink note', findRichText: true), findsOneWidget);
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await createNoteWithBacklink(tester);
+    expect(
+        find.descendant(
+          of: find.byType(NoteEditor),
+          matching: find.text('[[link]]', findRichText: true),
+        ),
+        findsOneWidget);
   });
 
   testWidgets('Save note button is enabled when note is changed',
       (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    when(() => mockDb.getBacklinkNotes(any()))
-        .thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.upsertNote(any()))
-        .thenAnswer((_) async => Future.value(true));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator()));
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
     await tester.enterText(
         find.bySemanticsLabel('Note and links to other ideas'), 'new note');
     await tester.pump();
@@ -74,20 +52,10 @@ void main() {
 
   testWidgets('Save note button is disabled when pressed',
       (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    when(() => mockDb.getBacklinkNotes(any()))
-        .thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.upsertNote(any()))
-        .thenAnswer((_) async => Future.value(true));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator()));
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
     await tester.enterText(
         find.bySemanticsLabel('Note and links to other ideas'), 'new note');
-    await tester.pump();
-    await tester.tap(find.text('Save'));
-    await tester.pump();
+    await saveCurrentNote(tester);
 
     expect(
         tester
@@ -103,85 +71,81 @@ void main() {
 
   testWidgets('Save note button shows snackbar if save failed',
       (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    when(() => mockDb.getBacklinkNotes(any()))
-        .thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.upsertNote(any()))
-        .thenAnswer((_) async => Future.value(false));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator()));
+    // mock supabase to fail on upsert
+    var mockSupabase = getSupabaseMockThrowOnUpsert();
+
+    // test for snackbar failure
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+        supabase: mockSupabase);
     await tester.enterText(
         find.bySemanticsLabel('Note and links to other ideas'), 'new note');
-    await tester.pump();
-    expect(find.byType(SnackBar), findsNothing);
-    await tester.tap(find.text('Save'));
-    await tester.pump();
+    await saveCurrentNote(tester);
     expect(find.byType(SnackBar), findsOneWidget);
   });
 
   testWidgets('Delete note shows snackbar if delete failed',
       (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    when(() => mockDb.getBacklinkNotes(any()))
-        .thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.deleteNotes(any()))
-        .thenAnswer((_) async => Future.value(false));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator()));
-    await tester.tap(find.byIcon(Icons.more_vert));
-    await tester.pumpAndSettle();
-    expect(find.byType(SnackBar), findsNothing);
-    await tester.tap(find.text('Delete'));
-    await tester.pump();
+    // mock supabase to fail on upsert
+    var mockSupabase = getSupabaseMockThrowOnUpsert();
+    // test for snackbar failure
+    await fnPumpWidget(
+      tester,
+      const MaterialApp(home: MainScreen()),
+      supabase: mockSupabase,
+    );
+    await deleteCurrentNote(tester);
     expect(find.byType(SnackBar), findsOneWidget);
   });
 
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    mockDb.noteHistory = {Note.empty(title: 'hello'): GlobalKey()};
-    when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
-        (_) async => Future.value([Note.empty(content: '[[hello]]')]));
-    when(() => mockDb.upsertNote(any()))
-        .thenAnswer((_) async => Future.value(true));
-    when(() => mockDb.titleExists(any(), any()))
-        .thenAnswer((_) async => Future.value(false));
-    when(() => mockDb.upsertNotes(any()))
-        .thenAnswer((_) async => Future.value(true));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator()));
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await createNoteWithBacklink(tester);
     await tester.enterText(
         find.bySemanticsLabel('Title of the idea'), 'hello world');
-    await tester.pump();
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-    expect(find.text('[[hello world]]', findRichText: true), findsOneWidget);
+    await saveCurrentNote(tester);
+    await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+    expect(
+        find.descendant(
+          of: find.byType(NoteEditor),
+          matching: find.text('[[hello world]]', findRichText: true),
+        ),
+        findsOneWidget);
+  });
+
+  testWidgets('Clicking link in ContentField shows LinkPreview',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await clickLinkInContentField(tester);
+    expect(find.byType(LinkPreview), findsOneWidget);
   });
 
   testWidgets('Clicking TitleField removes LinkPreview overlay',
       (WidgetTester tester) async {
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    when(() => mockDb.getBacklinkNotes(any())).thenAnswer(
-        (_) async => Future.value([Note.empty(content: '[[hello]]')]));
-    when(() => mockDb.upsertNote(any()))
-        .thenAnswer((_) async => Future.value(true));
-    await tester.pumpWidget(MaterialApp(home: NoteScreenNavigator()));
-    await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), 'hello world');
-    await tester.pump();
-    await tester.tapAt(tester
-        .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
-        .translate(20, 10));
-    await tester.pumpAndSettle();
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await clickLinkInContentField(tester);
     await tester.tap(find.byType(TitleField));
     await tester.pumpAndSettle();
     expect(find.byType(LinkPreview), findsNothing);
   });
+}
+
+// helpers
+Future<void> createNoteWithBacklink(WidgetTester tester) async {
+  await addNote(tester, title: 'link');
+  await addNote(tester, content: '[[link]]');
+  await tester.tap(find.descendant(
+    of: find.byType(NoteCard),
+    matching: find.text('link', findRichText: true),
+  ));
+  await tester.pumpAndSettle();
+}
+
+Future<void> clickLinkInContentField(WidgetTester tester) async {
+  await tester.enterText(find.bySemanticsLabel('Note and links to other ideas'),
+      '[[hello world]]');
+  await tester.pump();
+  await tester.tapAt(tester
+      .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
+      .translate(20, 10));
+  await tester.pumpAndSettle();
 }
