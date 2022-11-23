@@ -1,29 +1,30 @@
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../services/database.dart';
 import 'login_dialog.dart';
 
 enum AuthAction { signIn, signUp }
 
-class Auth extends StatefulWidget {
-  const Auth({Key? key, required this.db, this.onLogin}) : super(key: key);
+class Auth extends ConsumerStatefulWidget {
+  const Auth({Key? key, this.onLogin}) : super(key: key);
 
-  final Database db;
   final Function? onLogin;
   @override
   _AuthState createState() => _AuthState();
 }
 
-class _AuthState extends State<Auth> {
+class _AuthState extends ConsumerState<Auth> {
   bool isLoading = false;
   AuthAction _authAction = AuthAction.signUp;
 
   void onDialogContinue(String email, String password) async {
+    final db = ref.read(dbProvider);
     Navigator.pop(context);
-    await widget.db.login(email, password);
+    await db.login(email, password);
   }
 
   void onSeePricing() {
@@ -32,13 +33,14 @@ class _AuthState extends State<Auth> {
   }
 
   Future<void> onLoginPress(String email, String password) async {
+    final db = ref.read(dbProvider);
     try {
-      var migrationStatus = await widget.db.login(email, password);
-      var subTier = await widget.db.supabase.getSubscriptionTier();
+      var migrationStatus = await db.login(email, password);
+      var subTier = await db.supabase.getSubscriptionTier();
       if (subTier == SubscriptionTier.freeSub &&
           migrationStatus != MigrationStatus.fireLoginOnly) {
-        var uid = widget.db.supabase.currUser!.id;
-        await widget.db.supabase.logout();
+        var uid = db.supabase.currUser!.id;
+        await db.supabase.logout();
         await showDialog(
           context: context,
           barrierDismissible: false,
@@ -61,10 +63,11 @@ class _AuthState extends State<Auth> {
   }
 
   Future<void> _register(String email, String password) async {
+    final db = ref.read(dbProvider);
     try {
-      await widget.db.register(email, password);
-      await widget.db.login(email, password);
-      await widget.db.setInitialNotes().catchError((e) {});
+      await db.register(email, password);
+      await db.login(email, password);
+      await db.setInitialNotes().catchError((e) {});
       widget.onLogin?.call(email);
     } on FleetingNotesException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -89,6 +92,7 @@ class _AuthState extends State<Auth> {
   }
 
   List<Widget> getColumnChildren() {
+    final db = ref.read(dbProvider);
     if (isLoading) {
       return [
         const Padding(
@@ -120,7 +124,7 @@ class _AuthState extends State<Auth> {
         EmailForm(
           action: _authAction,
           onSubmit: onSubmit,
-          onResetPassword: widget.db.supabase.resetPassword,
+          onResetPassword: db.supabase.resetPassword,
         ),
       ];
     }

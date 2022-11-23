@@ -21,5 +21,6 @@ jobs:
     - run: flutter --version
     - run: flutter pub get
     - run: flutter analyze
-    - run: flutter test --platform chrome
+    - run: flutter test
+    - run: flutter test --platform chrome test/browser
     - run: flutter build web --web-renderer html --csp 

@@ -1,4 +1,3 @@
-import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 
@@ -6,7 +5,6 @@ class SourceContainer extends StatefulWidget {
   const SourceContainer({
     Key? key,
     required this.controller,
-    this.db,
     this.onChanged,
     this.overrideSourceUrl = false,
   }) : super(key: key);
@@ -14,7 +12,6 @@ class SourceContainer extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onChanged;
   final bool overrideSourceUrl;
-  final Database? db;
 
   @override
   State<SourceContainer> createState() => _SourceContainerState();

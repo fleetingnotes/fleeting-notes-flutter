@@ -1,14 +1,15 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:file_saver/file_saver.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'components/account.dart';
@@ -16,15 +17,14 @@ import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
 import 'components/local_sync_setting.dart';
 
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key, required this.db}) : super(key: key);
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({Key? key}) : super(key: key);
 
-  final Database db;
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String backupOption = 'Markdown';
   String email = '';
   bool isLoggedIn = false;
@@ -33,17 +33,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    final db = ref.read(dbProvider);
     getEncryptionKey();
     setState(() {
-      isLoggedIn = widget.db.isLoggedIn();
-      if (widget.db.supabase.currUser != null) {
-        email = widget.db.supabase.currUser!.email ?? '';
+      isLoggedIn = db.isLoggedIn();
+      if (db.supabase.currUser != null) {
+        email = db.supabase.currUser!.email ?? '';
       }
     });
   }
 
   void getEncryptionKey() {
-    widget.db.supabase.getEncryptionKey().then((key) {
+    final db = ref.read(dbProvider);
+    db.supabase.getEncryptionKey().then((key) {
       setState(() {
         encryptionEnabled = key != null;
       });
@@ -80,12 +82,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void autoFilledToggled(bool value) async {
-    await widget.db.settings.set('auto-fill-source', value);
+    final db = ref.read(dbProvider);
+    await db.settings.set('auto-fill-source', value);
     setState(() {}); // refresh settings screen
   }
 
   void onExportPress() async {
-    List<Note> notes = await widget.db.getAllNotes();
+    final db = ref.read(dbProvider);
+    List<Note> notes = await db.getAllNotes();
     if (backupOption == 'Markdown') {
       _downloadNotesAsMarkdownZIP(notes);
     } else {
@@ -98,6 +102,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void onImportPress() async {
+    final db = ref.read(dbProvider);
     await showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -126,13 +131,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         var note = Note.newNoteFromFile(title, content);
         // checks if title is invalid
         if (RegExp('[${Note.invalidChars}]').firstMatch(note.title) != null ||
-            (await widget.db.getNoteByTitle(note.title)) != null) {
+            (await db.getNoteByTitle(note.title)) != null) {
           continue;
         }
         notes.add(note);
       }
     }
-    await widget.db.upsertNotes(notes);
+    await db.upsertNotes(notes);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('Imported ${notes.length} notes'),
       duration: const Duration(seconds: 2),
@@ -140,31 +145,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void onLogoutPress() async {
-    await widget.db.logout();
+    final db = ref.read(dbProvider);
+    await db.logout();
     setState(() {
       isLoggedIn = false;
     });
   }
 
   void onDeleteAccountPress() async {
-    await widget.db.supabase.deleteAccount();
+    final db = ref.read(dbProvider);
+    await db.supabase.deleteAccount();
     setState(() {
       isLoggedIn = false;
     });
   }
 
   void onForceSyncPress() async {
-    widget.db.getAllNotes(forceSync: true);
+    final db = ref.read(dbProvider);
+    db.getAllNotes(forceSync: true);
   }
 
   void onEnableEncryptionPress() async {
+    final db = ref.read(dbProvider);
     showDialog(
       context: context,
       builder: (_) {
         return EncryptionDialog(setEncryptionKey: (key) async {
-          await widget.db.supabase.setEncryptionKey(key);
+          await db.supabase.setEncryptionKey(key);
           getEncryptionKey();
-          widget.db.refreshApp();
+          db.refreshApp();
         });
       },
     );
@@ -178,6 +187,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final db = ref.watch(dbProvider);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -230,15 +240,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ? null
                                     : onEnableEncryptionPress,
                               )
-                            : Auth(
-                                db: widget.db,
-                                onLogin: (e) {
-                                  getEncryptionKey();
-                                  setState(() {
-                                    isLoggedIn = true;
-                                    email = e;
-                                  });
-                                }),
+                            : Auth(onLogin: (e) {
+                                getEncryptionKey();
+                                setState(() {
+                                  isLoggedIn = true;
+                                  email = e;
+                                });
+                              }),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
                         const Text("Backup", style: TextStyle(fontSize: 12)),
@@ -254,8 +262,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const Text("Sync", style: TextStyle(fontSize: 12)),
                         const Divider(thickness: 1, height: 1),
                         LocalSyncSetting(
-                          settings: widget.db.settings,
-                          getAllNotes: widget.db.getAllNotes,
+                          settings: db.settings,
+                          getAllNotes: db.getAllNotes,
                         ),
                         SizedBox(
                             height: Theme.of(context).custom.kDefaultPadding),
@@ -266,7 +274,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const Text("Auto Fill Source",
                               style: TextStyle(fontSize: 12)),
                           Switch(
-                              value: widget.db.settings
+                              value: db.settings
                                   .get('auto-fill-source', defaultValue: false),
                               onChanged: autoFilledToggled)
                         ]),

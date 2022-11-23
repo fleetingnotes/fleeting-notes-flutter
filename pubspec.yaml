@@ -18,7 +18,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 0.6.10+43
 
 environment:
-  sdk: ">=2.16.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
+  flutter: ">=3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -49,7 +50,6 @@ dependencies:
   flutter_neumorphic: ^3.2.0
   receive_sharing_intent: ^1.4.5
   path_provider: ^2.0.9
-  provider: ^6.0.0
   dio: ^4.0.6
   file_picker: ^4.6.1
   mime: ^1.0.2
@@ -64,6 +64,7 @@ dependencies:
   firedart: ^0.9.0+1
   in_app_purchase: ^3.0.8
   home_widget: ^0.1.6
+  flutter_riverpod: ^2.1.1
 
 
 dev_dependencies:

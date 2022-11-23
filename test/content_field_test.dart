@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
@@ -13,7 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'mock_database.dart';
+import 'utils.dart';
 
 void main() {
   setUpAll(() {
@@ -21,96 +22,61 @@ void main() {
   });
 
   testWidgets('LinkPreview appears on link tap', (WidgetTester tester) async {
-    MockDatabase mockDb = MockDatabase();
-    TextEditingController controller = TextEditingController();
-    when(() => mockDb.getAllLinks())
-        .thenAnswer((_) async => Future.value(['hello', 'world']));
-    await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-      body: ContentField(
-        db: mockDb,
-        controller: controller,
-        onChanged: () {},
-      ),
-    )));
-    await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), '[[test]]');
-    await tester.pump();
-    await tester.tapAt(tester
-        .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
-        .translate(20, 10));
-    await tester.pumpAndSettle();
-
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await clickLinkInContentField(tester);
     expect(find.byType(LinkPreview), findsOneWidget);
   });
 
   testWidgets('TitleLinks list appears on `[[` type',
       (WidgetTester tester) async {
-    MockDatabase mockDb = MockDatabase();
-    TextEditingController controller = TextEditingController();
-    when(() => mockDb.getAllLinks())
-        .thenAnswer((_) async => Future.value(['hello']));
-    await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-      body: ContentField(
-        db: mockDb,
-        controller: controller,
-        onChanged: () {},
-      ),
-    )));
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
     await tester.enterText(
         find.bySemanticsLabel('Note and links to other ideas'), '[[');
     await tester.pump();
-
     expect(find.byType(LinkSuggestions), findsOneWidget);
   });
 
   testWidgets('Key navigation works in TitleLinks',
       (WidgetTester tester) async {
-    MockDatabase mockDb = MockDatabase();
-    TextEditingController controller = TextEditingController();
-    when(() => mockDb.getAllLinks())
-        .thenAnswer((_) async => Future.value(['hello', 'world']));
-    await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-      body: ContentField(
-        db: mockDb,
-        controller: controller,
-        onChanged: () {},
-      ),
-    )));
-    await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), '[[');
-    await tester.pump();
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await setupLinkSuggestions(tester);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.byType(LinkSuggestions), findsNothing);
-    expect(find.text('[[world]]'), findsOneWidget);
+    expect(
+        find.descendant(
+            of: find.byType(ContentField), matching: find.text('[[world]]')),
+        findsOneWidget);
   });
 
   testWidgets('Key navigation doesnt break on left key navigation',
       (WidgetTester tester) async {
-    MockDatabase mockDb = MockDatabase();
-    TextEditingController controller = TextEditingController();
-    when(() => mockDb.getAllLinks())
-        .thenAnswer((_) async => Future.value(['hello', 'world']));
-    await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-      body: ContentField(
-        db: mockDb,
-        controller: controller,
-        onChanged: () {},
-      ),
-    )));
-    await tester.tap(find.bySemanticsLabel('Note and links to other ideas'));
-    await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), '[[');
-    await tester.pump();
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await setupLinkSuggestions(tester);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
 
     expect(find.byType(LinkSuggestions), findsNothing);
   });
+}
+
+Future<void> setupLinkSuggestions(WidgetTester tester) async {
+  // add notes
+  await addNote(tester, title: 'hello');
+  await addNote(tester, content: '[[world]]');
+  // refresh note editor
+  await tester.tap(find.byIcon(Icons.arrow_back));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byIcon(Icons.arrow_back));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byIcon(Icons.add));
+  await tester.pumpAndSettle();
+
+  // trigger link suggestion
+  await tester.tap(find.bySemanticsLabel('Note and links to other ideas'));
+  await tester.enterText(
+      find.bySemanticsLabel('Note and links to other ideas'), '[[');
+  await tester.pump();
 }

@@ -9,6 +9,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:fleeting_notes_flutter/my_app_mobile.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<Box> openHiveBox(String boxName) async {
   if (!kIsWeb && !Hive.isBoxOpen(boxName)) {
@@ -40,7 +41,7 @@ void main() async {
     // Init your App.
     appRunner: () async {
       await initApp();
-      runApp(const MyApp());
+      runApp(const ProviderScope(child: MyApp()));
     },
   );
 }

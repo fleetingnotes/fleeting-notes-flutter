@@ -209,7 +209,7 @@ class Database {
   void navigateToSearch(String query) {
     navigatorKey.currentState?.push(
       PageRouteBuilder(
-        pageBuilder: (context, _, __) => SearchScreen(db: this),
+        pageBuilder: (context, _, __) => const SearchScreen(),
         transitionsBuilder: _transitionBuilder,
       ),
     );
@@ -236,7 +236,7 @@ class Database {
     noteHistory[note] = noteKey;
     navigatorKey.currentState?.push(PageRouteBuilder(
       pageBuilder: (context, _, __) =>
-          NoteEditor(key: noteKey, db: this, note: note, isShared: isShared),
+          NoteEditor(key: noteKey, note: note, isShared: isShared),
       transitionsBuilder: _transitionBuilder,
     ));
   }

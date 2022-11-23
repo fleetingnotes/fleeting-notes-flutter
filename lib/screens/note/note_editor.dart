@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,7 @@ import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controlle
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
-import 'package:fleeting_notes_flutter/services/database.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
@@ -17,27 +18,26 @@ import 'package:fleeting_notes_flutter/screens/note/components/SourceField/sourc
     if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container_web.dart';
 import 'package:flutter/services.dart';
 
-class NoteEditor extends StatefulWidget {
+class NoteEditor extends ConsumerStatefulWidget {
   const NoteEditor({
     Key? key,
     required this.note,
-    required this.db,
     this.isShared = false,
   }) : super(key: key);
 
   final Note note;
-  final Database db;
   final bool isShared;
   @override
   _NoteEditorState createState() => _NoteEditorState();
 }
 
-class _NoteEditorState extends State<NoteEditor> with RouteAware {
+class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   List<Note> backlinkNotes = [];
   List<String> linkSuggestions = [];
   bool hasNewChanges = false;
   bool isNoteShareable = false;
   Timer? saveTimer;
+  RouteObserver? routeObserver;
 
   late bool autofocus;
   late TextEditingController titleController;
@@ -47,7 +47,9 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void initState() {
     super.initState();
+    final db = ref.read(dbProvider);
     resetSaveTimer();
+    routeObserver = db.routeObserver;
     hasNewChanges = widget.isShared;
     isNoteShareable = widget.note.isShareable;
     autofocus = widget.note.isEmpty() || widget.isShared;
@@ -64,7 +66,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       ]),
     );
     contentController.text = widget.note.content;
-    widget.db.getBacklinkNotes(widget.note).then((notes) {
+    db.getBacklinkNotes(widget.note).then((notes) {
       setState(() {
         backlinkNotes = notes;
       });
@@ -72,7 +74,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void resetSaveTimer() {
-    var saveMs = widget.db.settings.get('save-delay-ms');
+    final settings = ref.read(settingsProvider);
+    var saveMs = settings.get('save-delay-ms');
     saveTimer?.cancel();
     saveTimer = Timer(Duration(milliseconds: saveMs), () {
       if (hasNewChanges) {
@@ -84,24 +87,21 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    widget.db.routeObserver
-        .subscribe(this, ModalRoute.of(context) as PageRoute);
+    routeObserver?.subscribe(this, ModalRoute.of(context) as PageRoute);
   }
 
   @override
   void dispose() {
     super.dispose();
     saveTimer?.cancel();
-    widget.db.routeObserver.unsubscribe(this);
-    if (hasNewChanges && !widget.isShared) {
-      _saveNote(updateState: false);
-    }
+    routeObserver?.unsubscribe(this);
   }
 
   @override
   void didPopNext() {
+    final db = ref.read(dbProvider);
     // Refresh note if we traverse back
-    widget.db.getNote(widget.note.id).then((note) {
+    db.getNote(widget.note.id).then((note) {
       if (note != null) {
         titleController.text = note.title;
         contentController.text = note.content;
@@ -121,12 +121,13 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   // Helper functions
   Future<void> checkTitle(id, title) async {
+    final db = ref.read(dbProvider);
     if (title == '') return;
 
     RegExp r = RegExp('[${Note.invalidChars}]');
     final invalidMatch = r.firstMatch(titleController.text);
     final titleExists =
-        await widget.db.titleExists(widget.note.id, titleController.text);
+        await db.titleExists(widget.note.id, titleController.text);
 
     if (invalidMatch != null) {
       titleController.text = widget.note.title;
@@ -140,12 +141,13 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void _deleteNote() async {
+    final db = ref.read(dbProvider);
     Note deletedNote = widget.note;
     deletedNote.isDeleted = true;
-    bool isSuccessDelete = await widget.db.deleteNotes([widget.note]);
+    bool isSuccessDelete = await db.deleteNotes([widget.note]);
     if (isSuccessDelete) {
       Navigator.pop(context);
-      widget.db.noteHistory.remove(widget.note);
+      db.noteHistory.remove(widget.note);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Fail to delete note'),
@@ -155,6 +157,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   Future<void> _saveNote({updateState = true}) async {
+    final db = ref.read(dbProvider);
     Note updatedNote = widget.note;
     String prevTitle = widget.note.title;
     updatedNote.title = titleController.text;
@@ -173,12 +176,12 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
           hasNewChanges = false;
         });
       }
-      bool isSaveSuccess = await widget.db.upsertNote(updatedNote);
+      bool isSaveSuccess = await db.upsertNote(updatedNote);
       if (!isSaveSuccess) {
         if (updateState) onChanged();
         throw FleetingNotesException('Failed to save note');
       } else {
-        widget.db.settings.delete('unsaved-note');
+        db.settings.delete('unsaved-note');
         await updateBacklinks(prevTitle, updatedNote.title);
       }
     } on FleetingNotesException catch (e) {
@@ -190,6 +193,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void storeUnsavedNote() {
+    final db = ref.read(dbProvider);
     Note unsavedNote = Note(
       id: widget.note.id,
       title: titleController.text,
@@ -197,10 +201,11 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       source: sourceController.text,
       timestamp: widget.note.timestamp,
     );
-    widget.db.settings.set('unsaved-note', unsavedNote);
+    db.settings.set('unsaved-note', unsavedNote);
   }
 
   Future<void> updateBacklinks(String prevTitle, String newTitle) async {
+    final db = ref.read(dbProvider);
     if (backlinkNotes.isEmpty || prevTitle == newTitle) return;
     // update backlinks
     List<Note> updatedBacklinks = backlinkNotes.map((n) {
@@ -208,7 +213,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
       n.content = n.content.replaceAll(r, '[[${widget.note.title}]]');
       return n;
     }).toList();
-    if (await widget.db.upsertNotes(updatedBacklinks)) {
+    if (await db.upsertNotes(updatedBacklinks)) {
       setState(() {
         backlinkNotes = updatedBacklinks;
       });
@@ -241,8 +246,9 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void onSearchNavigate(BuildContext context) {
-    widget.db.popAllRoutes();
-    widget.db.navigateToSearch('');
+    final db = ref.read(dbProvider);
+    db.popAllRoutes();
+    db.navigateToSearch('');
   }
 
   void onCopyUrl() {
@@ -256,10 +262,10 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
   }
 
   void onAddAttachment(String filename, Uint8List? bytes) async {
+    final db = ref.read(dbProvider);
     try {
       String newFileName = '${widget.note.id}/$filename';
-      String? downloadUrl =
-          await widget.db.supabase.addAttachment(newFileName, bytes);
+      String? downloadUrl = await db.supabase.addAttachment(newFileName, bytes);
       if (mounted) {
         sourceController.text = downloadUrl;
         onChanged();
@@ -274,7 +280,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    var isSharedNotes = widget.db.isSharedNotes;
+    final db = ref.watch(dbProvider);
+    var isSharedNotes = db.isSharedNotes;
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {
@@ -295,9 +302,8 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                   onDelete: (isSharedNotes) ? null : _deleteNote,
                   onSearch: () => onSearchNavigate(context),
                   onAddAttachment: onAddAttachment,
-                  onCopyUrl: (widget.db.isLoggedIn() || isSharedNotes)
-                      ? onCopyUrl
-                      : null,
+                  onCopyUrl:
+                      (db.isLoggedIn() || isSharedNotes) ? onCopyUrl : null,
                   onShareChange: (bool isShareable) {
                     setState(() {
                       isNoteShareable = isShareable;
@@ -325,14 +331,12 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                         ),
                         ContentField(
                           controller: contentController,
-                          db: widget.db,
                           onChanged: onChanged,
                           autofocus: autofocus,
                         ),
                         SourceContainer(
                           controller: sourceController,
                           onChanged: onChanged,
-                          db: widget.db,
                           overrideSourceUrl: widget.note.isEmpty(),
                         ),
                         SizedBox(
@@ -346,8 +350,7 @@ class _NoteEditorState extends State<NoteEditor> with RouteAware {
                               note: note,
                               onLongPress: () => {},
                               onTap: () {
-                                widget.db
-                                    .navigateToNote(note); // TODO: Deprecate
+                                db.navigateToNote(note); // TODO: Deprecate
                               },
                             )),
                       ],

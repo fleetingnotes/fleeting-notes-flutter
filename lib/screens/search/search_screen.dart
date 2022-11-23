@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
@@ -12,22 +13,20 @@ import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.d
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../note/note_editor.dart';
 
-class SearchScreen extends StatefulWidget {
+class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({
     Key? key,
-    required this.db,
     this.searchFocusNode,
     // keep track of notes selected
   }) : super(key: key);
 
-  final Database db;
   final FocusNode? searchFocusNode;
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchScreenState extends ConsumerState<SearchScreen> {
   StreamSubscription? noteChangeStream;
   final ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
@@ -50,6 +49,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Map searchFilter = {'title': true, 'content': true, 'source': true};
 
   Future<void> loadNotes(queryRegex, {forceSync = false}) async {
+    final db = ref.read(dbProvider);
     SearchQuery query = SearchQuery(
         query: queryRegex,
         searchByTitle: searchFilter['title'],
@@ -57,7 +57,7 @@ class _SearchScreenState extends State<SearchScreen> {
         searchBySource: searchFilter['source'],
         sortBy: sortOptionMap[sortBy]!);
     try {
-      var tempNotes = await widget.db.getSearchNotes(
+      var tempNotes = await db.getSearchNotes(
         query,
         forceSync: forceSync,
       );
@@ -88,8 +88,9 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    final db = ref.read(dbProvider);
     loadNotes(queryController.text);
-    widget.db.listenNoteChange(listenCallback).then((stream) {
+    db.listenNoteChange(listenCallback).then((stream) {
       noteChangeStream = stream;
     });
   }
@@ -101,14 +102,15 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _pressNote(BuildContext context, Note note) {
+    final db = ref.read(dbProvider);
     if (selectedNotes.isEmpty) {
       setState(() {
         activeNoteId = note.id;
       });
       if (!Responsive.isMobile(context)) {
-        widget.db.popAllRoutes();
+        db.popAllRoutes();
       }
-      widget.db.navigateToNote(note);
+      db.navigateToNote(note);
     } else {
       setState(() {
         if (selectedNotes.contains(note)) {
@@ -139,10 +141,11 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void deleteNotes(BuildContext context) async {
-    bool isSuccessDelete = await widget.db.deleteNotes(selectedNotes);
+    final db = ref.read(dbProvider);
+    bool isSuccessDelete = await db.deleteNotes(selectedNotes);
     if (isSuccessDelete) {
       for (var note in selectedNotes) {
-        widget.db.noteHistory.remove(note);
+        db.noteHistory.remove(note);
       }
       clearNotes();
     } else {
@@ -160,6 +163,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final db = ref.watch(dbProvider);
     return Scaffold(
       appBar: selectedNotes.isNotEmpty
           ? PreferredSize(
@@ -187,7 +191,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.menu),
-                      onPressed: widget.db.openDrawer,
+                      onPressed: db.openDrawer,
                     ),
                     const SizedBox(width: 5),
                     Expanded(
@@ -340,18 +344,17 @@ class ModifyNotesAppBar extends StatelessWidget {
   }
 }
 
-class SearchScreenNavigator extends StatelessWidget {
+class SearchScreenNavigator extends ConsumerWidget {
   const SearchScreenNavigator({
     Key? key,
-    required this.db,
     this.hasInitNote = false,
   }) : super(key: key);
 
-  final Database db;
   final bool hasInitNote;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final db = ref.watch(dbProvider);
     var history = db.noteHistory.entries.toList();
     db.navigatorKey = GlobalKey<NavigatorState>();
     return Navigator(
@@ -362,13 +365,11 @@ class SearchScreenNavigator extends StatelessWidget {
             if (history.isEmpty || history.first.key.isEmpty()) {
               return SearchScreen(
                 key: db.searchKey,
-                db: db,
               );
             } else {
               return NoteEditor(
                 key: history.first.value,
                 note: history.first.key,
-                db: db,
                 isShared: hasInitNote,
               );
             }

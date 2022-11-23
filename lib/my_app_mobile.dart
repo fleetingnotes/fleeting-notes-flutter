@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'my_app.dart' as base_app;
@@ -12,7 +14,7 @@ class MyApp extends base_app.MyApp {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  State<base_app.MyApp> createState() => _MyAppState();
+  ConsumerState<base_app.MyApp> createState() => _MyAppState();
 }
 
 class ParsedHighlight {
@@ -41,6 +43,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   }
 
   Future<Note> getNoteFromWidgetUri(Uri uri) async {
+    final db = ref.read(dbProvider);
     var noteId = uri.queryParameters['id'];
     if (noteId != null) {
       try {
@@ -55,6 +58,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   }
 
   void homeWidgetRefresh(event) async {
+    final db = ref.read(dbProvider);
     debugPrint("homeWidgetRefresh");
     var q = SearchQuery(query: '', sortBy: SortOptions.dateASC, limit: 25);
     var notes = await db.getSearchNotes(q);
@@ -65,6 +69,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
 
   @override
   void refreshApp(user) {
+    final db = ref.read(dbProvider);
     super.refreshApp(user);
     homeWidgetRefresh(null);
     noteChangeStream?.cancel();
@@ -76,6 +81,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   @override
   void initState() {
     super.initState();
+    final db = ref.read(dbProvider);
     Note getNoteFromShareText(String sharedText) {
       var ph = findAndroidHighlight(sharedText);
       if (ph != null) {
