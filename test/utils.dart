@@ -1,5 +1,6 @@
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,7 +44,7 @@ Future<void> resizeToMobile(WidgetTester tester) async {
 
 // screen interactions
 Future<void> addNote(WidgetTester tester,
-    {String title = "", String content = "Note"}) async {
+    {String title = "", String content = "note"}) async {
   await tester.tap(find.byIcon(Icons.add));
   await tester.pumpAndSettle();
   await tester.enterText(find.bySemanticsLabel('Title of the idea'), title);
@@ -66,6 +67,26 @@ Future<void> deleteCurrentNote(WidgetTester tester) async {
   await tester.tap(find.text('Delete'));
   await tester.pumpAndSettle();
   await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+}
+
+Future<void> createNoteWithBacklink(WidgetTester tester) async {
+  await addNote(tester, title: 'link');
+  await addNote(tester, content: '[[link]]');
+  await tester.tap(find.descendant(
+    of: find.byType(NoteCard),
+    matching: find.text('link', findRichText: true),
+  ));
+  await tester.pumpAndSettle();
+}
+
+Future<void> clickLinkInContentField(WidgetTester tester) async {
+  await tester.enterText(find.bySemanticsLabel('Note and links to other ideas'),
+      '[[hello world]]');
+  await tester.pump();
+  await tester.tapAt(tester
+      .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
+      .translate(20, 10));
+  await tester.pumpAndSettle();
 }
 
 // get mock object

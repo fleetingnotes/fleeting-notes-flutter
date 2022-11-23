@@ -3,7 +3,6 @@ import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
-import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -111,14 +110,6 @@ void main() {
         ),
         findsOneWidget);
   });
-
-  testWidgets('Clicking link in ContentField shows LinkPreview',
-      (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    await clickLinkInContentField(tester);
-    expect(find.byType(LinkPreview), findsOneWidget);
-  });
-
   testWidgets('Clicking TitleField removes LinkPreview overlay',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
@@ -127,25 +118,4 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(LinkPreview), findsNothing);
   });
-}
-
-// helpers
-Future<void> createNoteWithBacklink(WidgetTester tester) async {
-  await addNote(tester, title: 'link');
-  await addNote(tester, content: '[[link]]');
-  await tester.tap(find.descendant(
-    of: find.byType(NoteCard),
-    matching: find.text('link', findRichText: true),
-  ));
-  await tester.pumpAndSettle();
-}
-
-Future<void> clickLinkInContentField(WidgetTester tester) async {
-  await tester.enterText(find.bySemanticsLabel('Note and links to other ideas'),
-      '[[hello world]]');
-  await tester.pump();
-  await tester.tapAt(tester
-      .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
-      .translate(20, 10));
-  await tester.pumpAndSettle();
 }
