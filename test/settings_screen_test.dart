@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'mocks/mock_database.dart';
+import 'utils.dart';
 
 void main() {
   setUpAll(() {
@@ -20,20 +20,16 @@ void main() {
   });
 
   testWidgets('Render settings when logged in', (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => true);
-    await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
+    var mockSupabase = getSupabaseMockLoggedIn();
+    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
+        supabase: mockSupabase);
     expect(find.byType(Auth), findsNothing);
     expect(find.byType(Account), findsOneWidget);
   });
 
   testWidgets('Render settings when not logged in',
       (WidgetTester tester) async {
-    tester.binding.window.physicalSizeTestValue = const Size(3000, 1500);
-    MockDatabase mockDb = MockDatabase();
-    when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-    await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
+    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()));
     expect(find.byType(Auth), findsOneWidget);
     expect(find.byType(Account), findsNothing);
   });

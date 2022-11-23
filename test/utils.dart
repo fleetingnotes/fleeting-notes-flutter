@@ -90,10 +90,15 @@ Future<void> clickLinkInContentField(WidgetTester tester) async {
 }
 
 // get mock object
-MockSupabaseDB getSupabaseMockThrowOnUpsert() {
+MockSupabaseDB getSupabaseMockLoggedIn() {
   var mockSupabase = MockSupabaseDB();
   when(() => mockSupabase.currUser).thenReturn(const User(
       id: '', appMetadata: {}, userMetadata: {}, aud: '', createdAt: ''));
+  return mockSupabase;
+}
+
+MockSupabaseDB getSupabaseMockThrowOnUpsert() {
+  var mockSupabase = getSupabaseMockLoggedIn();
   when(() => mockSupabase.upsertNotes(any()))
       .thenThrow(FleetingNotesException('Failed'));
   return mockSupabase;

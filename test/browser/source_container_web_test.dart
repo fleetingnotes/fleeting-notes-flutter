@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import '../utils.dart';
 
 void main() {
   setUpAll(() {
@@ -18,8 +19,10 @@ void main() {
   testWidgets('Empty source field shows Add Source Url',
       (WidgetTester tester) async {
     TextEditingController controller = TextEditingController();
-    await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: SourceContainer(controller: controller))));
+    await fnPumpWidget(
+        tester,
+        MaterialApp(
+            home: Scaffold(body: SourceContainer(controller: controller))));
 
     expect(find.text('Add Source URL'), findsOneWidget);
     expect(find.bySemanticsLabel('Source'), findsNothing);
@@ -28,8 +31,10 @@ void main() {
   testWidgets('Filled source shows Source field', (WidgetTester tester) async {
     TextEditingController controller = TextEditingController();
     controller.text = 'filled';
-    await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: SourceContainer(controller: controller))));
+    await fnPumpWidget(
+        tester,
+        MaterialApp(
+            home: Scaffold(body: SourceContainer(controller: controller))));
 
     expect(find.text('Add Source URL'), findsNothing);
     expect(find.bySemanticsLabel('Source'), findsOneWidget);
@@ -38,8 +43,10 @@ void main() {
   testWidgets('Clicking Add Source URL button shows follow-link button',
       (WidgetTester tester) async {
     TextEditingController controller = TextEditingController();
-    await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: SourceContainer(controller: controller))));
+    await fnPumpWidget(
+        tester,
+        MaterialApp(
+            home: Scaffold(body: SourceContainer(controller: controller))));
 
     await tester.tap(find.text('Add Source URL'));
     await tester.pump();
@@ -51,8 +58,10 @@ void main() {
   testWidgets('Empty Source Field has Follow Link Button disabled',
       (WidgetTester tester) async {
     TextEditingController controller = TextEditingController();
-    await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: SourceContainer(controller: controller))));
+    await fnPumpWidget(
+        tester,
+        MaterialApp(
+            home: Scaffold(body: SourceContainer(controller: controller))));
 
     await tester.tap(find.text('Add Source URL'));
     await tester.pump();
