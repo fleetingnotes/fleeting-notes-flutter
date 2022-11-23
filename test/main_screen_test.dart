@@ -6,10 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 // @TestOn('browser')
 import 'package:fleeting_notes_flutter/models/search_query.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
-import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
@@ -17,7 +14,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
-import 'mocks/mock_database.dart';
+
 import 'utils.dart';
 
 // Currently Only Testing Web
@@ -75,214 +72,125 @@ void main() {
             of: find.byType(NoteCard),
             matching: find.text('Test save note!', findRichText: true)),
         findsOneWidget);
+  });
+
+  testWidgets('Delete note updates list of notes', (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await addNote(tester, content: 'Test delete note!');
+    expect(find.byType(NoteCard), findsOneWidget);
+    await deleteCurrentNote(tester);
+    expect(find.byType(NoteCard), findsNothing);
+  });
+
+  // // Mobile Tests
+  testWidgets('Render Main Screen (Mobile)', (WidgetTester tester) async {
+    resizeToMobile(tester);
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    expect(find.byType(NoteEditor), findsNothing);
+    expect(find.byType(SearchScreen), findsOneWidget);
+  });
+
+  testWidgets('Clicking NoteCard navigates to NoteScreen (Mobile)',
+      (WidgetTester tester) async {
+    resizeToMobile(tester);
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    expect(find.byType(SearchScreen), findsOneWidget);
+    await addNote(tester, content: 'Click me note!');
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(NoteCard));
+    await tester.pumpAndSettle(); // Wait for animation to finish
+    expect(find.widgetWithText(NoteEditor, 'Click me note!'), findsOneWidget);
+    expect(find.byType(SearchScreen), findsNothing);
+  });
+
+  // // Responsive Tests
+  testWidgets('Resize Desktop (note + search) -> Mobile (search)',
+      (WidgetTester tester) async {
+    resizeToDesktop(tester);
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+
+    // Change to mobile
+    resizeToMobile(tester);
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsNothing);
+  });
+
+  testWidgets('Resize Desktop (note + empty) -> Mobile (search)',
+      (WidgetTester tester) async {
+    resizeToDesktop(tester);
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+
+    // Delete screen
+    await deleteCurrentNote(tester);
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsNothing);
+
+    // Change to mobile
+    resizeToMobile(tester);
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsNothing);
+  });
+
+  testWidgets('Resize Mobile (search) -> Desktop (search + note)',
+      (WidgetTester tester) async {
+    resizeToMobile(tester);
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsNothing);
+
+    // Change to Desktop
+    resizeToDesktop(tester);
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
     expect(find.byType(NoteEditor), findsOneWidget);
   });
 
-  // testWidgets('Delete note updates list of notes', (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   Note newNote = Note.empty(content: 'Test delete note!');
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-  //       .thenAnswer((_) async => Future.value([newNote]));
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   await tester.pumpWidget(const MaterialApp(home: MainScreen()));
-  //   await tester.pump();
-  //   await tester.tap(find.widgetWithText(NoteCard, 'Test delete note!'));
-  //   await tester.pumpAndSettle(); // Wait for animation to finish
-  //   await tester.tap(find.byIcon(Icons.more_vert));
-  //   await tester.pumpAndSettle();
-  //   await tester.tap(find.text('Delete'));
-  //   await tester.pumpAndSettle();
-  //   expect(
-  //       find.widgetWithText(SearchScreen, 'Test delete note!'), findsNothing);
-  //   expect(find.byType(NoteEditor), findsNothing);
-  // }, skip: true);
+  testWidgets('Resize Mobile (note) -> Desktop (search + note)',
+      (WidgetTester tester) async {
+    resizeToMobile(tester);
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
 
-  // // Mobile Tests
-  // testWidgets('Render Main Screen (Mobile)', (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(300, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   await tester.pumpWidget(const MaterialApp(home: MainScreen()));
-  //   expect(find.byType(NoteEditor), findsNothing);
-  //   expect(find.byType(SearchScreen), findsOneWidget);
-  // });
+    // Mobile on Note Screen
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsNothing);
+    expect(find.byType(NoteEditor), findsOneWidget);
 
-  // testWidgets('Clicking NoteCard navigates to NoteScreen (Mobile)',
-  //     (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(300, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   Note newNote = Note.empty(content: 'Click me note!');
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-  //       .thenAnswer((_) async => Future.value([newNote]));
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when((() => mockDb.upsertNote(any())))
-  //       .thenAnswer((_) async => Future.value(true));
-  //   await tester.pumpWidget(const MaterialApp(home: MainScreen()));
-  //   await tester.pump();
-  //   await tester.tap(find.text('Click me note!', findRichText: true));
-  //   await tester.pumpAndSettle(); // Wait for animation to finish
-  //   expect(find.widgetWithText(NoteEditor, 'Click me note!'), findsOneWidget);
-  //   expect(find.byType(SearchScreen), findsNothing);
-  // });
+    // Change to Desktop
+    resizeToDesktop(tester);
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
+  });
 
-  // // Responsive Tests
-  // testWidgets('Resize Desktop (note + search) -> Mobile (search)',
-  //     (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   await tester.pumpWidget(const MaterialApp(home: MainScreen()));
+  testWidgets('When Mobile Size with initial note, Then see NoteEditor',
+      (WidgetTester tester) async {
+    resizeToMobile(tester);
+    await fnPumpWidget(
+      tester,
+      MaterialApp(home: MainScreen(initNote: Note.empty(content: 'init note'))),
+    );
 
-  //   // Change to mobile
-  //   tester.binding.window.physicalSizeTestValue = const Size(300, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   await tester.pumpAndSettle();
-  //   expect(find.byType(SearchScreen), findsOneWidget);
-  //   expect(find.byType(NoteEditor), findsNothing);
-  // });
+    // Mobile on Note Screen
+    expect(find.byType(SearchScreen), findsNothing);
+    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.text('init note'), findsOneWidget);
+  });
 
-  // testWidgets('Resize Desktop (note + empty) -> Mobile (search)',
-  //     (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.deleteNotes(any()))
-  //       .thenAnswer((_) async => Future.value(true));
-  //   await tester.pumpWidget(const MaterialApp(home: MainScreen()));
+  testWidgets('When Desktop Size with initial note, Then see init note',
+      (WidgetTester tester) async {
+    resizeToDesktop(tester);
+    await fnPumpWidget(
+      tester,
+      MaterialApp(home: MainScreen(initNote: Note.empty(content: 'init note'))),
+    );
 
-  //   // Delete screen
-  //   await tester.tap(find.byIcon(Icons.more_vert));
-  //   await tester.pumpAndSettle();
-  //   await tester.tap(find.text('Delete'));
-  //   await tester.pumpAndSettle();
-  //   expect(find.byType(SearchScreen), findsOneWidget);
-  //   expect(find.byType(NoteEditor), findsNothing);
-
-  //   // Change to mobile
-  //   tester.binding.window.physicalSizeTestValue = const Size(300, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   await tester.pumpAndSettle();
-  //   expect(find.byType(SearchScreen), findsOneWidget);
-  //   expect(find.byType(NoteEditor), findsNothing);
-  // });
-
-  // testWidgets('Resize Mobile (search) -> Desktop (search + note)',
-  //     (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(300, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   await tester.pumpWidget(const MaterialApp(home: MainScreen()));
-
-  //   // Mobile on Search Screen
-  //   expect(find.byType(SearchScreen), findsOneWidget);
-  //   expect(find.byType(NoteEditor), findsNothing);
-
-  //   // Change to Desktop
-  //   tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   await tester.pumpAndSettle();
-  //   expect(find.byType(SearchScreen), findsOneWidget);
-  //   expect(find.byType(NoteEditor), findsOneWidget);
-  // });
-
-  // testWidgets('Resize Mobile (note) -> Desktop (search + note)',
-  //     (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(300, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   await tester.pumpWidget(const MaterialApp(home: MainScreen()));
-
-  //   // Mobile on Note Screen
-  //   await tester.tap(find.byIcon(Icons.add));
-  //   await tester.pumpAndSettle();
-  //   expect(find.byType(SearchScreen), findsNothing);
-  //   expect(find.byType(NoteEditor), findsOneWidget);
-
-  //   // Change to Desktop
-  //   tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   await tester.pumpAndSettle();
-  //   expect(find.byType(SearchScreen), findsOneWidget);
-  //   expect(find.byType(NoteEditor), findsOneWidget);
-  // });
-
-  // testWidgets('When Mobile Size with initial note, Then see NoteEditor',
-  //     (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(300, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getSearchNotes(any(), forceSync: any(named: 'forceSync')))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.upsertNote(any()))
-  //       .thenAnswer((_) async => Future.value(true));
-  //   await tester.pumpWidget(MaterialApp(
-  //       home: MainScreen(initNote: Note.empty(content: 'init note'))));
-
-  //   // Mobile on Note Screen
-  //   expect(find.byType(SearchScreen), findsNothing);
-  //   expect(find.byType(NoteEditor), findsOneWidget);
-  //   expect(find.text('init note'), findsOneWidget);
-  // });
-
-  // testWidgets('When Desktop Size with initial note, Then see init note',
-  //     (WidgetTester tester) async {
-  //   tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  //   tester.binding.window.devicePixelRatioTestValue = 1.0;
-  //   MockDatabase mockDb = MockDatabase();
-  //   when(() => mockDb.getAllLinks()).thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.isLoggedIn()).thenAnswer((_) => false);
-  //   when(() => mockDb.getBacklinkNotes(any()))
-  //       .thenAnswer((_) async => Future.value([]));
-  //   when(() => mockDb.upsertNote(any()))
-  //       .thenAnswer((_) async => Future.value(true));
-
-  //   await tester.pumpWidget(MaterialApp(
-  //       home: MainScreen(initNote: Note.empty(content: 'init note'))));
-
-  //   // Mobile on Note Screen
-  //   expect(find.byType(SearchScreen), findsOneWidget);
-  //   expect(find.byType(NoteEditor), findsOneWidget);
-  //   expect(find.text('init note'), findsOneWidget);
-  // });
+    // Mobile on Note Screen
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.text('init note'), findsOneWidget);
+  });
 }

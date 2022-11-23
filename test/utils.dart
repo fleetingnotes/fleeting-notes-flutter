@@ -28,10 +28,25 @@ Future<void> resizeToDesktop(WidgetTester tester) async {
   tester.binding.window.devicePixelRatioTestValue = 1.0;
 }
 
+Future<void> resizeToMobile(WidgetTester tester) async {
+  tester.binding.window.physicalSizeTestValue = const Size(300, 500);
+  tester.binding.window.devicePixelRatioTestValue = 1.0;
+}
+
 Future<void> addNote(WidgetTester tester, {String content = "Note"}) async {
+  await tester.tap(find.byIcon(Icons.add));
+  await tester.pumpAndSettle();
   await tester.enterText(
       find.bySemanticsLabel('Note and links to other ideas'), content);
   await tester.tap(find.text('Save'));
   await tester.pumpAndSettle(); // Wait for animation to finish
+  await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+}
+
+Future<void> deleteCurrentNote(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.more_vert));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Delete'));
+  await tester.pumpAndSettle();
   await tester.pump(const Duration(seconds: 1)); // wait for notes to update
 }
