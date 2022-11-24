@@ -227,9 +227,13 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   }
 
   void onChanged() async {
-    if (widget.note.content != contentController.text ||
+    bool isNoteDiff = widget.note.content != contentController.text ||
         widget.note.title != titleController.text ||
-        widget.note.source != sourceController.text) {
+        widget.note.source != sourceController.text;
+    bool isNoteEmpty = contentController.text.isEmpty &&
+        titleController.text.isEmpty &&
+        sourceController.text.isEmpty;
+    if (isNoteDiff && !isNoteEmpty) {
       if (titleController.text.isNotEmpty ||
           contentController.text.isNotEmpty) {
         storeUnsavedNote();
