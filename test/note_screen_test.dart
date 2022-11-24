@@ -37,16 +37,7 @@ void main() {
         find.bySemanticsLabel('Note and links to other ideas'), 'new note');
     await tester.pump();
 
-    expect(
-        tester
-            .widget<OutlinedButton>(
-              find.ancestor(
-                  of: find.text('Save'),
-                  matching: find
-                      .byWidgetPredicate((widget) => widget is OutlinedButton)),
-            )
-            .enabled,
-        isTrue);
+    expect(findSaveButton(tester).enabled, isTrue);
   });
 
   testWidgets('Save note button is disabled when pressed',
@@ -56,16 +47,7 @@ void main() {
         find.bySemanticsLabel('Note and links to other ideas'), 'new note');
     await saveCurrentNote(tester);
 
-    expect(
-        tester
-            .widget<OutlinedButton>(
-              find.ancestor(
-                  of: find.text('Save'),
-                  matching: find
-                      .byWidgetPredicate((widget) => widget is OutlinedButton)),
-            )
-            .enabled,
-        isFalse);
+    expect(findSaveButton(tester).enabled, isFalse);
   });
 
   testWidgets('Save note button shows snackbar if save failed',
@@ -118,4 +100,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(LinkPreview), findsNothing);
   });
+
+  testWidgets('Autosave works', (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    // auto save
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), 'save');
+    await tester.pump();
+    expect(findSaveButton(tester).enabled, isTrue);
+    await tester.pump(const Duration(seconds: 1));
+    expect(findSaveButton(tester).enabled, isFalse);
+
+    // empty notes are not saved
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), '');
+    await tester.pump();
+    expect(findSaveButton(tester).enabled, isFalse);
+  });
+}
+
+OutlinedButton findSaveButton(WidgetTester tester) {
+  return tester.widget<OutlinedButton>(
+    find.ancestor(
+        of: find.text('Save'),
+        matching: find.byWidgetPredicate((widget) => widget is OutlinedButton)),
+  );
 }
