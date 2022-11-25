@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:fleeting_notes_flutter/services/text_similarity.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:mime/mime.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'settings.dart';
 import '../models/Note.dart';
@@ -280,6 +282,44 @@ class Database {
             ))
         .toList();
     await upsertNotes(initNotes);
+  }
+
+  Future<Note?> addAttachmentToNewNote(
+      {String? filename, Uint8List? fileBytes}) async {
+    Note newNote = Note.empty();
+
+    // get filename with extension
+    filename = filename ?? newNote.id;
+    final mimeType = lookupMimeType(filename, headerBytes: fileBytes);
+    String ext = (mimeType != null) ? extensionFromMime(mimeType) : "";
+    if (filename.split('.').length == 1 && ext.isNotEmpty) {
+      filename = "$filename.$ext";
+    }
+
+    // upload file & return note
+    String sourceUrl = await supabase.addAttachment(filename, fileBytes);
+    String dateInNum = DateTime.now().toString().replaceAll(RegExp(r'\D'), '');
+    newNote.source = sourceUrl;
+    newNote.title = "file-$dateInNum";
+    newNote.title += (ext.isEmpty) ? "" : ".$ext";
+    if (await upsertNote(newNote)) {
+      return newNote;
+    }
+    return null;
+  }
+
+  void insertTextAtSelection(TextEditingController controller, String text) {
+    if (text.isEmpty) return;
+    var currSelection = controller.selection;
+    int start = controller.text.length;
+    int end = start;
+    if (currSelection.start >= 0 && currSelection.end >= 0) {
+      start = currSelection.start;
+      end = currSelection.end;
+    }
+    controller.text = controller.text.replaceRange(start, end, text);
+    controller.selection =
+        TextSelection.fromPosition(TextPosition(offset: start + text.length));
   }
 
   void refreshApp() {

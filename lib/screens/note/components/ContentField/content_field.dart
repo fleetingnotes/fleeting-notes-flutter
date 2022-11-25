@@ -1,7 +1,10 @@
+import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
+import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'keyboard_button.dart';
 import '../../../../utils/shortcut_actions.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +39,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     builder: (context) => Container(),
   );
   bool titleLinksVisible = false;
+  bool isPasting = false;
   late ShortcutActions shortcuts;
 
   @override
@@ -58,6 +62,44 @@ class _ContentFieldState extends ConsumerState<ContentField> {
       setState(() {
         allLinks = links;
       });
+    });
+  }
+
+  void handlePaste() async {
+    setState(() {
+      isPasting = true;
+    });
+    final db = ref.read(dbProvider);
+    try {
+      var pasteImage = await Pasteboard.image;
+      if (pasteImage != null) {
+        try {
+          Note? newNote =
+              await db.addAttachmentToNewNote(fileBytes: pasteImage);
+          if (newNote != null) {
+            db.insertTextAtSelection(widget.controller, "[[${newNote.title}]]");
+            widget.onChanged?.call();
+          }
+        } on FleetingNotesException catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(e.message),
+            duration: const Duration(seconds: 2),
+          ));
+        }
+      } else {
+        throw FleetingNotesException('No Image to paste');
+      }
+    } catch (e) {
+      // perform regular paste
+      var clipboardData = await Clipboard.getData('text/plain');
+      String? clipboardText = clipboardData?.text;
+      if (clipboardText != null) {
+        db.insertTextAtSelection(widget.controller, clipboardText);
+        widget.onChanged?.call();
+      }
+    }
+    setState(() {
+      isPasting = false;
     });
   }
 
@@ -314,21 +356,28 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                   ],
                 )
               ]),
-          child: TextField(
-            focusNode: contentFocusNode,
-            textCapitalization: TextCapitalization.sentences,
-            autofocus: widget.autofocus,
-            controller: widget.controller,
-            keyboardType: TextInputType.multiline,
-            minLines: 5,
-            maxLines: null,
-            style: Theme.of(context).textTheme.bodyText2,
-            decoration: const InputDecoration(
-              hintText: "Note and links to other ideas",
-              border: InputBorder.none,
+          child: Actions(
+            actions: <Type, Action<Intent>>{
+              PasteIntent: CallbackAction(onInvoke: (Intent intent) {
+                if (!isPasting) handlePaste();
+              }),
+            },
+            child: TextField(
+              focusNode: contentFocusNode,
+              textCapitalization: TextCapitalization.sentences,
+              autofocus: widget.autofocus,
+              controller: widget.controller,
+              keyboardType: TextInputType.multiline,
+              minLines: 5,
+              maxLines: null,
+              style: Theme.of(context).textTheme.bodyText2,
+              decoration: const InputDecoration(
+                hintText: "Note and links to other ideas",
+                border: InputBorder.none,
+              ),
+              onChanged: (text) => _onContentChanged(context, text, size),
+              onTap: () => _onContentTap(context, size),
             ),
-            onChanged: (text) => _onContentChanged(context, text, size),
-            onTap: () => _onContentTap(context, size),
           ),
         );
       }),

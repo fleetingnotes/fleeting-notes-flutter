@@ -13,6 +13,10 @@ class SaveIntent extends Intent {
   const SaveIntent();
 }
 
+class PasteIntent extends Intent {
+  const PasteIntent();
+}
+
 Map<LogicalKeySet, Intent> shortcutMapping = <LogicalKeySet, Intent>{
   LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyO):
       const NewNoteIntent(),
@@ -26,4 +30,8 @@ Map<LogicalKeySet, Intent> shortcutMapping = <LogicalKeySet, Intent>{
       const SaveIntent(),
   LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyS):
       const SaveIntent(),
+  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyV):
+      const PasteIntent(),
+  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyV):
+      const PasteIntent(),
 };

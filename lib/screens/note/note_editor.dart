@@ -269,9 +269,10 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     final db = ref.read(dbProvider);
     try {
       String newFileName = '${widget.note.id}/$filename';
-      String? downloadUrl = await db.supabase.addAttachment(newFileName, bytes);
-      if (mounted) {
-        sourceController.text = downloadUrl;
+      Note? newNote = await db.addAttachmentToNewNote(
+          filename: newFileName, fileBytes: bytes);
+      if (mounted && newNote != null) {
+        db.insertTextAtSelection(contentController, "[[${newNote.title}]]");
         onChanged();
       }
     } on FleetingNotesException catch (e) {
