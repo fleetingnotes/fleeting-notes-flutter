@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
+import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
 import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:fleeting_notes_flutter/services/text_similarity.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class Database {
   final Settings settings;
   final TextSimilarity textSimilarity = TextSimilarity();
   SyncManager? syncManager;
+  BrowserExtension be = BrowserExtension();
   Database({
     required this.supabase,
     required this.settings,

@@ -74,3 +74,30 @@ function getVideoId() {
     }
     return videoId;
 }
+
+const pasteHandler = function (e) {
+  var items;
+
+  if (e.clipboardData && e.clipboardData.items) {
+    items = e.clipboardData.items;
+
+    if (items) {
+      items = Array.prototype.filter.call(items, function (element) {
+        return element.type.indexOf("image") >= 0;
+      });
+
+      Array.prototype.forEach.call(items, function (item) {
+        var blob = item.getAsFile();
+
+        var rdr = new FileReader();
+        rdr.onloadend = function () {
+          window.postMessage(new Uint8Array(rdr.result));
+        };
+
+        rdr.readAsArrayBuffer(blob);
+      });
+    }
+  }
+};
+
+window.addEventListener('paste', pasteHandler);

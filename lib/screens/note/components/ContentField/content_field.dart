@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
@@ -40,12 +41,20 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   );
   bool titleLinksVisible = false;
   bool isPasting = false;
+  Map<Type, Action<Intent>> textfieldActions = {};
+  StreamSubscription<Uint8List?>? pasteListener;
+
   late ShortcutActions shortcuts;
 
   @override
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
+    pasteListener = db.be.pasteController.stream.listen((pasteImage) {
+      if (contentFocusNode.hasFocus && !isPasting) {
+        handlePaste(pasteImage: pasteImage);
+      }
+    });
     // NOTE: onKeyEvent doesn't ignore enter key press
     contentFocusNode = FocusNode(onKey: onKeyEvent);
     contentFocusNode.addListener(() {
@@ -65,13 +74,13 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     });
   }
 
-  void handlePaste() async {
+  void handlePaste({Uint8List? pasteImage}) async {
     setState(() {
       isPasting = true;
     });
     final db = ref.read(dbProvider);
     try {
-      var pasteImage = await Pasteboard.image;
+      pasteImage ??= await Pasteboard.image;
       if (pasteImage != null) {
         try {
           Note? newNote =
@@ -107,6 +116,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   void dispose() {
     super.dispose();
     contentFocusNode.dispose();
+    pasteListener?.cancel();
   }
 
   KeyEventResult onKeyEvent(node, e) {
@@ -298,6 +308,18 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
   }
 
+  Future<Map<Type, Action<Intent>>> getTextFieldActions() async {
+    if (!kIsWeb) {
+      return {
+        PasteIntent: CallbackAction(onInvoke: (Intent intent) async {
+          if (!isPasting) handlePaste();
+          return null;
+        }),
+      };
+    }
+    return {};
+  }
+
   @override
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
@@ -357,11 +379,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                 )
               ]),
           child: Actions(
-            actions: <Type, Action<Intent>>{
-              PasteIntent: CallbackAction(onInvoke: (Intent intent) {
-                if (!isPasting) handlePaste();
-              }),
-            },
+            actions: textfieldActions,
             child: TextField(
               focusNode: contentFocusNode,
               textCapitalization: TextCapitalization.sentences,
