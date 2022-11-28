@@ -1,4 +1,3 @@
-import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -39,8 +38,9 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
   }
 
   void setSourceUrl() async {
-    widget.controller.text = await BrowserExtension()
-        .getSourceUrl(defaultText: widget.controller.text);
+    final be = ref.read(browserExtensionProvider);
+    widget.controller.text =
+        await be.getSourceUrl(defaultText: widget.controller.text);
     widget.onChanged?.call();
     setState(() {
       sourceFieldVisible = true;

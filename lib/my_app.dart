@@ -9,7 +9,6 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'services/browser_ext/browser_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MyApp extends ConsumerStatefulWidget {
@@ -23,6 +22,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   Note? initNote;
   StreamController<User?>? authChangeController;
   StreamSubscription? authSubscription;
+  StreamController<Uint8List?>? pasteController;
 
   void refreshApp(User? user) {
     final db = ref.read(dbProvider);
@@ -36,8 +36,10 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
+    final be = ref.read(browserExtensionProvider);
     authChangeController = db.supabase.authChangeController;
     authSubscription = db.supabase.authSubscription;
+    pasteController = be.pasteController;
     authChangeController?.stream.listen(refreshApp);
     refreshApp(db.supabase.currUser);
     if (kIsWeb) {
@@ -52,6 +54,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
     super.dispose();
     authSubscription?.cancel();
     authChangeController?.close();
+    pasteController?.close();
   }
 
   // This widget is the root of your application.
@@ -140,7 +143,7 @@ class _LoadMainScreenState extends ConsumerState<LoadMainScreen> {
         source: params['source'] ?? '',
       );
     } else {
-      BrowserExtension be = BrowserExtension();
+      final be = ref.read(browserExtensionProvider);
       String selectionText = await be.getSelectionText();
       if (selectionText.isNotEmpty) {
         String sourceUrl = await be.getSourceUrl();

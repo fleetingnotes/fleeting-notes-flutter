@@ -65,6 +65,7 @@ dependencies:
   in_app_purchase: ^3.0.8
   home_widget: ^0.1.6
   flutter_riverpod: ^2.1.1
+  pasteboard: ^0.2.0
 
 
 dev_dependencies:

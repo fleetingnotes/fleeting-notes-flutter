@@ -286,7 +286,7 @@ class SupabaseDB {
     if (fileBytes.lengthInBytes / 1000000 > maxSize) {
       throw FleetingNotesException('File cannot be larger than $maxSize MB');
     }
-    final mimeType = lookupMimeType(filename);
+    final mimeType = lookupMimeType(filename, headerBytes: fileBytes);
     try {
       await client.storage.from('attachments').uploadBinary(filename, fileBytes,
           fileOptions: FileOptions(contentType: mimeType));
