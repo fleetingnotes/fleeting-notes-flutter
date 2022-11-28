@@ -6,5 +6,4 @@ class BE {
       StreamController<Uint8List?>.broadcast();
   Future<String> getSelectionText() async => '';
   Future<String> getSourceUrl({String defaultText = ''}) async => defaultText;
-  Future<String?> getClipboardPermissionState() async => null;
 }
