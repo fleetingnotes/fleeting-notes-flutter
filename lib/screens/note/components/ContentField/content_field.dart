@@ -50,7 +50,8 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    pasteListener = db.be.pasteController.stream.listen((pasteImage) {
+    final be = ref.read(browserExtensionProvider);
+    pasteListener = be.pasteController.stream.listen((pasteImage) {
       if (contentFocusNode.hasFocus && !isPasting) {
         handlePaste(pasteImage: pasteImage);
       }

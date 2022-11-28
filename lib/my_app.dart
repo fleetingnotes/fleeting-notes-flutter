@@ -37,9 +37,10 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
+    final be = ref.read(browserExtensionProvider);
     authChangeController = db.supabase.authChangeController;
     authSubscription = db.supabase.authSubscription;
-    pasteController = db.be.pasteController;
+    pasteController = be.pasteController;
     authChangeController?.stream.listen(refreshApp);
     refreshApp(db.supabase.currUser);
     if (kIsWeb) {
@@ -143,7 +144,7 @@ class _LoadMainScreenState extends ConsumerState<LoadMainScreen> {
         source: params['source'] ?? '',
       );
     } else {
-      BrowserExtension be = BrowserExtension();
+      final be = ref.read(browserExtensionProvider);
       String selectionText = await be.getSelectionText();
       if (selectionText.isNotEmpty) {
         String sourceUrl = await be.getSourceUrl();

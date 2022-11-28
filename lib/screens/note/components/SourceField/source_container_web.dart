@@ -38,9 +38,9 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
   }
 
   void setSourceUrl() async {
-    final db = ref.read(dbProvider);
+    final be = ref.read(browserExtensionProvider);
     widget.controller.text =
-        await db.be.getSourceUrl(defaultText: widget.controller.text);
+        await be.getSourceUrl(defaultText: widget.controller.text);
     widget.onChanged?.call();
     setState(() {
       sourceFieldVisible = true;
