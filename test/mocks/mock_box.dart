@@ -149,6 +149,6 @@ class MockBox implements Box {
   @override
   Stream<BoxEvent> watch({key}) {
     // TODO: implement watch
-    throw UnimplementedError();
+    return const Stream.empty();
   }
 }

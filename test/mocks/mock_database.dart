@@ -5,10 +5,11 @@ import 'mock_box.dart';
 class MockDatabase extends Database {
   MockDatabase({required super.supabase, required super.settings});
   Box? _currBox;
-
+  Map<String, Box> allBoxes = {'local': MockBox(), 'supabase': MockBox()};
   @override
   Future<Box> getBox() async {
-    _currBox ??= MockBox();
+    var boxName = (supabase.currUser?.id == null) ? 'local' : 'supabase';
+    _currBox = allBoxes[boxName];
     return _currBox!;
   }
 }

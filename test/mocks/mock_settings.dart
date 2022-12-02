@@ -1,7 +1,12 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 
+import 'mock_box.dart';
+
 class MockSettings extends Mock implements Settings {
+  @override
+  var box = MockBox();
+
   @override
   get(String key, {defaultValue}) {
     Map<String, dynamic> testSettings = {
