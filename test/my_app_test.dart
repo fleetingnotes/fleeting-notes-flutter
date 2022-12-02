@@ -7,7 +7,7 @@ import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
-
+import 'mocks/mock_supabase.dart';
 import 'utils.dart';
 
 void main() {
@@ -26,7 +26,7 @@ void main() {
 
   testWidgets('Login has different notes', (WidgetTester tester) async {
     resizeToDesktop(tester);
-    var mockSupabase = getSupabaseAuthMock();
+    var mockSupabase = getBaseMockSupabaseDB();
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
     await addNote(tester);
     await navigateToSettings(tester);
@@ -46,7 +46,7 @@ void main() {
   testWidgets('Login and logout does not delete notes',
       (WidgetTester tester) async {
     resizeToDesktop(tester);
-    var mockSupabase = getSupabaseAuthMock();
+    var mockSupabase = getBaseMockSupabaseDB();
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
     await addNote(tester);
     await navigateToSettings(tester);

@@ -1,6 +1,5 @@
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ Future<void> fnPumpWidget(
   MockSupabaseDB? supabase,
 }) async {
   settings = settings ?? MockSettings();
-  supabase = supabase ?? MockSupabaseDB();
+  supabase = supabase ?? getBaseMockSupabaseDB();
   MockDatabase mockDb = MockDatabase(settings: settings, supabase: supabase);
   await tester.pumpWidget(ProviderScope(
     overrides: [
@@ -96,7 +95,7 @@ Future<void> attemptLogin(WidgetTester tester) async {
   await tester.enterText(find.bySemanticsLabel("Enter your email"), 'matt@g.g');
   await tester.enterText(find.bySemanticsLabel("Password"), '222222');
   await tester.tap(find.text('Sign in'));
-  await tester.pumpAndSettle();
+  await tester.pump(); // pumpAndSettle doesnt work with circular progress
 }
 
 Future<void> clickLinkInContentField(WidgetTester tester) async {
@@ -111,30 +110,12 @@ Future<void> clickLinkInContentField(WidgetTester tester) async {
 
 // get mock object
 MockSupabaseDB getSupabaseMockThrowOnUpsert() {
-  var mockSupabase = MockSupabaseDB();
+  var mockSupabase = getBaseMockSupabaseDB();
   mockSupabase.currUser = getUser();
   when(() => mockSupabase.upsertNotes(any()))
       .thenThrow(FleetingNotesException('Failed'));
   return mockSupabase;
 }
-
-MockSupabaseDB getSupabaseAuthMock() {
-  var mockSupabase = MockSupabaseDB();
-  when(() => mockSupabase.loginMigration(any(), any())).thenAnswer((_) {
-    var user = getUser();
-    mockSupabase.authChangeController.add(user);
-    mockSupabase.currUser = user;
-    return Future.value(MigrationStatus.supaFireLogin);
-  });
-  when(() => mockSupabase.logout()).thenAnswer((_) {
-    mockSupabase.authChangeController.add(null);
-    mockSupabase.currUser = null;
-    return Future.value(true);
-  });
-  return mockSupabase;
-}
-
-// helpers
 
 /// Runs the onTap handler for the [TextSpan] which matches the search-string.
 /// https://github.com/flutter/flutter/issues/56023#issuecomment-764985456

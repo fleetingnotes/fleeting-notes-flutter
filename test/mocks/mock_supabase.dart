@@ -29,8 +29,22 @@ class MockSupabaseDB extends Mock implements SupabaseDB {
 
   @override
   SupabaseClient client = MockSupabaseClient();
+}
 
-  @override
-  Future<SubscriptionTier> getSubscriptionTier() async =>
-      SubscriptionTier.unknownSub;
+MockSupabaseDB getBaseMockSupabaseDB() {
+  var mockSupabase = MockSupabaseDB();
+  when(() => mockSupabase.loginMigration(any(), any())).thenAnswer((_) {
+    var user = getUser();
+    mockSupabase.authChangeController.add(user);
+    mockSupabase.currUser = user;
+    return Future.value(MigrationStatus.supaFireLogin);
+  });
+  when(() => mockSupabase.logout()).thenAnswer((_) {
+    mockSupabase.authChangeController.add(null);
+    mockSupabase.currUser = null;
+    return Future.value(true);
+  });
+  when(() => mockSupabase.getSubscriptionTier())
+      .thenAnswer((_) => Future.value(SubscriptionTier.unknownSub));
+  return mockSupabase;
 }
