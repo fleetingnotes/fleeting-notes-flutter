@@ -157,6 +157,7 @@ class AuthFlow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 15, 0, 15),
       child: RichText(
+        key: const Key('SignInText'),
         text: TextSpan(children: [
           TextSpan(text: text, style: Theme.of(context).textTheme.bodyText1!),
           TextSpan(

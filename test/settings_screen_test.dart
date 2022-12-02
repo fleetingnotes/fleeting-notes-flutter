@@ -20,9 +20,10 @@ void main() {
   });
 
   testWidgets('Render settings when logged in', (WidgetTester tester) async {
-    var mockSupabase = getSupabaseMockLoggedIn();
+    var mockSupabase = getSupabaseAuthMock();
     await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
         supabase: mockSupabase);
+    await attemptLogin(tester);
     expect(find.byType(Auth), findsNothing);
     expect(find.byType(Account), findsOneWidget);
   });
@@ -32,5 +33,13 @@ void main() {
     await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()));
     expect(find.byType(Auth), findsOneWidget);
     expect(find.byType(Account), findsNothing);
+  });
+
+  testWidgets('Login works as expected', (WidgetTester tester) async {
+    var mockSupabase = getSupabaseAuthMock();
+    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
+        supabase: mockSupabase);
+    await attemptLogin(tester);
+    expect(find.text('Logout'), findsOneWidget);
   });
 }

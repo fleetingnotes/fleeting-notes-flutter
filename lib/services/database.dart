@@ -192,8 +192,6 @@ class Database {
 
   Future<MigrationStatus> login(String email, String password) async {
     var migrationStatus = await supabase.loginMigration(email, password);
-    var box = await getBox();
-    box.clear();
     return migrationStatus;
   }
 
