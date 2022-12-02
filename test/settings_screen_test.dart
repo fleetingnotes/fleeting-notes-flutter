@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'mocks/mock_supabase.dart';
 import 'utils.dart';
 
 void main() {
@@ -20,7 +21,7 @@ void main() {
   });
 
   testWidgets('Render settings when logged in', (WidgetTester tester) async {
-    var mockSupabase = getSupabaseAuthMock();
+    var mockSupabase = getBaseMockSupabaseDB();
     await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
         supabase: mockSupabase);
     await attemptLogin(tester);
@@ -36,7 +37,7 @@ void main() {
   });
 
   testWidgets('Login works as expected', (WidgetTester tester) async {
-    var mockSupabase = getSupabaseAuthMock();
+    var mockSupabase = getBaseMockSupabaseDB();
     await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
         supabase: mockSupabase);
     await attemptLogin(tester);
