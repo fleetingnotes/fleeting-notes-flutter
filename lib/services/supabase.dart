@@ -24,7 +24,7 @@ enum MigrationStatus {
 enum SubscriptionTier { freeSub, basicSub, premiumSub, unknownSub }
 
 class SupabaseDB {
-  final SupabaseClient client = Supabase.instance.client;
+  SupabaseClient get client => Supabase.instance.client;
   final FireDart firedart = FireDart();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   StreamSubscription<AuthState>? authSubscription;
@@ -55,6 +55,7 @@ class SupabaseDB {
     if (user == null) {
       throw FleetingNotesException('Login failed');
     } else {
+      currUser = user;
       return user;
     }
   }

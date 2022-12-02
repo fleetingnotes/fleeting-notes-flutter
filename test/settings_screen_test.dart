@@ -6,8 +6,10 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/login_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/account.dart';
+import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -42,5 +44,34 @@ void main() {
         supabase: mockSupabase);
     await attemptLogin(tester);
     expect(find.text('Logout'), findsOneWidget);
+  });
+
+  testWidgets('Premium user sees no login dialog', (WidgetTester tester) async {
+    var mockSupabase = getBaseMockSupabaseDB();
+    when(() => mockSupabase.getSubscriptionTier())
+        .thenAnswer((_) => Future.value(SubscriptionTier.premiumSub));
+
+    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
+        supabase: mockSupabase);
+    await attemptLogin(tester);
+    expect(find.byType(LoginDialog), findsNothing);
+  });
+  testWidgets('Free user sees login dialog', (WidgetTester tester) async {
+    var mockSupabase = getBaseMockSupabaseDB();
+    when(() => mockSupabase.getSubscriptionTier())
+        .thenAnswer((_) => Future.value(SubscriptionTier.freeSub));
+    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
+        supabase: mockSupabase);
+    await attemptLogin(tester);
+    expect(find.byType(LoginDialog), findsOneWidget);
+  });
+  testWidgets('Unknwn user sees no login dialog', (WidgetTester tester) async {
+    var mockSupabase = getBaseMockSupabaseDB();
+    when(() => mockSupabase.getSubscriptionTier())
+        .thenAnswer((_) => Future.value(SubscriptionTier.unknownSub));
+    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
+        supabase: mockSupabase);
+    await attemptLogin(tester);
+    expect(find.byType(LoginDialog), findsNothing);
   });
 }

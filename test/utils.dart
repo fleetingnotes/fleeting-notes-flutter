@@ -95,7 +95,7 @@ Future<void> attemptLogin(WidgetTester tester) async {
   await tester.enterText(find.bySemanticsLabel("Enter your email"), 'matt@g.g');
   await tester.enterText(find.bySemanticsLabel("Password"), '222222');
   await tester.tap(find.text('Sign in'));
-  await tester.pumpAndSettle();
+  await tester.pump(); // pumpAndSettle doesnt work with circular progress
 }
 
 Future<void> clickLinkInContentField(WidgetTester tester) async {
