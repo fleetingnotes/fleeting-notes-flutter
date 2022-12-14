@@ -260,14 +260,16 @@ class SupabaseDB {
 
   Future<Map<String, Note>> getNotesCache() async {
     var box = await getNotesCacheBox();
-    Map<String, Note> mapping = {for (var note in box!.values) note.id: note};
+    Map<String, Note> mapping = {
+      for (var note in box?.values ?? []) note.id: note
+    };
     return mapping;
   }
 
   Future<void> saveNotesCache(List<Note> notes) async {
     var box = await getNotesCacheBox();
     Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
-    box!.putAll(noteIdMap);
+    box?.putAll(noteIdMap);
   }
 
   Future<void> clearNotesCache() async {
