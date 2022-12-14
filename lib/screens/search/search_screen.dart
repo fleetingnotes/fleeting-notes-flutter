@@ -226,7 +226,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   children: [
                     Flexible(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 180),
+                        constraints: const BoxConstraints(maxWidth: 200),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             isExpanded: true,
