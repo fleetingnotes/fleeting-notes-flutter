@@ -69,7 +69,8 @@ ${content}''';
       'title': title,
       'content': content,
       'source': source,
-      'timestamp': createdAt,
+      'created_at': createdAt,
+      'modified_at': modifiedAt,
     };
   }
 

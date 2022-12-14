@@ -60,7 +60,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   void homeWidgetRefresh(event) async {
     final db = ref.read(dbProvider);
     debugPrint("homeWidgetRefresh");
-    var q = SearchQuery(query: '', sortBy: SortOptions.dateASC, limit: 25);
+    var q = SearchQuery(query: '', sortBy: SortOptions.createdASC, limit: 25);
     var notes = await db.getSearchNotes(q);
     await HomeWidget.saveWidgetData('notes', jsonEncode(notes));
     await HomeWidget.updateWidget(

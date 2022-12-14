@@ -85,10 +85,10 @@ class Database {
     return notes;
   }
 
-  List<Note> getAllNotesLocal(box) {
+  List<Note> getAllNotesLocal(Box box) {
     List<Note> notes = [];
-    for (var note in box.values) {
-      notes.add(note as Note);
+    for (var note in box.values.cast<Note>()) {
+      notes.add(note);
     }
     return notes;
   }

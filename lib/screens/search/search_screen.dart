@@ -34,10 +34,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   var selectedNotes = <Note>[];
 
   late List<Note> notes = [];
-  String sortBy = 'Sort by date (new to old)';
+  String sortBy = 'Sort by created (new to old)';
   Map<String, SortOptions> sortOptionMap = {
-    'Sort by date (new to old)': SortOptions.dateASC,
-    'Sort by date (old to new)': SortOptions.dateDESC,
+    'Sort by modified (new to old)': SortOptions.modifiedASC,
+    'Sort by modified (old to new)': SortOptions.modifiedDESC,
+    'Sort by created (new to old)': SortOptions.createdASC,
+    'Sort by created (old to new)': SortOptions.createdDESC,
     'Sort by title (A to Z)': SortOptions.titleASC,
     'Sort by title (Z to A)': SortOptions.titleDSC,
     'Sort by content (A to Z)': SortOptions.contentASC,
