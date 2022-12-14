@@ -13,7 +13,7 @@ class Note {
   @HiveField(0)
   final String id;
   @HiveField(1)
-  final String timestamp;
+  final String createdAt;
   @HiveField(2)
   String title;
   @HiveField(3)
@@ -24,6 +24,8 @@ class Note {
   bool isDeleted;
   @HiveField(7, defaultValue: false)
   bool isShareable;
+  @HiveField(8, defaultValue: '2000-01-01')
+  String modifiedAt;
   final String partition;
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
@@ -40,12 +42,12 @@ ${content}''';
     required this.id,
     required this.title,
     required this.content,
-    required this.timestamp,
+    required this.createdAt,
     this.isShareable = false,
     this.partition = '',
     this.source = '',
     this.isDeleted = false,
-  });
+  }) : modifiedAt = createdAt;
 
   static Note empty(
       {String title = '', String content = '', String source = ''}) {
@@ -56,7 +58,7 @@ ${content}''';
       title: title,
       content: content,
       source: source,
-      timestamp: dateStr,
+      createdAt: dateStr,
       isDeleted: false,
     );
   }
@@ -67,7 +69,7 @@ ${content}''';
       'title': title,
       'content': content,
       'source': source,
-      'timestamp': timestamp,
+      'timestamp': createdAt,
     };
   }
 
@@ -78,7 +80,7 @@ ${content}''';
       title: noteMap["title"].toString(),
       content: noteMap["content"].toString(),
       source: noteMap["source"].toString(),
-      timestamp: noteMap["timestamp"].toString(),
+      createdAt: noteMap["timestamp"].toString(),
     );
   }
 
@@ -88,7 +90,7 @@ ${content}''';
       title: jsonEncode(note.title),
       content: jsonEncode(note.content),
       source: jsonEncode(note.source),
-      timestamp: jsonEncode(note.timestamp),
+      createdAt: jsonEncode(note.createdAt),
       isDeleted: note.isDeleted,
     );
   }
@@ -122,7 +124,7 @@ ${content}''';
   }
 
   DateTime getDateTime() {
-    return DateTime.parse(timestamp);
+    return DateTime.parse(createdAt);
   }
 
   String getShortDateTimeStr() {
@@ -188,9 +190,9 @@ ${content}''';
           return source;
         case 'created_time':
           if (matchInMetadata(m, template ?? '')) {
-            return timestamp.replaceAll('"', r'\"');
+            return createdAt.replaceAll('"', r'\"');
           }
-          return timestamp;
+          return createdAt;
         case 'content':
           if (matchInMetadata(m, template ?? '')) {
             return content.replaceAll('"', r'\"');

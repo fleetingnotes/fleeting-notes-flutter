@@ -199,7 +199,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
       title: titleController.text,
       content: contentController.text,
       source: sourceController.text,
-      timestamp: widget.note.timestamp,
+      createdAt: widget.note.createdAt,
     );
     db.settings.set('unsaved-note', unsavedNote);
   }

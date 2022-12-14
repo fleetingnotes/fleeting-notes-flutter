@@ -215,6 +215,7 @@ class SupabaseDB {
 
   Future<bool> deleteNotes(List<Note> notes) async {
     var deletedNotes = notes.map((note) {
+      note.modifiedAt = DateTime.now().toUtc().toIso8601String();
       note.isDeleted = true;
       return note;
     }).toList();
@@ -377,7 +378,7 @@ class SupabaseDB {
       partition: supaNote['_partition'],
       isDeleted: supaNote['deleted'],
       isShareable: supaNote['shared'],
-      timestamp: dt.toIso8601String(),
+      createdAt: dt.toIso8601String(),
     );
   }
 
@@ -402,8 +403,8 @@ class SupabaseDB {
       'title': title,
       'content': content,
       'source': source,
-      'created_at': note.timestamp,
-      'modified_at': DateTime.now().toUtc().toIso8601String(),
+      'created_at': note.createdAt,
+      'modified_at': note.modifiedAt,
       'deleted': note.isDeleted,
       '_partition': userId,
       'shared': note.isShareable,
