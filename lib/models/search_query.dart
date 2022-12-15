@@ -13,14 +13,16 @@ class SearchQuery {
     this.searchByTitle = true,
     this.searchByContent = true,
     this.searchBySource = true,
-    this.sortBy = SortOptions.dateASC,
+    this.sortBy = SortOptions.createdASC,
     this.limit = 50,
   });
 }
 
 enum SortOptions {
-  dateASC,
-  dateDESC,
+  modifiedASC,
+  modifiedDESC,
+  createdASC,
+  createdDESC,
   titleASC,
   titleDSC,
   contentASC,
@@ -30,10 +32,14 @@ enum SortOptions {
 }
 
 final Map sortMap = {
-  SortOptions.dateASC: (Note n1, Note n2) =>
-      n2.timestamp.compareTo(n1.timestamp),
-  SortOptions.dateDESC: (Note n1, Note n2) =>
-      n1.timestamp.compareTo(n2.timestamp),
+  SortOptions.modifiedASC: (Note n1, Note n2) =>
+      n2.modifiedAt.compareTo(n1.modifiedAt),
+  SortOptions.modifiedDESC: (Note n1, Note n2) =>
+      n1.modifiedAt.compareTo(n2.modifiedAt),
+  SortOptions.createdASC: (Note n1, Note n2) =>
+      n2.createdAt.compareTo(n1.createdAt),
+  SortOptions.createdDESC: (Note n1, Note n2) =>
+      n1.createdAt.compareTo(n2.createdAt),
   SortOptions.titleASC: (Note n1, Note n2) =>
       n1.title.toLowerCase().compareTo(n2.title.toLowerCase()),
   SortOptions.titleDSC: (Note n1, Note n2) =>

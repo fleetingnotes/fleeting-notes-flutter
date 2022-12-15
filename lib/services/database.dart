@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
 import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:fleeting_notes_flutter/services/text_similarity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:mime/mime.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -85,10 +85,10 @@ class Database {
     return notes;
   }
 
-  List<Note> getAllNotesLocal(box) {
+  List<Note> getAllNotesLocal(Box box) {
     List<Note> notes = [];
-    for (var note in box.values) {
-      notes.add(note as Note);
+    for (var note in box.values.cast<Note>()) {
+      notes.add(note);
     }
     return notes;
   }
@@ -152,7 +152,11 @@ class Database {
         if (!isSuccess) return false;
       }
       var box = await getBox();
-      Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
+      Map<String, Note> noteIdMap = {};
+      for (var note in notes) {
+        note.modifiedAt = DateTime.now().toUtc().toIso8601String();
+        noteIdMap[note.id] = note;
+      }
       await box.putAll(noteIdMap);
       noteChangeController.add('upsertNotes');
       syncManager?.pushNotes(notes);

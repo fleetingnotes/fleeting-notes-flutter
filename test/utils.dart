@@ -49,12 +49,22 @@ Future<void> addNote(WidgetTester tester,
     {String title = "", String content = "note"}) async {
   await tester.tap(find.byIcon(Icons.add));
   await tester.pumpAndSettle();
-  await tester.enterText(find.bySemanticsLabel('Title of the idea'), title);
-  await tester.enterText(
-      find.bySemanticsLabel('Note and links to other ideas'), content);
+  await modifyCurrentNote(tester, title: title, content: content);
+}
+
+Future<void> modifyCurrentNote(WidgetTester tester,
+    {String? title, String? content}) async {
+  if (title != null) {
+    await tester.enterText(find.bySemanticsLabel('Title of the idea'), title);
+  }
+  if (content != null) {
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), content);
+  }
   await tester.tap(find.text('Save'));
   await tester.pumpAndSettle(); // Wait for animation to finish
-  await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+  await tester
+      .pump(const Duration(seconds: 1)); // wait for notes to save / update
 }
 
 Future<void> saveCurrentNote(WidgetTester tester) async {
@@ -106,6 +116,22 @@ Future<void> clickLinkInContentField(WidgetTester tester) async {
       .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
       .translate(20, 10));
   await tester.pumpAndSettle();
+}
+
+Future<void> sortBy(WidgetTester tester, sortByText) async {
+  await tester.tap(find.byType(DropdownButton<String>));
+  await tester.pumpAndSettle();
+  await tester
+      .tap(find.widgetWithText(DropdownMenuItem<String>, sortByText).last);
+  await tester.pumpAndSettle();
+  await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+}
+
+List<String> getContentNoteCardList(WidgetTester tester) {
+  return tester
+      .widgetList<NoteCard>(find.byType(NoteCard))
+      .map((nc) => nc.note.content)
+      .toList();
 }
 
 // get mock object
