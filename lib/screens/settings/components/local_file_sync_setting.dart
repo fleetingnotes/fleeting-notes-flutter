@@ -1,13 +1,14 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
-import 'package:fleeting_notes_flutter/services/sync/local_sync.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/Note.dart';
 
-class LocalSyncSetting extends StatefulWidget {
+class LocalSyncSetting extends ConsumerStatefulWidget {
   const LocalSyncSetting({
     Key? key,
     required this.settings,
@@ -17,10 +18,10 @@ class LocalSyncSetting extends StatefulWidget {
   final Settings settings;
   final Function getAllNotes;
   @override
-  State<LocalSyncSetting> createState() => _LocalSyncSettingState();
+  ConsumerState<LocalSyncSetting> createState() => _LocalSyncSettingState();
 }
 
-class _LocalSyncSettingState extends State<LocalSyncSetting> {
+class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
   bool enabled = false;
   String? syncDir;
   TextEditingController controller = TextEditingController();
@@ -40,7 +41,10 @@ class _LocalSyncSettingState extends State<LocalSyncSetting> {
         syncDir = selectedDirectory;
       });
     }
-    updateHiveDb();
+    await updateHiveDb();
+    var ls = ref.read(localFileSyncProvider);
+    List<Note> notes = await widget.getAllNotes();
+    ls.init(notes: notes);
   }
 
   void onSwitchChange(bool val) async {
@@ -48,11 +52,9 @@ class _LocalSyncSettingState extends State<LocalSyncSetting> {
       enabled = val;
     });
     await updateHiveDb();
-    if (val && syncDir != null) {
-      List<Note> notes = await widget.getAllNotes();
-      var ls = LocalSync(settings: widget.settings);
-      ls.pushNotes(notes);
-    }
+    List<Note> notes = await widget.getAllNotes();
+    var ls = ref.read(localFileSyncProvider);
+    ls.init(notes: notes);
   }
 
   void onNoteTemplateChange(String val) {

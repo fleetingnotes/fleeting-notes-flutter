@@ -15,7 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
-import 'components/local_sync_setting.dart';
+import 'components/local_file_sync_setting.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);

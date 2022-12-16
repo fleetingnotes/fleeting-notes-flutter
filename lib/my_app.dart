@@ -11,6 +11,8 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'models/syncterface.dart';
+
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -20,9 +22,13 @@ class MyApp extends ConsumerStatefulWidget {
 
 class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   Note? initNote;
+
+  Iterable<StreamController> allControllers = [];
   StreamController<User?>? authChangeController;
   StreamSubscription? authSubscription;
   StreamController<Uint8List?>? pasteController;
+  StreamController<NoteEvent>? noteChangeController;
+  StreamController<NoteEvent>? localFileSyncController;
 
   void refreshApp(User? user) {
     final db = ref.read(dbProvider);
@@ -37,9 +43,13 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
     super.initState();
     final db = ref.read(dbProvider);
     final be = ref.read(browserExtensionProvider);
+    final ls = ref.read(localFileSyncProvider);
+    noteChangeController = db.noteChangeController;
+    localFileSyncController = ls.streamController;
     authChangeController = db.supabase.authChangeController;
     authSubscription = db.supabase.authSubscription;
     pasteController = be.pasteController;
+
     authChangeController?.stream.listen(refreshApp);
     refreshApp(db.supabase.currUser);
     if (kIsWeb) {
@@ -55,6 +65,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
     authSubscription?.cancel();
     authChangeController?.close();
     pasteController?.close();
+    noteChangeController?.close();
+    localFileSyncController?.close();
   }
 
   // This widget is the root of your application.

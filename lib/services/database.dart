@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
+import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:fleeting_notes_flutter/services/text_similarity.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:mime/mime.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import '../models/syncterface.dart';
 import 'settings.dart';
 import '../models/Note.dart';
 import 'dart:async';
@@ -19,15 +21,22 @@ import 'supabase.dart';
 
 class Database {
   final SupabaseDB supabase;
+  final LocalFileSync localFileSync;
   final Settings settings;
   final TextSimilarity textSimilarity = TextSimilarity();
   SyncManager? syncManager;
   BrowserExtension be = BrowserExtension();
   Database({
     required this.supabase,
+    required this.localFileSync,
     required this.settings,
   }) {
-    syncManager = SyncManager(settings: settings);
+    syncManager = SyncManager(
+      [localFileSync],
+      noteChangeController.stream,
+      handleSyncFromExternal,
+      settings,
+    );
   }
   GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
@@ -36,7 +45,8 @@ class Database {
   GlobalKey searchKey = GlobalKey();
   Map<Note, GlobalKey> noteHistory = {};
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
-  StreamController<String> noteChangeController = StreamController.broadcast();
+  StreamController<NoteEvent> noteChangeController =
+      StreamController.broadcast();
   String? shareUserId;
   Box? _currBox;
   bool get isSharedNotes =>
@@ -75,8 +85,7 @@ class Database {
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         await box.clear();
         await box.putAll(noteIdMap);
-        noteChangeController.add('getAllNotes');
-        syncManager?.pushNotes(notes);
+        noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
       }
     } catch (e, stack) {
       Sentry.captureException(e, stackTrace: stack);
@@ -141,6 +150,11 @@ class Database {
     return box.get(id);
   }
 
+  Future<Iterable<Note?>> getNotesByIds(Iterable<String> ids) async {
+    var box = await getBox();
+    return ids.map((id) => box.get(id));
+  }
+
   Future<bool> upsertNote(Note note) async {
     return await upsertNotes([note]);
   }
@@ -158,8 +172,7 @@ class Database {
         noteIdMap[note.id] = note;
       }
       await box.putAll(noteIdMap);
-      noteChangeController.add('upsertNotes');
-      syncManager?.pushNotes(notes);
+      noteChangeController.add(NoteEvent(notes, NoteEventStatus.upsert));
       return true;
     } catch (e) {
       return false;
@@ -174,8 +187,7 @@ class Database {
       }
       var box = await getBox();
       await box.deleteAll(notes.map((n) => n.id));
-      noteChangeController.add('deleteNotes');
-      syncManager?.deleteNotes(notes);
+      noteChangeController.add(NoteEvent(notes, NoteEventStatus.delete));
       return true;
     } catch (e) {
       return false;
@@ -209,6 +221,21 @@ class Database {
       return r.hasMatch(note.content);
     }).toList();
     return notes;
+  }
+
+  void handleSyncFromExternal(NoteEvent e) async {
+    List<Note> notesToUpdate = await getNotesToUpdate(e.notes, getNotesByIds);
+    switch (e.status) {
+      case NoteEventStatus.init:
+        upsertNotes(notesToUpdate);
+        break;
+      case NoteEventStatus.upsert:
+        upsertNotes(notesToUpdate);
+        break;
+      case NoteEventStatus.delete:
+        deleteNotes(notesToUpdate);
+        break;
+    }
   }
 
   // TODO: Move this out of db
