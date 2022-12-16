@@ -24,7 +24,8 @@ class SyncManager {
   void handleSyncFromMain(NoteEvent e) async {
     for (var s in allSyncs) {
       if (!s.canSync) continue;
-      var notesToUpdate = await getNotesToUpdate(e.notes, s.getNotesByIds);
+      var notesToUpdate = await getNotesToUpdate(e.notes, s.getNotesByIds,
+          shouldCreateNote: true);
       switch (e.status) {
         case NoteEventStatus.init:
           s.upsertNotes(notesToUpdate);

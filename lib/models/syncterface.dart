@@ -27,7 +27,8 @@ abstract class SyncTerface {
 }
 
 // prioritizes notes with greater modified time & only syncs notes already existing
-Note? mergeIncomingNote(Note currNote, Note incomingNote) {
+Note? mergeIncomingNote(Note? currNote, Note incomingNote) {
+  if (currNote == null) return incomingNote;
   bool isSimilarNote(Note n1, Note n2) {
     return n1.title == n2.title &&
         n1.content == n2.content &&
@@ -47,10 +48,9 @@ Note? mergeIncomingNote(Note currNote, Note incomingNote) {
   return null;
 }
 
-Future<List<Note>> getNotesToUpdate(
-    Iterable<Note> incomingNotes,
-    Future<Iterable<Note?>> Function(Iterable<String> ids)
-        getNotesByIds) async {
+Future<List<Note>> getNotesToUpdate(Iterable<Note> incomingNotes,
+    Future<Iterable<Note?>> Function(Iterable<String> ids) getNotesByIds,
+    {bool shouldCreateNote = false}) async {
   List<Note> notesToUpdate = [];
 
   // gets mapping of local notes
@@ -63,10 +63,10 @@ Future<List<Note>> getNotesToUpdate(
 
   for (var n in incomingNotes) {
     Note? localNote = noteIdMapping[n.id];
-    if (localNote != null) {
+    if (localNote != null || shouldCreateNote) {
       var newLocalNote = mergeIncomingNote(localNote, n);
       if (newLocalNote != null) {
-        notesToUpdate.add(localNote);
+        notesToUpdate.add(newLocalNote);
       }
     }
   }
