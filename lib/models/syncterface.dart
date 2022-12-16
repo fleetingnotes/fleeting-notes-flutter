@@ -15,7 +15,7 @@ abstract class SyncTerface {
   // upserts notes passed in
   Future<void> upsertNotes(Iterable<Note> notes);
   // deletes notes passed in
-  Future<void> deleteNotes(Iterable<Note> notes);
+  Future<void> deleteNotes(Iterable<String> ids);
   // pushes notes to sync and initializes any listeners
   Future<void> init({Iterable<Note> notes = const Iterable.empty()});
   // retrieves notes given note ids

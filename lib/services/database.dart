@@ -224,16 +224,21 @@ class Database {
   }
 
   void handleSyncFromExternal(NoteEvent e) async {
-    List<Note> notesToUpdate = await getNotesToUpdate(e.notes, getNotesByIds);
     switch (e.status) {
       case NoteEventStatus.init:
+        List<Note> notesToUpdate =
+            await getNotesToUpdate(e.notes, getNotesByIds);
+        if (notesToUpdate.isEmpty) break;
         upsertNotes(notesToUpdate);
         break;
       case NoteEventStatus.upsert:
+        List<Note> notesToUpdate =
+            await getNotesToUpdate(e.notes, getNotesByIds);
+        if (notesToUpdate.isEmpty) break;
         upsertNotes(notesToUpdate);
         break;
       case NoteEventStatus.delete:
-        deleteNotes(notesToUpdate);
+        deleteNotes(e.notes.toList());
         break;
     }
   }

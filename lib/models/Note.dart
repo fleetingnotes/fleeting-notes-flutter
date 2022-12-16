@@ -85,6 +85,17 @@ ${content}''';
     );
   }
 
+  static Note createDeletedNote(String id) {
+    return Note(
+      id: id,
+      title: "",
+      content: "",
+      source: "",
+      createdAt: "2000-01-01",
+      isDeleted: true,
+    );
+  }
+
   static Note encodeNote(Note note) {
     return Note(
       id: jsonEncode(note.id),

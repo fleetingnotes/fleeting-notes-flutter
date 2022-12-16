@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import 'package:watcher/watcher.dart';
 import "package:yaml/yaml.dart";
+import 'package:collection/collection.dart';
 
 class MDFile {
   YamlMap frontmatter = YamlMap();
@@ -61,10 +62,12 @@ class LocalFileSync extends SyncTerface {
           }
           break;
         case ChangeType.REMOVE:
-          var f = File(e.path);
-          var note = parseFile(f);
-          if (note != null) {
-            streamController.add(NoteEvent([note], NoteEventStatus.delete));
+          String? noteId =
+              idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
+          if (noteId != null) {
+            var deletedNote = Note.createDeletedNote(noteId);
+            streamController
+                .add(NoteEvent([deletedNote], NoteEventStatus.delete));
           }
           break;
         default:
@@ -98,11 +101,11 @@ class LocalFileSync extends SyncTerface {
   }
 
   @override
-  Future<void> deleteNotes(Iterable<Note> notes) async {
-    for (var n in notes) {
-      if (idToPath.containsKey(n.id)) {
-        var f = File(idToPath[n.id] as String);
-        idToPath.remove(n.id);
+  Future<void> deleteNotes(Iterable<String> ids) async {
+    for (var id in ids) {
+      if (idToPath.containsKey(id)) {
+        var f = File(idToPath[id] as String);
+        idToPath.remove(id);
         f.deleteSync();
       }
     }
