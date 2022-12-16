@@ -157,7 +157,13 @@ class LocalFileSync extends SyncTerface {
   }
 
   Note? parseFile(File f) {
-    var mdStr = f.readAsStringSync();
+    String mdStr;
+    try {
+      mdStr = f.readAsStringSync();
+    } on FileSystemException catch (e) {
+      debugPrint(e.toString());
+      return null;
+    }
     var md = parseMDFile(mdStr);
     var stats = f.statSync();
 

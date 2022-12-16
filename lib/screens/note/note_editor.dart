@@ -272,7 +272,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
 
   void handleNoteEvent(NoteEvent e) {
     Note? n = e.notes.firstWhereOrNull((n) => n.id == widget.note.id);
-    if (n != null) {
+    if (n == null) return;
+    bool noteSimilar = titleController.text == n.title &&
+        contentController.text == n.content &&
+        sourceController.text == n.source;
+    if (!noteSimilar) {
       titleController.text = n.title;
       contentController.text = n.content;
       sourceController.text = n.source;
