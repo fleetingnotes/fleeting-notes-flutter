@@ -227,13 +227,13 @@ class Database {
     switch (e.status) {
       case NoteEventStatus.init:
         List<Note> notesToUpdate =
-            await getNotesToUpdate(e.notes, getNotesByIds);
+            await SyncManager.getNotesToUpdate(e.notes, getNotesByIds);
         if (notesToUpdate.isEmpty) break;
         upsertNotes(notesToUpdate);
         break;
       case NoteEventStatus.upsert:
         List<Note> notesToUpdate =
-            await getNotesToUpdate(e.notes, getNotesByIds);
+            await SyncManager.getNotesToUpdate(e.notes, getNotesByIds);
         if (notesToUpdate.isEmpty) break;
         upsertNotes(notesToUpdate);
         break;

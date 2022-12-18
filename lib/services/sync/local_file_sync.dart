@@ -1,8 +1,10 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
+import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
@@ -19,8 +21,10 @@ class MDFile {
 class LocalFileSync extends SyncTerface {
   LocalFileSync({
     required this.settings,
+    this.fs = const LocalFileSystem(),
   }) : super();
   final Settings settings;
+  final FileSystem fs;
   Map<String, String> idToPath = {};
   bool get enabled => settings.get('local-sync-enabled', defaultValue: false);
   String get syncDir => settings.get('local-sync-dir', defaultValue: '');
@@ -40,12 +44,12 @@ class LocalFileSync extends SyncTerface {
     if (!canSync) return;
 
     // initial two-way sync
-    var notesToUpdate =
-        await getNotesToUpdate(notes, getNotesByIds, shouldCreateNote: true);
+    var notesToUpdate = await SyncManager.getNotesToUpdate(notes, getNotesByIds,
+        shouldCreateNote: true);
     upsertNotes(notesToUpdate);
     idToPath = getNoteIdToPathMapping();
     var fsNotes = idToPath.values.map((path) {
-      var f = File(path);
+      var f = fs.file(path);
       return parseFile(f);
     }).whereType<Note>();
     streamController.add(NoteEvent(fsNotes, NoteEventStatus.init));
@@ -55,7 +59,7 @@ class LocalFileSync extends SyncTerface {
       if (!canSync) return;
       switch (e.type) {
         case ChangeType.MODIFY:
-          var f = File(e.path);
+          var f = fs.file(e.path);
           var note = parseFile(f);
           if (note != null) {
             streamController.add(NoteEvent([note], NoteEventStatus.upsert));
@@ -81,10 +85,10 @@ class LocalFileSync extends SyncTerface {
       String mdContent = n.getMarkdownContent(template: template);
       File f;
       if (idToPath.containsKey(n.id)) {
-        f = File(idToPath[n.id] as String);
+        f = fs.file(idToPath[n.id] as String);
       } else {
         String fileName = n.getMarkdownFilename();
-        f = File(p.join(syncDir, fileName));
+        f = fs.file(p.join(syncDir, fileName));
       }
       try {
         f.writeAsStringSync(mdContent);
@@ -93,7 +97,7 @@ class LocalFileSync extends SyncTerface {
         if (e.osError?.errorCode != 17) rethrow;
         // try writing as a different filename... weird bug / workaround
         var newFileName = "${const Uuid().v4()}.md";
-        f = File(p.join(syncDir, newFileName));
+        f = fs.file(p.join(syncDir, newFileName));
         f.writeAsStringSync(mdContent);
         idToPath[n.id] = f.path;
       }
@@ -104,7 +108,7 @@ class LocalFileSync extends SyncTerface {
   Future<void> deleteNotes(Iterable<String> ids) async {
     for (var id in ids) {
       if (idToPath.containsKey(id)) {
-        var f = File(idToPath[id] as String);
+        var f = fs.file(idToPath[id] as String);
         idToPath.remove(id);
         f.deleteSync();
       }
@@ -116,13 +120,13 @@ class LocalFileSync extends SyncTerface {
     return ids.map((id) {
       var path = idToPath[id];
       if (path == null) return null;
-      var f = File(path);
+      var f = fs.file(path);
       return parseFile(f);
     });
   }
 
   Map<String, String> getNoteIdToPathMapping() {
-    List<FileSystemEntity> files = Directory(syncDir).listSync();
+    List<FileSystemEntity> files = fs.directory(syncDir).listSync();
     Map<String, String> idToPathMap = {};
     for (var f in files) {
       if (f is File) {
