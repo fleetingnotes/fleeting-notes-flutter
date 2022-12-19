@@ -1,5 +1,7 @@
+import 'package:file/memory.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'mocks/mock_database.dart';
+import 'mocks/mock_local_file_sync.dart';
 import 'mocks/mock_settings.dart';
 import 'mocks/mock_supabase.dart';
 
@@ -18,15 +21,24 @@ Future<void> fnPumpWidget(
   bool isLoggedIn = false,
   MockSettings? settings,
   MockSupabaseDB? supabase,
+  LocalFileSync? localFs,
 }) async {
   settings = settings ?? MockSettings();
   supabase = supabase ?? getBaseMockSupabaseDB();
-  MockDatabase mockDb = MockDatabase(settings: settings, supabase: supabase);
+  localFs =
+      localFs ?? LocalFileSync(settings: settings, fs: MemoryFileSystem());
+  MockDatabase mockDb = MockDatabase(
+    settings: settings,
+    supabase: supabase,
+    localFileSync: localFs,
+  );
+
   await tester.pumpWidget(ProviderScope(
     overrides: [
       dbProvider.overrideWithValue(mockDb),
       settingsProvider.overrideWithValue(settings),
-      supabaseProvider.overrideWithValue(supabase)
+      supabaseProvider.overrideWithValue(supabase),
+      localFileSyncProvider.overrideWithValue(localFs),
     ],
     child: widget,
   ));
@@ -155,4 +167,15 @@ void fireOnTap(Finder finder, String text) {
     (span.recognizer as TapGestureRecognizer).onTap!();
     return false; // stop iterating, we found the one.
   });
+}
+
+Future<MockLocalFileSync> setupLfs({
+  bool enabled = true,
+  MockSettings? settings,
+}) async {
+  settings = settings ?? MockSettings();
+  settings.set('local-sync-enabled', enabled);
+  settings.set('local-sync-dir', '/');
+  var lfs = MockLocalFileSync(settings: settings, fs: MemoryFileSystem());
+  return lfs;
 }

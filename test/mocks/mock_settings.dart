@@ -4,11 +4,7 @@ import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'mock_box.dart';
 
 class MockSettings extends Mock implements Settings {
-  @override
-  var box = MockBox();
-
-  @override
-  get(String key, {defaultValue}) {
+  MockSettings() {
     Map<String, dynamic> testSettings = {
       "auto-fill-source": false,
       "analytics-enabled": true,
@@ -17,14 +13,25 @@ class MockSettings extends Mock implements Settings {
       "max-attachment-size-mb-premium": 1,
       "initial-notes": [],
     };
-    return testSettings[key] ?? defaultValue;
+    box.putAll(testSettings);
+  }
+  @override
+  var box = MockBox();
+
+  @override
+  get(String key, {defaultValue}) {
+    return box.get(key, defaultValue: defaultValue);
   }
 
   @override
-  Future<void> set(String key, dynamic value) async {}
+  Future<void> set(String key, dynamic value) async {
+    box.put(key, value);
+  }
 
   @override
-  Future<void> delete(String key) async {}
+  Future<void> delete(String key) async {
+    box.delete(key);
+  }
 
   @override
   bool isFirstTimeOpen() => false;

@@ -111,7 +111,11 @@ class LocalFileSync extends SyncTerface {
       if (idToPath.containsKey(id)) {
         var f = fs.file(idToPath[id] as String);
         idToPath.remove(id);
-        f.deleteSync();
+        try {
+          f.deleteSync();
+        } on FileSystemException catch (e) {
+          debugPrint(e.toString());
+        }
       }
     }
   }
