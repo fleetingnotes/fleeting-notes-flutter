@@ -96,8 +96,8 @@ class LocalFileSync extends SyncTerface {
       try {
         await f.writeAsString(mdContent);
         idToPath[n.id] = f.path;
-      } on FileSystemException catch (e) {
-        if (e.osError?.errorCode != 17) rethrow;
+      } on FileSystemException {
+        // if (e.osError?.errorCode != 17) rethrow;
         // try writing as a different filename... weird bug / workaround
         var newFileName = "${const Uuid().v4()}.md";
         f = fs.file(p.join(syncDir, newFileName));
