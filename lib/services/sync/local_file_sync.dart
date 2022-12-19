@@ -45,10 +45,10 @@ class LocalFileSync extends SyncTerface {
     if (!canSync) return;
 
     // initial two-way sync
+    idToPath = getNoteIdToPathMapping();
     var notesToUpdate = await SyncManager.getNotesToUpdate(notes, getNotesByIds,
         shouldCreateNote: true);
     upsertNotes(notesToUpdate);
-    idToPath = getNoteIdToPathMapping();
     var fsNotes = idToPath.values.map((path) {
       var f = fs.file(path);
       return parseFile(f);
