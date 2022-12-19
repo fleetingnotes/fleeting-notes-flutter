@@ -20,12 +20,14 @@ void main() {
       await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
           settings: settings, localFs: lfs);
 
-      expect(lfs.fs.currentDirectory.listSync().isEmpty, isTrue);
+      expect(lfs.fs.directory(lfs.syncDir).listSync().isEmpty, isTrue);
       await addNote(tester, title: "hello-world");
-      expect(lfs.fs.currentDirectory.listSync().length == 1, isTrue);
+      expect(lfs.fs.directory(lfs.syncDir).listSync().length == 1, isTrue);
       expect(
-          lfs.fs.currentDirectory.listSync().first.basename == 'hello-world.md',
-          isTrue);
+        lfs.fs.directory(lfs.syncDir).listSync().first.basename ==
+            'hello-world.md',
+        isTrue,
+      );
     });
     testWidgets(
       "Updating the content of the note updates file contents",
@@ -36,7 +38,7 @@ void main() {
             settings: settings, localFs: lfs);
         await addNote(tester, title: "hello-world");
 
-        File file = lfs.fs.currentDirectory.listSync().first as File;
+        File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
         expect(file.readAsStringSync().contains("a modification"), isFalse);
         await modifyCurrentNote(tester, content: "a modification");
         expect(file.readAsStringSync().contains("a modification"), isTrue);
@@ -51,9 +53,9 @@ void main() {
             settings: settings, localFs: lfs);
         await addNote(tester, title: "hello-world");
 
-        expect(lfs.fs.currentDirectory.listSync().isEmpty, isFalse);
+        expect(lfs.fs.directory(lfs.syncDir).listSync().isEmpty, isFalse);
         await deleteCurrentNote(tester);
-        expect(lfs.fs.currentDirectory.listSync().isEmpty, isTrue);
+        expect(lfs.fs.directory(lfs.syncDir).listSync().isEmpty, isTrue);
       },
     );
   });
@@ -110,7 +112,7 @@ void main() {
         expect(find.byType(NoteCard), findsOneWidget);
         File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
         file.deleteSync();
-        lfs.dirController.add(WatchEvent(ChangeType.REMOVE, "/hello-world.md"));
+        lfs.dirController.add(WatchEvent(ChangeType.REMOVE, file.path));
         await tester.pumpAndSettle();
         expect(find.byType(NoteCard), findsNothing);
       },
@@ -162,7 +164,7 @@ void main() {
 
         // setup notes
         var n = Note.empty(title: "hello-world", content: "local mod");
-        var file = lfs.fs.file(p.join(lfs.syncDir, "${n.title}.md"));
+        File file = lfs.fs.file(p.join(lfs.syncDir, "${n.title}.md"));
         await db.upsertNotes([n]);
         await tester.pump(const Duration(seconds: 1));
         file.writeAsStringSync(
