@@ -45,23 +45,25 @@ class LocalFileSync extends SyncTerface {
     if (!canSync) return;
 
     // initial two-way sync
-    idToPath = getNoteIdToPathMapping();
+    await setNoteIdToPathMapping();
     var notesToUpdate = await SyncManager.getNotesToUpdate(notes, getNotesByIds,
         shouldCreateNote: true);
-    upsertNotes(notesToUpdate);
-    var fsNotes = idToPath.values.map((path) {
+    await upsertNotes(notesToUpdate);
+    var fsNotes = (await Future.wait(idToPath.values.map((path) {
       var f = fs.file(path);
       return parseFile(f);
-    }).whereType<Note>();
+    })))
+        .whereType<Note>();
+
     streamController.add(NoteEvent(fsNotes, NoteEventStatus.init));
 
     // add directory listener
-    directoryStream = dirStream.listen((e) {
+    directoryStream = dirStream.listen((e) async {
       if (!canSync) return;
       switch (e.type) {
         case ChangeType.MODIFY:
           var f = fs.file(e.path);
-          var note = parseFile(f);
+          var note = await parseFile(f);
           if (note != null) {
             streamController.add(NoteEvent([note], NoteEventStatus.upsert));
           }
@@ -92,14 +94,14 @@ class LocalFileSync extends SyncTerface {
         f = fs.file(p.join(syncDir, fileName));
       }
       try {
-        f.writeAsStringSync(mdContent);
+        await f.writeAsString(mdContent);
         idToPath[n.id] = f.path;
       } on FileSystemException catch (e) {
         if (e.osError?.errorCode != 17) rethrow;
         // try writing as a different filename... weird bug / workaround
         var newFileName = "${const Uuid().v4()}.md";
         f = fs.file(p.join(syncDir, newFileName));
-        f.writeAsStringSync(mdContent);
+        await f.writeAsString(mdContent);
         idToPath[n.id] = f.path;
       }
     }
@@ -112,7 +114,7 @@ class LocalFileSync extends SyncTerface {
         var f = fs.file(idToPath[id] as String);
         idToPath.remove(id);
         try {
-          f.deleteSync();
+          await f.delete();
         } on FileSystemException catch (e) {
           debugPrint(e.toString());
         }
@@ -122,32 +124,30 @@ class LocalFileSync extends SyncTerface {
 
   @override
   Future<Iterable<Note?>> getNotesByIds(Iterable<String> ids) async {
-    return ids.map((id) {
+    return Future.wait(ids.map((id) {
       var path = idToPath[id];
-      if (path == null) return null;
+      if (path == null) return Future.value(null);
       var f = fs.file(path);
       return parseFile(f);
-    });
+    }));
   }
 
-  Map<String, String> getNoteIdToPathMapping() {
-    List<FileSystemEntity> files = fs.directory(syncDir).listSync();
-    Map<String, String> idToPathMap = {};
+  Future<void> setNoteIdToPathMapping() async {
+    List<FileSystemEntity> files = await fs.directory(syncDir).list().toList();
     for (var f in files) {
       if (f is File && f.basename.endsWith(".md")) {
         try {
-          String mdStr = f.readAsStringSync();
+          String mdStr = await f.readAsString();
           MDFile md = parseMDFile(mdStr);
           var frontmatterId = md.frontmatter['id'];
           if (frontmatterId != null) {
-            idToPathMap[frontmatterId] = f.path;
+            idToPath[frontmatterId] = f.path;
           }
         } on FileSystemException catch (e) {
           debugPrint(e.toString());
         }
       }
     }
-    return idToPathMap;
   }
 
   MDFile parseMDFile(String md) {
@@ -168,16 +168,16 @@ class LocalFileSync extends SyncTerface {
     return MDFile(frontmatter, content);
   }
 
-  Note? parseFile(File f) {
+  Future<Note?> parseFile(File f) async {
     String mdStr;
     try {
-      mdStr = f.readAsStringSync();
+      mdStr = await f.readAsString();
     } on FileSystemException catch (e) {
       debugPrint(e.toString());
       return null;
     }
     var md = parseMDFile(mdStr);
-    var stats = f.statSync();
+    var stats = await f.stat();
 
     // note properties
     var noteId = md.frontmatter['id'];

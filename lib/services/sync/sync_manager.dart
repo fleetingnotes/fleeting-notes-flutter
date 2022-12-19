@@ -34,16 +34,16 @@ class SyncManager {
           var notesToUpdate = await getNotesToUpdate(e.notes, s.getNotesByIds,
               shouldCreateNote: true);
           if (notesToUpdate.isEmpty) break;
-          s.upsertNotes(notesToUpdate);
+          await s.upsertNotes(notesToUpdate);
           break;
         case NoteEventStatus.upsert:
           var notesToUpdate = await getNotesToUpdate(e.notes, s.getNotesByIds,
               shouldCreateNote: true);
           if (notesToUpdate.isEmpty) break;
-          s.upsertNotes(notesToUpdate);
+          await s.upsertNotes(notesToUpdate);
           break;
         case NoteEventStatus.delete:
-          s.deleteNotes(e.notes.map((n) => n.id));
+          await s.deleteNotes(e.notes.map((n) => n.id));
           break;
       }
     }

@@ -182,7 +182,7 @@ Future<MockLocalFileSync> setupLfs({
   MockSettings? settings,
   FileSystem? fs,
 }) async {
-  fs = fs ?? const LocalFileSystem();
+  fs = fs ?? MemoryFileSystem();
   var f = fs.systemTempDirectory.createTempSync();
   settings = settings ?? MockSettings();
   settings.set('local-sync-enabled', enabled);
