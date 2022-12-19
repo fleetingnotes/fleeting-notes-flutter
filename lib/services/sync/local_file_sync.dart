@@ -29,6 +29,7 @@ class LocalFileSync extends SyncTerface {
   bool get enabled => settings.get('local-sync-enabled', defaultValue: false);
   String get syncDir => settings.get('local-sync-dir', defaultValue: '');
   String? get template => settings.get('local-sync-template');
+  Stream<WatchEvent> get dirStream => DirectoryWatcher(syncDir).events;
   StreamSubscription<WatchEvent>? directoryStream;
   final StreamController<NoteEvent> streamController =
       StreamController.broadcast();
@@ -55,7 +56,7 @@ class LocalFileSync extends SyncTerface {
     streamController.add(NoteEvent(fsNotes, NoteEventStatus.init));
 
     // add directory listener
-    directoryStream = DirectoryWatcher(syncDir).events.listen((e) {
+    directoryStream = dirStream.listen((e) {
       if (!canSync) return;
       switch (e.type) {
         case ChangeType.MODIFY:
@@ -129,7 +130,7 @@ class LocalFileSync extends SyncTerface {
     List<FileSystemEntity> files = fs.directory(syncDir).listSync();
     Map<String, String> idToPathMap = {};
     for (var f in files) {
-      if (f is File) {
+      if (f is File && f.basename.endsWith(".md")) {
         try {
           String mdStr = f.readAsStringSync();
           MDFile md = parseMDFile(mdStr);
