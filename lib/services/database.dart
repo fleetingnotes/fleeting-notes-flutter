@@ -36,6 +36,7 @@ class Database {
       noteChangeController.stream,
       handleSyncFromExternal,
       settings,
+      () async => getAllNotesLocal(await getBox()),
     );
   }
   GlobalKey<NavigatorState> navigatorKey =

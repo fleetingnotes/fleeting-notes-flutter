@@ -8,18 +8,22 @@ class SyncManager {
   final Settings settings;
   final Stream<NoteEvent> mainSyncStream;
   final void Function(NoteEvent) handleSyncFromExternal;
+  final Future<Iterable<Note>> Function() getAllNotes;
   final List<StreamSubscription<NoteEvent>> streamSubs = [];
   SyncManager(
     this.allSyncs,
     this.mainSyncStream,
     this.handleSyncFromExternal,
     this.settings,
+    this.getAllNotes,
   ) {
     streamSubs.add(mainSyncStream.listen(handleSyncFromMain));
-    for (var s in allSyncs) {
-      streamSubs.add(s.noteStream.listen(handleSyncFromExternal));
-      s.init();
-    }
+    getAllNotes().then((notes) {
+      for (var s in allSyncs) {
+        streamSubs.add(s.noteStream.listen(handleSyncFromExternal));
+        s.init(notes: notes);
+      }
+    });
   }
 
   void handleSyncFromMain(NoteEvent e) async {

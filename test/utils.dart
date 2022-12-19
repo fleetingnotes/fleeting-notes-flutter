@@ -1,6 +1,9 @@
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/services/settings.dart';
+import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/gestures.dart';
@@ -19,19 +22,21 @@ Future<void> fnPumpWidget(
   WidgetTester tester,
   Widget widget, {
   bool isLoggedIn = false,
-  MockSettings? settings,
-  MockSupabaseDB? supabase,
+  Settings? settings,
+  SupabaseDB? supabase,
   LocalFileSync? localFs,
+  MockDatabase? db,
 }) async {
   settings = settings ?? MockSettings();
   supabase = supabase ?? getBaseMockSupabaseDB();
   localFs =
       localFs ?? LocalFileSync(settings: settings, fs: MemoryFileSystem());
-  MockDatabase mockDb = MockDatabase(
-    settings: settings,
-    supabase: supabase,
-    localFileSync: localFs,
-  );
+  MockDatabase mockDb = db ??
+      MockDatabase(
+        settings: settings,
+        supabase: supabase,
+        localFileSync: localFs,
+      );
 
   await tester.pumpWidget(ProviderScope(
     overrides: [
@@ -172,10 +177,12 @@ void fireOnTap(Finder finder, String text) {
 Future<MockLocalFileSync> setupLfs({
   bool enabled = true,
   MockSettings? settings,
+  FileSystem? fs,
 }) async {
   settings = settings ?? MockSettings();
   settings.set('local-sync-enabled', enabled);
   settings.set('local-sync-dir', '/');
-  var lfs = MockLocalFileSync(settings: settings, fs: MemoryFileSystem());
+  fs = fs ?? MemoryFileSystem();
+  var lfs = MockLocalFileSync(settings: settings, fs: fs);
   return lfs;
 }
