@@ -276,7 +276,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     bool noteSimilar = titleController.text == n.title &&
         contentController.text == n.content &&
         sourceController.text == n.source;
-    if (!noteSimilar) {
+    if (!noteSimilar && !n.isDeleted) {
       titleController.text = n.title;
       contentController.text = n.content;
       sourceController.text = n.source;

@@ -98,7 +98,9 @@ class Database {
   List<Note> getAllNotesLocal(Box box) {
     List<Note> notes = [];
     for (var note in box.values.cast<Note>()) {
-      notes.add(note);
+      if (!note.isDeleted) {
+        notes.add(note);
+      }
     }
     return notes;
   }
@@ -170,6 +172,7 @@ class Database {
       Map<String, Note> noteIdMap = {};
       for (var note in notes) {
         note.modifiedAt = DateTime.now().toUtc().toIso8601String();
+        note.isDeleted = false;
         noteIdMap[note.id] = note;
       }
       await box.putAll(noteIdMap);
@@ -187,7 +190,12 @@ class Database {
         if (!isSuccess) return false;
       }
       var box = await getBox();
-      await box.deleteAll(notes.map((n) => n.id));
+      Map<String, Note> noteIdMap = {};
+      for (var note in notes) {
+        note.isDeleted = true;
+        noteIdMap[note.id] = note;
+      }
+      await box.putAll(noteIdMap);
       noteChangeController.add(NoteEvent(notes, NoteEventStatus.delete));
       return true;
     } catch (e) {

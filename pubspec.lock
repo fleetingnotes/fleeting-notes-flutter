@@ -1186,7 +1186,7 @@ packages:
     source: hosted
     version: "9.4.0"
   watcher:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: watcher
       url: "https://pub.dartlang.org"

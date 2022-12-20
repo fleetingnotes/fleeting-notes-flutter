@@ -8,7 +8,6 @@ import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
-import 'package:watcher/watcher.dart';
 import "package:yaml/yaml.dart";
 import 'package:collection/collection.dart';
 
@@ -16,6 +15,15 @@ class MDFile {
   YamlMap frontmatter = YamlMap();
   String content;
   MDFile(this.frontmatter, this.content);
+}
+
+bool isValidUuid(String uuid) {
+  try {
+    Uuid.parse(uuid);
+    return true;
+  } on FormatException {
+    return false;
+  }
 }
 
 class LocalFileSync extends SyncTerface {
@@ -29,8 +37,8 @@ class LocalFileSync extends SyncTerface {
   bool get enabled => settings.get('local-sync-enabled', defaultValue: false);
   String get syncDir => settings.get('local-sync-dir', defaultValue: '');
   String? get template => settings.get('local-sync-template');
-  Stream<WatchEvent> get dirStream => DirectoryWatcher(syncDir).events;
-  StreamSubscription<WatchEvent>? directoryStream;
+  Stream<FileSystemEvent> get dirStream => fs.directory(syncDir).watch();
+  StreamSubscription<FileSystemEvent>? directoryStream;
   final StreamController<NoteEvent> streamController =
       StreamController.broadcast();
 
@@ -45,30 +53,26 @@ class LocalFileSync extends SyncTerface {
     if (!canSync) return;
 
     // initial two-way sync
+    List<Note> fsNotes = [];
     await setNoteIdToPathMapping();
     var notesToUpdate = await SyncManager.getNotesToUpdate(notes, getNotesByIds,
         shouldCreateNote: true);
     await upsertNotes(notesToUpdate);
-    var fsNotes = (await Future.wait(idToPath.values.map((path) {
+    await Future.wait(idToPath.values.map((path) {
       var f = fs.file(path);
-      return parseFile(f);
-    })))
-        .whereType<Note>();
-
+      return parseFile(f).then((value) {
+        if (value != null) {
+          fsNotes.add(value);
+        }
+      });
+    }));
     streamController.add(NoteEvent(fsNotes, NoteEventStatus.init));
 
     // add directory listener
     directoryStream = dirStream.listen((e) async {
       if (!canSync) return;
       switch (e.type) {
-        case ChangeType.MODIFY:
-          var f = fs.file(e.path);
-          var note = await parseFile(f);
-          if (note != null) {
-            streamController.add(NoteEvent([note], NoteEventStatus.upsert));
-          }
-          break;
-        case ChangeType.REMOVE:
+        case FileSystemEvent.delete:
           String? noteId =
               idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
           if (noteId != null) {
@@ -78,6 +82,14 @@ class LocalFileSync extends SyncTerface {
           }
           break;
         default:
+          // for adding or modifying we upsert
+          var f = fs.file(e.path);
+          var note = await parseFile(f);
+          if (note != null && isValidUuid(note.id)) {
+            idToPath[note.id] = e.path;
+            streamController.add(NoteEvent([note], NoteEventStatus.upsert));
+          }
+          break;
       }
     });
   }
