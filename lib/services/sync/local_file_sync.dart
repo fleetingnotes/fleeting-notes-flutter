@@ -136,12 +136,16 @@ class LocalFileSync extends SyncTerface {
 
   @override
   Future<Iterable<Note?>> getNotesByIds(Iterable<String> ids) async {
-    return Future.wait(ids.map((id) {
+    List<Note> notes = [];
+    await Future.wait(ids.map((id) {
       var path = idToPath[id];
       if (path == null) return Future.value(null);
       var f = fs.file(path);
-      return parseFile(f);
+      return parseFile(f).then((n) {
+        if (n != null) notes.add(n);
+      });
     }));
+    return notes;
   }
 
   Future<void> setNoteIdToPathMapping() async {
