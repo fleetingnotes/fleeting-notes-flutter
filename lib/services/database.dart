@@ -192,8 +192,9 @@ class Database {
       var box = await getBox();
       Map<String, Note> noteIdMap = {};
       for (var note in notes) {
-        note.isDeleted = true;
-        noteIdMap[note.id] = note;
+        Note boxNote = box.get(note.id, defaultValue: note);
+        boxNote.isDeleted = true;
+        noteIdMap[note.id] = boxNote;
       }
       await box.putAll(noteIdMap);
       noteChangeController.add(NoteEvent(notes, NoteEventStatus.delete));
