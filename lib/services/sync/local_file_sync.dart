@@ -37,6 +37,8 @@ class LocalFileSync extends SyncTerface {
   Map<String, String> idToPath = {};
   bool get enabled => settings.get('local-sync-enabled', defaultValue: false);
   String get syncDir => settings.get('local-sync-dir', defaultValue: '');
+  String get syncType =>
+      settings.get('local-sync-type', defaultValue: 'two-way');
   String? get template => settings.get('local-sync-template');
   Stream<WatchEvent> get dirStream => Watcher(syncDir).events;
   StreamSubscription<WatchEvent>? directoryStream;
@@ -67,32 +69,34 @@ class LocalFileSync extends SyncTerface {
         }
       });
     }));
-    streamController.add(NoteEvent(fsNotes, NoteEventStatus.init));
 
     // add directory listener
-    directoryStream = dirStream.listen((e) async {
-      if (!canSync) return;
-      switch (e.type) {
-        case ChangeType.REMOVE:
-          String? noteId =
-              idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
-          if (noteId != null) {
-            var deletedNote = Note.createDeletedNote(noteId);
-            streamController
-                .add(NoteEvent([deletedNote], NoteEventStatus.delete));
-          }
-          break;
-        default:
-          // for adding or modifying we upsert
-          var f = fs.file(e.path);
-          var note = await parseFile(f);
-          if (note != null && isValidUuid(note.id)) {
-            idToPath[note.id] = e.path;
-            streamController.add(NoteEvent([note], NoteEventStatus.upsert));
-          }
-          break;
-      }
-    });
+    if (syncType == 'two-way') {
+      streamController.add(NoteEvent(fsNotes, NoteEventStatus.init));
+      directoryStream = dirStream.listen((e) async {
+        if (!canSync) return;
+        switch (e.type) {
+          case ChangeType.REMOVE:
+            String? noteId =
+                idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
+            if (noteId != null) {
+              var deletedNote = Note.createDeletedNote(noteId);
+              streamController
+                  .add(NoteEvent([deletedNote], NoteEventStatus.delete));
+            }
+            break;
+          default:
+            // for adding or modifying we upsert
+            var f = fs.file(e.path);
+            var note = await parseFile(f);
+            if (note != null && isValidUuid(note.id)) {
+              idToPath[note.id] = e.path;
+              streamController.add(NoteEvent([note], NoteEventStatus.upsert));
+            }
+            break;
+        }
+      });
+    }
   }
 
   @override

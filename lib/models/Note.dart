@@ -34,7 +34,6 @@ class Note {
 id: "${id}"
 title: "${title}"
 source: "${source}"
-created_time: "${created_time}"
 ---
 ${content}''';
 

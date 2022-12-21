@@ -24,6 +24,7 @@ class Settings {
     'local-sync-enabled': bool,
     'local-sync-dir': String,
     'local-sync-template': String,
+    'local-sync-type': String,
     // remote config settings
     "initial-notes": String,
     "save-delay-ms": int,
