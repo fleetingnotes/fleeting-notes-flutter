@@ -1,5 +1,4 @@
 import 'package:file/file.dart';
-import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
@@ -13,12 +12,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:uuid/uuid.dart';
 import 'mocks/mock_database.dart';
 import 'mocks/mock_local_file_sync.dart';
 import 'mocks/mock_settings.dart';
 import 'mocks/mock_supabase.dart';
-import 'package:path/path.dart' as p;
 
 // init
 Future<void> fnPumpWidget(

@@ -128,7 +128,7 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
     updateHiveDb();
   }
 
-  Future<void> updateHiveDb({init: false}) async {
+  Future<void> updateHiveDb({init = false}) async {
     await Future.wait([
       widget.settings.set('local-sync-enabled', enabled),
       widget.settings.set('local-sync-dir', syncDir),
