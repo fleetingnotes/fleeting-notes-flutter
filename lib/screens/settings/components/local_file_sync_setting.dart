@@ -34,7 +34,7 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
   void initState() {
     enabled = widget.settings.get('local-sync-enabled', defaultValue: false);
     syncDir = widget.settings.get('local-sync-dir');
-    syncType = widget.settings.get('local-sync-type');
+    syncType = widget.settings.get('local-sync-type', defaultValue: syncType);
     controller.text = widget.settings
         .get('local-sync-template', defaultValue: Note.defaultNoteTemplate);
     super.initState();
