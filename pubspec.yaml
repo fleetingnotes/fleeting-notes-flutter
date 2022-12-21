@@ -67,6 +67,7 @@ dependencies:
   flutter_riverpod: ^2.1.1
   pasteboard: ^0.2.0
   file: ^6.1.4
+  permission_handler: ^10.2.0
 
 
 dev_dependencies:

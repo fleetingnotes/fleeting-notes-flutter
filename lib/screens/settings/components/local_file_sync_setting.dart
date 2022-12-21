@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../models/Note.dart';
 
@@ -48,13 +49,20 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
   }
 
   void onSwitchChange(bool val) async {
-    setState(() {
-      enabled = val;
-    });
-    await updateHiveDb();
-    List<Note> notes = await widget.getAllNotes();
-    var ls = ref.read(localFileSyncProvider);
-    ls.init(notes: notes);
+    // disabling doesn't require permission
+    if (!val) {
+      setState(() {
+        enabled = val;
+      });
+    } else if (await Permission.manageExternalStorage.request().isGranted) {
+      setState(() {
+        enabled = val;
+      });
+      await updateHiveDb();
+      List<Note> notes = await widget.getAllNotes();
+      var ls = ref.read(localFileSyncProvider);
+      ls.init(notes: notes);
+    }
   }
 
   void onNoteTemplateChange(String val) {
