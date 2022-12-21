@@ -194,7 +194,8 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
             children: [
               SettingItem(
                 title: 'Note template',
-                description: '`id` is necessary in metadata',
+                description:
+                    'I don\'t recommend changing this for two-way sync',
                 widget: IconButton(
                   padding: EdgeInsets.zero,
                   onPressed: (kIsWeb) ? null : onRefreshNoteTemplate,
