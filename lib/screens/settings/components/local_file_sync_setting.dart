@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/foundation.dart';
@@ -35,8 +38,44 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
     super.initState();
   }
 
+  Future<String> _displayTextInputDialog(BuildContext context) async {
+    String tempDir = '';
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Create new sync folder'),
+            content: TextField(
+              onChanged: (value) {
+                tempDir = value;
+              },
+              decoration: const InputDecoration(hintText: "Folder name"),
+            ),
+            actions: <Widget>[
+              ElevatedButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        });
+    return tempDir;
+  }
+
   void onFolderSelect() async {
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    String? selectedDirectory;
+    if (Platform.isIOS) {
+      String relDir = await _displayTextInputDialog(context);
+      if (relDir.isNotEmpty) {
+        var appDir = (await getApplicationDocumentsDirectory()).path;
+        selectedDirectory = p.join(appDir, 'MyFleetingNotes', relDir);
+        Directory(selectedDirectory).createSync(recursive: true);
+      }
+    } else {
+      selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    }
     if (selectedDirectory != null) {
       setState(() {
         syncDir = selectedDirectory;
@@ -50,11 +89,17 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
 
   void onSwitchChange(bool val) async {
     // disabling doesn't require permission
-    if (!val) {
+    if (!val || kIsWeb) {
       setState(() {
-        enabled = val;
+        enabled = false;
       });
-    } else if (await Permission.manageExternalStorage.request().isGranted) {
+      return;
+    }
+    bool androidPerms = Platform.isAndroid &&
+        await Permission.manageExternalStorage.request().isGranted;
+    bool iOSPerms =
+        Platform.isIOS && await Permission.storage.request().isGranted;
+    if (androidPerms || iOSPerms) {
       setState(() {
         enabled = val;
       });
