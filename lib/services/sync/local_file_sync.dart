@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -79,6 +80,14 @@ class LocalFileSync extends SyncTerface {
             var deletedNote = Note.createDeletedNote(noteId);
             streamController
                 .add(NoteEvent([deletedNote], NoteEventStatus.delete));
+          }
+          break;
+        case FileSystemEvent.move:
+          var key =
+              idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
+          var dest = (e as FileSystemMoveEvent).destination;
+          if (key != null && dest != null) {
+            idToPath[key] = dest;
           }
           break;
         default:
