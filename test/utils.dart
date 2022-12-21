@@ -82,9 +82,8 @@ Future<void> modifyCurrentNote(WidgetTester tester,
         find.bySemanticsLabel('Note and links to other ideas'), content);
   }
   await tester.tap(find.text('Save'));
-  await tester.pumpAndSettle(); // Wait for animation to finish
-  await tester
-      .pump(const Duration(seconds: 1)); // wait for notes to save / update
+  await tester.pumpAndSettle(
+      const Duration(seconds: 1)); // Wait for animation to finish
 }
 
 Future<void> saveCurrentNote(WidgetTester tester) async {

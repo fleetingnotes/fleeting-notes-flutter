@@ -1,12 +1,15 @@
+import 'dart:io';
+
 import 'package:file/file.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:watcher/watcher.dart';
 import 'mocks/mock_database.dart';
+import 'mocks/mock_local_file_sync.dart';
 import 'mocks/mock_settings.dart';
 // import 'package:path/path.dart' as p;
 import 'mocks/mock_supabase.dart';
@@ -74,7 +77,7 @@ void main() {
         String fileContents = file.readAsStringSync();
         await deleteCurrentNote(tester);
         file.writeAsStringSync(fileContents);
-        lfs.dirController.add(WatchEvent(ChangeType.ADD, file.path));
+        // lfs.dirController.add(WatchEvent(ChangeType.ADD, file.path));
         await tester.pumpAndSettle();
         expect(find.byType(NoteCard), findsNothing);
       },
@@ -90,8 +93,7 @@ void main() {
 
         expect(find.byType(NoteCard), findsOneWidget);
         File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
-        file.writeAsStringSync("a modification", mode: FileMode.append);
-        lfs.dirController.add(WatchEvent(ChangeType.MODIFY, file.path));
+        modifyFile(file, lfs, "a modification");
         await tester.pumpAndSettle();
         expect(
             find.descendant(
@@ -111,8 +113,7 @@ void main() {
 
         expect(find.byType(NoteCard), findsOneWidget);
         File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
-        file.deleteSync();
-        lfs.dirController.add(WatchEvent(ChangeType.REMOVE, file.path));
+        deleteFile(file, lfs);
         await tester.pumpAndSettle();
         expect(find.byType(NoteCard), findsNothing);
       },
@@ -187,3 +188,29 @@ void main() {
     );
   });
 }
+
+void deleteFile(File file, MockLocalFileSync lfs) {
+  file.deleteSync();
+  var e = MockFileSystemEvent();
+  when(() => e.path).thenReturn(file.path);
+  when(() => e.type).thenReturn(FileSystemEvent.delete);
+  lfs.dirController.add(e);
+}
+
+void modifyFile(File file, MockLocalFileSync lfs, String appendText) {
+  file.writeAsStringSync(appendText, mode: FileMode.append);
+  var e = MockFileSystemEvent();
+  when(() => e.path).thenReturn(file.path);
+  when(() => e.type).thenReturn(FileSystemEvent.modify);
+  lfs.dirController.add(e);
+}
+
+void addFile(File file, MockLocalFileSync lfs, String fileContents) {
+  file.writeAsStringSync(fileContents);
+  var e = MockFileSystemEvent();
+  when(() => e.path).thenReturn(file.path);
+  when(() => e.type).thenReturn(FileSystemEvent.modify);
+  lfs.dirController.add(e);
+}
+
+class MockFileSystemEvent extends Mock implements FileSystemEvent {}
