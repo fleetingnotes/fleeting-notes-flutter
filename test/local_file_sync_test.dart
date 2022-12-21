@@ -1,9 +1,7 @@
-import 'dart:io';
-
+import 'package:watcher/watcher.dart';
 import 'package:file/file.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
@@ -97,7 +95,6 @@ void main() {
         String fileContents = file.readAsStringSync();
         await deleteCurrentNote(tester);
         file.writeAsStringSync(fileContents);
-        // lfs.dirController.add(WatchEvent(ChangeType.ADD, file.path));
         await tester.pumpAndSettle();
         expect(find.byType(NoteCard), findsNothing);
       },
@@ -225,37 +222,22 @@ void main() {
 
 void deleteFile(File file, MockLocalFileSync lfs) {
   file.deleteSync();
-  var e = MockFileSystemEvent();
-  when(() => e.path).thenReturn(file.path);
-  when(() => e.type).thenReturn(FileSystemEvent.delete);
-  lfs.dirController.add(e);
+  lfs.dirController.add(WatchEvent(ChangeType.REMOVE, file.path));
 }
 
 void appendFile(File file, MockLocalFileSync lfs, String appendText) {
   file.writeAsStringSync(appendText, mode: FileMode.append);
-  var e = MockFileSystemEvent();
-  when(() => e.path).thenReturn(file.path);
-  when(() => e.type).thenReturn(FileSystemEvent.modify);
-  lfs.dirController.add(e);
+  lfs.dirController.add(WatchEvent(ChangeType.MODIFY, file.path));
 }
 
 void addFile(File file, MockLocalFileSync lfs, String fileContents) {
   file.writeAsStringSync(fileContents);
-  var e = MockFileSystemEvent();
-  when(() => e.path).thenReturn(file.path);
-  when(() => e.type).thenReturn(FileSystemEvent.create);
-  lfs.dirController.add(e);
+  lfs.dirController.add(WatchEvent(ChangeType.ADD, file.path));
 }
 
-void renameFile(File file, MockLocalFileSync lfs, String destination) {
+void renameFile(File file, MockLocalFileSync lfs, String destination) async {
   file.renameSync(destination);
-  var e = MockFileSystemMoveEvent();
-  when(() => e.path).thenReturn(file.path);
-  when(() => e.type).thenReturn(FileSystemEvent.move);
-  when(() => e.destination).thenReturn(destination);
-  lfs.dirController.add(e);
+  lfs.dirController.add(WatchEvent(ChangeType.ADD, destination));
+  await Future.delayed(const Duration(milliseconds: 100));
+  lfs.dirController.add(WatchEvent(ChangeType.REMOVE, file.path));
 }
-
-class MockFileSystemEvent extends Mock implements FileSystemEvent {}
-
-class MockFileSystemMoveEvent extends Mock implements FileSystemMoveEvent {}

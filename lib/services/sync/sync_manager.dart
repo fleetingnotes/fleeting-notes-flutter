@@ -43,6 +43,7 @@ class SyncManager {
           await s.upsertNotes(notesToUpdate);
           break;
         case NoteEventStatus.delete:
+          // tries to delete notes
           await s.deleteNotes(e.notes.map((n) => n.id));
           break;
       }

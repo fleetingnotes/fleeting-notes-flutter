@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:watcher/watcher.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -38,8 +38,8 @@ class LocalFileSync extends SyncTerface {
   bool get enabled => settings.get('local-sync-enabled', defaultValue: false);
   String get syncDir => settings.get('local-sync-dir', defaultValue: '');
   String? get template => settings.get('local-sync-template');
-  Stream<FileSystemEvent> get dirStream => fs.directory(syncDir).watch();
-  StreamSubscription<FileSystemEvent>? directoryStream;
+  Stream<WatchEvent> get dirStream => Watcher(syncDir).events;
+  StreamSubscription<WatchEvent>? directoryStream;
   final StreamController<NoteEvent> streamController =
       StreamController.broadcast();
 
@@ -73,21 +73,13 @@ class LocalFileSync extends SyncTerface {
     directoryStream = dirStream.listen((e) async {
       if (!canSync) return;
       switch (e.type) {
-        case FileSystemEvent.delete:
+        case ChangeType.REMOVE:
           String? noteId =
               idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
           if (noteId != null) {
             var deletedNote = Note.createDeletedNote(noteId);
             streamController
                 .add(NoteEvent([deletedNote], NoteEventStatus.delete));
-          }
-          break;
-        case FileSystemEvent.move:
-          var key =
-              idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
-          var dest = (e as FileSystemMoveEvent).destination;
-          if (key != null && dest != null) {
-            idToPath[key] = dest;
           }
           break;
         default:
