@@ -243,7 +243,7 @@ void addFile(File file, MockLocalFileSync lfs, String fileContents) {
   file.writeAsStringSync(fileContents);
   var e = MockFileSystemEvent();
   when(() => e.path).thenReturn(file.path);
-  when(() => e.type).thenReturn(FileSystemEvent.modify);
+  when(() => e.type).thenReturn(FileSystemEvent.create);
   lfs.dirController.add(e);
 }
 
