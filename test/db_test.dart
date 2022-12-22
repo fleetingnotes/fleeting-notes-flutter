@@ -1,19 +1,33 @@
 import 'package:fleeting_notes_flutter/models/search_query.dart';
+import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
+import 'package:hive/hive.dart';
 import 'package:test/test.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'mocks/mock_box.dart';
 import 'mocks/mock_settings.dart';
 import 'mocks/mock_supabase.dart';
 
+var settings = MockSettings();
+var mockBox = MockBox();
+
 class MockDatabaseTests extends Database {
   MockDatabaseTests()
-      : super(supabase: MockSupabaseDB(), settings: MockSettings());
+      : super(
+            supabase: MockSupabaseDB(),
+            settings: settings,
+            localFileSync: LocalFileSync(settings: settings));
 
   Note newNote(id, title, content, source) {
     String t = DateTime.now().toUtc().toIso8601String();
     var note = Note(
         id: id, title: title, content: content, createdAt: t, source: source);
     return note;
+  }
+
+  @override
+  Future<Box> getBox() async {
+    return mockBox;
   }
 
   @override

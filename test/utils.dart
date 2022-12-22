@@ -1,5 +1,10 @@
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/services/settings.dart';
+import 'package:fleeting_notes_flutter/services/supabase.dart';
+import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'mocks/mock_database.dart';
+import 'mocks/mock_local_file_sync.dart';
 import 'mocks/mock_settings.dart';
 import 'mocks/mock_supabase.dart';
 
@@ -16,17 +22,28 @@ Future<void> fnPumpWidget(
   WidgetTester tester,
   Widget widget, {
   bool isLoggedIn = false,
-  MockSettings? settings,
-  MockSupabaseDB? supabase,
+  Settings? settings,
+  SupabaseDB? supabase,
+  LocalFileSync? localFs,
+  MockDatabase? db,
 }) async {
   settings = settings ?? MockSettings();
   supabase = supabase ?? getBaseMockSupabaseDB();
-  MockDatabase mockDb = MockDatabase(settings: settings, supabase: supabase);
+  localFs =
+      localFs ?? LocalFileSync(settings: settings, fs: MemoryFileSystem());
+  MockDatabase mockDb = db ??
+      MockDatabase(
+        settings: settings,
+        supabase: supabase,
+        localFileSync: localFs,
+      );
+
   await tester.pumpWidget(ProviderScope(
     overrides: [
       dbProvider.overrideWithValue(mockDb),
       settingsProvider.overrideWithValue(settings),
-      supabaseProvider.overrideWithValue(supabase)
+      supabaseProvider.overrideWithValue(supabase),
+      localFileSyncProvider.overrideWithValue(localFs),
     ],
     child: widget,
   ));
@@ -62,9 +79,8 @@ Future<void> modifyCurrentNote(WidgetTester tester,
         find.bySemanticsLabel('Note and links to other ideas'), content);
   }
   await tester.tap(find.text('Save'));
-  await tester.pumpAndSettle(); // Wait for animation to finish
-  await tester
-      .pump(const Duration(seconds: 1)); // wait for notes to save / update
+  await tester.pumpAndSettle(
+      const Duration(seconds: 1)); // Wait for animation to finish
 }
 
 Future<void> saveCurrentNote(WidgetTester tester) async {
@@ -155,4 +171,18 @@ void fireOnTap(Finder finder, String text) {
     (span.recognizer as TapGestureRecognizer).onTap!();
     return false; // stop iterating, we found the one.
   });
+}
+
+Future<MockLocalFileSync> setupLfs({
+  bool enabled = true,
+  MockSettings? settings,
+  FileSystem? fs,
+}) async {
+  fs = fs ?? MemoryFileSystem();
+  var f = fs.systemTempDirectory.createTempSync();
+  settings = settings ?? MockSettings();
+  settings.set('local-sync-enabled', enabled);
+  settings.set('local-sync-dir', f.path);
+  var lfs = MockLocalFileSync(settings: settings, fs: fs);
+  return lfs;
 }

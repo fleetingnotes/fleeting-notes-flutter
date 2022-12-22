@@ -3,7 +3,11 @@ import 'package:hive/hive.dart';
 import 'mock_box.dart';
 
 class MockDatabase extends Database {
-  MockDatabase({required super.supabase, required super.settings});
+  MockDatabase({
+    required super.supabase,
+    required super.settings,
+    required super.localFileSync,
+  });
   Box? _currBox;
   Map<String, Box> allBoxes = {'local': MockBox(), 'supabase': MockBox()};
   @override

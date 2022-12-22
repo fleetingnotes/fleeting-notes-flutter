@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/models/syncterface.dart';
+import 'package:collection/collection.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
@@ -38,6 +40,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   bool isNoteShareable = false;
   Timer? saveTimer;
   RouteObserver? routeObserver;
+  StreamSubscription<NoteEvent>? noteChangeStream;
 
   late bool autofocus;
   late TextEditingController titleController;
@@ -66,6 +69,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
       ]),
     );
     contentController.text = widget.note.content;
+    noteChangeStream = db.noteChangeController.stream.listen(handleNoteEvent);
     db.getBacklinkNotes(widget.note).then((notes) {
       setState(() {
         backlinkNotes = notes;
@@ -95,6 +99,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     super.dispose();
     saveTimer?.cancel();
     routeObserver?.unsubscribe(this);
+    noteChangeStream?.cancel();
   }
 
   @override
@@ -263,6 +268,19 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
       content: Text('URL copied to clipboard'),
       duration: Duration(seconds: 2),
     ));
+  }
+
+  void handleNoteEvent(NoteEvent e) {
+    Note? n = e.notes.firstWhereOrNull((n) => n.id == widget.note.id);
+    if (n == null) return;
+    bool noteSimilar = titleController.text == n.title &&
+        contentController.text == n.content &&
+        sourceController.text == n.source;
+    if (!noteSimilar && !n.isDeleted) {
+      titleController.text = n.title;
+      contentController.text = n.content;
+      sourceController.text = n.source;
+    }
   }
 
   void onAddAttachment(String filename, Uint8List? bytes) async {

@@ -34,7 +34,6 @@ class Note {
 id: "${id}"
 title: "${title}"
 source: "${source}"
-created_time: "${created_time}"
 ---
 ${content}''';
 
@@ -82,6 +81,17 @@ ${content}''';
       content: noteMap["content"].toString(),
       source: noteMap["source"].toString(),
       createdAt: noteMap["timestamp"].toString(),
+    );
+  }
+
+  static Note createDeletedNote(String id) {
+    return Note(
+      id: id,
+      title: "",
+      content: "",
+      source: "",
+      createdAt: "2000-01-01",
+      isDeleted: true,
     );
   }
 
