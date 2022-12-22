@@ -33,11 +33,11 @@ class MockSupabaseDB extends Mock implements SupabaseDB {
 
 MockSupabaseDB getBaseMockSupabaseDB() {
   var mockSupabase = MockSupabaseDB();
-  when(() => mockSupabase.loginMigration(any(), any())).thenAnswer((_) {
+  when(() => mockSupabase.login(any(), any())).thenAnswer((_) {
     var user = getUser();
     mockSupabase.authChangeController.add(user);
     mockSupabase.currUser = user;
-    return Future.value(MigrationStatus.supaFireLogin);
+    return Future.value(user);
   });
   when(() => mockSupabase.logout()).thenAnswer((_) {
     mockSupabase.authChangeController.add(null);
