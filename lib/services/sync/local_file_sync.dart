@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:watcher/watcher.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -77,12 +78,15 @@ class LocalFileSync extends SyncTerface {
         if (!canSync) return;
         switch (e.type) {
           case ChangeType.REMOVE:
-            String? noteId =
-                idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
-            if (noteId != null) {
-              var deletedNote = Note.createDeletedNote(noteId);
-              streamController
-                  .add(NoteEvent([deletedNote], NoteEventStatus.delete));
+            // no proper permissions on android to handle renaming of files
+            if (!Platform.isAndroid) {
+              String? noteId =
+                  idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
+              if (noteId != null) {
+                var deletedNote = Note.createDeletedNote(noteId);
+                streamController
+                    .add(NoteEvent([deletedNote], NoteEventStatus.delete));
+              }
             }
             break;
           default:
