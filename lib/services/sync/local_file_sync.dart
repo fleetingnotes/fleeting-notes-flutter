@@ -79,6 +79,7 @@ class LocalFileSync extends SyncTerface {
         switch (e.type) {
           case ChangeType.REMOVE:
             // no proper permissions on android to handle renaming of files
+            // https://github.com/dart-lang/watcher/issues/131
             if (!Platform.isAndroid) {
               String? noteId =
                   idToPath.keys.firstWhereOrNull((k) => idToPath[k] == e.path);
