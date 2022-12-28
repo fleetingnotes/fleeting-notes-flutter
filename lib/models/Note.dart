@@ -28,12 +28,14 @@ class Note {
   String modifiedAt;
   final String partition;
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
-  static const String linkRegex = "\\[\\[([^$invalidChars]+?)\\]\\]";
+  static const String linkRegex =
+      "\\[\\[([^$invalidChars]+?)(\\|([^$invalidChars]*))?\\]\\]";
   static const String defaultNoteTemplate = r'''
 ---
 id: "${id}"
 title: "${title}"
 source: "${source}"
+aliases: ["${title}"]
 ---
 ${content}''';
 
