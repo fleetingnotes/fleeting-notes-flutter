@@ -135,8 +135,10 @@ class Database {
       linkSet.add(note.title);
       var matches = linkRegex.allMatches(note.content);
       for (var match in matches) {
-        String link = match.group(0).toString();
-        linkSet.add(link.substring(2, link.length - 2));
+        String? link = match.group(1);
+        if (link != null) {
+          linkSet.add(link);
+        }
       }
     }
     linkSet.remove('');

@@ -94,16 +94,13 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
       });
       return;
     }
-    bool androidPerms = Platform.isAndroid &&
-        await Permission.manageExternalStorage.request().isGranted;
-    bool iOSPerms =
-        Platform.isIOS && await Permission.storage.request().isGranted;
-    if (androidPerms || iOSPerms) {
+    bool storagePerms = await Permission.storage.request().isGranted;
+    if (storagePerms) {
       setState(() {
         enabled = val;
       });
-      await updateHiveDb(init: true);
     }
+    await updateHiveDb(init: true);
   }
 
   void onSyncTypeChange(String? type) {

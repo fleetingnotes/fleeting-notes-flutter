@@ -134,13 +134,14 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     // check if caretOffset is in a link
     var caretIndex = widget.controller.selection.baseOffset;
     var matches = RegExp(Note.linkRegex).allMatches(widget.controller.text);
-    Iterable<dynamic> filteredMatches =
+    Iterable<RegExpMatch> filteredMatches =
         matches.where((m) => m.start < caretIndex && m.end > caretIndex);
 
     if (filteredMatches.isNotEmpty) {
-      String title = filteredMatches.first.group(1);
-
-      showFollowLinkOverlay(context, title, size);
+      String? title = filteredMatches.first.group(1);
+      if (title != null) {
+        showFollowLinkOverlay(context, title, size);
+      }
     }
   }
 
