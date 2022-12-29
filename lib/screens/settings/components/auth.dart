@@ -35,10 +35,9 @@ class _AuthState extends ConsumerState<Auth> {
   Future<void> onLoginPress(String email, String password) async {
     final db = ref.read(dbProvider);
     try {
-      var migrationStatus = await db.login(email, password);
+      await db.login(email, password);
       var subTier = await db.supabase.getSubscriptionTier();
-      if (subTier == SubscriptionTier.freeSub &&
-          migrationStatus != MigrationStatus.fireLoginOnly) {
+      if (subTier == SubscriptionTier.freeSub) {
         var uid = db.supabase.currUser!.id;
         await db.supabase.logout();
         await showDialog(

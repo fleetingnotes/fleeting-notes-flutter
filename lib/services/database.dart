@@ -215,12 +215,11 @@ class Database {
   }
 
   Future<void> register(String email, String password) async {
-    await supabase.registerFirebase(email, password);
+    await supabase.register(email, password);
   }
 
-  Future<MigrationStatus> login(String email, String password) async {
-    var migrationStatus = await supabase.loginMigration(email, password);
-    return migrationStatus;
+  Future<void> login(String email, String password) async {
+    await supabase.login(email, password);
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
