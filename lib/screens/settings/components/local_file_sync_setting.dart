@@ -92,6 +92,7 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
       setState(() {
         enabled = false;
       });
+      await updateHiveDb(init: true);
       return;
     }
     bool storagePerms = await Permission.storage.request().isGranted;
