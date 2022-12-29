@@ -87,8 +87,21 @@ class LoginDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Logout of all other sessions'),
-      content: Text(
-          'As a free user, you can only log in with one account at a time.${(!kIsWeb && Platform.isIOS) ? ' Subscribe to the Basic Plan (\$3 / month)' : ''}'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+              'As a free user, you can only log in with one account at a time.'),
+          if (!kIsWeb && Platform.isIOS)
+            const Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: Text(
+                  'Subscribe to the Basic Plan (\$3 / month):\n - Unlimited Logged in Devices\n - 25MB Attachment Limit'),
+            )
+        ],
+      ),
       actions: getActionButtons(),
     );
   }
