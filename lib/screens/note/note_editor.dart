@@ -277,9 +277,20 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
         contentController.text == n.content &&
         sourceController.text == n.source;
     if (!noteSimilar && !n.isDeleted) {
+      var prevTitleSel = titleController.selection;
+      var prevContentSel = contentController.selection;
+      var prevSourceSel = sourceController.selection;
       titleController.text = n.title;
       contentController.text = n.content;
       sourceController.text = n.source;
+      // attempt to reset selection
+      try {
+        titleController.selection = prevTitleSel;
+        contentController.selection = prevContentSel;
+        sourceController.selection = prevSourceSel;
+      } catch (e) {
+        debugPrint('Failed to set cursor position (${e.toString()})');
+      }
     }
   }
 

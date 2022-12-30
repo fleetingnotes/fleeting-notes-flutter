@@ -17,8 +17,16 @@ import 'mocks/mock_local_file_sync.dart';
 import 'mocks/mock_settings.dart';
 import 'mocks/mock_supabase.dart';
 
+class FNMocks {
+  MockDatabase db;
+  LocalFileSync localFs;
+  SupabaseDB supabase;
+  Settings settings;
+  FNMocks(this.db, this.settings, this.supabase, this.localFs);
+}
+
 // init
-Future<void> fnPumpWidget(
+Future<FNMocks> fnPumpWidget(
   WidgetTester tester,
   Widget widget, {
   bool isLoggedIn = false,
@@ -48,6 +56,7 @@ Future<void> fnPumpWidget(
     child: widget,
   ));
   await tester.pumpAndSettle();
+  return FNMocks(mockDb, settings, supabase, localFs);
 }
 
 // resizing

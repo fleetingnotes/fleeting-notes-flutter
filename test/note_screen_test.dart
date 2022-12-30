@@ -1,5 +1,7 @@
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
@@ -116,6 +118,29 @@ void main() {
         find.bySemanticsLabel('Note and links to other ideas'), '');
     await tester.pump();
     expect(findSaveButton(tester).enabled, isFalse);
+  });
+  testWidgets('Cursor location doesnt change when handling note event',
+      (WidgetTester tester) async {
+    // setup
+    var mocks =
+        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), 'save');
+    await tester.tap(find.byIcon(Icons.save));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    var prevController =
+        tester.widget<ContentField>(find.byType(ContentField)).controller;
+
+    // trigger handleNoteEvent
+    var note = (await mocks.db.getAllNotes()).first;
+    note.content = 'auto update note';
+    mocks.db.noteChangeController
+        .add(NoteEvent([note], NoteEventStatus.upsert));
+    await tester.pump();
+
+    var nextController =
+        tester.widget<ContentField>(find.byType(ContentField)).controller;
+    expect(prevController.selection == nextController.selection, isTrue);
   });
 }
 
