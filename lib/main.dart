@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:flutter/foundation.dart';
@@ -10,6 +9,7 @@ import 'package:fleeting_notes_flutter/my_app_mobile.dart'
     if (dart.library.js) 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 Future<Box> openHiveBox(String boxName) async {
   if (!kIsWeb && !Hive.isBoxOpen(boxName)) {
@@ -31,7 +31,7 @@ Future<void> initApp() async {
 }
 
 void main() async {
-  GoRouter.setUrlPathStrategy(UrlPathStrategy.path);
+  usePathUrlStrategy();
   await SentryFlutter.init(
     (options) {
       options.dsn = kDebugMode

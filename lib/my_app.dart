@@ -74,7 +74,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
     final _router = GoRouter(
-      redirect: (state) {
+      redirect: (context, state) {
         if (state.subloc == '/' || state.subloc == '/settings') {
           return null;
         }
@@ -94,6 +94,13 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
             GoRoute(
               path: 'settings',
               builder: (context, _) => const SettingsScreen(),
+            ),
+            // https://github.com/flutter/flutter/issues/115355
+            // redirect will use empty location if below is not present
+            GoRoute(
+              path: 'web-ext.html',
+              builder: (context, state) =>
+                  LoadMainScreen(initNote: initNote, state: state),
             ),
           ],
         ),
