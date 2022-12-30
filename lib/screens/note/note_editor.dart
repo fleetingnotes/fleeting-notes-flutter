@@ -290,6 +290,16 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
         sourceController.selection = prevSourceSel;
       } catch (e) {
         debugPrint('Failed to set cursor position (${e.toString()})');
+        debugPrint('Putting cursor at end of string');
+        var titleLen = titleController.text.length;
+        var contentLen = contentController.text.length;
+        var sourceLen = sourceController.text.length;
+        titleController.selection =
+            TextSelection(baseOffset: titleLen, extentOffset: titleLen);
+        contentController.selection =
+            TextSelection(baseOffset: contentLen, extentOffset: contentLen);
+        sourceController.selection =
+            TextSelection(baseOffset: sourceLen, extentOffset: sourceLen);
       }
     }
   }

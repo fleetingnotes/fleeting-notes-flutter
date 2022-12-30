@@ -142,6 +142,27 @@ void main() {
         tester.widget<ContentField>(find.byType(ContentField)).controller;
     expect(prevController.selection == nextController.selection, isTrue);
   });
+  testWidgets('Cursor location set to end of text if too short',
+      (WidgetTester tester) async {
+    // setup
+    var mocks =
+        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await tester.enterText(
+        find.bySemanticsLabel('Note and links to other ideas'), 'save');
+    await tester.tap(find.byIcon(Icons.save));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    // trigger handleNoteEvent
+    var note = (await mocks.db.getAllNotes()).first;
+    note.content = 's';
+    mocks.db.noteChangeController
+        .add(NoteEvent([note], NoteEventStatus.upsert));
+    await tester.pump();
+
+    var nextController =
+        tester.widget<ContentField>(find.byType(ContentField)).controller;
+    expect(nextController.selection.baseOffset == note.content.length, isTrue);
+  });
 }
 
 OutlinedButton findSaveButton(WidgetTester tester) {
