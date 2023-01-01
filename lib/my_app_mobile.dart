@@ -86,16 +86,16 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    Note getNoteFromShareText(String sharedText) {
-      var ph = findAndroidHighlight(sharedText);
+    Note getNoteFromShareText({String title = '', String body = ''}) {
+      var ph = findAndroidHighlight(body);
       if (ph != null) {
-        return Note.empty(content: ph.content, source: ph.source);
+        return Note.empty(title: title, content: ph.content, source: ph.source);
       }
-      bool _validURL = Uri.tryParse(sharedText)?.hasAbsolutePath ?? false;
+      bool _validURL = Uri.tryParse(body)?.hasAbsolutePath ?? false;
       if (_validURL) {
-        return Note.empty(source: sharedText);
+        return Note.empty(title: title, source: body);
       } else {
-        return Note.empty(content: sharedText);
+        return Note.empty(title: title, content: body);
       }
     }
 
@@ -105,15 +105,9 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       // but keep in mind it could be `null` or "empty"(`receivedIntent.isNull`).
       String title = (intent.extra?['name'] ?? '').toString();
       String body = (intent.extra?['articleBody'] ?? '').toString();
-      String text = '';
-      if (title.isNotEmpty) {
-        text += '# $title\n';
-      }
-      if (body.isNotEmpty) {
-        text += body;
-      }
-      if (text.isEmpty) return;
-      db.navigateToNote(getNoteFromShareText(text), isShared: true);
+      if (title.isEmpty && body.isEmpty) return;
+      db.navigateToNote(getNoteFromShareText(title: title, body: body),
+          isShared: true);
     }
 
     if (Platform.isAndroid) {
@@ -128,7 +122,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       // For sharing or opening urls/text coming from outside the app while the app is in the memory
       receiveShareSub =
           ReceiveSharingIntent.getTextStream().listen((String sharedText) {
-        db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
+        db.navigateToNote(getNoteFromShareText(body: sharedText),
+            isShared: true);
       }, onError: (err) {
         // ignore: avoid_print
         print("getLinkStream error: $err");
@@ -138,7 +133,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       ReceiveSharingIntent.getInitialText().then((String? sharedText) {
         if (sharedText != null) {
           db.popAllRoutes();
-          db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
+          db.navigateToNote(getNoteFromShareText(body: sharedText),
+              isShared: true);
         }
       });
 
