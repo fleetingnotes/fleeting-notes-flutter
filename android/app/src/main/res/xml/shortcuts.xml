@@ -1,0 +1,15 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+  <capability android:name="actions.intent.CREATE_DIGITAL_DOCUMENT">
+    <intent
+      android:action="android.intent.action.VIEW"
+      android:targetPackage="com.fleetingnotes"
+      android:targetClass="com.fleetingnotes.MainActivity">
+      <parameter
+        android:name="digitalDocument.name"
+        android:key="name"/>
+      <parameter
+        android:name="digitalDocument.articleBody"
+        android:key="articleBody"/>
+    </intent>
+  </capability>
+</shortcuts>

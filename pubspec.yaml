@@ -68,6 +68,7 @@ dependencies:
   file: ^6.1.4
   permission_handler: ^10.2.0
   watcher: ^1.0.2
+  receive_intent: ^0.2.3
 
 
 dev_dependencies:
