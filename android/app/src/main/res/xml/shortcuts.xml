@@ -10,6 +10,9 @@
       <parameter
         android:name="digitalDocument.articleBody"
         android:key="articleBody"/>
+      <parameter
+        android:name="digitalDocument.@type"
+        android:key="type"/>
     </intent>
   </capability>
 </shortcuts>

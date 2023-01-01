@@ -105,7 +105,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       // but keep in mind it could be `null` or "empty"(`receivedIntent.isNull`).
       String title = (intent.extra?['name'] ?? '').toString();
       String body = (intent.extra?['articleBody'] ?? '').toString();
-      if (title.isEmpty && body.isEmpty) return;
+      String type = (intent.extra?['type'] ?? '').toString();
+      if (type != 'DigitalDocument') return;
       db.navigateToNote(getNoteFromShareText(title: title, body: body),
           isShared: true);
     }
