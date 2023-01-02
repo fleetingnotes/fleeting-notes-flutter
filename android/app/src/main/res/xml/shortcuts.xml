@@ -1,0 +1,33 @@
+<shortcuts
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
+  <capability android:name="actions.intent.CREATE_DIGITAL_DOCUMENT">
+    <intent
+      android:action="android.intent.action.VIEW"
+      android:targetPackage="com.fleetingnotes"
+      android:targetClass="com.fleetingnotes.MainActivity">
+      <parameter
+        android:name="digitalDocument.name"
+        android:key="name"/>
+      <parameter
+        android:name="digitalDocument.articleBody"
+        android:key="articleBody"/>
+      <parameter
+        android:name="digitalDocument.@type"
+        android:key="type"/>
+    </intent>
+  </capability>
+  <capability
+    android:name="custom.actions.intent.CREATE_FLEETING_NOTE"
+    app:queryPatterns="@array/CreateNoteQueries">
+    <intent
+      android:action="android.intent.action.VIEW"
+      android:targetPackage="com.fleetingnotes"
+      android:targetClass="com.fleetingnotes.MainActivity">
+      <parameter
+          android:name="articleBody"
+          android:key="articleBody"
+          android:mimeType="https://schema.org/Text" />
+    </intent>
+  </capability>
+</shortcuts>

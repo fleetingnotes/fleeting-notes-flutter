@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:receive_intent/receive_intent.dart' as ri;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'my_app.dart' as base_app;
 
@@ -26,6 +27,9 @@ class ParsedHighlight {
 
 class _MyAppState extends base_app.MyAppState<MyApp> {
   StreamSubscription? noteChangeStream;
+  StreamSubscription? homeWidgetSub;
+  StreamSubscription? receiveShareSub;
+  StreamSubscription? androidIntentSub;
 
   ParsedHighlight? findAndroidHighlight(String sharedText) {
     if (!Platform.isAndroid) return null;
@@ -82,23 +86,45 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    Note getNoteFromShareText(String sharedText) {
-      var ph = findAndroidHighlight(sharedText);
+    Note getNoteFromShareText({String title = '', String body = ''}) {
+      var ph = findAndroidHighlight(body);
       if (ph != null) {
-        return Note.empty(content: ph.content, source: ph.source);
+        return Note.empty(title: title, content: ph.content, source: ph.source);
       }
-      bool _validURL = Uri.tryParse(sharedText)?.hasAbsolutePath ?? false;
+      bool _validURL = Uri.tryParse(body)?.hasAbsolutePath ?? false;
       if (_validURL) {
-        return Note.empty(source: sharedText);
+        return Note.empty(title: title, source: body);
       } else {
-        return Note.empty(content: sharedText);
+        return Note.empty(title: title, content: body);
       }
     }
 
+    void handleAndroidIntent(ri.Intent? intent) {
+      if (intent == null || intent.isNull) return;
+      // Validate receivedIntent and warn the user, if it is not correct,
+      // but keep in mind it could be `null` or "empty"(`receivedIntent.isNull`).
+      String title = (intent.extra?['name'] ?? '').toString();
+      String body = (intent.extra?['articleBody'] ?? '').toString();
+      String type = (intent.extra?['type'] ?? '').toString();
+      if (type != 'DigitalDocument' && body.isEmpty) return;
+      db.navigateToNote(getNoteFromShareText(title: title, body: body),
+          isShared: true);
+    }
+
+    if (Platform.isAndroid) {
+      ri.ReceiveIntent.getInitialIntent().then(handleAndroidIntent);
+      androidIntentSub = ri.ReceiveIntent.receivedIntentStream
+          .listen(handleAndroidIntent, onError: (err) {
+        // ignore: avoid_print
+        print(err);
+      });
+    }
     if (Platform.isIOS || Platform.isAndroid) {
       // For sharing or opening urls/text coming from outside the app while the app is in the memory
-      ReceiveSharingIntent.getTextStream().listen((String sharedText) {
-        db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
+      receiveShareSub =
+          ReceiveSharingIntent.getTextStream().listen((String sharedText) {
+        db.navigateToNote(getNoteFromShareText(body: sharedText),
+            isShared: true);
       }, onError: (err) {
         // ignore: avoid_print
         print("getLinkStream error: $err");
@@ -108,7 +134,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       ReceiveSharingIntent.getInitialText().then((String? sharedText) {
         if (sharedText != null) {
           db.popAllRoutes();
-          db.navigateToNote(getNoteFromShareText(sharedText), isShared: true);
+          db.navigateToNote(getNoteFromShareText(body: sharedText),
+              isShared: true);
         }
       });
 
@@ -123,12 +150,15 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
         }
       });
 
-      HomeWidget.widgetClicked.listen((uri) {
+      homeWidgetSub = HomeWidget.widgetClicked.listen((uri) {
         if (uri != null) {
           getNoteFromWidgetUri(uri).then((note) {
             db.navigateToNote(note);
           });
         }
+      }, onError: (err) {
+        // ignore: avoid_print
+        print(err);
       });
     }
   }
@@ -137,5 +167,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   void dispose() {
     super.dispose();
     noteChangeStream?.cancel();
+    homeWidgetSub?.cancel();
+    receiveShareSub?.cancel();
+    androidIntentSub?.cancel();
   }
 }
