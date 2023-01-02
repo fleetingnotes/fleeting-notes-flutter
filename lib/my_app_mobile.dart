@@ -106,7 +106,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       String title = (intent.extra?['name'] ?? '').toString();
       String body = (intent.extra?['articleBody'] ?? '').toString();
       String type = (intent.extra?['type'] ?? '').toString();
-      if (type != 'DigitalDocument') return;
+      if (type != 'DigitalDocument' && body.isEmpty) return;
       db.navigateToNote(getNoteFromShareText(title: title, body: body),
           isShared: true);
     }
