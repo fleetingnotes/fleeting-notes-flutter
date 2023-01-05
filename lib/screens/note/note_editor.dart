@@ -279,7 +279,10 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     bool noteSimilar = titleController.text == n.title &&
         contentController.text == n.content &&
         sourceController.text == n.source;
-    bool isNewerNote = DateTime.parse(n.modifiedAt).isAfter(modifiedAt);
+    bool isNewerNote = DateTime.parse(n.modifiedAt)
+        // add 5 second buffer to prevent prevent notes updating as user types
+        .subtract(const Duration(seconds: 5))
+        .isAfter(modifiedAt);
     if (!noteSimilar && !n.isDeleted && isNewerNote) {
       updateFields(n);
     }

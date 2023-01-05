@@ -164,7 +164,9 @@ void main() {
     expect(nextController.selection.baseOffset == note.content.length, isTrue);
   });
 
-  testWidgets('Older notes dont update fields', (WidgetTester tester) async {
+  testWidgets(
+      'NoteEvents that have a modified time within 5 seconds dont update fields',
+      (WidgetTester tester) async {
     // setup
     var mocks =
         await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
@@ -173,13 +175,10 @@ void main() {
     await tester.tap(find.byIcon(Icons.save));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    // trigger handleNoteEvent with old note
+    // note updated within 5 seconds of previous note saved
     var note = (await mocks.db.getAllNotes()).first;
     note.content = 's';
-    note.modifiedAt = DateTime.now()
-        .subtract(const Duration(minutes: 5))
-        .toUtc()
-        .toIso8601String();
+    note.modifiedAt = DateTime.now().toUtc().toIso8601String();
     mocks.db.noteChangeController
         .add(NoteEvent([note], NoteEventStatus.upsert));
     await tester.pump();
