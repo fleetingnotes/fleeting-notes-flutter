@@ -160,11 +160,8 @@ class Database {
     return ids.map((id) => box.get(id));
   }
 
-  Future<bool> upsertNote(Note note) async {
-    return await upsertNotes([note]);
-  }
-
-  Future<bool> upsertNotes(List<Note> notes) async {
+  Future<bool> upsertNotes(List<Note> notes,
+      {bool setModifiedAt = false}) async {
     try {
       if (isLoggedIn()) {
         bool isSuccess = await supabase.upsertNotes(notes);
@@ -173,7 +170,9 @@ class Database {
       var box = await getBox();
       Map<String, Note> noteIdMap = {};
       for (var note in notes) {
-        note.modifiedAt = DateTime.now().toUtc().toIso8601String();
+        if (setModifiedAt) {
+          note.modifiedAt = DateTime.now().toUtc().toIso8601String();
+        }
         note.isDeleted = false;
         noteIdMap[note.id] = note;
       }
@@ -349,7 +348,7 @@ class Database {
     newNote.source = sourceUrl;
     newNote.title = "file-$dateInNum";
     newNote.title += (ext.isEmpty) ? "" : ".$ext";
-    if (await upsertNote(newNote)) {
+    if (await upsertNotes([newNote])) {
       return newNote;
     }
     return null;

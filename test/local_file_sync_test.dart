@@ -227,11 +227,13 @@ void deleteFile(File file, MockLocalFileSync lfs) {
 
 void appendFile(File file, MockLocalFileSync lfs, String appendText) {
   file.writeAsStringSync(appendText, mode: FileMode.append);
+  file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 5)));
   lfs.dirController.add(WatchEvent(ChangeType.MODIFY, file.path));
 }
 
 void addFile(File file, MockLocalFileSync lfs, String fileContents) {
   file.writeAsStringSync(fileContents);
+  file.setLastModifiedSync(DateTime.now().add(const Duration(seconds: 5)));
   lfs.dirController.add(WatchEvent(ChangeType.ADD, file.path));
 }
 
