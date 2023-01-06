@@ -183,7 +183,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
           hasNewChanges = false;
         });
       }
-      bool isSaveSuccess = await db.upsertNote(updatedNote);
+      bool isSaveSuccess =
+          await db.upsertNotes([updatedNote], setModifiedAt: true);
       if (!isSaveSuccess) {
         if (updateState) onChanged();
         throw FleetingNotesException('Failed to save note');
@@ -220,7 +221,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
       n.content = n.content.replaceAll(r, '[[${widget.note.title}]]');
       return n;
     }).toList();
-    if (await db.upsertNotes(updatedBacklinks)) {
+    if (await db.upsertNotes(updatedBacklinks, setModifiedAt: true)) {
       setState(() {
         backlinkNotes = updatedBacklinks;
       });

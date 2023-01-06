@@ -133,6 +133,8 @@ void main() {
 
     // trigger handleNoteEvent
     var note = (await mocks.db.getAllNotes()).first;
+    note.modifiedAt =
+        DateTime.now().add(const Duration(seconds: 5)).toIso8601String();
     note.content = 'auto update note';
     mocks.db.noteChangeController
         .add(NoteEvent([note], NoteEventStatus.upsert));
@@ -154,6 +156,8 @@ void main() {
 
     // trigger handleNoteEvent
     var note = (await mocks.db.getAllNotes()).first;
+    note.modifiedAt =
+        DateTime.now().add(const Duration(seconds: 5)).toIso8601String();
     note.content = 's';
     mocks.db.noteChangeController
         .add(NoteEvent([note], NoteEventStatus.upsert));
