@@ -22,7 +22,7 @@ public class ListWidgetService: RemoteViewsService() {
 }
 
 @Serializable
-data class NoteItem(val id: String, val title: String, val content: String, val source: String, val timestamp: String)
+data class NoteItem(val id: String, val title: String, val content: String, val source: String, val created_at: String, val modified_at: String)
 
 class ListRemoteViewsFactory(
         private val context: Context,
