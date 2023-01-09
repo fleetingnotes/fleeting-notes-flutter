@@ -9,9 +9,8 @@ import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../utils/responsive.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
-
-import 'package:flutter/foundation.dart' show kIsWeb;
 import '../note/note_editor.dart';
+import 'components/search_bar.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({
@@ -176,139 +175,109 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 deleteNotes: deleteNotes,
               ))
           : null,
-      body: Container(
-        padding: EdgeInsets.only(
-            top: kIsWeb ? Theme.of(context).custom.kDefaultPadding : 0),
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: SafeArea(
-          right: false,
-          child: Column(
-            children: [
-              // This is our Search bar
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: Theme.of(context).custom.kDefaultPadding,
-                    vertical: Theme.of(context).custom.kDefaultPadding / 2),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: db.openDrawer,
-                    ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: TextField(
-                        focusNode: widget.searchFocusNode,
-                        controller: queryController,
-                        onChanged: loadNotes,
-                        onTap: () {},
-                        decoration: InputDecoration(
-                          hintText: 'Search',
-                          fillColor: Theme.of(context).dialogBackgroundColor,
-                          filled: true,
-                          suffixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
+      body: SafeArea(
+        right: false,
+        child: Column(
+          children: [
+            // This is our Search bar
+            SearchBar(
+              onMenuPressed: db.openDrawer,
+              controller: queryController,
+              focusNode: widget.searchFocusNode,
+              onChanged: loadNotes,
+              onTap: () {},
+            ),
+            SizedBox(height: Theme.of(context).custom.kDefaultPadding),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: Theme.of(context).custom.kDefaultPadding),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 200),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          value: sortBy,
+                          iconSize: 16,
+                          style: Theme.of(context).textTheme.bodyText1,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              sortBy = newValue!;
+                            });
+                            loadNotes(queryController.text);
+                          },
+                          items: sortOptionMap.keys
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(height: Theme.of(context).custom.kDefaultPadding),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: Theme.of(context).custom.kDefaultPadding),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 200),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            value: sortBy,
-                            iconSize: 16,
-                            style: Theme.of(context).textTheme.bodyText1,
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                sortBy = newValue!;
-                              });
-                              loadNotes(queryController.text);
-                            },
-                            items: sortOptionMap.keys
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Tooltip(
-                      message: 'Search by',
-                      child: MaterialButton(
-                        minWidth: 20,
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) {
-                              return SearchDialog(
-                                searchFilter: searchFilter,
-                                onFilterChange: (type, val) {
-                                  setState(() {
-                                    searchFilter[type] = val;
-                                  });
-                                  loadNotes(queryController.text);
-                                },
-                              );
-                            },
-                          );
-                        },
-                        child: const Icon(Icons.filter_list, size: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: Theme.of(context).custom.kDefaultPadding),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _pullRefreshNotes,
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    key: const PageStorageKey('ListOfNotes'),
-                    controller: scrollController,
-                    itemCount: notes.length,
-                    itemBuilder: (context, index) => NoteCard(
-                      sQuery: SearchQuery(
-                          query: queryController.text,
-                          searchByTitle: searchFilter['title'],
-                          searchByContent: searchFilter['content'],
-                          searchBySource: searchFilter['source'],
-                          sortBy: sortOptionMap[sortBy]!),
-                      note: notes[index],
-                      isActive: Responsive.isMobile(context)
-                          ? false
-                          : notes[index].id == activeNoteId,
-                      isSelected: selectedNotes.contains(notes[index]),
-                      onLongPress: () {
-                        _longPressNote(context, notes[index]);
+                  ),
+                  Tooltip(
+                    message: 'Search by',
+                    child: MaterialButton(
+                      minWidth: 20,
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) {
+                            return SearchDialog(
+                              searchFilter: searchFilter,
+                              onFilterChange: (type, val) {
+                                setState(() {
+                                  searchFilter[type] = val;
+                                });
+                                loadNotes(queryController.text);
+                              },
+                            );
+                          },
+                        );
                       },
-                      onTap: () {
-                        _pressNote(context, notes[index]);
-                      },
+                      child: const Icon(Icons.filter_list, size: 16),
                     ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: Theme.of(context).custom.kDefaultPadding),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _pullRefreshNotes,
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  key: const PageStorageKey('ListOfNotes'),
+                  controller: scrollController,
+                  itemCount: notes.length,
+                  itemBuilder: (context, index) => NoteCard(
+                    sQuery: SearchQuery(
+                        query: queryController.text,
+                        searchByTitle: searchFilter['title'],
+                        searchByContent: searchFilter['content'],
+                        searchBySource: searchFilter['source'],
+                        sortBy: sortOptionMap[sortBy]!),
+                    note: notes[index],
+                    isActive: Responsive.isMobile(context)
+                        ? false
+                        : notes[index].id == activeNoteId,
+                    isSelected: selectedNotes.contains(notes[index]),
+                    onLongPress: () {
+                      _longPressNote(context, notes[index]);
+                    },
+                    onTap: () {
+                      _pressNote(context, notes[index]);
+                    },
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
