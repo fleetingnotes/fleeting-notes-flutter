@@ -8,8 +8,8 @@ class NoteCard extends StatelessWidget {
   const NoteCard({
     Key? key,
     required this.note,
-    required this.onLongPress,
-    required this.onTap,
+    this.onLongPress,
+    this.onTap,
     this.sQuery,
     this.isActive = false,
     this.isSelected = false,
@@ -17,8 +17,8 @@ class NoteCard extends StatelessWidget {
 
   final bool isActive;
   final bool isSelected;
-  final VoidCallback onLongPress;
-  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final VoidCallback? onTap;
   final Note note;
   final SearchQuery? sQuery;
 
