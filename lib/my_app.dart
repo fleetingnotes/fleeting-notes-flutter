@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,11 +117,13 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
           return MaterialApp.router(
             title: 'Fleeting Notes',
             debugShowCheckedModeBanner: false,
-            theme: lightTheme,
-            darkTheme: darkTheme,
-            themeMode: box.get('dark-mode', defaultValue: false)
-                ? ThemeMode.dark
-                : ThemeMode.light,
+            theme: ThemeData(
+              useMaterial3: true,
+              colorSchemeSeed: Colors.blue,
+              brightness: box.get('dark-mode', defaultValue: false)
+                  ? Brightness.dark
+                  : Brightness.light,
+            ),
             routeInformationProvider: _router.routeInformationProvider,
             routeInformationParser: _router.routeInformationParser,
             routerDelegate: _router.routerDelegate,

@@ -1,7 +1,7 @@
 import 'dart:math';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
 import '../models/Note.dart';
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
 class NoteCard extends StatelessWidget {
@@ -17,15 +17,113 @@ class NoteCard extends StatelessWidget {
 
   final bool isActive;
   final bool isSelected;
-  final VoidCallback onLongPress; 
+  final VoidCallback onLongPress;
   final VoidCallback onTap;
   final Note note;
   final SearchQuery? sQuery;
 
-  List<TextSpan> highlightString(
-      String query, String text, TextStyle defaultStyle) {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: onLongPress,
+      onTap: onTap,
+      child: Card(
+          elevation: (isActive || isSelected) ? 0 : null,
+          color:
+              (isActive) ? Theme.of(context).colorScheme.surfaceVariant : null,
+          shape: (isSelected)
+              ? RoundedRectangleBorder(
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                )
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (note.title.isNotEmpty)
+                  CustomRichText(
+                    text: note.title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    isActive: isActive,
+                    sQuery: sQuery,
+                    maxLines: 1,
+                  ),
+                CustomRichText(
+                  text: note.content,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  isActive: isActive,
+                  sQuery: sQuery,
+                  maxLines: 3,
+                ),
+                if (note.source.isNotEmpty) NoteSource(source: note.source),
+              ],
+            ),
+          )),
+    );
+  }
+}
+
+class NoteSource extends StatelessWidget {
+  const NoteSource({
+    Key? key,
+    required this.source,
+  }) : super(key: key);
+
+  final String source;
+
+  @override
+  Widget build(BuildContext context) {
+    return CachedNetworkImage(
+      width: double.infinity,
+      imageUrl: source,
+      imageBuilder: (context, imageProvider) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      errorWidget: (context, url, err) => Container(),
+    );
+  }
+}
+
+class CustomRichText extends StatelessWidget {
+  const CustomRichText({
+    Key? key,
+    required this.text,
+    this.style,
+    this.isActive = false,
+    this.sQuery,
+    this.maxLines,
+  }) : super(key: key);
+
+  final String text;
+  final SearchQuery? sQuery;
+  final bool isActive;
+  final TextStyle? style;
+  final int? maxLines;
+
+  List<TextSpan> highlightString(String query, String text,
+      Color highlightColor, TextStyle? defaultStyle) {
     RegExp r = getQueryRegex(query);
-    TextStyle highlight = defaultStyle.copyWith(backgroundColor: Colors.orange);
+    defaultStyle ??= const TextStyle();
+    TextStyle highlight =
+        defaultStyle.copyWith(backgroundColor: highlightColor);
     int placeHolder = 0;
     List<TextSpan> textSpanner = [];
     final element = r.firstMatch(text);
@@ -53,111 +151,16 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: Theme.of(context).custom.kDefaultPadding,
-            vertical: Theme.of(context).custom.kDefaultPadding / 2),
-        child: GestureDetector(
-            onLongPress: onLongPress,
-            child: NeumorphicButton(
-              padding: const EdgeInsets.all(0),
-              style: NeumorphicStyle(
-                depth: (isActive) ? 0 : 2,
-                color: isActive
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).scaffoldBackgroundColor,
-                shadowLightColor: Theme.of(context).custom.lightShadow,
-                shadowDarkColor: Theme.of(context).custom.darkShadow,
-              ),
-              onPressed: onTap,
-              child: Container(
-                padding:
-                    EdgeInsets.all(Theme.of(context).custom.kDefaultPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (note.title != '')
-                                  RichText(
-                                      text: TextSpan(
-                                          children: highlightString(
-                                              (sQuery != null &&
-                                                      sQuery!.searchByTitle)
-                                                  ? sQuery!.query
-                                                  : '',
-                                              note.title,
-                                              Theme.of(context)
-                                                  .textTheme
-                                                  .bodyText1!
-                                                  .copyWith(
-                                                    color: isActive
-                                                        ? Colors.white
-                                                        : null,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w600,
-                                                  ))),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis),
-                                if (note.content != '')
-                                  RichText(
-                                      text: TextSpan(
-                                          children: highlightString(
-                                              (sQuery != null &&
-                                                      sQuery!.searchByContent)
-                                                  ? sQuery!.query
-                                                  : '',
-                                              note.content,
-                                              Theme.of(context)
-                                                  .textTheme
-                                                  .bodyText2!
-                                                  .copyWith(
-                                                    color: isActive
-                                                        ? Colors.white
-                                                        : null,
-                                                  ))),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis),
-                              ]),
-                        ),
-                        SizedBox(
-                            width: Theme.of(context).custom.kDefaultPadding),
-                        Column(
-                          children: [
-                            Text(
-                              note.getShortDateTimeStr(),
-                              style:
-                                  Theme.of(context).textTheme.caption!.copyWith(
-                                        color: isActive ? Colors.white70 : null,
-                                      ),
-                            ),
-                            const SizedBox(height: 5),
-                            // if (note.hasAttachment) // TODO: Add attachment
-                            //   Icon(
-                            //     Icons.attachment,
-                            //     size: 15,
-                            //     color: isActive
-                            //         ? Colors.white70
-                            //         : Theme.of(context).custom.kGrayColor,
-                            //   ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-                decoration: isSelected
-                    ? BoxDecoration(
-                        border: Border.all(color: Colors.blue,
-                            width: 4),
-                        borderRadius: BorderRadius.circular(8))
-                    : null,
-              ),
-            )));
-    // Add GestureDetector
+    return RichText(
+      text: TextSpan(
+          children: highlightString(
+        (sQuery != null && sQuery!.searchByTitle) ? sQuery!.query : '',
+        text,
+        Theme.of(context).highlightColor,
+        style,
+      )),
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 }
