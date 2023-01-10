@@ -1,6 +1,8 @@
+import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SearchBar extends StatefulWidget {
+class SearchBar extends ConsumerStatefulWidget {
   const SearchBar({
     Key? key,
     required this.onMenuPressed,
@@ -11,16 +13,16 @@ class SearchBar extends StatefulWidget {
   }) : super(key: key);
 
   final VoidCallback onMenuPressed;
-  final Function(String)? onChanged;
+  final VoidCallback? onChanged;
   final VoidCallback? onTap;
   final TextEditingController? controller;
   final FocusNode? focusNode;
 
   @override
-  State<SearchBar> createState() => _SearchBarState();
+  ConsumerState<SearchBar> createState() => _SearchBarState();
 }
 
-class _SearchBarState extends State<SearchBar> {
+class _SearchBarState extends ConsumerState<SearchBar> {
   bool hasFocus = false;
   bool maintainFocus = false;
   FocusNode focusNode = FocusNode();
@@ -88,11 +90,7 @@ class _SearchBarState extends State<SearchBar> {
             child: TextField(
               focusNode: focusNode,
               controller: widget.controller,
-              onChanged: widget.onChanged,
-              onTap: () async {
-                // widget.onTap?.call();
-                // focusNode.requestFocus();
-              },
+              onChanged: (val) => widget.onChanged?.call(),
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(
                 hintText: 'Search',
@@ -106,8 +104,17 @@ class _SearchBarState extends State<SearchBar> {
               ? (Padding(
                   padding: const EdgeInsets.only(right: 16),
                   child: IconButton(
+                    tooltip: "Sort and Filter",
                     padding: const EdgeInsets.all(0),
-                    onPressed: () {
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (_) {
+                          return SearchDialog(
+                            onChange: widget.onChanged?.call,
+                          );
+                        },
+                      );
                       focusNode.requestFocus();
                     },
                     icon: const Icon(Icons.tune, size: 24),

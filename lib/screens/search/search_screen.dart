@@ -33,33 +33,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   var selectedNotes = <Note>[];
 
   late List<Note> notes = [];
-  String sortBy = 'Sort by created (new to old)';
-  Map<String, SortOptions> sortOptionMap = {
-    'Sort by modified (new to old)': SortOptions.modifiedASC,
-    'Sort by modified (old to new)': SortOptions.modifiedDESC,
-    'Sort by created (new to old)': SortOptions.createdASC,
-    'Sort by created (old to new)': SortOptions.createdDESC,
-    'Sort by title (A to Z)': SortOptions.titleASC,
-    'Sort by title (Z to A)': SortOptions.titleDSC,
-    'Sort by content (A to Z)': SortOptions.contentASC,
-    'Sort by content (Z to A)': SortOptions.contentDESC,
-    'Sort by source (A to Z)': SortOptions.sourceASC,
-    'Sort by source (Z to A)': SortOptions.sourceDESC,
-  };
   String activeNoteId = '';
-  Map searchFilter = {'title': true, 'content': true, 'source': true};
 
-  Future<void> loadNotes(queryRegex, {forceSync = false}) async {
+  Future<void> loadNotes(String query, {forceSync = false}) async {
     final db = ref.read(dbProvider);
-    SearchQuery query = SearchQuery(
-        query: queryRegex,
-        searchByTitle: searchFilter['title'],
-        searchByContent: searchFilter['content'],
-        searchBySource: searchFilter['source'],
-        sortBy: sortOptionMap[sortBy]!);
+    final searchQuery = ref.read(searchProvider);
+    searchQuery.query = query;
     try {
       var tempNotes = await db.getSearchNotes(
-        query,
+        searchQuery,
         forceSync: forceSync,
       );
       if (!mounted) return;
@@ -165,6 +147,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    final searchQuery = ref.watch(searchProvider);
     return Scaffold(
       appBar: selectedNotes.isNotEmpty
           ? PreferredSize(
@@ -184,69 +167,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               onMenuPressed: db.openDrawer,
               controller: queryController,
               focusNode: widget.searchFocusNode,
-              onChanged: loadNotes,
+              onChanged: () => loadNotes(queryController.text),
               onTap: () {},
             ),
-            SizedBox(height: Theme.of(context).custom.kDefaultPadding),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: Theme.of(context).custom.kDefaultPadding),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 200),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: sortBy,
-                          iconSize: 16,
-                          style: Theme.of(context).textTheme.bodyText1,
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              sortBy = newValue!;
-                            });
-                            loadNotes(queryController.text);
-                          },
-                          items: sortOptionMap.keys
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Tooltip(
-                    message: 'Search by',
-                    child: MaterialButton(
-                      minWidth: 20,
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) {
-                            return SearchDialog(
-                              searchFilter: searchFilter,
-                              onFilterChange: (type, val) {
-                                setState(() {
-                                  searchFilter[type] = val;
-                                });
-                                loadNotes(queryController.text);
-                              },
-                            );
-                          },
-                        );
-                      },
-                      child: const Icon(Icons.filter_list, size: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: Theme.of(context).custom.kDefaultPadding),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _pullRefreshNotes,
@@ -255,13 +178,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   key: const PageStorageKey('ListOfNotes'),
                   controller: scrollController,
                   itemCount: notes.length,
+                  padding: const EdgeInsets.all(8),
                   itemBuilder: (context, index) => NoteCard(
-                    sQuery: SearchQuery(
-                        query: queryController.text,
-                        searchByTitle: searchFilter['title'],
-                        searchByContent: searchFilter['content'],
-                        searchBySource: searchFilter['source'],
-                        sortBy: sortOptionMap[sortBy]!),
+                    sQuery: searchQuery,
                     note: notes[index],
                     isActive: Responsive.isMobile(context)
                         ? false

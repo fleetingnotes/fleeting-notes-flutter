@@ -5,6 +5,8 @@ import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 
+import '../models/search_query.dart';
+
 // init providers
 final supabaseProvider = Provider<SupabaseDB>((_) => SupabaseDB());
 final settingsProvider = Provider<Settings>((_) => Settings());
@@ -24,3 +26,5 @@ final dbProvider = Provider<Database>((ref) {
     localFileSync: localFileSync,
   );
 });
+
+final searchProvider = Provider<SearchQuery>((ref) => SearchQuery());
