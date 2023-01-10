@@ -56,13 +56,14 @@ class NoteCard extends StatelessWidget {
                           sQuery: sQuery,
                           maxLines: 1,
                         ),
-                      CustomRichText(
-                        text: note.content,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        isActive: isActive,
-                        sQuery: sQuery,
-                        maxLines: 3,
-                      ),
+                      if (note.content.isNotEmpty)
+                        CustomRichText(
+                          text: note.content,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          isActive: isActive,
+                          sQuery: sQuery,
+                          maxLines: 3,
+                        ),
                       if (note.source.isNotEmpty)
                         NoteSource(source: note.source),
                     ],
