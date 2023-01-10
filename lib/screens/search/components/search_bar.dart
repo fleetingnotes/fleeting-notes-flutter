@@ -94,7 +94,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
               onChanged: (val) => widget.onChanged?.call(),
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: const InputDecoration(
-                hintText: 'Search',
+                hintText: 'Search Notes',
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,
                 ),
