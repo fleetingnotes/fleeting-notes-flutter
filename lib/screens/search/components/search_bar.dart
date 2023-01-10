@@ -81,6 +81,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
               : (Padding(
                   padding: const EdgeInsets.only(left: 16),
                   child: IconButton(
+                    tooltip: 'Open Menu',
                     padding: const EdgeInsets.all(0),
                     onPressed: widget.onMenuPressed,
                     icon: const Icon(Icons.menu_outlined, size: 24),
