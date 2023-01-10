@@ -41,25 +41,35 @@ class NoteCard extends StatelessWidget {
               : null,
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (note.title.isNotEmpty)
-                  CustomRichText(
-                    text: note.title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    isActive: isActive,
-                    sQuery: sQuery,
-                    maxLines: 1,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (note.title.isNotEmpty)
+                        CustomRichText(
+                          text: note.title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          isActive: isActive,
+                          sQuery: sQuery,
+                          maxLines: 1,
+                        ),
+                      CustomRichText(
+                        text: note.content,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        isActive: isActive,
+                        sQuery: sQuery,
+                        maxLines: 3,
+                      ),
+                      if (note.source.isNotEmpty)
+                        NoteSource(source: note.source),
+                    ],
                   ),
-                CustomRichText(
-                  text: note.content,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  isActive: isActive,
-                  sQuery: sQuery,
-                  maxLines: 3,
                 ),
-                if (note.source.isNotEmpty) NoteSource(source: note.source),
+                Text(note.getShortDateTimeStr(),
+                    style: Theme.of(context).textTheme.labelMedium),
               ],
             ),
           )),
