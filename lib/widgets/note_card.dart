@@ -51,7 +51,10 @@ class NoteCard extends StatelessWidget {
                       if (note.title.isNotEmpty)
                         CustomRichText(
                           text: note.title,
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                           isActive: isActive,
                           sQuery: sQuery,
                           maxLines: 1,
@@ -59,7 +62,7 @@ class NoteCard extends StatelessWidget {
                       if (note.content.isNotEmpty)
                         CustomRichText(
                           text: note.content,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: Theme.of(context).textTheme.bodySmall,
                           isActive: isActive,
                           sQuery: sQuery,
                           maxLines: 3,
@@ -69,8 +72,9 @@ class NoteCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(note.getShortDateTimeStr(),
-                    style: Theme.of(context).textTheme.labelMedium),
+                    style: Theme.of(context).textTheme.labelSmall),
               ],
             ),
           )),
@@ -82,9 +86,11 @@ class NoteSource extends StatelessWidget {
   const NoteSource({
     Key? key,
     required this.source,
+    this.height = 100,
   }) : super(key: key);
 
   final String source;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +103,7 @@ class NoteSource extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Container(
-              height: 100,
+              height: height,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: imageProvider,

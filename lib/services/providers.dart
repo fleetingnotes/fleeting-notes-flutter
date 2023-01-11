@@ -5,7 +5,9 @@ import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 
+import '../models/Note.dart';
 import '../models/search_query.dart';
+import 'notifier.dart';
 
 // init providers
 final supabaseProvider = Provider<SupabaseDB>((_) => SupabaseDB());
@@ -28,3 +30,5 @@ final dbProvider = Provider<Database>((ref) {
 });
 
 final searchProvider = Provider<SearchQuery>((ref) => SearchQuery());
+final viewedNotesProvider =
+    StateNotifierProvider<NoteNotifier, List<Note>>((ref) => NoteNotifier());

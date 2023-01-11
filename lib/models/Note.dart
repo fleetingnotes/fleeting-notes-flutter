@@ -50,6 +50,12 @@ ${content}''';
     this.isDeleted = false,
   }) : modifiedAt = createdAt;
 
+  DateTime get createdAtDate => DateTime.parse(createdAt);
+  DateTime get modifiedAtDate => DateTime.parse(modifiedAt);
+  set modifiedAtDate(DateTime d) {
+    modifiedAt = d.toUtc().toIso8601String();
+  }
+
   static Note empty(
       {String title = '', String content = '', String source = ''}) {
     Uuid uuid = const Uuid();
@@ -136,14 +142,10 @@ ${content}''';
     return title == '' && content == '' && source == '';
   }
 
-  DateTime getDateTime() {
-    return DateTime.parse(createdAt);
-  }
-
-  String getShortDateTimeStr() {
+  String getShortDateTimeStr({DateTime? noteDateTime}) {
+    noteDateTime ??= createdAtDate;
     final now = DateTime.now().toUtc();
     final today = DateTime(now.year, now.month, now.day);
-    final noteDateTime = getDateTime();
     final noteDate =
         DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
 
@@ -156,10 +158,10 @@ ${content}''';
     }
   }
 
-  String getDateTimeStr() {
+  String getDateTimeStr({DateTime? noteDateTime}) {
+    noteDateTime ??= createdAtDate;
     final now = DateTime.now().toUtc();
     final today = DateTime(now.year, now.month, now.day);
-    final noteDateTime = getDateTime();
     final noteDate =
         DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
 

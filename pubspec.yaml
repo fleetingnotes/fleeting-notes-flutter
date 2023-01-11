@@ -70,6 +70,7 @@ dependencies:
   watcher: ^1.0.2
   receive_intent: ^0.2.3
   cached_network_image: ^3.2.3
+  flutter_markdown: ^0.6.13
 
 
 dev_dependencies:

@@ -143,6 +143,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               child: const SideMenu(),
             ),
             floatingActionButton: FloatingActionButton(
+              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
               child: const Icon(Icons.add),
               tooltip: 'Add note',
               onPressed: () {
