@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/note/note_list.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,20 +21,6 @@ class NoteScreenNavigator extends ConsumerWidget {
     db.routeObserver = routeObserver;
     var history = db.noteHistory.entries.toList();
 
-    return Navigator(
-      key: db.navigatorKey,
-      observers: [routeObserver],
-      onGenerateRoute: (route) => PageRouteBuilder(
-        settings: route,
-        pageBuilder: (context, _, __) {
-          if (history.isEmpty) return Container();
-          return NoteEditor(
-            key: history.first.value,
-            note: history.first.key,
-            isShared: hasInitNote,
-          );
-        },
-      ),
-    );
+    return const NoteList();
   }
 }

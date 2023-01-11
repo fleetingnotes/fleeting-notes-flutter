@@ -293,7 +293,8 @@ class Database {
     scaffoldKey.currentState?.openDrawer();
   }
 
-  Future<StreamSubscription> listenNoteChange(Function callback) async {
+  Future<StreamSubscription> listenNoteChange(
+      Function(NoteEvent) callback) async {
     return noteChangeController.stream.listen((event) {
       callback(event);
     });

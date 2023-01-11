@@ -13,7 +13,7 @@ import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
-import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_popup_menu.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart'
@@ -40,6 +40,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   bool isNoteShareable = false;
   Timer? saveTimer;
   DateTime modifiedAt = DateTime(2000);
+  DateTime? savedAt;
   RouteObserver? routeObserver;
   StreamSubscription<NoteEvent>? noteChangeStream;
 
@@ -92,14 +93,12 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    routeObserver?.subscribe(this, ModalRoute.of(context) as PageRoute);
   }
 
   @override
   void dispose() {
     super.dispose();
     saveTimer?.cancel();
-    routeObserver?.unsubscribe(this);
     noteChangeStream?.cancel();
   }
 
@@ -190,6 +189,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
       } else {
         db.settings.delete('unsaved-note');
         await updateBacklinks(prevTitle, updatedNote.title);
+        setState(() {
+          savedAt = DateTime.now();
+        });
       }
     } on FleetingNotesException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -276,6 +278,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   void handleNoteEvent(NoteEvent e) {
     Note? n = e.notes.firstWhereOrNull((n) => n.id == widget.note.id);
     if (n == null) return;
+    isNoteShareable = n.isShareable;
     bool noteSimilar = titleController.text == n.title &&
         contentController.text == n.content &&
         sourceController.text == n.source;
@@ -335,8 +338,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final db = ref.watch(dbProvider);
-    var isSharedNotes = db.isSharedNotes;
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {
@@ -346,74 +347,28 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
           return null;
         }),
       },
-      child: Scaffold(
-        body: Container(
-          color: Theme.of(context).dialogBackgroundColor,
-          child: SafeArea(
-            child: Column(
-              children: [
-                Header(
-                  onSave: (hasNewChanges) ? _saveNote : null,
-                  onDelete: (isSharedNotes) ? null : _deleteNote,
-                  onSearch: () => onSearchNavigate(context),
-                  onAddAttachment: onAddAttachment,
-                  onCopyUrl:
-                      (db.isLoggedIn() || isSharedNotes) ? onCopyUrl : null,
-                  onShareChange: (bool isShareable) {
-                    setState(() {
-                      isNoteShareable = isShareable;
-                    });
-                    _saveNote();
-                  },
-                  isNoteShareable: isNoteShareable,
-                ),
-                const Divider(thickness: 1, height: 1),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: ScrollController(),
-                    padding: EdgeInsets.all(
-                        Theme.of(context).custom.kDefaultPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.note.getDateTimeStr(),
-                          style: Theme.of(context).textTheme.caption,
-                        ),
-                        TitleField(
-                          controller: titleController,
-                          onChanged: onChanged,
-                        ),
-                        ContentField(
-                          controller: contentController,
-                          onChanged: onChanged,
-                          autofocus: autofocus,
-                        ),
-                        SourceContainer(
-                          controller: sourceController,
-                          onChanged: onChanged,
-                          overrideSourceUrl: widget.note.isEmpty(),
-                        ),
-                        SizedBox(
-                            height: Theme.of(context).custom.kDefaultPadding),
-                        const Text("Backlinks", style: TextStyle(fontSize: 12)),
-                        const Divider(thickness: 1, height: 1),
-                        SizedBox(
-                            height:
-                                Theme.of(context).custom.kDefaultPadding / 2),
-                        ...backlinkNotes.map((note) => NoteCard(
-                              note: note,
-                              onLongPress: () => {},
-                              onTap: () {
-                                db.navigateToNote(note); // TODO: Deprecate
-                              },
-                            )),
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TitleField(
+                controller: titleController,
+                onChanged: onChanged,
+              ),
+              ContentField(
+                controller: contentController,
+                onChanged: onChanged,
+                autofocus: true,
+              ),
+              const SizedBox(height: 8),
+              SourceContainer(
+                controller: sourceController,
+                onChanged: onChanged,
+                overrideSourceUrl: widget.note.isEmpty(),
+              ),
+            ],
           ),
         ),
       ),

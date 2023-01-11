@@ -31,4 +31,7 @@ final dbProvider = Provider<Database>((ref) {
 
 final searchProvider = Provider<SearchQuery>((ref) => SearchQuery());
 final viewedNotesProvider =
-    StateNotifierProvider<NoteNotifier, List<Note>>((ref) => NoteNotifier());
+    StateNotifierProvider<NoteNotifier, List<Note>>((ref) {
+  final db = ref.watch(dbProvider);
+  return NoteNotifier(db);
+});

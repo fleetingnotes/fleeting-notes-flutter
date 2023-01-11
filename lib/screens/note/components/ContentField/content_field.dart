@@ -390,7 +390,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
               keyboardType: TextInputType.multiline,
               minLines: 5,
               maxLines: null,
-              style: Theme.of(context).textTheme.bodyText2,
+              style: Theme.of(context).textTheme.bodyMedium,
               decoration: const InputDecoration(
                 hintText: "Note and links to other ideas",
                 border: InputBorder.none,

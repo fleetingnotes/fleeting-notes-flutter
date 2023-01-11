@@ -86,6 +86,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   void _pressNote(BuildContext context, Note note) {
     final db = ref.read(dbProvider);
+    final viewedNotes = ref.read(viewedNotesProvider.notifier);
     if (selectedNotes.isEmpty) {
       setState(() {
         activeNoteId = note.id;
@@ -93,7 +94,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (!Responsive.isMobile(context)) {
         db.popAllRoutes();
       }
-      db.navigateToNote(note);
+      viewedNotes.addNote(note);
     } else {
       setState(() {
         if (selectedNotes.contains(note)) {
