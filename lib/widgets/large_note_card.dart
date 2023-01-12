@@ -1,37 +1,23 @@
-import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_popup_menu.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown/markdown.dart' as md;
 import '../models/Note.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
-class LargeNoteCard extends StatelessWidget {
+class LargeNoteCard extends ConsumerWidget {
   const LargeNoteCard({
     Key? key,
     required this.note,
-    this.onTap,
-    this.onDelete,
-    this.onCopyUrl,
-    this.onSourcePress,
-    this.onMenuPress,
-    this.onBacklinkPress,
-    this.onShareChange,
-    this.sQuery,
   }) : super(key: key);
 
-  final Function(Note note)? onTap;
-  final VoidCallback? onDelete;
-  final VoidCallback? onSourcePress;
-  final VoidCallback? onMenuPress;
-  final VoidCallback? onCopyUrl;
-  final Function(String)? onBacklinkPress;
-  final Function(bool)? onShareChange;
   final Note note;
-  final SearchQuery? sQuery;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final noteUtils = ref.watch(noteUtilsProvider);
     return Card(
         child: Column(
       children: [
@@ -61,7 +47,8 @@ class LargeNoteCard extends StatelessWidget {
                     shape: const CircleBorder(),
                   ),
                   child: IconButton(
-                    onPressed: () => onTap?.call(note),
+                    onPressed: () =>
+                        noteUtils.openNoteEditorDialog(context, note),
                     icon: const Icon(
                       Icons.edit,
                     ),
@@ -76,10 +63,7 @@ class LargeNoteCard extends StatelessWidget {
                       shape: const CircleBorder(),
                     ),
                     child: NotePopupMenu(
-                      onDelete: onDelete,
-                      onCopyUrl: onCopyUrl,
-                      onShareChange: onShareChange,
-                      isNoteShareable: note.isShareable,
+                      note: note,
                     )),
               ),
             ],

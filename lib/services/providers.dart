@@ -1,4 +1,5 @@
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
+import 'package:fleeting_notes_flutter/services/note_utils.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
@@ -34,4 +35,9 @@ final viewedNotesProvider =
     StateNotifierProvider<NoteNotifier, List<Note>>((ref) {
   final db = ref.watch(dbProvider);
   return NoteNotifier(db);
+});
+final noteUtilsProvider = Provider<NoteUtils>((ref) {
+  final db = ref.watch(dbProvider);
+  final viewedNotes = ref.watch(viewedNotesProvider.notifier);
+  return NoteUtils(db, viewedNotes);
 });

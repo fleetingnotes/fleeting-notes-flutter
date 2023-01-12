@@ -29,13 +29,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   void initState() {
     super.initState();
+    var note = widget.initNote;
     final db = ref.read(dbProvider);
-    if (widget.initNote == null) {
+    if (note == null) {
       hasInitNote = false;
-      db.noteHistory = {Note.empty(): GlobalKey()};
     } else {
       hasInitNote = true;
-      db.noteHistory = {widget.initNote!: GlobalKey()};
     }
     var isSharedNotes = db.isSharedNotes;
     if (!kDebugMode) analyticsDialogWorkflow();
@@ -122,6 +121,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    final noteUtils = ref.watch(noteUtilsProvider);
     return WillPopScope(
       onWillPop: () async {
         return !db.canPop();
@@ -147,11 +147,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               child: const Icon(Icons.add),
               tooltip: 'Add note',
               onPressed: () {
-                // This is bugged because floating action button isn't part of
-                // any route...
-                // Provider.of<NoteStackModel>(context, listen: false)
-                //     .pushNote(Note.empty());
-                db.navigateToNote(Note.empty()); // TODO: Deprecate
+                noteUtils.openNoteEditorDialog(context, Note.empty());
               },
             ),
             body: Responsive(

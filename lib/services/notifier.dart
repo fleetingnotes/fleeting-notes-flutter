@@ -8,7 +8,7 @@ class NoteNotifier extends StateNotifier<List<Note>> {
   Database db;
   NoteNotifier(
     this.db,
-  ) : super([Note.empty()]) {
+  ) : super([]) {
     db.listenNoteChange((event) {
       if (event.status == NoteEventStatus.init) return;
       for (var note in event.notes) {

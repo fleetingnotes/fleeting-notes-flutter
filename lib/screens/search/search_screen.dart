@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/services/note_utils.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../utils/responsive.dart';
-import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 import '../note/note_editor.dart';
 import 'components/search_bar.dart';
 
@@ -52,7 +50,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (e is FleetingNotesException) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(e.message),
-          duration: const Duration(seconds: 2),
         ));
       } else {
         rethrow;
@@ -86,7 +83,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   void _pressNote(BuildContext context, Note note) {
     final db = ref.read(dbProvider);
-    final viewedNotes = ref.read(viewedNotesProvider.notifier);
+    final noteUtils = ref.read(noteUtilsProvider);
     if (selectedNotes.isEmpty) {
       setState(() {
         activeNoteId = note.id;
@@ -94,7 +91,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (!Responsive.isMobile(context)) {
         db.popAllRoutes();
       }
-      viewedNotes.addNote(note);
+      noteUtils.openNoteEditorDialog(context, note);
     } else {
       setState(() {
         if (selectedNotes.contains(note)) {

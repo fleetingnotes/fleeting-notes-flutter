@@ -1,33 +1,37 @@
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NotePopupMenu extends StatefulWidget {
+import '../../../models/Note.dart';
+
+class NotePopupMenu extends ConsumerStatefulWidget {
   const NotePopupMenu({
     Key? key,
-    this.onDelete,
+    required this.note,
     this.onAddAttachment,
-    this.onCopyUrl,
-    this.onShareChange,
-    this.isNoteShareable = false,
+    this.deleteOption = true,
+    this.attachmentOption = false,
+    this.shareOption = false,
   }) : super(key: key);
 
-  final VoidCallback? onCopyUrl;
-  final VoidCallback? onDelete;
+  final Note note;
   final Function(String, Uint8List?)? onAddAttachment;
-  final Function(bool)? onShareChange;
-  final bool isNoteShareable;
+  final bool deleteOption;
+  final bool attachmentOption;
+  final bool shareOption;
 
   @override
-  State<NotePopupMenu> createState() => _NotePopupMenuState();
+  ConsumerState<NotePopupMenu> createState() => _NotePopupMenuState();
 }
 
-class _NotePopupMenuState extends State<NotePopupMenu> {
-  late bool _isShareable;
+class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
+  bool _isShareable = false;
 
   @override
   void initState() {
-    _isShareable = widget.isNoteShareable;
+    _isShareable = widget.note.isShareable;
     super.initState();
   }
 
@@ -44,6 +48,7 @@ class _NotePopupMenuState extends State<NotePopupMenu> {
 
   @override
   Widget build(BuildContext context) {
+    final noteUtils = ref.watch(noteUtilsProvider);
     return PopupMenuButton(
       icon: const Icon(Icons.more_vert),
       itemBuilder: (context) => [
@@ -56,37 +61,36 @@ class _NotePopupMenuState extends State<NotePopupMenu> {
             ),
             onTap: addAttachment,
           ),
-        if (widget.onCopyUrl != null)
+        if (widget.shareOption)
           PopupMenuItem(
             child: ListTile(
               title: const Text("Share URL"),
               leading: const Icon(Icons.link),
               contentPadding: const EdgeInsets.only(left: 0.0, right: 0.0),
-              trailing: widget.onShareChange == null
-                  ? null
-                  : Tooltip(
-                      child: StatefulBuilder(builder: (context, setState) {
-                        return Checkbox(
-                            value: _isShareable,
-                            onChanged: (val) {
-                              setState(() {
-                                _isShareable = val ?? false;
-                              });
-                              widget.onShareChange?.call(_isShareable);
-                            });
-                      }),
-                      message: 'Is shareable',
-                    ),
+              trailing: Tooltip(
+                child: StatefulBuilder(builder: (context, setState) {
+                  return Checkbox(
+                      value: _isShareable,
+                      onChanged: (val) {
+                        setState(() {
+                          _isShareable = val ?? false;
+                        });
+                        noteUtils.handleShareChange(
+                            widget.note.id, _isShareable);
+                      });
+                }),
+                message: 'Is shareable',
+              ),
             ),
-            onTap: () {
+            onTap: () async {
+              noteUtils.handleShareChange(widget.note.id, _isShareable);
+              noteUtils.handleCopyUrl(context, widget.note.id);
               setState(() {
                 _isShareable = true;
               });
-              widget.onShareChange?.call(_isShareable);
-              widget.onCopyUrl?.call();
             },
           ),
-        if (widget.onDelete != null)
+        if (widget.deleteOption)
           PopupMenuItem(
             child: const ListTile(
               title: Text("Delete"),
@@ -94,7 +98,7 @@ class _NotePopupMenuState extends State<NotePopupMenu> {
               contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
             ),
             onTap: () {
-              widget.onDelete?.call();
+              noteUtils.handleDeleteNote(context, widget.note.id);
             },
           ),
       ],
