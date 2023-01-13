@@ -59,6 +59,12 @@ class _SearchBarState extends ConsumerState<SearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    var searchNotifier = ref.watch(searchProvider.notifier);
+    ref.listen<SearchQuery>(searchProvider, (_, sq) {
+      setState(() {
+        hasFocus = sq.query.isNotEmpty || hasFocus;
+      });
+    });
     return AnimatedContainer(
       duration: const Duration(milliseconds: 100),
       margin: EdgeInsets.symmetric(
@@ -81,6 +87,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
                         child: IconButton(
                           padding: const EdgeInsets.all(0),
                           onPressed: () {
+                            searchNotifier.updateSearch(SearchQuery(query: ''));
                             focusNode.unfocus();
                             setState(() {
                               hasFocus = false;
