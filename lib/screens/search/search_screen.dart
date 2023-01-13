@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../utils/responsive.dart';
@@ -33,10 +34,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   late List<Note> notes = [];
   String activeNoteId = '';
 
-  Future<void> loadNotes(String query, {forceSync = false}) async {
+  Future<void> loadNotes({forceSync = false}) async {
     final db = ref.read(dbProvider);
     final searchQuery = ref.read(searchProvider);
-    searchQuery.query = query;
     try {
       var tempNotes = await db.getSearchNotes(
         searchQuery,
@@ -57,20 +57,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  void listenCallback(event) {
-    loadNotes(queryController.text);
-  }
-
   Future<void> _pullRefreshNotes() async {
-    await loadNotes(queryController.text, forceSync: true);
+    await loadNotes(forceSync: true);
   }
 
   @override
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    loadNotes(queryController.text);
-    db.listenNoteChange(listenCallback).then((stream) {
+    loadNotes();
+    db.listenNoteChange((e) => loadNotes()).then((stream) {
       noteChangeStream = stream;
     });
   }
@@ -135,6 +131,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
     final searchQuery = ref.watch(searchProvider);
+    ref.listen<SearchQuery>(searchProvider, (_, sq) {
+      if (queryController.text != sq.query) {
+        queryController.text = sq.query;
+      }
+      loadNotes();
+    });
     return Scaffold(
       appBar: selectedNotes.isNotEmpty
           ? PreferredSize(
@@ -150,7 +152,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 onMenuPressed: db.openDrawer,
                 controller: queryController,
                 focusNode: widget.searchFocusNode,
-                onChanged: () => loadNotes(queryController.text),
               ),
             ),
       body: SafeArea(

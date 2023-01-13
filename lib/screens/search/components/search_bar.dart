@@ -1,6 +1,9 @@
 import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../models/search_query.dart';
 
 class SearchBar extends ConsumerStatefulWidget {
   const SearchBar({
@@ -45,6 +48,13 @@ class _SearchBarState extends ConsumerState<SearchBar> {
         hasFocus = true;
       });
     }
+  }
+
+  onQueryChange(String val) {
+    var searchNotifier = ref.read(searchProvider.notifier);
+    searchNotifier.updateSearch(SearchQuery(
+      query: val,
+    ));
   }
 
   @override
@@ -92,7 +102,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
                   child: TextField(
                     focusNode: focusNode,
                     controller: widget.controller,
-                    onChanged: (val) => widget.onChanged?.call(),
+                    onChanged: onQueryChange,
                     style: Theme.of(context).textTheme.bodyLarge,
                     decoration: const InputDecoration(
                       hintText: 'Search Notes',

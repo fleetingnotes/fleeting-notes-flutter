@@ -3,6 +3,15 @@ import 'package:fleeting_notes_flutter/services/database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/Note.dart';
+import '../models/search_query.dart';
+
+class SearchNotifier extends StateNotifier<SearchQuery> {
+  SearchNotifier() : super(SearchQuery());
+
+  void updateSearch(SearchQuery sq) {
+    state = sq;
+  }
+}
 
 class NoteNotifier extends StateNotifier<List<Note>> {
   Database db;

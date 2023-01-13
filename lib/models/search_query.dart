@@ -13,7 +13,7 @@ class SearchQuery {
     this.searchByTitle = true,
     this.searchByContent = true,
     this.searchBySource = true,
-    this.sortBy = SortOptions.createdASC,
+    this.sortBy = SortOptions.createdDESC,
     this.limit = 50,
   });
 }

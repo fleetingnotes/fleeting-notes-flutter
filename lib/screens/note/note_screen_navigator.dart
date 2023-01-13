@@ -3,8 +3,6 @@ import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'note_editor.dart';
-
 class NoteScreenNavigator extends ConsumerWidget {
   NoteScreenNavigator({
     Key? key,
@@ -19,7 +17,6 @@ class NoteScreenNavigator extends ConsumerWidget {
     final db = ref.watch(dbProvider);
     db.navigatorKey = GlobalKey<NavigatorState>();
     db.routeObserver = routeObserver;
-    var history = db.noteHistory.entries.toList();
 
     return const NoteList();
   }
