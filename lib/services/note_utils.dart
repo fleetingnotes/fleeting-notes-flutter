@@ -43,13 +43,14 @@ class NoteUtils {
 
   Future<void> handleSaveNote(BuildContext context, Note note) async {
     try {
+      var oldNote = await db.getNoteById(note.id);
       await _checkTitle(note.id, note.title);
       bool isSaveSuccess = await db.upsertNotes([note], setModifiedAt: true);
       if (!isSaveSuccess) {
         throw FleetingNotesException('Failed to save note');
       } else {
         db.settings.delete('unsaved-note');
-        await updateBacklinks(context, note);
+        await updateBacklinks(context, oldNote, note);
       }
     } on FleetingNotesException catch (e) {
       _showSnackbar(context, e.message);
@@ -65,8 +66,8 @@ class NoteUtils {
     }
   }
 
-  Future<List<Note>> updateBacklinks(BuildContext context, Note newNote) async {
-    var oldNote = await db.getNoteById(newNote.id);
+  Future<List<Note>> updateBacklinks(
+      BuildContext context, Note? oldNote, Note newNote) async {
     if (oldNote == null || oldNote.title == newNote.title) {
       return [];
     }
@@ -86,6 +87,29 @@ class NoteUtils {
       return updatedBacklinks;
     } else {
       throw FleetingNotesException('Failed to update backlinks');
+    }
+  }
+
+  void onAddAttachment(
+      BuildContext context, Note note, String filename, Uint8List? bytes,
+      {TextEditingController? controller}) async {
+    try {
+      String newFileName = '${note.id}/$filename';
+      Note? newNote = await db.addAttachmentToNewNote(
+          filename: newFileName, fileBytes: bytes);
+      if (newNote != null) {
+        if (controller != null) {
+          db.insertTextAtSelection(controller, "[[${newNote.title}]]");
+        } else {
+          var dbNote = await db.getNoteById(note.id);
+          if (dbNote != null) {
+            dbNote.content += '\n[[${newNote.title}]]';
+            db.upsertNotes([dbNote], setModifiedAt: true);
+          }
+        }
+      }
+    } on FleetingNotesException catch (e) {
+      _showSnackbar(context, e.message);
     }
   }
 
@@ -152,7 +176,6 @@ class NoteUtils {
 
   void _showSnackbar(BuildContext context, String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      behavior: SnackBarBehavior.floating,
       content: Text(text),
     ));
   }

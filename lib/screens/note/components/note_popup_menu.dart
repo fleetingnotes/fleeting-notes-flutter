@@ -39,13 +39,19 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
   }
 
   void addAttachment() async {
+    final noteUtils = ref.read(noteUtilsProvider);
     FilePickerResult? result =
         await FilePicker.platform.pickFiles(withData: true);
     if (result != null) {
       PlatformFile file = result.files.first;
       Uint8List? fileBytes = file.bytes;
       String filename = file.name;
-      widget.onAddAttachment?.call(filename, fileBytes);
+      noteUtils.onAddAttachment(
+        context,
+        widget.note,
+        filename,
+        fileBytes,
+      );
     }
   }
 

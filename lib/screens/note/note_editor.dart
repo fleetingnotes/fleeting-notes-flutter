@@ -144,11 +144,17 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
 
   Future<void> _saveNote() async {
     final noteUtils = ref.read(noteUtilsProvider);
-    Note updatedNote = widget.note;
-    updatedNote.title = titleController.text;
-    updatedNote.content = contentController.text;
-    updatedNote.source = sourceController.text;
-    updatedNote.isShareable = isNoteShareable;
+    Note updatedNote = Note(
+      id: widget.note.id,
+      title: titleController.text,
+      content: contentController.text,
+      source: sourceController.text,
+      isShareable: isNoteShareable,
+      createdAt: widget.note.createdAt,
+      partition: widget.note.partition,
+      isDeleted: widget.note.isDeleted,
+    );
+    updatedNote.modifiedAt = widget.note.modifiedAt;
     try {
       setState(() {
         hasNewChanges = false;
@@ -172,28 +178,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
       createdAt: widget.note.createdAt,
     );
     db.settings.set('unsaved-note', unsavedNote);
-  }
-
-  Future<void> updateBacklinks(String prevTitle, String newTitle) async {
-    final db = ref.read(dbProvider);
-    if (backlinkNotes.isEmpty || prevTitle == newTitle) return;
-    // update backlinks
-    List<Note> updatedBacklinks = backlinkNotes.map((n) {
-      RegExp r = RegExp('\\[\\[$prevTitle\\]\\]', multiLine: true);
-      n.content = n.content.replaceAll(r, '[[${widget.note.title}]]');
-      return n;
-    }).toList();
-    if (await db.upsertNotes(updatedBacklinks, setModifiedAt: true)) {
-      setState(() {
-        backlinkNotes = updatedBacklinks;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('${backlinkNotes.length} Link(s) Updated'),
-        duration: const Duration(seconds: 2),
-      ));
-    } else {
-      throw FleetingNotesException('Failed to update backlinks');
-    }
   }
 
   void onChanged() async {
