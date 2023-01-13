@@ -93,7 +93,6 @@ class NoteUtils {
     var dbNote = await db.getNoteById(note.id);
     if (dbNote != null) {
       note = dbNote;
-      noteNotifier.addNote(dbNote);
     }
     await showDialog(
       context: context,
@@ -119,6 +118,7 @@ class NoteUtils {
     );
     Note? unsavedNote = db.settings.get('unsaved-note');
     if (unsavedNote != null && unsavedNote.id == note.id) {
+      noteNotifier.addNote(unsavedNote);
       await handleSaveNote(context, unsavedNote);
     } else {
       var postDialogNote = await db.getNoteById(note.id);
