@@ -121,24 +121,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   void deleteNotes(BuildContext context) async {
-    final db = ref.read(dbProvider);
-    bool isSuccessDelete = await db.deleteNotes(selectedNotes);
-    if (isSuccessDelete) {
-      for (var note in selectedNotes) {
-        db.noteHistory.remove(note);
-      }
+    final noteUtil = ref.read(noteUtilsProvider);
+    try {
+      await noteUtil.handleDeleteNote(context, selectedNotes);
       clearNotes();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Notes deletion failed'),
-        duration: Duration(seconds: 2),
-      ));
+    } on FleetingNotesException {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Notes successfully deleted'),
-      duration: Duration(seconds: 2),
-    ));
   }
 
   @override
@@ -148,25 +137,34 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Scaffold(
       appBar: selectedNotes.isNotEmpty
           ? PreferredSize(
-              preferredSize: const Size.fromHeight(50),
+              preferredSize: const Size.fromHeight(56),
               child: ModifyNotesAppBar(
                 selectedNotes: selectedNotes,
                 clearNotes: clearNotes,
                 deleteNotes: deleteNotes,
               ))
-          : null,
+          : PreferredSize(
+              preferredSize: const Size.fromHeight(56),
+              child: SearchBar(
+                onMenuPressed: db.openDrawer,
+                controller: queryController,
+                focusNode: widget.searchFocusNode,
+                onChanged: () => loadNotes(queryController.text),
+                onTap: () {},
+              ),
+            ),
       body: SafeArea(
         right: false,
         child: Column(
           children: [
             // This is our Search bar
-            SearchBar(
-              onMenuPressed: db.openDrawer,
-              controller: queryController,
-              focusNode: widget.searchFocusNode,
-              onChanged: () => loadNotes(queryController.text),
-              onTap: () {},
-            ),
+            // SearchBar(
+            //   onMenuPressed: db.openDrawer,
+            //   controller: queryController,
+            //   focusNode: widget.searchFocusNode,
+            //   onChanged: () => loadNotes(queryController.text),
+            //   onTap: () {},
+            // ),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _pullRefreshNotes,

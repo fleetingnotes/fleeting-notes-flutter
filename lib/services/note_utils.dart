@@ -28,16 +28,16 @@ class NoteUtils {
     _showSnackbar(context, 'URL copied to clipboard');
   }
 
-  Future<void> handleDeleteNote(BuildContext context, String noteId) async {
-    var note = await db.getNoteById(noteId);
-    noteNotifier.deleteNotes([noteId]);
-    if (note == null) {
-      _showSnackbar(context, 'Could not find note');
-      return;
-    }
-    bool isSuccessDelete = await db.deleteNotes([note]);
-    if (!isSuccessDelete) {
-      _showSnackbar(context, 'Failed to delete note');
+  Future<void> handleDeleteNote(BuildContext context, List<Note> notes) async {
+    try {
+      noteNotifier.deleteNotes(notes.map((n) => n.id));
+      bool isSuccessDelete = await db.deleteNotes(notes);
+      if (!isSuccessDelete) {
+        throw FleetingNotesException('Failed to delete note');
+      }
+    } on FleetingNotesException catch (e) {
+      _showSnackbar(context, e.message);
+      rethrow;
     }
   }
 

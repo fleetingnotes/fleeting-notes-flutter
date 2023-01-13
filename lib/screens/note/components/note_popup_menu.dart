@@ -98,7 +98,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
               contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
             ),
             onTap: () {
-              noteUtils.handleDeleteNote(context, widget.note.id);
+              noteUtils.handleDeleteNote(context, [widget.note]);
             },
           ),
       ],
