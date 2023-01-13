@@ -137,14 +137,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Scaffold(
       appBar: selectedNotes.isNotEmpty
           ? PreferredSize(
-              preferredSize: const Size.fromHeight(56),
+              preferredSize: const Size.fromHeight(72),
               child: ModifyNotesAppBar(
                 selectedNotes: selectedNotes,
                 clearNotes: clearNotes,
                 deleteNotes: deleteNotes,
               ))
           : PreferredSize(
-              preferredSize: const Size.fromHeight(56),
+              preferredSize: const Size.fromHeight(72),
               child: SearchBar(
                 onMenuPressed: db.openDrawer,
                 controller: queryController,
@@ -157,14 +157,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         right: false,
         child: Column(
           children: [
-            // This is our Search bar
-            // SearchBar(
-            //   onMenuPressed: db.openDrawer,
-            //   controller: queryController,
-            //   focusNode: widget.searchFocusNode,
-            //   onChanged: () => loadNotes(queryController.text),
-            //   onTap: () {},
-            // ),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _pullRefreshNotes,
@@ -213,11 +205,15 @@ class ModifyNotesAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      toolbarHeight: 72,
       leading: IconButton(
         icon: const Icon(Icons.close),
         onPressed: clearNotes,
       ),
-      title: Text('${selectedNotes.length} notes selected'),
+      title: Text(
+        '${selectedNotes.length} notes selected',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
       actions: <Widget>[
         // action button
         IconButton(

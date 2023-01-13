@@ -54,77 +54,84 @@ class _SearchBarState extends ConsumerState<SearchBar> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 100),
       margin: EdgeInsets.symmetric(
-        vertical: (hasFocus) ? 0 : 8,
-        horizontal: (!hasFocus) ? 16 : 0,
+        vertical: (hasFocus) ? 0 : 4,
+        horizontal: (hasFocus) ? 0 : 16,
       ),
-      padding: EdgeInsets.symmetric(vertical: (hasFocus) ? 8 : 0),
-      decoration: BoxDecoration(
-        borderRadius: (hasFocus) ? null : BorderRadius.circular(30),
-        color: Theme.of(context).colorScheme.surfaceVariant,
-      ),
-      child: Row(
+      padding: EdgeInsets.symmetric(vertical: (hasFocus) ? 4 : 0),
+      child: Column(
         children: [
-          (hasFocus)
-              ? (Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: IconButton(
-                    padding: const EdgeInsets.all(0),
-                    onPressed: () {
-                      focusNode.unfocus();
-                      setState(() {
-                        hasFocus = false;
-                      });
-                    },
-                    icon: const Icon(Icons.arrow_back, size: 24),
+          Card(
+            shape: RoundedRectangleBorder(
+                borderRadius:
+                    (hasFocus) ? BorderRadius.zero : BorderRadius.circular(30)),
+            elevation: (hasFocus) ? 0 : 3,
+            child: Row(
+              children: [
+                (hasFocus)
+                    ? (Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: IconButton(
+                          padding: const EdgeInsets.all(0),
+                          onPressed: () {
+                            focusNode.unfocus();
+                            setState(() {
+                              hasFocus = false;
+                            });
+                          },
+                          icon: const Icon(Icons.arrow_back, size: 24),
+                        ),
+                      ))
+                    : (Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: IconButton(
+                          tooltip: 'Open Menu',
+                          padding: const EdgeInsets.all(0),
+                          onPressed: widget.onMenuPressed,
+                          icon: const Icon(Icons.menu_outlined, size: 24),
+                        ),
+                      )),
+                Expanded(
+                  child: TextField(
+                    focusNode: focusNode,
+                    controller: widget.controller,
+                    onChanged: (val) => widget.onChanged?.call(),
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    decoration: const InputDecoration(
+                      hintText: 'Search Notes',
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                   ),
-                ))
-              : (Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: IconButton(
-                    tooltip: 'Open Menu',
-                    padding: const EdgeInsets.all(0),
-                    onPressed: widget.onMenuPressed,
-                    icon: const Icon(Icons.menu_outlined, size: 24),
-                  ),
-                )),
-          Expanded(
-            child: TextField(
-              focusNode: focusNode,
-              controller: widget.controller,
-              onChanged: (val) => widget.onChanged?.call(),
-              style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(
-                hintText: 'Search Notes',
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
                 ),
-              ),
+                (hasFocus)
+                    ? (Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: IconButton(
+                          tooltip: "Sort and Filter",
+                          padding: const EdgeInsets.all(0),
+                          onPressed: () async {
+                            await showDialog(
+                              context: context,
+                              builder: (_) {
+                                return SearchDialog(
+                                  onChange: widget.onChanged?.call,
+                                );
+                              },
+                            );
+                            focusNode.requestFocus();
+                          },
+                          icon: const Icon(Icons.tune, size: 24),
+                        ),
+                      ))
+                    : (const Padding(
+                        padding: EdgeInsets.only(right: 16),
+                        child: Icon(Icons.search, size: 24),
+                      )),
+              ],
             ),
           ),
-          (hasFocus)
-              ? (Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: IconButton(
-                    tooltip: "Sort and Filter",
-                    padding: const EdgeInsets.all(0),
-                    onPressed: () async {
-                      await showDialog(
-                        context: context,
-                        builder: (_) {
-                          return SearchDialog(
-                            onChange: widget.onChanged?.call,
-                          );
-                        },
-                      );
-                      focusNode.requestFocus();
-                    },
-                    icon: const Icon(Icons.tune, size: 24),
-                  ),
-                ))
-              : (const Padding(
-                  padding: EdgeInsets.only(right: 16),
-                  child: Icon(Icons.search, size: 24),
-                )),
+          // if (hasFocus) const Divider()
         ],
       ),
     );
