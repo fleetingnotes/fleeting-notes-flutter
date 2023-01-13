@@ -144,17 +144,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
 
   Future<void> _saveNote() async {
     final noteUtils = ref.read(noteUtilsProvider);
-    Note updatedNote = Note(
-      id: widget.note.id,
+    Note updatedNote = widget.note.copyWith(
       title: titleController.text,
       content: contentController.text,
       source: sourceController.text,
-      isShareable: isNoteShareable,
-      createdAt: widget.note.createdAt,
-      partition: widget.note.partition,
-      isDeleted: widget.note.isDeleted,
     );
-    updatedNote.modifiedAt = widget.note.modifiedAt;
     try {
       setState(() {
         hasNewChanges = false;

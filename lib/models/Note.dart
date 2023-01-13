@@ -70,6 +70,27 @@ ${content}''';
     );
   }
 
+  Note copyWith({
+    String? title,
+    String? content,
+    String? source,
+    bool? isShareable,
+    bool? isDeleted,
+  }) {
+    var copiedNote = Note(
+      id: id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      source: source ?? this.source,
+      isShareable: isShareable ?? this.isShareable,
+      createdAt: createdAt,
+      partition: partition,
+      isDeleted: isDeleted ?? this.isDeleted,
+    );
+    copiedNote.modifiedAt = modifiedAt;
+    return copiedNote;
+  }
+
   toJson() {
     return {
       'id': id,
