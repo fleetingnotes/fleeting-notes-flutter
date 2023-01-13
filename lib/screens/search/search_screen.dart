@@ -7,6 +7,7 @@ import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../utils/responsive.dart';
 import '../note/note_editor.dart';
+import 'components/modify_notes_bar.dart';
 import 'components/search_bar.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -150,7 +151,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 controller: queryController,
                 focusNode: widget.searchFocusNode,
                 onChanged: () => loadNotes(queryController.text),
-                onTap: () {},
               ),
             ),
       body: SafeArea(
@@ -186,41 +186,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-class ModifyNotesAppBar extends StatelessWidget {
-  const ModifyNotesAppBar({
-    Key? key,
-    required this.selectedNotes,
-    required this.clearNotes,
-    required this.deleteNotes,
-  }) : super(key: key);
-
-  final List<Note> selectedNotes;
-  final Function() clearNotes;
-  final Function(BuildContext) deleteNotes;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      toolbarHeight: 72,
-      leading: IconButton(
-        icon: const Icon(Icons.close),
-        onPressed: clearNotes,
-      ),
-      title: Text(
-        '${selectedNotes.length} notes selected',
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
-      actions: <Widget>[
-        // action button
-        IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () => deleteNotes(context),
-        )
-      ],
     );
   }
 }

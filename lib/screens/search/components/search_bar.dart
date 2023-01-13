@@ -6,7 +6,6 @@ class SearchBar extends ConsumerStatefulWidget {
   const SearchBar({
     Key? key,
     required this.onMenuPressed,
-    this.onTap,
     this.onChanged,
     this.controller,
     this.focusNode,
@@ -14,7 +13,6 @@ class SearchBar extends ConsumerStatefulWidget {
 
   final VoidCallback onMenuPressed;
   final VoidCallback? onChanged;
-  final VoidCallback? onTap;
   final TextEditingController? controller;
   final FocusNode? focusNode;
 
