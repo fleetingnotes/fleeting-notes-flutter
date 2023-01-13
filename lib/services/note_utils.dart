@@ -4,6 +4,9 @@ import 'package:flutter/services.dart';
 
 import '../models/Note.dart';
 import '../models/exceptions.dart';
+import '../screens/note/stylable_textfield_controller.dart';
+import '../models/text_part_style_definition.dart';
+import '../models/text_part_style_definitions.dart';
 import '../screens/note/components/note_popup_menu.dart';
 import '../screens/note/note_editor.dart';
 import 'database.dart';
@@ -119,6 +122,18 @@ class NoteUtils {
     if (dbNote != null) {
       note = dbNote;
     }
+
+    TextEditingController contentController = StyleableTextFieldController(
+      styles: TextPartStyleDefinitions(definitionList: [
+        TextPartStyleDefinition(
+            pattern: Note.linkRegex,
+            style: const TextStyle(
+              color: Color.fromARGB(255, 138, 180, 248),
+              decoration: TextDecoration.underline,
+            ))
+      ]),
+    );
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -134,6 +149,10 @@ class NoteUtils {
               const Spacer(),
               NotePopupMenu(
                 note: note,
+                onAddAttachment: (String fn, Uint8List? fb) {
+                  onAddAttachment(context, note, fn, fb,
+                      controller: contentController);
+                },
               )
             ],
           ),
@@ -141,6 +160,7 @@ class NoteUtils {
               width: 599,
               child: NoteEditor(
                 note: note,
+                contentController: contentController,
                 isShared: isShared,
               )),
         );

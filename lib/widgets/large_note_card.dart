@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_popup_menu.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
@@ -64,6 +66,9 @@ class LargeNoteCard extends ConsumerWidget {
                     ),
                     child: NotePopupMenu(
                       note: note,
+                      onAddAttachment: (String fn, Uint8List? fb) {
+                        noteUtils.onAddAttachment(context, note, fn, fb);
+                      },
                     )),
               ),
             ],

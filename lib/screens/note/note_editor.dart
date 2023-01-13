@@ -21,11 +21,18 @@ class NoteEditor extends ConsumerStatefulWidget {
   const NoteEditor({
     Key? key,
     required this.note,
+    this.titleController,
+    this.contentController,
+    this.sourceController,
     this.isShared = false,
   }) : super(key: key);
 
   final Note note;
   final bool isShared;
+  final TextEditingController? titleController;
+  final TextEditingController? contentController;
+  final TextEditingController? sourceController;
+
   @override
   _NoteEditorState createState() => _NoteEditorState();
 }
@@ -42,9 +49,18 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   StreamSubscription<NoteEvent>? noteChangeStream;
 
   late bool autofocus;
-  late TextEditingController titleController;
-  late TextEditingController contentController;
-  late TextEditingController sourceController;
+  TextEditingController titleController = TextEditingController();
+  TextEditingController contentController = StyleableTextFieldController(
+    styles: TextPartStyleDefinitions(definitionList: [
+      TextPartStyleDefinition(
+          pattern: Note.linkRegex,
+          style: const TextStyle(
+            color: Color.fromARGB(255, 138, 180, 248),
+            decoration: TextDecoration.underline,
+          ))
+    ]),
+  );
+  TextEditingController sourceController = TextEditingController();
 
   @override
   void initState() {
@@ -54,19 +70,15 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     hasNewChanges = widget.isShared;
     isNoteShareable = widget.note.isShareable;
     autofocus = widget.note.isEmpty() || widget.isShared;
-    titleController = TextEditingController(text: widget.note.title);
-    sourceController = TextEditingController(text: widget.note.source);
-    contentController = StyleableTextFieldController(
-      styles: TextPartStyleDefinitions(definitionList: [
-        TextPartStyleDefinition(
-            pattern: Note.linkRegex,
-            style: const TextStyle(
-              color: Color.fromARGB(255, 138, 180, 248),
-              decoration: TextDecoration.underline,
-            ))
-      ]),
-    );
+
+    // update controllers
+    titleController = widget.titleController ?? titleController;
+    contentController = widget.contentController ?? contentController;
+    sourceController = widget.sourceController ?? sourceController;
+    titleController.text = widget.note.title;
     contentController.text = widget.note.content;
+    sourceController.text = widget.note.source;
+
     noteChangeStream = db.noteChangeController.stream.listen(handleNoteEvent);
     db.getBacklinkNotes(widget.note).then((notes) {
       setState(() {
@@ -277,6 +289,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    print('build');
+    print(sourceController.text);
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {

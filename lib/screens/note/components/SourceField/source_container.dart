@@ -5,13 +5,13 @@ class SourceContainer extends StatefulWidget {
   const SourceContainer({
     Key? key,
     this.controller,
-    this.text = '',
+    this.text,
     this.onChanged,
     this.overrideSourceUrl = false,
     this.readOnly = false,
   }) : super(key: key);
 
-  final String text;
+  final String? text;
   final TextEditingController? controller;
   final VoidCallback? onChanged;
   final bool overrideSourceUrl;
@@ -28,7 +28,7 @@ class _SourceContainerState extends State<SourceContainer> {
   void initState() {
     super.initState();
     controller = widget.controller ?? controller;
-    controller.text = widget.text;
+    controller.text = widget.text ?? controller.text;
   }
 
   void launchURLBrowser(String url, BuildContext context) async {
