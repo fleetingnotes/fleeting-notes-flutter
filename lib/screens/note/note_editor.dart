@@ -38,7 +38,6 @@ class NoteEditor extends ConsumerStatefulWidget {
 }
 
 class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
-  List<Note> backlinkNotes = [];
   List<String> linkSuggestions = [];
   bool hasNewChanges = false;
   bool isNoteShareable = false;
@@ -80,11 +79,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     sourceController.text = widget.note.source;
 
     noteChangeStream = db.noteChangeController.stream.listen(handleNoteEvent);
-    db.getBacklinkNotes(widget.note).then((notes) {
-      setState(() {
-        backlinkNotes = notes;
-      });
-    });
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
   }
 
@@ -130,27 +124,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     // If we autosave every note, we would pollute pretty fast.
     if (hasNewChanges) {
       _saveNote();
-    }
-  }
-
-  // Helper functions
-  Future<void> checkTitle(id, title) async {
-    final db = ref.read(dbProvider);
-    if (title == '') return;
-
-    RegExp r = RegExp('[${Note.invalidChars}]');
-    final invalidMatch = r.firstMatch(titleController.text);
-    final titleExists =
-        await db.titleExists(widget.note.id, titleController.text);
-
-    if (invalidMatch != null) {
-      titleController.text = widget.note.title;
-      throw FleetingNotesException(
-          r'Title cannot contain [, ], #, *, :, ^, \, /');
-    } else if (titleExists) {
-      titleController.text = widget.note.title;
-      throw FleetingNotesException(
-          'Title `${widget.note.title}` already exists');
     }
   }
 
@@ -210,22 +183,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     }
   }
 
-  void onSearchNavigate(BuildContext context) {
-    final db = ref.read(dbProvider);
-    db.popAllRoutes();
-    db.navigateToSearch('');
-  }
-
-  void onCopyUrl() {
-    Clipboard.setData(ClipboardData(
-        text: p.join(
-            "https://my.fleetingnotes.app/", "?note=${widget.note.id}")));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('URL copied to clipboard'),
-      duration: Duration(seconds: 2),
-    ));
-  }
-
   void handleNoteEvent(NoteEvent e) {
     Note? n = e.notes.firstWhereOrNull((n) => n.id == widget.note.id);
     if (n == null) return;
@@ -269,28 +226,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     }
   }
 
-  void onAddAttachment(String filename, Uint8List? bytes) async {
-    final db = ref.read(dbProvider);
-    try {
-      String newFileName = '${widget.note.id}/$filename';
-      Note? newNote = await db.addAttachmentToNewNote(
-          filename: newFileName, fileBytes: bytes);
-      if (mounted && newNote != null) {
-        db.insertTextAtSelection(contentController, "[[${newNote.title}]]");
-        onChanged();
-      }
-    } on FleetingNotesException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.message),
-        duration: const Duration(seconds: 2),
-      ));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    print('build');
-    print(sourceController.text);
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {
