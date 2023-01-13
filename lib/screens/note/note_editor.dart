@@ -158,43 +158,23 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     }
   }
 
-  Future<void> _saveNote({updateState = true}) async {
-    final db = ref.read(dbProvider);
+  Future<void> _saveNote() async {
+    final noteUtils = ref.read(noteUtilsProvider);
     Note updatedNote = widget.note;
-    String prevTitle = widget.note.title;
     updatedNote.title = titleController.text;
     updatedNote.content = contentController.text;
     updatedNote.source = sourceController.text;
     updatedNote.isShareable = isNoteShareable;
     try {
-      try {
-        await checkTitle(updatedNote.id, updatedNote.title);
-      } on FleetingNotesException catch (_) {
-        titleController.text = prevTitle;
-        rethrow;
-      }
-      if (updateState) {
-        setState(() {
-          hasNewChanges = false;
-        });
-      }
-      bool isSaveSuccess =
-          await db.upsertNotes([updatedNote], setModifiedAt: true);
-      if (!isSaveSuccess) {
-        if (updateState) onChanged();
-        throw FleetingNotesException('Failed to save note');
-      } else {
-        db.settings.delete('unsaved-note');
-        await updateBacklinks(prevTitle, updatedNote.title);
-        setState(() {
-          savedAt = DateTime.now();
-        });
-      }
-    } on FleetingNotesException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.message),
-        duration: const Duration(seconds: 2),
-      ));
+      setState(() {
+        hasNewChanges = false;
+      });
+      await noteUtils.handleSaveNote(context, updatedNote);
+      setState(() {
+        savedAt = DateTime.now();
+      });
+    } on FleetingNotesException {
+      onChanged();
     }
   }
 

@@ -25,7 +25,13 @@ class NoteNotifier extends StateNotifier<List<Note>> {
 
   void addNote(Note note) {
     if (state.isEmpty || state.first.id != note.id) {
-      state = [note, ...state];
+      var newState = [...state];
+      newState.removeWhere((e) => e.id == note.id);
+      state = [
+        note,
+        for (final n in state)
+          if (n.id != note.id) n
+      ];
     }
     updateNotes([note]);
   }

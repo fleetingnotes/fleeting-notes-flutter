@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
-import 'package:fleeting_notes_flutter/services/note_utils.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
