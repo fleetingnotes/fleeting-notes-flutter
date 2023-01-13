@@ -93,6 +93,7 @@ class NoteUtils {
     var dbNote = await db.getNoteById(note.id);
     if (dbNote != null) {
       note = dbNote;
+      noteNotifier.addNote(dbNote);
     }
     await showDialog(
       context: context,
@@ -116,10 +117,14 @@ class NoteUtils {
         );
       },
     );
-    // TODO: make it so that notes are saved when dialog is closed in case dialog closed early
-    var postDialogNote = await db.getNoteById(note.id);
-    if (postDialogNote != null) {
-      noteNotifier.addNote(postDialogNote);
+    Note? unsavedNote = db.settings.get('unsaved-note');
+    if (unsavedNote != null) {
+      await handleSaveNote(context, unsavedNote);
+    } else {
+      var postDialogNote = await db.getNoteById(note.id);
+      if (postDialogNote != null) {
+        noteNotifier.addNote(postDialogNote);
+      }
     }
   }
 

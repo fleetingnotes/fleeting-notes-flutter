@@ -142,22 +142,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     }
   }
 
-  void _deleteNote() async {
-    final db = ref.read(dbProvider);
-    Note deletedNote = widget.note;
-    deletedNote.isDeleted = true;
-    bool isSuccessDelete = await db.deleteNotes([widget.note]);
-    if (isSuccessDelete) {
-      Navigator.pop(context);
-      db.noteHistory.remove(widget.note);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Fail to delete note'),
-        duration: Duration(seconds: 2),
-      ));
-    }
-  }
-
   Future<void> _saveNote() async {
     final noteUtils = ref.read(noteUtilsProvider);
     Note updatedNote = widget.note;
