@@ -89,7 +89,8 @@ class NoteUtils {
     }
   }
 
-  Future<void> openNoteEditorDialog(BuildContext context, Note note) async {
+  Future<void> openNoteEditorDialog(BuildContext context, Note note,
+      {bool isShared = false}) async {
     var dbNote = await db.getNoteById(note.id);
     if (dbNote != null) {
       note = dbNote;
@@ -112,7 +113,12 @@ class NoteUtils {
               )
             ],
           ),
-          content: SizedBox(width: 599, child: NoteEditor(note: note)),
+          content: SizedBox(
+              width: 599,
+              child: NoteEditor(
+                note: note,
+                isShared: isShared,
+              )),
         );
       },
     );

@@ -31,12 +31,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     super.initState();
     var note = widget.initNote;
     final db = ref.read(dbProvider);
-    if (note == null) {
-      hasInitNote = false;
-    } else {
-      hasInitNote = true;
-    }
+    hasInitNote = note != null;
     var isSharedNotes = db.isSharedNotes;
+    if (!db.settings.isFirstTimeOpen()) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        final noteUtils = ref.read(noteUtilsProvider);
+        var dialogNote = note;
+        dialogNote ??= Note.empty();
+        noteUtils.openNoteEditorDialog(context, dialogNote,
+            isShared: hasInitNote);
+      });
+    }
     if (!kDebugMode) analyticsDialogWorkflow();
     if (!db.isLoggedIn() && !isSharedNotes && db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
