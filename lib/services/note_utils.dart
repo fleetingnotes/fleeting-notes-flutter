@@ -118,7 +118,7 @@ class NoteUtils {
       },
     );
     Note? unsavedNote = db.settings.get('unsaved-note');
-    if (unsavedNote != null) {
+    if (unsavedNote != null && unsavedNote.id == note.id) {
       await handleSaveNote(context, unsavedNote);
     } else {
       var postDialogNote = await db.getNoteById(note.id);
