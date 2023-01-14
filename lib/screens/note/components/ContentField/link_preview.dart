@@ -26,7 +26,6 @@ class LinkPreview extends StatelessWidget {
     }
     return Positioned(
       width: width,
-      height: 150,
       child: CompositedTransformFollower(
         link: layerLink,
         offset: newCaretOffset,
