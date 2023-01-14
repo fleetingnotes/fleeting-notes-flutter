@@ -323,76 +323,82 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     return CompositedTransformTarget(
       link: layerLink,
       child: LayoutBuilder(builder: (context, size) {
-        return KeyboardActions(
-          enable: defaultTargetPlatform == TargetPlatform.android ||
-              defaultTargetPlatform == TargetPlatform.iOS,
-          disableScroll: true,
-          config: KeyboardActionsConfig(
-              keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
-              actions: [
-                KeyboardActionsItem(
-                  focusNode: contentFocusNode,
-                  displayArrows: false,
-                  displayDoneButton: false,
-                  toolbarAlignment: MainAxisAlignment.spaceAround,
-                  toolbarButtons: [
-                    (node) {
-                      return KeyboardButton(
-                        icon: '[]',
-                        onPressed: () {
-                          shortcuts.addLink();
-                          _onContentChanged(
-                              context, widget.controller.text, size);
-                        },
-                        tooltip: 'Add link',
-                      );
-                    },
-                    (node) {
-                      return KeyboardButton(
-                        icon: '#',
-                        onPressed: () {
-                          shortcuts.addTag();
-                          _onContentChanged(
-                              context, widget.controller.text, size);
-                        },
-                      );
-                    },
-                    (node) {
-                      return KeyboardButton(
-                        icon: Icons.checklist_outlined,
-                        onPressed: () {
-                          shortcuts.toggleCheckbox();
-                          _onContentChanged(
-                              context, widget.controller.text, size);
-                        },
-                      );
-                    },
-                    (node) {
-                      return const KeyboardButton(
-                        icon: 'Aa',
-                        disabled: true,
-                      );
-                    },
-                  ],
-                )
-              ]),
-          child: Actions(
-            actions: textfieldActions,
-            child: TextField(
-              focusNode: contentFocusNode,
-              textCapitalization: TextCapitalization.sentences,
-              autofocus: widget.autofocus,
-              controller: widget.controller,
-              keyboardType: TextInputType.multiline,
-              minLines: 5,
-              maxLines: null,
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(
-                hintText: "Note and links to other ideas",
-                border: InputBorder.none,
+        return WillPopScope(
+          onWillPop: () async {
+            removeOverlay();
+            return true;
+          },
+          child: KeyboardActions(
+            enable: defaultTargetPlatform == TargetPlatform.android ||
+                defaultTargetPlatform == TargetPlatform.iOS,
+            disableScroll: true,
+            config: KeyboardActionsConfig(
+                keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
+                actions: [
+                  KeyboardActionsItem(
+                    focusNode: contentFocusNode,
+                    displayArrows: false,
+                    displayDoneButton: false,
+                    toolbarAlignment: MainAxisAlignment.spaceAround,
+                    toolbarButtons: [
+                      (node) {
+                        return KeyboardButton(
+                          icon: '[]',
+                          onPressed: () {
+                            shortcuts.addLink();
+                            _onContentChanged(
+                                context, widget.controller.text, size);
+                          },
+                          tooltip: 'Add link',
+                        );
+                      },
+                      (node) {
+                        return KeyboardButton(
+                          icon: '#',
+                          onPressed: () {
+                            shortcuts.addTag();
+                            _onContentChanged(
+                                context, widget.controller.text, size);
+                          },
+                        );
+                      },
+                      (node) {
+                        return KeyboardButton(
+                          icon: Icons.checklist_outlined,
+                          onPressed: () {
+                            shortcuts.toggleCheckbox();
+                            _onContentChanged(
+                                context, widget.controller.text, size);
+                          },
+                        );
+                      },
+                      (node) {
+                        return const KeyboardButton(
+                          icon: 'Aa',
+                          disabled: true,
+                        );
+                      },
+                    ],
+                  )
+                ]),
+            child: Actions(
+              actions: textfieldActions,
+              child: TextField(
+                focusNode: contentFocusNode,
+                textCapitalization: TextCapitalization.sentences,
+                autofocus: widget.autofocus,
+                controller: widget.controller,
+                keyboardType: TextInputType.multiline,
+                minLines: 5,
+                maxLines: null,
+                style: Theme.of(context).textTheme.bodyMedium,
+                decoration: const InputDecoration(
+                  hintText: "Note and links to other ideas",
+                  border: InputBorder.none,
+                ),
+                onChanged: (text) => _onContentChanged(context, text, size),
+                onTap: () => _onContentTap(context, size),
               ),
-              onChanged: (text) => _onContentChanged(context, text, size),
-              onTap: () => _onContentTap(context, size),
             ),
           ),
         );
