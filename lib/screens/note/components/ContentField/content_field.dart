@@ -58,11 +58,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     });
     // NOTE: onKeyEvent doesn't ignore enter key press
     contentFocusNode = FocusNode(onKey: onKeyEvent);
-    contentFocusNode.addListener(() {
-      if (!contentFocusNode.hasFocus) {
-        removeOverlay();
-      }
-    });
     shortcuts = ShortcutActions(
       controller: widget.controller,
       bringEditorToFocus: contentFocusNode.requestFocus,
@@ -115,9 +110,10 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
   @override
   void dispose() {
-    super.dispose();
+    removeOverlay();
     contentFocusNode.dispose();
     pasteListener?.cancel();
+    super.dispose();
   }
 
   KeyEventResult onKeyEvent(node, e) {
@@ -191,7 +187,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   }
 
   Offset getCaretOffset(TextEditingController textController,
-      TextStyle textStyle, BoxConstraints size) {
+      TextStyle? textStyle, BoxConstraints size) {
     String beforeCaretText =
         textController.text.substring(0, textController.selection.baseOffset);
 
@@ -222,13 +218,14 @@ class _ContentFieldState extends ConsumerState<ContentField> {
           t.substring(caretI, t.length).replaceFirst(RegExp(r"^\]\]"), "");
       widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: linkIndex + link.length + 4));
+      widget.onChanged?.call();
       removeOverlay();
     }
 
     removeOverlay();
     Offset caretOffset = getCaretOffset(
       widget.controller,
-      Theme.of(context).textTheme.bodyText2!,
+      Theme.of(context).textTheme.bodyMedium,
       size,
     );
 
@@ -261,8 +258,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
 
     void _onFollowLinkTap(Note note) async {
-      final db = ref.read(dbProvider);
-      db.navigateToNote(note); // TODO: Deprecate
+      Navigator.pop(context, note);
       removeOverlay();
     }
 
@@ -270,18 +266,19 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     removeOverlay();
     Offset caretOffset = getCaretOffset(
       widget.controller,
-      Theme.of(context).textTheme.bodyText2!,
+      Theme.of(context).textTheme.bodyMedium!,
       size,
     );
     Widget builder(context) {
       return FutureBuilder<Note>(
           future: getFollowLinkNote(),
           builder: (BuildContext context, AsyncSnapshot<Note> snapshot) {
-            if (snapshot.hasData && snapshot.data != null) {
+            var note = snapshot.data;
+            if (note != null) {
               return LinkPreview(
-                note: snapshot.data!,
+                note: note,
                 caretOffset: caretOffset,
-                onTap: () => _onFollowLinkTap(snapshot.data!),
+                onTap: () => _onFollowLinkTap(note),
                 layerLink: layerLink,
               );
             } else {
@@ -297,14 +294,13 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     OverlayState? overlayState = Overlay.of(context);
     overlayEntry = OverlayEntry(builder: builder);
     // show overlay
-    if (overlayState != null) {
-      overlayState.insert(overlayEntry!);
-    }
+    overlayState.insert(overlayEntry ?? OverlayEntry(builder: builder));
+    contentFocusNode.unfocus();
   }
 
   void removeOverlay() {
-    if (overlayEntry != null && overlayEntry!.mounted) {
-      overlayEntry!.remove();
+    if (overlayEntry != null && overlayEntry?.mounted == true) {
+      overlayEntry?.remove();
       titleLinkQuery.value = '';
       overlayEntry = null;
     }

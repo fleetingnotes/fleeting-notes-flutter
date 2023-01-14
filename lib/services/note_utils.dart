@@ -134,7 +134,7 @@ class NoteUtils {
       ]),
     );
 
-    await showDialog(
+    Note? poppedNote = await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -166,14 +166,18 @@ class NoteUtils {
         );
       },
     );
-    Note? unsavedNote = db.settings.get('unsaved-note');
-    if (unsavedNote != null && unsavedNote.id == note.id) {
-      noteNotifier.addNote(unsavedNote);
-      await handleSaveNote(context, unsavedNote);
+    if (poppedNote != null) {
+      noteNotifier.addNote(poppedNote);
     } else {
-      var postDialogNote = await db.getNoteById(note.id);
-      if (postDialogNote != null) {
-        noteNotifier.addNote(postDialogNote);
+      Note? unsavedNote = db.settings.get('unsaved-note');
+      if (unsavedNote != null && unsavedNote.id == note.id) {
+        noteNotifier.addNote(unsavedNote);
+        await handleSaveNote(context, unsavedNote);
+      } else {
+        var postDialogNote = await db.getNoteById(note.id);
+        if (postDialogNote != null) {
+          noteNotifier.addNote(postDialogNote);
+        }
       }
     }
   }

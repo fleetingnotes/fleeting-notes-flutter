@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import '../../../../models/Note.dart';
 
@@ -29,38 +30,12 @@ class LinkPreview extends StatelessWidget {
       child: CompositedTransformFollower(
         link: layerLink,
         offset: newCaretOffset,
-        child: Material(
-          child: OutlinedButton(
-              onPressed: onTap,
-              style: const ButtonStyle(alignment: Alignment.topLeft),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 15),
-                  Text(
-                    note.title,
-                    maxLines: 1,
-                    textAlign: TextAlign.start,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textTheme.bodyText1?.color,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    note.content,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 3,
-                    style: Theme.of(context).textTheme.bodyText2,
-                  ),
-                  const Spacer(),
-                  Text(note.getDateTimeStr(),
-                      style: Theme.of(context).textTheme.caption),
-                  const SizedBox(height: 15)
-                ],
-              )),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: NoteCard(
+            note: note,
+            onTap: onTap,
+          ),
         ),
       ),
     );

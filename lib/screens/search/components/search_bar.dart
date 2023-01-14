@@ -146,7 +146,6 @@ class _SearchBarState extends ConsumerState<SearchBar> {
               ],
             ),
           ),
-          // if (hasFocus) const Divider()
         ],
       ),
     );
