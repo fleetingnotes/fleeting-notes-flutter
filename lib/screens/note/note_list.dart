@@ -14,6 +14,23 @@ class _NoteListState extends ConsumerState<NoteList> {
   @override
   Widget build(BuildContext context) {
     final notes = ref.watch(viewedNotesProvider);
+    if (notes.isEmpty) {
+      return Center(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.description_outlined,
+            size: 64,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Notes you view appear here',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ],
+      ));
+    }
     return ListView.builder(
       padding: const EdgeInsets.only(top: 4, right: 8),
       itemCount: notes.length,
