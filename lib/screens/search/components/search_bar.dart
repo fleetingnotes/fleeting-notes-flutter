@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/search_query.dart';
+import '../../../utils/responsive.dart';
 
 class SearchBar extends ConsumerStatefulWidget {
   const SearchBar({
@@ -81,30 +82,17 @@ class _SearchBarState extends ConsumerState<SearchBar> {
             elevation: (hasFocus) ? 0 : 3,
             child: Row(
               children: [
-                (hasFocus)
-                    ? (Padding(
-                        padding: const EdgeInsets.only(left: 16),
-                        child: IconButton(
-                          padding: const EdgeInsets.all(0),
-                          onPressed: () {
-                            searchNotifier.updateSearch(SearchQuery(query: ''));
-                            focusNode.unfocus();
-                            setState(() {
-                              hasFocus = false;
-                            });
-                          },
-                          icon: const Icon(Icons.arrow_back, size: 24),
-                        ),
-                      ))
-                    : (Padding(
-                        padding: const EdgeInsets.only(left: 16),
-                        child: IconButton(
-                          tooltip: 'Open Menu',
-                          padding: const EdgeInsets.all(0),
-                          onPressed: widget.onMenuPressed,
-                          icon: const Icon(Icons.menu_outlined, size: 24),
-                        ),
-                      )),
+                LeadingIcon(
+                  hasFocus: hasFocus,
+                  onBack: () {
+                    searchNotifier.updateSearch(SearchQuery(query: ''));
+                    focusNode.unfocus();
+                    setState(() {
+                      hasFocus = false;
+                    });
+                  },
+                  onMenu: widget.onMenuPressed,
+                ),
                 Expanded(
                   child: TextField(
                     focusNode: focusNode,
@@ -149,5 +137,44 @@ class _SearchBarState extends ConsumerState<SearchBar> {
         ],
       ),
     );
+  }
+}
+
+class LeadingIcon extends StatelessWidget {
+  const LeadingIcon({
+    super.key,
+    required this.hasFocus,
+    this.onBack,
+    this.onMenu,
+  });
+
+  final bool hasFocus;
+  final VoidCallback? onBack;
+  final VoidCallback? onMenu;
+
+  @override
+  Widget build(BuildContext context) {
+    if (hasFocus) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 16),
+        child: IconButton(
+          padding: const EdgeInsets.all(0),
+          onPressed: onBack,
+          icon: const Icon(Icons.arrow_back, size: 24),
+        ),
+      );
+    } else if (Responsive.isMobile(context)) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 16),
+        child: IconButton(
+          tooltip: 'Open Menu',
+          padding: const EdgeInsets.all(0),
+          onPressed: onMenu,
+          icon: const Icon(Icons.menu_outlined, size: 24),
+        ),
+      );
+    } else {
+      return const SizedBox(width: 16);
+    }
   }
 }

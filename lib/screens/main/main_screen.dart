@@ -13,6 +13,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'components/analytics_dialog.dart';
+import 'components/note_fab.dart';
+import 'components/side_rail.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({Key? key, this.initNote}) : super(key: key);
@@ -24,6 +26,7 @@ class MainScreen extends ConsumerStatefulWidget {
 
 class _MainScreenState extends ConsumerState<MainScreen> {
   FocusNode searchFocusNode = FocusNode();
+  Widget? desktopSideWidget;
   late bool hasInitNote;
   bool bannerExists = false;
   @override
@@ -123,10 +126,27 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
+  void addNote() {
+    final noteUtils = ref.read(noteUtilsProvider);
+    final db = ref.read(dbProvider);
+    db.closeDrawer();
+    noteUtils.openNoteEditorDialog(context, Note.empty());
+  }
+
+  void toggleDrawerDesktop() {
+    setState(() {
+      if (desktopSideWidget == null) {
+        desktopSideWidget = SideMenu(
+            addNote: addNote, closeDrawer: toggleDrawerDesktop, width: 240);
+      } else {
+        desktopSideWidget = null;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    final noteUtils = ref.watch(noteUtilsProvider);
     return WillPopScope(
       onWillPop: () async {
         return !db.canPop();
@@ -143,22 +163,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           child: Scaffold(
             key: db.scaffoldKey,
             resizeToAvoidBottomInset: false,
-            drawer: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 250),
-              child: const SideMenu(),
-            ),
-            floatingActionButton: FloatingActionButton(
-              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-              child: const Icon(Icons.add),
-              tooltip: 'Add note',
-              onPressed: () {
-                noteUtils.openNoteEditorDialog(context, Note.empty());
-              },
-            ),
+            drawer: (Responsive.isDesktop(context))
+                ? null
+                : SideMenu(
+                    addNote: addNote,
+                    closeDrawer: db.closeDrawer,
+                  ),
+            floatingActionButton: (Responsive.isMobile(context))
+                ? NoteFAB(onPressed: addNote)
+                : null,
             body: Responsive(
               mobile: SearchScreenNavigator(hasInitNote: hasInitNote),
               tablet: Row(
                 children: [
+                  SideRail(addNote: addNote, onMenu: db.openDrawer),
                   Expanded(
                     flex: 6,
                     child: SearchScreen(
@@ -174,8 +192,30 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               ),
               desktop: Row(
                 children: [
-                  Expanded(
-                    flex: 3,
+                  Stack(
+                    children: [
+                      SideRail(addNote: addNote, onMenu: toggleDrawerDesktop),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder: (widget, animation) {
+                          const begin = Offset(-1.0, 0.0);
+                          const end = Offset.zero;
+                          const curve = Curves.ease;
+
+                          final tween = Tween(begin: begin, end: end)
+                              .chain(CurveTween(curve: curve));
+                          final offsetAnimation = animation.drive(tween);
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: widget,
+                          );
+                        },
+                        child: desktopSideWidget,
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    width: 360,
                     child: SearchScreen(
                       key: db.searchKey,
                       searchFocusNode: searchFocusNode,

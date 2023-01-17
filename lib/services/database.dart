@@ -293,6 +293,10 @@ class Database {
     scaffoldKey.currentState?.openDrawer();
   }
 
+  void closeDrawer() {
+    scaffoldKey.currentState?.closeDrawer();
+  }
+
   Future<StreamSubscription> listenNoteChange(
       Function(NoteEvent) callback) async {
     return noteChangeController.stream.listen((event) {
