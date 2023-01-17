@@ -15,6 +15,7 @@ class _NoteListState extends ConsumerState<NoteList> {
   Widget build(BuildContext context) {
     final notes = ref.watch(viewedNotesProvider);
     return ListView.builder(
+      padding: const EdgeInsets.only(top: 4, right: 8),
       itemCount: notes.length,
       itemBuilder: (context, i) {
         return LargeNoteCard(
