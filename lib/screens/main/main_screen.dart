@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/note/note_list.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../models/search_query.dart';
 import 'components/analytics_dialog.dart';
 import 'components/note_fab.dart';
 import 'components/side_rail.dart';
@@ -29,6 +31,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget? desktopSideWidget;
   late bool hasInitNote;
   bool bannerExists = false;
+  bool hasSearchFocus = false;
   @override
   void initState() {
     super.initState();
@@ -59,7 +62,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     // wait to make sure the user is logged in
                     Future.delayed(const Duration(milliseconds: 500), () {
                       setState(() {
-                        db.refreshApp();
+                        db.refreshApp(ref);
                       });
                     });
                   },
@@ -79,7 +82,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                   setState(() {
                     hasInitNote = false;
                     bannerExists = false;
-                    db.refreshApp();
+                    db.refreshApp(ref);
                   });
                   context.go('/');
                 },
@@ -92,6 +95,31 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         bannerExists = true;
       });
     }
+    searchFocusNode.addListener(searchFocusListener);
+  }
+
+  @override
+  void dispose() {
+    searchFocusNode.removeListener(searchFocusListener);
+    super.dispose();
+  }
+
+  void searchFocusListener() {
+    bool nodeHasFocus = searchFocusNode.hasFocus;
+    if (nodeHasFocus) {
+      setState(() {
+        hasSearchFocus = true;
+      });
+    }
+  }
+
+  void removeSearchFocus() {
+    final searchNotifier = ref.read(searchProvider.notifier);
+    searchNotifier.updateSearch(SearchQuery(query: ''));
+    searchFocusNode.unfocus();
+    setState(() {
+      hasSearchFocus = false;
+    });
   }
 
   void analyticsDialogWorkflow() {
@@ -130,6 +158,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final noteUtils = ref.read(noteUtilsProvider);
     final db = ref.read(dbProvider);
     db.closeDrawer();
+    removeSearchFocus();
     noteUtils.openNoteEditorDialog(context, Note.empty());
   }
 
@@ -147,6 +176,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    ref.listen<SearchQuery>(searchProvider, (_, sq) {
+      setState(() {
+        hasSearchFocus = sq.query.isNotEmpty || hasSearchFocus;
+      });
+    });
     return WillPopScope(
       onWillPop: () async {
         return !db.canPop();
@@ -173,7 +207,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 ? NoteFAB(onPressed: addNote)
                 : null,
             body: Responsive(
-              mobile: SearchScreenNavigator(hasInitNote: hasInitNote),
+              mobile: SearchScreen(
+                searchFocusNode: searchFocusNode,
+                removeSearchFocus: removeSearchFocus,
+                hasSearchFocus: hasSearchFocus,
+                child: (hasSearchFocus) ? null : const NoteList(),
+              ),
               tablet: Row(
                 children: [
                   SideRail(addNote: addNote, onMenu: db.openDrawer),
@@ -181,6 +220,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     flex: 6,
                     child: SearchScreen(
                       key: db.searchKey,
+                      removeSearchFocus: removeSearchFocus,
+                      hasSearchFocus: hasSearchFocus,
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
@@ -218,6 +259,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     width: 360,
                     child: SearchScreen(
                       key: db.searchKey,
+                      removeSearchFocus: removeSearchFocus,
+                      hasSearchFocus: hasSearchFocus,
                       searchFocusNode: searchFocusNode,
                     ),
                   ),

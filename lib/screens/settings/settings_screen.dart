@@ -173,7 +173,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return EncryptionDialog(setEncryptionKey: (key) async {
           await db.supabase.setEncryptionKey(key);
           getEncryptionKey();
-          db.refreshApp();
+          db.refreshApp(ref);
         });
       },
     );

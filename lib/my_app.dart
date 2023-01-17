@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
@@ -35,7 +36,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
     if (user != null) {
       db.getAllNotes(forceSync: true);
     }
-    db.refreshApp();
+    db.refreshApp(ref);
   }
 
   @override
@@ -55,7 +56,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
     });
 
     authChangeController?.stream.listen(refreshApp);
-    refreshApp(db.supabase.currUser);
+    SchedulerBinding.instance
+        .addPostFrameCallback((_) => refreshApp(db.supabase.currUser));
     if (kIsWeb) {
       setState(() {
         initNote = db.settings.get('unsaved-note');

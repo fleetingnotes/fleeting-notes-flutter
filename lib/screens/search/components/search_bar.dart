@@ -9,23 +9,26 @@ import '../../../utils/responsive.dart';
 class SearchBar extends ConsumerStatefulWidget {
   const SearchBar({
     Key? key,
-    required this.onMenuPressed,
+    required this.onMenu,
+    required this.onBack,
     this.onChanged,
     this.controller,
     this.focusNode,
+    this.hasSearchFocus = false,
   }) : super(key: key);
 
-  final VoidCallback onMenuPressed;
+  final VoidCallback onMenu;
+  final VoidCallback onBack;
   final VoidCallback? onChanged;
   final TextEditingController? controller;
   final FocusNode? focusNode;
+  final bool hasSearchFocus;
 
   @override
   ConsumerState<SearchBar> createState() => _SearchBarState();
 }
 
 class _SearchBarState extends ConsumerState<SearchBar> {
-  bool hasFocus = false;
   bool maintainFocus = false;
   FocusNode focusNode = FocusNode();
 
@@ -33,22 +36,6 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   void initState() {
     super.initState();
     focusNode = widget.focusNode ?? focusNode;
-    focusNode.addListener(onSearchFocusChange);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    focusNode.removeListener(onSearchFocusChange);
-  }
-
-  onSearchFocusChange() {
-    bool nodeHasFocus = focusNode.hasFocus;
-    if (nodeHasFocus) {
-      setState(() {
-        hasFocus = true;
-      });
-    }
   }
 
   onQueryChange(String val) {
@@ -60,38 +47,27 @@ class _SearchBarState extends ConsumerState<SearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    var searchNotifier = ref.watch(searchProvider.notifier);
-    ref.listen<SearchQuery>(searchProvider, (_, sq) {
-      setState(() {
-        hasFocus = sq.query.isNotEmpty || hasFocus;
-      });
-    });
     return AnimatedContainer(
       duration: const Duration(milliseconds: 100),
       margin: EdgeInsets.symmetric(
-        vertical: (hasFocus) ? 0 : 4,
-        horizontal: (hasFocus) ? 0 : 16,
+        vertical: (widget.hasSearchFocus) ? 0 : 4,
+        horizontal: (widget.hasSearchFocus) ? 0 : 16,
       ),
-      padding: EdgeInsets.symmetric(vertical: (hasFocus) ? 4 : 0),
+      padding: EdgeInsets.symmetric(vertical: (widget.hasSearchFocus) ? 4 : 0),
       child: Column(
         children: [
           Card(
             shape: RoundedRectangleBorder(
-                borderRadius:
-                    (hasFocus) ? BorderRadius.zero : BorderRadius.circular(30)),
-            elevation: (hasFocus) ? 0 : 3,
+                borderRadius: (widget.hasSearchFocus)
+                    ? BorderRadius.zero
+                    : BorderRadius.circular(30)),
+            elevation: (widget.hasSearchFocus) ? 0 : 3,
             child: Row(
               children: [
                 LeadingIcon(
-                  hasFocus: hasFocus,
-                  onBack: () {
-                    searchNotifier.updateSearch(SearchQuery(query: ''));
-                    focusNode.unfocus();
-                    setState(() {
-                      hasFocus = false;
-                    });
-                  },
-                  onMenu: widget.onMenuPressed,
+                  hasFocus: widget.hasSearchFocus,
+                  onBack: widget.onBack,
+                  onMenu: widget.onMenu,
                 ),
                 Expanded(
                   child: TextField(
@@ -107,7 +83,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
                     ),
                   ),
                 ),
-                (hasFocus)
+                (widget.hasSearchFocus)
                     ? (Padding(
                         padding: const EdgeInsets.only(right: 16),
                         child: IconButton(

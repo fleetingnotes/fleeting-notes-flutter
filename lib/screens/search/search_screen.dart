@@ -7,18 +7,23 @@ import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../utils/responsive.dart';
-import '../note/note_editor.dart';
 import 'components/modify_notes_bar.dart';
 import 'components/search_bar.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({
     Key? key,
+    required this.removeSearchFocus,
     this.searchFocusNode,
+    this.child,
+    this.hasSearchFocus = false,
     // keep track of notes selected
   }) : super(key: key);
 
   final FocusNode? searchFocusNode;
+  final VoidCallback removeSearchFocus;
+  final Widget? child;
+  final bool hasSearchFocus;
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -127,16 +132,53 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
+  Widget getSearchList() {
+    final searchQuery = ref.read(searchProvider);
+    return SafeArea(
+      right: false,
+      child: Column(
+        children: [
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _pullRefreshNotes,
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                key: const PageStorageKey('ListOfNotes'),
+                controller: scrollController,
+                itemCount: notes.length,
+                padding: const EdgeInsets.all(8),
+                itemBuilder: (context, index) => NoteCard(
+                  sQuery: searchQuery,
+                  note: notes[index],
+                  isActive: Responsive.isMobile(context)
+                      ? false
+                      : notes[index].id == activeNoteId,
+                  isSelected: selectedNotes.contains(notes[index]),
+                  onLongPress: () {
+                    _longPressNote(context, notes[index]);
+                  },
+                  onTap: () {
+                    _pressNote(context, notes[index]);
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    final searchQuery = ref.watch(searchProvider);
     ref.listen<SearchQuery>(searchProvider, (_, sq) {
       if (queryController.text != sq.query) {
         queryController.text = sq.query;
       }
       loadNotes();
     });
+    Widget? child = widget.child;
     return Scaffold(
       appBar: selectedNotes.isNotEmpty
           ? PreferredSize(
@@ -149,78 +191,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           : PreferredSize(
               preferredSize: const Size.fromHeight(72),
               child: SearchBar(
-                onMenuPressed: db.openDrawer,
+                hasSearchFocus: widget.hasSearchFocus,
+                onMenu: db.openDrawer,
+                onBack: widget.removeSearchFocus,
                 controller: queryController,
                 focusNode: widget.searchFocusNode,
               ),
             ),
-      body: SafeArea(
-        right: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: _pullRefreshNotes,
-                child: ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  key: const PageStorageKey('ListOfNotes'),
-                  controller: scrollController,
-                  itemCount: notes.length,
-                  padding: const EdgeInsets.all(8),
-                  itemBuilder: (context, index) => NoteCard(
-                    sQuery: searchQuery,
-                    note: notes[index],
-                    isActive: Responsive.isMobile(context)
-                        ? false
-                        : notes[index].id == activeNoteId,
-                    isSelected: selectedNotes.contains(notes[index]),
-                    onLongPress: () {
-                      _longPressNote(context, notes[index]);
-                    },
-                    onTap: () {
-                      _pressNote(context, notes[index]);
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SearchScreenNavigator extends ConsumerWidget {
-  const SearchScreenNavigator({
-    Key? key,
-    this.hasInitNote = false,
-  }) : super(key: key);
-
-  final bool hasInitNote;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final db = ref.watch(dbProvider);
-    var history = db.noteHistory.entries.toList();
-    db.navigatorKey = GlobalKey<NavigatorState>();
-    return Navigator(
-      key: db.navigatorKey,
-      onGenerateRoute: (route) => PageRouteBuilder(
-          settings: route,
-          pageBuilder: (context, _, __) {
-            if (history.isEmpty || history.first.key.isEmpty()) {
-              return SearchScreen(
-                key: db.searchKey,
-              );
-            } else {
-              return NoteEditor(
-                key: history.first.value,
-                note: history.first.key,
-                isShared: hasInitNote,
-              );
-            }
-          }),
+      body: (child == null) ? getSearchList() : child,
     );
   }
 }

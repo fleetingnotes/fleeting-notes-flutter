@@ -59,4 +59,8 @@ class NoteNotifier extends StateNotifier<List<Note>> {
         if (!noteIdsSet.contains(note.id)) note
     ];
   }
+
+  void deleteAllNotes() {
+    state = [];
+  }
 }

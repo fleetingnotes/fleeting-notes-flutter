@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
-import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:fleeting_notes_flutter/services/text_similarity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:mime/mime.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -45,6 +46,7 @@ class Database {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey searchKey = GlobalKey();
   Map<Note, GlobalKey> noteHistory = {};
+  FocusNode searchFocusNode = FocusNode();
   RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
   StreamController<NoteEvent> noteChangeController =
       StreamController.broadcast();
@@ -254,14 +256,14 @@ class Database {
   }
 
   // TODO: Move this out of db
-  void navigateToSearch(String query) {
-    navigatorKey.currentState?.push(
-      PageRouteBuilder(
-        pageBuilder: (context, _, __) => const SearchScreen(),
-        transitionsBuilder: _transitionBuilder,
-      ),
-    );
-  }
+  // void navigateToSearch(String query) {
+  //   navigatorKey.currentState?.push(
+  //     PageRouteBuilder(
+  //       pageBuilder: (context, _, __) => const SearchScreen(),
+  //       transitionsBuilder: _transitionBuilder,
+  //     ),
+  //   );
+  // }
 
   // TODO: Move this out of db
   SlideTransition _transitionBuilder(
@@ -373,11 +375,12 @@ class Database {
         TextSelection.fromPosition(TextPosition(offset: start + text.length));
   }
 
-  void refreshApp() {
+  void refreshApp(WidgetRef ref) {
+    final search = ref.read(searchProvider.notifier);
+    final viewedNotes = ref.read(viewedNotesProvider.notifier);
     shareUserId = null;
     popAllRoutes();
-    searchKey = GlobalKey();
-    noteHistory = {Note.empty(): GlobalKey()};
-    navigateToSearch('');
+    search.updateSearch(SearchQuery(query: ''));
+    viewedNotes.deleteAllNotes();
   }
 }
