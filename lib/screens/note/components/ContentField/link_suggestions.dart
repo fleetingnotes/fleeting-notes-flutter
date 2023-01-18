@@ -99,7 +99,8 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
       child: CompositedTransformFollower(
         link: widget.layerLink,
         offset: newCaretOffset,
-        child: Material(
+        child: Card(
+          clipBehavior: Clip.hardEdge,
           child: ListView.builder(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
