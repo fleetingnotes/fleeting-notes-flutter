@@ -240,7 +240,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 children: [
                   Stack(
                     children: [
-                      SideRail(addNote: addNote, onMenu: toggleDrawerDesktop),
+                      if (desktopSideWidget == null)
+                        SideRail(addNote: addNote, onMenu: toggleDrawerDesktop),
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
                         transitionBuilder: (widget, animation) {

@@ -1,5 +1,6 @@
 import 'package:fleeting_notes_flutter/services/notifier.dart';
 import 'package:fleeting_notes_flutter/utils/responsive.dart';
+import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -129,17 +130,16 @@ class NoteUtils {
           );
         }
         return Dialog(
-          elevation: 3,
+          elevation: dialogElevation,
+          clipBehavior: Clip.hardEdge,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30)),
+          ),
           child: SizedBox(
             width: 599,
             child: NoteEditorScreen(
               isShared: isShared,
               note: note,
-              appbarElevation: 3,
-              appbarShape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30))),
             ),
           ),
         );

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -100,7 +101,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
           routes: [
             GoRoute(
               path: 'settings',
-              builder: (context, _) => const SettingsScreen(),
+              pageBuilder: (context, _) =>
+                  const DialogPage(child: SettingsScreen()),
             ),
             // https://github.com/flutter/flutter/issues/115355
             // redirect will use empty location if below is not present

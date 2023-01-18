@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:flutter/material.dart';
 
 class SideMenu extends StatelessWidget {
@@ -14,11 +15,10 @@ class SideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final db = ref.watch(dbProvider);
-    // bool darkMode = settings.get('dark-mode', defaultValue: false);
     return SizedBox(
       width: width,
       child: NavigationDrawer(
+        onDestinationSelected: (v) => onDestinationSelected(context, v),
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),

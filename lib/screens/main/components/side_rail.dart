@@ -1,5 +1,14 @@
 import 'package:fleeting_notes_flutter/screens/main/components/note_fab.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+void onDestinationSelected(BuildContext context, int v) {
+  if (v == 0) {
+    context.go('/');
+  } else if (v == 1) {
+    context.go('/settings');
+  }
+}
 
 class SideRail extends StatelessWidget {
   const SideRail({
@@ -14,6 +23,7 @@ class SideRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NavigationRail(
+      onDestinationSelected: (v) => onDestinationSelected(context, v),
       leading: Column(
         children: [
           Padding(

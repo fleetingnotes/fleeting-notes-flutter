@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
+import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -9,6 +10,7 @@ import '../../models/Note.dart';
 import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
+import '../../utils/responsive.dart';
 import 'components/note_popup_menu.dart';
 import 'note_editor.dart';
 
@@ -17,13 +19,11 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
     super.key,
     required this.note,
     required this.isShared,
-    this.appbarShape,
     this.appbarElevation,
   });
 
   final Note note;
   final bool isShared;
-  final ShapeBorder? appbarShape;
   final double? appbarElevation;
 
   @override
@@ -49,8 +49,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         AppBar(
-          shape: widget.appbarShape,
-          elevation: widget.appbarElevation,
+          elevation: (Responsive.isMobile(context)) ? null : dialogElevation,
           leading: IconButton(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.close),
