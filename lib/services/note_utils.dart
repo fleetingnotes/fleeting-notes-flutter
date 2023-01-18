@@ -1,14 +1,11 @@
 import 'package:fleeting_notes_flutter/services/notifier.dart';
+import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/Note.dart';
 import '../models/exceptions.dart';
-import '../screens/note/stylable_textfield_controller.dart';
-import '../models/text_part_style_definition.dart';
-import '../models/text_part_style_definitions.dart';
-import '../screens/note/components/note_popup_menu.dart';
-import '../screens/note/note_editor.dart';
+import '../screens/note/note_editor_screen.dart';
 import 'database.dart';
 import 'package:path/path.dart' as p;
 
@@ -123,46 +120,28 @@ class NoteUtils {
       note = dbNote;
     }
 
-    TextEditingController contentController = StyleableTextFieldController(
-      styles: TextPartStyleDefinitions(definitionList: [
-        TextPartStyleDefinition(
-            pattern: Note.linkRegex,
-            style: const TextStyle(
-              color: Color.fromARGB(255, 138, 180, 248),
-              decoration: TextDecoration.underline,
-            ))
-      ]),
-    );
-
     Note? poppedNote = await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Row(
-            children: [
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close),
-              ),
-              const SizedBox(width: 8),
-              const Text("Edit Note"),
-              const Spacer(),
-              NotePopupMenu(
-                note: note,
-                onAddAttachment: (String fn, Uint8List? fb) {
-                  onAddAttachment(context, note, fn, fb,
-                      controller: contentController);
-                },
-              )
-            ],
+        if (Responsive.isMobile(context)) {
+          return Dialog.fullscreen(
+            child: NoteEditorScreen(isShared: isShared, note: note),
+          );
+        }
+        return Dialog(
+          elevation: 3,
+          child: SizedBox(
+            width: 599,
+            child: NoteEditorScreen(
+              isShared: isShared,
+              note: note,
+              appbarElevation: 3,
+              appbarShape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30))),
+            ),
           ),
-          content: SizedBox(
-              width: 599,
-              child: NoteEditor(
-                note: note,
-                contentController: contentController,
-                isShared: isShared,
-              )),
         );
       },
     );

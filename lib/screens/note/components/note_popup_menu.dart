@@ -14,7 +14,6 @@ class NotePopupMenu extends ConsumerStatefulWidget {
     this.onAddAttachment,
     this.backlinksOption = true,
     this.deleteOption = true,
-    this.attachmentOption = false,
     this.shareOption = false,
   }) : super(key: key);
 
@@ -22,7 +21,6 @@ class NotePopupMenu extends ConsumerStatefulWidget {
   final Function(String, Uint8List?)? onAddAttachment;
   final bool backlinksOption;
   final bool deleteOption;
-  final bool attachmentOption;
   final bool shareOption;
 
   @override

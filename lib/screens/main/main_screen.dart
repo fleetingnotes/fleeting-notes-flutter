@@ -8,7 +8,6 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_menu.dart';
 import 'package:fleeting_notes_flutter/utils/responsive.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

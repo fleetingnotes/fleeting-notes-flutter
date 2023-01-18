@@ -23,6 +23,7 @@ class NoteEditor extends ConsumerStatefulWidget {
     this.contentController,
     this.sourceController,
     this.isShared = false,
+    this.padding,
   }) : super(key: key);
 
   final Note note;
@@ -30,6 +31,7 @@ class NoteEditor extends ConsumerStatefulWidget {
   final TextEditingController? titleController;
   final TextEditingController? contentController;
   final TextEditingController? sourceController;
+  final EdgeInsetsGeometry? padding;
 
   @override
   _NoteEditorState createState() => _NoteEditorState();
@@ -237,26 +239,29 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
       },
       child: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TitleField(
-                controller: titleController,
-                onChanged: onChanged,
-              ),
-              ContentField(
-                controller: contentController,
-                onChanged: onChanged,
-                autofocus: true,
-              ),
-              const SizedBox(height: 8),
-              SourceContainer(
-                controller: sourceController,
-                onChanged: onChanged,
-                overrideSourceUrl: widget.note.isEmpty(),
-              ),
-            ],
+          child: Padding(
+            padding: widget.padding ?? EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TitleField(
+                  controller: titleController,
+                  onChanged: onChanged,
+                ),
+                ContentField(
+                  controller: contentController,
+                  onChanged: onChanged,
+                  autofocus: true,
+                ),
+                const SizedBox(height: 8),
+                SourceContainer(
+                  controller: sourceController,
+                  onChanged: onChanged,
+                  overrideSourceUrl: widget.note.isEmpty(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
