@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/Note.dart';
 import '../models/exceptions.dart';
@@ -164,6 +165,28 @@ class NoteUtils {
           noteNotifier.addNote(postDialogNote);
         }
       }
+    }
+  }
+
+  void launchURLBrowser(String url, BuildContext context) async {
+    void _failUrlSnackbar(String message) {
+      var snackBar = SnackBar(
+        content: Text(message),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+
+    Uri? uri = Uri.tryParse(url);
+    if (uri == null) {
+      String errText = 'Could not launch `$url`';
+      _failUrlSnackbar(errText);
+      return;
+    }
+    try {
+      await launchUrl(uri);
+    } catch (e) {
+      String errText = 'Could not launch `$url`';
+      _failUrlSnackbar(errText);
     }
   }
 

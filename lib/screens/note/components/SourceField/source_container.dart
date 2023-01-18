@@ -1,7 +1,8 @@
-import 'package:url_launcher/url_launcher.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
-class SourceContainer extends StatefulWidget {
+class SourceContainer extends ConsumerStatefulWidget {
   const SourceContainer({
     Key? key,
     this.controller,
@@ -18,10 +19,10 @@ class SourceContainer extends StatefulWidget {
   final bool readOnly;
 
   @override
-  State<SourceContainer> createState() => _SourceContainerState();
+  ConsumerState<SourceContainer> createState() => _SourceContainerState();
 }
 
-class _SourceContainerState extends State<SourceContainer> {
+class _SourceContainerState extends ConsumerState<SourceContainer> {
   TextEditingController controller = TextEditingController();
 
   @override
@@ -31,30 +32,10 @@ class _SourceContainerState extends State<SourceContainer> {
     controller.text = widget.text ?? controller.text;
   }
 
-  void launchURLBrowser(String url, BuildContext context) async {
-    void _failUrlSnackbar(String message) {
-      var snackBar = SnackBar(
-        content: Text(message),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
-
-    Uri? uri = Uri.tryParse(url);
-    if (uri == null) {
-      String errText = 'Could not launch `$url`';
-      _failUrlSnackbar(errText);
-      return;
-    }
-    try {
-      await launchUrl(uri);
-    } catch (e) {
-      String errText = 'Could not launch `$url`';
-      _failUrlSnackbar(errText);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final noteUtils = ref.watch(noteUtilsProvider);
+
     return TextField(
       readOnly: widget.readOnly,
       style: Theme.of(context).textTheme.bodyMedium,
@@ -72,7 +53,7 @@ class _SourceContainerState extends State<SourceContainer> {
             icon: const Icon(Icons.open_in_new),
             onPressed: (controller.text == '')
                 ? null
-                : () => launchURLBrowser(controller.text, context),
+                : () => noteUtils.launchURLBrowser(controller.text, context),
           ),
         ),
       ),

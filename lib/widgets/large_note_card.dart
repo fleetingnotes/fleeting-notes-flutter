@@ -107,14 +107,19 @@ class LargeNoteCard extends ConsumerWidget {
                                 data: note.content,
                                 softLineBreak: true,
                                 selectable: true,
+                                onTapLink: (text, href, title) {
+                                  if (href != null) {
+                                    noteUtils.launchURLBrowser(href, context);
+                                  }
+                                },
                                 extensionSet: md.ExtensionSet(
-                                    md.ExtensionSet.gitHubFlavored
-                                        .blockSyntaxes,
-                                    [
-                                      md.EmojiSyntax(),
-                                      ...md.ExtensionSet.gitHubFlavored
-                                          .inlineSyntaxes,
-                                    ]),
+                                  md.ExtensionSet.gitHubFlavored.blockSyntaxes,
+                                  [
+                                    md.EmojiSyntax(),
+                                    ...md.ExtensionSet.gitHubFlavored
+                                        .inlineSyntaxes,
+                                  ],
+                                ),
                               ),
                             ),
                           if (note.source.isNotEmpty)
