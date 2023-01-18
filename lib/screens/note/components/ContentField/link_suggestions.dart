@@ -120,10 +120,11 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
                   hoverColor: Colors.transparent,
                   title: RichText(
                       text: TextSpan(
-                          children: highlightString(
-                    item,
-                    Theme.of(context).textTheme.bodyText1!,
-                  ))),
+                    children: highlightString(
+                      item,
+                      Theme.of(context).textTheme.bodyMedium!,
+                    ),
+                  )),
                   onTap: () {
                     widget.onLinkSelect(item);
                   },

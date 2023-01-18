@@ -266,7 +266,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     removeOverlay();
     Offset caretOffset = getCaretOffset(
       widget.controller,
-      Theme.of(context).textTheme.bodyMedium!,
+      Theme.of(context).textTheme.bodyMedium,
       size,
     );
     Widget builder(context) {

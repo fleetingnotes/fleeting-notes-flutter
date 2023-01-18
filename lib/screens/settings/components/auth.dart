@@ -158,10 +158,10 @@ class AuthFlow extends StatelessWidget {
       child: RichText(
         key: const Key('SignInText'),
         text: TextSpan(children: [
-          TextSpan(text: text, style: Theme.of(context).textTheme.bodyText1!),
+          TextSpan(text: text, style: Theme.of(context).textTheme.bodyMedium),
           TextSpan(
             text: linkedText,
-            style: Theme.of(context).textTheme.bodyText1!.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.blue,
                 ),
             recognizer: TapGestureRecognizer()..onTap = onTap,
