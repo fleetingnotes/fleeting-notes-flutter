@@ -211,7 +211,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 searchFocusNode: searchFocusNode,
                 removeSearchFocus: removeSearchFocus,
                 hasSearchFocus: hasSearchFocus,
-                child: (hasSearchFocus) ? null : const NoteList(),
+                child: (hasSearchFocus)
+                    ? null
+                    : const NoteList(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                      ),
               ),
               tablet: Row(
                 children: [
@@ -225,9 +229,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
-                  Expanded(
+                  const Expanded(
                     flex: 9,
-                    child: NoteScreenNavigator(hasInitNote: hasInitNote),
+                    child: NoteList(
+                      padding: EdgeInsets.only(top: 4, right: 8),
+                    ),
                   ),
                 ],
               ),
@@ -264,9 +270,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
-                  Expanded(
+                  const Expanded(
                     flex: 9,
-                    child: NoteScreenNavigator(hasInitNote: hasInitNote),
+                    child: NoteList(
+                      padding: EdgeInsets.only(top: 4, right: 8),
+                    ),
                   ),
                 ],
               ),

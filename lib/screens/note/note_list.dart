@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class NoteList extends ConsumerStatefulWidget {
-  const NoteList({super.key});
+  const NoteList({
+    super.key,
+    this.padding,
+  });
+
+  final EdgeInsetsGeometry? padding;
 
   @override
   ConsumerState<NoteList> createState() => _NoteListState();
@@ -32,7 +37,7 @@ class _NoteListState extends ConsumerState<NoteList> {
       ));
     }
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 4, right: 8),
+      padding: widget.padding,
       itemCount: notes.length,
       itemBuilder: (context, i) {
         return LargeNoteCard(
