@@ -50,10 +50,14 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
   void onSeeBacklinks() {
     final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     final notifier = ref.read(searchProvider.notifier);
+    final noteUtils = ref.read(noteUtilsProvider);
     notifier.updateSearch(searchQuery.copyWith(
       query: "[[${widget.note.title}]]",
       searchByContent: true,
     ));
+    if (noteUtils.dialogOpen) {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -118,6 +122,9 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
             ),
             onTap: () {
               noteUtils.handleDeleteNote(context, [widget.note]);
+              if (noteUtils.dialogOpen) {
+                Navigator.pop(context);
+              }
             },
           ),
       ],

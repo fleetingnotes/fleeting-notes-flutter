@@ -14,6 +14,7 @@ import 'package:path/path.dart' as p;
 class NoteUtils {
   Database db;
   NoteNotifier noteNotifier;
+  bool dialogOpen = false;
   NoteUtils(this.db, this.noteNotifier);
 
   Future<void> handleCopyUrl(BuildContext context, String noteId) async {
@@ -31,11 +32,11 @@ class NoteUtils {
 
   Future<void> handleDeleteNote(BuildContext context, List<Note> notes) async {
     try {
-      noteNotifier.deleteNotes(notes.map((n) => n.id));
       bool isSuccessDelete = await db.deleteNotes(notes);
       if (!isSuccessDelete) {
         throw FleetingNotesException('Failed to delete note');
       }
+      noteNotifier.deleteNotes(notes.map((n) => n.id));
     } on FleetingNotesException catch (e) {
       _showSnackbar(context, e.message);
       rethrow;
@@ -121,6 +122,7 @@ class NoteUtils {
       note = dbNote;
     }
 
+    dialogOpen = true;
     Note? poppedNote = await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -145,6 +147,7 @@ class NoteUtils {
         );
       },
     );
+    dialogOpen = false;
     var postDialogNote = await db.getNoteById(note.id);
     if (poppedNote != null) {
       if (postDialogNote != null) {
