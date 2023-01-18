@@ -13,7 +13,6 @@ import 'components/search_bar.dart';
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({
     Key? key,
-    required this.removeSearchFocus,
     this.searchFocusNode,
     this.child,
     this.hasSearchFocus = false,
@@ -21,7 +20,6 @@ class SearchScreen extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   final FocusNode? searchFocusNode;
-  final VoidCallback removeSearchFocus;
   final Widget? child;
   final bool hasSearchFocus;
 
@@ -41,7 +39,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Future<void> loadNotes({forceSync = false}) async {
     final db = ref.read(dbProvider);
-    final searchQuery = ref.read(searchProvider);
+    final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     try {
       var tempNotes = await db.getSearchNotes(
         searchQuery,
@@ -172,8 +170,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    ref.listen<SearchQuery>(searchProvider, (_, sq) {
-      if (queryController.text != sq.query) {
+    ref.listen<SearchQuery?>(searchProvider, (_, sq) {
+      if (sq != null && queryController.text != sq.query) {
         queryController.text = sq.query;
       }
       loadNotes();
@@ -191,9 +189,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           : PreferredSize(
               preferredSize: const Size.fromHeight(72),
               child: SearchBar(
-                hasSearchFocus: widget.hasSearchFocus,
                 onMenu: db.openDrawer,
-                onBack: widget.removeSearchFocus,
                 controller: queryController,
                 focusNode: widget.searchFocusNode,
               ),

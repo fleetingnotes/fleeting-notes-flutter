@@ -9,7 +9,7 @@ class SearchDialog extends ConsumerWidget {
   }) : super(key: key);
 
   updateSearchFilter(WidgetRef ref, String key, bool val) {
-    final searchQuery = ref.read(searchProvider);
+    final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     final notifier = ref.read(searchProvider.notifier);
     notifier.updateSearch(searchQuery.copyWith(
       searchByTitle: (key == 'title') ? val : null,
@@ -20,7 +20,7 @@ class SearchDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchQuery = ref.watch(searchProvider);
+    final searchQuery = ref.watch(searchProvider) ?? SearchQuery();
     return SimpleDialog(
       title: const Text('Sort and Filter'),
       children: [
@@ -85,8 +85,8 @@ class _DropdownSortMenuState extends ConsumerState<DropdownSortMenu> {
   @override
   void initState() {
     super.initState();
-    final searchQuery = ref.read(searchProvider);
-    var sortByStr = searchQuery.sortBy.toString().split('.').last.toLowerCase();
+    final sq = ref.read(searchProvider) ?? SearchQuery();
+    var sortByStr = sq.sortBy.toString().split('.').last.toLowerCase();
     setState(() {
       sortDir = sortByStr.endsWith('asc') ? 'asc' : 'desc';
       sortVal = sortByStr.replaceFirst(sortDir, '');
@@ -109,7 +109,7 @@ class _DropdownSortMenuState extends ConsumerState<DropdownSortMenu> {
   }
 
   void saveSortState() {
-    final sq = ref.read(searchProvider);
+    final sq = ref.read(searchProvider) ?? SearchQuery();
     final notifier = ref.read(searchProvider.notifier);
     var sortOption = sortOptionMap["$sortVal-$sortDir"];
     notifier.updateSearch(sq.copyWith(sortBy: sortOption));

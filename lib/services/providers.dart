@@ -30,7 +30,7 @@ final dbProvider = Provider<Database>((ref) {
   );
 });
 
-final searchProvider = StateNotifierProvider<SearchNotifier, SearchQuery>(
+final searchProvider = StateNotifierProvider<SearchNotifier, SearchQuery?>(
     (ref) => SearchNotifier());
 final viewedNotesProvider =
     StateNotifierProvider<NoteNotifier, List<Note>>((ref) {

@@ -3,23 +3,20 @@ import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../models/search_query.dart';
 import '../../../utils/responsive.dart';
 
 class SearchBar extends ConsumerStatefulWidget {
   const SearchBar({
     Key? key,
     required this.onMenu,
-    required this.onBack,
     this.controller,
     this.focusNode,
-    this.hasSearchFocus = false,
   }) : super(key: key);
 
   final VoidCallback onMenu;
-  final VoidCallback onBack;
   final TextEditingController? controller;
   final FocusNode? focusNode;
-  final bool hasSearchFocus;
 
   @override
   ConsumerState<SearchBar> createState() => _SearchBarState();
@@ -33,10 +30,21 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   void initState() {
     super.initState();
     focusNode = widget.focusNode ?? focusNode;
+    focusNode.addListener(onQueryFocusChange);
+  }
+
+  @override
+  void dispose() {
+    focusNode.removeListener(onQueryFocusChange);
+    super.dispose();
+  }
+
+  onQueryFocusChange() {
+    onQueryChange('');
   }
 
   onQueryChange(String val) {
-    final searchQuery = ref.read(searchProvider);
+    final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     final notifier = ref.read(searchProvider.notifier);
     notifier.updateSearch(searchQuery.copyWith(
       query: val,
@@ -45,26 +53,29 @@ class _SearchBarState extends ConsumerState<SearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final searchQuery = ref.watch(searchProvider);
+    final notifier = ref.watch(searchProvider.notifier);
+    bool hasSearchFocus = searchQuery != null;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 100),
       margin: EdgeInsets.symmetric(
-        vertical: (widget.hasSearchFocus) ? 0 : 4,
-        horizontal: (widget.hasSearchFocus) ? 0 : 16,
+        vertical: (hasSearchFocus) ? 0 : 4,
+        horizontal: (hasSearchFocus) ? 0 : 16,
       ),
-      padding: EdgeInsets.symmetric(vertical: (widget.hasSearchFocus) ? 4 : 0),
+      padding: EdgeInsets.symmetric(vertical: (hasSearchFocus) ? 4 : 0),
       child: Column(
         children: [
           Card(
             shape: RoundedRectangleBorder(
-                borderRadius: (widget.hasSearchFocus)
+                borderRadius: (hasSearchFocus)
                     ? BorderRadius.zero
                     : BorderRadius.circular(30)),
-            elevation: (widget.hasSearchFocus) ? 0 : 3,
+            elevation: (hasSearchFocus) ? 0 : 3,
             child: Row(
               children: [
                 LeadingIcon(
-                  hasFocus: widget.hasSearchFocus,
-                  onBack: widget.onBack,
+                  hasFocus: hasSearchFocus,
+                  onBack: () => notifier.updateSearch(null),
                   onMenu: widget.onMenu,
                 ),
                 Expanded(
@@ -81,7 +92,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
                     ),
                   ),
                 ),
-                (widget.hasSearchFocus)
+                (hasSearchFocus)
                     ? (Padding(
                         padding: const EdgeInsets.only(right: 16),
                         child: IconButton(

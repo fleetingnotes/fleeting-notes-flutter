@@ -30,7 +30,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget? desktopSideWidget;
   late bool hasInitNote;
   bool bannerExists = false;
-  bool hasSearchFocus = false;
   @override
   void initState() {
     super.initState();
@@ -94,31 +93,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         bannerExists = true;
       });
     }
-    searchFocusNode.addListener(searchFocusListener);
-  }
-
-  @override
-  void dispose() {
-    searchFocusNode.removeListener(searchFocusListener);
-    super.dispose();
-  }
-
-  void searchFocusListener() {
-    bool nodeHasFocus = searchFocusNode.hasFocus;
-    if (nodeHasFocus) {
-      setState(() {
-        hasSearchFocus = true;
-      });
-    }
-  }
-
-  void removeSearchFocus() {
-    final searchNotifier = ref.read(searchProvider.notifier);
-    searchNotifier.updateSearch(SearchQuery(query: ''));
-    searchFocusNode.unfocus();
-    setState(() {
-      hasSearchFocus = false;
-    });
   }
 
   void analyticsDialogWorkflow() {
@@ -156,8 +130,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void addNote() {
     final noteUtils = ref.read(noteUtilsProvider);
     final db = ref.read(dbProvider);
+    final search = ref.read(searchProvider.notifier);
     db.closeDrawer();
-    removeSearchFocus();
+    search.updateSearch(null);
     noteUtils.openNoteEditorDialog(context, Note.empty());
   }
 
@@ -175,11 +150,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    ref.listen<SearchQuery>(searchProvider, (_, sq) {
-      setState(() {
-        hasSearchFocus = sq.query.isNotEmpty || hasSearchFocus;
-      });
-    });
+    final searchQuery = ref.watch(searchProvider);
     return WillPopScope(
       onWillPop: () async {
         return !db.canPop();
@@ -208,9 +179,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             body: Responsive(
               mobile: SearchScreen(
                 searchFocusNode: searchFocusNode,
-                removeSearchFocus: removeSearchFocus,
-                hasSearchFocus: hasSearchFocus,
-                child: (hasSearchFocus)
+                child: (searchQuery != null)
                     ? null
                     : const NoteList(
                         padding: EdgeInsets.symmetric(horizontal: 4),
@@ -223,8 +192,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     flex: 6,
                     child: SearchScreen(
                       key: db.searchKey,
-                      removeSearchFocus: removeSearchFocus,
-                      hasSearchFocus: hasSearchFocus,
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
@@ -265,8 +232,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     width: 360,
                     child: SearchScreen(
                       key: db.searchKey,
-                      removeSearchFocus: removeSearchFocus,
-                      hasSearchFocus: hasSearchFocus,
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
