@@ -3,7 +3,6 @@ import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../models/search_query.dart';
 import '../../../utils/responsive.dart';
 
 class SearchBar extends ConsumerStatefulWidget {
@@ -11,7 +10,6 @@ class SearchBar extends ConsumerStatefulWidget {
     Key? key,
     required this.onMenu,
     required this.onBack,
-    this.onChanged,
     this.controller,
     this.focusNode,
     this.hasSearchFocus = false,
@@ -19,7 +17,6 @@ class SearchBar extends ConsumerStatefulWidget {
 
   final VoidCallback onMenu;
   final VoidCallback onBack;
-  final VoidCallback? onChanged;
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final bool hasSearchFocus;
@@ -39,8 +36,9 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   }
 
   onQueryChange(String val) {
-    var searchNotifier = ref.read(searchProvider.notifier);
-    searchNotifier.updateSearch(SearchQuery(
+    final searchQuery = ref.read(searchProvider);
+    final notifier = ref.read(searchProvider.notifier);
+    notifier.updateSearch(searchQuery.copyWith(
       query: val,
     ));
   }
@@ -93,9 +91,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
                             await showDialog(
                               context: context,
                               builder: (_) {
-                                return SearchDialog(
-                                  onChange: widget.onChanged?.call,
-                                );
+                                return const SearchDialog();
                               },
                             );
                             focusNode.requestFocus();

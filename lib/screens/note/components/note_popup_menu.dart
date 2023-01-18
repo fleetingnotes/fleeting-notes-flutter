@@ -50,9 +50,11 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
   }
 
   void onSeeBacklinks() {
+    final searchQuery = ref.read(searchProvider);
     final notifier = ref.read(searchProvider.notifier);
-    notifier.updateSearch(SearchQuery(
+    notifier.updateSearch(searchQuery.copyWith(
       query: "[[${widget.note.title}]]",
+      searchByContent: true,
     ));
   }
 

@@ -9,7 +9,7 @@ class SearchNotifier extends StateNotifier<SearchQuery> {
   SearchNotifier() : super(SearchQuery());
 
   void updateSearch(SearchQuery sq) {
-    state = sq;
+    state = sq.copy();
   }
 }
 

@@ -16,6 +16,27 @@ class SearchQuery {
     this.sortBy = SortOptions.createdDESC,
     this.limit = 50,
   });
+
+  copyWith(
+      {String? query,
+      bool? searchByTitle,
+      bool? searchByContent,
+      bool? searchBySource,
+      SortOptions? sortBy,
+      int? limit}) {
+    return SearchQuery(
+      query: query ?? this.query,
+      searchByTitle: searchByTitle ?? this.searchByTitle,
+      searchByContent: searchByContent ?? this.searchByContent,
+      searchBySource: searchBySource ?? this.searchBySource,
+      sortBy: sortBy ?? this.sortBy,
+      limit: limit ?? this.limit,
+    );
+  }
+
+  copy() {
+    return copyWith();
+  }
 }
 
 enum SortOptions {

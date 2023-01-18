@@ -3,35 +3,23 @@ import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SearchDialog extends ConsumerStatefulWidget {
+class SearchDialog extends ConsumerWidget {
   const SearchDialog({
     Key? key,
-    this.onChange,
   }) : super(key: key);
 
-  final VoidCallback? onChange;
-
-  @override
-  ConsumerState<SearchDialog> createState() => _SearchDialogState();
-}
-
-class _SearchDialogState extends ConsumerState<SearchDialog> {
-  updateSearchFilter(String key, bool val) {
+  updateSearchFilter(WidgetRef ref, String key, bool val) {
     final searchQuery = ref.read(searchProvider);
-    setState(() {
-      if (key == 'title') {
-        searchQuery.searchByTitle = val;
-      } else if (key == 'content') {
-        searchQuery.searchByContent = val;
-      } else if (key == 'source') {
-        searchQuery.searchBySource = val;
-      }
-    });
-    widget.onChange?.call();
+    final notifier = ref.read(searchProvider.notifier);
+    notifier.updateSearch(searchQuery.copyWith(
+      searchByTitle: (key == 'title') ? val : null,
+      searchByContent: (key == 'content') ? val : null,
+      searchBySource: (key == 'source') ? val : null,
+    ));
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = ref.watch(searchProvider);
     return SimpleDialog(
       title: const Text('Sort and Filter'),
@@ -43,7 +31,7 @@ class _SearchDialogState extends ConsumerState<SearchDialog> {
             children: [
               Text('Sort By', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
-              DropdownSortMenu(onChange: widget.onChange),
+              const DropdownSortMenu(),
               const SizedBox(height: 24),
               Text('Filter By', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
@@ -55,19 +43,20 @@ class _SearchDialogState extends ConsumerState<SearchDialog> {
                     label: Text('Title',
                         style: Theme.of(context).textTheme.labelLarge),
                     selected: searchQuery.searchByTitle,
-                    onSelected: (val) => updateSearchFilter('title', val),
+                    onSelected: (val) => updateSearchFilter(ref, 'title', val),
                   ),
                   FilterChip(
                     label: Text('Content',
                         style: Theme.of(context).textTheme.labelLarge),
                     selected: searchQuery.searchByContent,
-                    onSelected: (val) => updateSearchFilter('content', val),
+                    onSelected: (val) =>
+                        updateSearchFilter(ref, 'content', val),
                   ),
                   FilterChip(
                     label: Text('Source',
                         style: Theme.of(context).textTheme.labelLarge),
                     selected: searchQuery.searchBySource,
-                    onSelected: (val) => updateSearchFilter('source', val),
+                    onSelected: (val) => updateSearchFilter(ref, 'source', val),
                   ),
                 ],
               ),
@@ -82,10 +71,7 @@ class _SearchDialogState extends ConsumerState<SearchDialog> {
 class DropdownSortMenu extends ConsumerStatefulWidget {
   const DropdownSortMenu({
     Key? key,
-    this.onChange,
   }) : super(key: key);
-
-  final VoidCallback? onChange;
 
   @override
   ConsumerState<DropdownSortMenu> createState() => _DropdownSortMenuState();
@@ -123,12 +109,10 @@ class _DropdownSortMenuState extends ConsumerState<DropdownSortMenu> {
   }
 
   void saveSortState() {
-    final searchQuery = ref.read(searchProvider);
+    final sq = ref.read(searchProvider);
+    final notifier = ref.read(searchProvider.notifier);
     var sortOption = sortOptionMap["$sortVal-$sortDir"];
-    if (sortOption != null) {
-      searchQuery.sortBy = sortOption;
-    }
-    widget.onChange?.call();
+    notifier.updateSearch(sq.copyWith(sortBy: sortOption));
   }
 
   @override
