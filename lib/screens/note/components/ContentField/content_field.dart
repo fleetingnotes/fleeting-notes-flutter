@@ -258,7 +258,9 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
 
     void _onFollowLinkTap(Note note) async {
+      final notifier = ref.read(searchProvider.notifier);
       Navigator.pop(context, note);
+      notifier.updateSearch(null);
       removeOverlay();
     }
 

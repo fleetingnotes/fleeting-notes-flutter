@@ -145,7 +145,11 @@ class NoteUtils {
         );
       },
     );
+    var postDialogNote = await db.getNoteById(note.id);
     if (poppedNote != null) {
+      if (postDialogNote != null) {
+        noteNotifier.addNote(postDialogNote);
+      }
       noteNotifier.addNote(poppedNote);
     } else {
       Note? unsavedNote = db.settings.get('unsaved-note');
@@ -153,7 +157,6 @@ class NoteUtils {
         await handleSaveNote(context, unsavedNote);
         noteNotifier.addNote(unsavedNote);
       } else {
-        var postDialogNote = await db.getNoteById(note.id);
         if (postDialogNote != null) {
           noteNotifier.addNote(postDialogNote);
         }
