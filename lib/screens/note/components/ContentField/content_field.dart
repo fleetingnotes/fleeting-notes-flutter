@@ -275,6 +275,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
           builder: (BuildContext context, AsyncSnapshot<Note> snapshot) {
             var note = snapshot.data;
             if (note != null) {
+              contentFocusNode.unfocus();
               return LinkPreview(
                 note: note,
                 caretOffset: caretOffset,
@@ -295,7 +296,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     overlayEntry = OverlayEntry(builder: builder);
     // show overlay
     overlayState.insert(overlayEntry ?? OverlayEntry(builder: builder));
-    contentFocusNode.unfocus();
   }
 
   void removeOverlay() {
