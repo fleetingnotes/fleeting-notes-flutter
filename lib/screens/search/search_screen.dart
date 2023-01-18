@@ -171,7 +171,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
     ref.listen<SearchQuery?>(searchProvider, (_, sq) {
-      if (sq != null && queryController.text != sq.query) {
+      if (sq == null) {
+        queryController.text = '';
+      } else if (queryController.text != sq.query) {
         queryController.text = sq.query;
       }
       loadNotes();

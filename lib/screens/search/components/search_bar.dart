@@ -40,7 +40,10 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   }
 
   onQueryFocusChange() {
-    onQueryChange('');
+    final searchQuery = ref.read(searchProvider);
+    if (searchQuery == null) {
+      onQueryChange('');
+    }
   }
 
   onQueryChange(String val) {
