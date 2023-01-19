@@ -81,15 +81,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   void _pressNote(BuildContext context, Note note) {
-    final db = ref.read(dbProvider);
     final noteUtils = ref.read(noteUtilsProvider);
     if (selectedNotes.isEmpty) {
       setState(() {
         activeNoteId = note.id;
       });
-      if (!Responsive.isMobile(context)) {
-        db.popAllRoutes();
-      }
       noteUtils.openNoteEditorDialog(context, note);
     } else {
       setState(() {

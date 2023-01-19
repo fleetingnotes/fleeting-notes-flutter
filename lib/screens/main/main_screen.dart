@@ -150,100 +150,91 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
     final searchQuery = ref.watch(searchProvider);
-    return WillPopScope(
-      onWillPop: () async {
-        return !db.canPop();
-      },
-      child: Shortcuts(
-        shortcuts: shortcutMapping,
-        child: Actions(
-          actions: <Type, Action<Intent>>{
-            NewNoteIntent: CallbackAction(
-                onInvoke: (Intent intent) => db.navigateToNote(Note.empty())),
-            SearchIntent: CallbackAction(
-                onInvoke: (intent) => searchFocusNode.requestFocus())
-          },
-          child: Scaffold(
-            key: db.scaffoldKey,
-            resizeToAvoidBottomInset: false,
-            drawer: (Responsive.isDesktop(context))
-                ? null
-                : SideMenu(
-                    addNote: addNote,
-                    closeDrawer: db.closeDrawer,
+    return Shortcuts(
+      shortcuts: shortcutMapping,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          NewNoteIntent: CallbackAction(onInvoke: (Intent intent) => addNote()),
+          SearchIntent: CallbackAction(
+              onInvoke: (intent) => searchFocusNode.requestFocus())
+        },
+        child: Scaffold(
+          key: db.scaffoldKey,
+          resizeToAvoidBottomInset: false,
+          drawer: (Responsive.isDesktop(context))
+              ? null
+              : SideMenu(
+                  addNote: addNote,
+                  closeDrawer: db.closeDrawer,
+                ),
+          floatingActionButton: (Responsive.isMobile(context))
+              ? NoteFAB(onPressed: addNote)
+              : null,
+          body: SafeArea(
+            child: Responsive(
+              mobile: SearchScreen(
+                searchFocusNode: searchFocusNode,
+                child: (searchQuery != null)
+                    ? null
+                    : const NoteList(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                      ),
+              ),
+              tablet: Row(
+                children: [
+                  SideRail(addNote: addNote, onMenu: db.openDrawer),
+                  Expanded(
+                    flex: 6,
+                    child: SearchScreen(
+                      searchFocusNode: searchFocusNode,
+                    ),
                   ),
-            floatingActionButton: (Responsive.isMobile(context))
-                ? NoteFAB(onPressed: addNote)
-                : null,
-            body: SafeArea(
-              child: Responsive(
-                mobile: SearchScreen(
-                  searchFocusNode: searchFocusNode,
-                  child: (searchQuery != null)
-                      ? null
-                      : const NoteList(
-                          padding: EdgeInsets.symmetric(horizontal: 4),
-                        ),
-                ),
-                tablet: Row(
-                  children: [
-                    SideRail(addNote: addNote, onMenu: db.openDrawer),
-                    Expanded(
-                      flex: 6,
-                      child: SearchScreen(
-                        key: db.searchKey,
-                        searchFocusNode: searchFocusNode,
-                      ),
+                  const Expanded(
+                    flex: 9,
+                    child: NoteList(
+                      padding: EdgeInsets.only(top: 4, right: 8),
                     ),
-                    const Expanded(
-                      flex: 9,
-                      child: NoteList(
-                        padding: EdgeInsets.only(top: 4, right: 8),
-                      ),
-                    ),
-                  ],
-                ),
-                desktop: Row(
-                  children: [
-                    Stack(
-                      children: [
-                        if (desktopSideWidget == null)
-                          SideRail(
-                              addNote: addNote, onMenu: toggleDrawerDesktop),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          transitionBuilder: (widget, animation) {
-                            const begin = Offset(-1.0, 0.0);
-                            const end = Offset.zero;
-                            const curve = Curves.ease;
+                  ),
+                ],
+              ),
+              desktop: Row(
+                children: [
+                  Stack(
+                    children: [
+                      if (desktopSideWidget == null)
+                        SideRail(addNote: addNote, onMenu: toggleDrawerDesktop),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder: (widget, animation) {
+                          const begin = Offset(-1.0, 0.0);
+                          const end = Offset.zero;
+                          const curve = Curves.ease;
 
-                            final tween = Tween(begin: begin, end: end)
-                                .chain(CurveTween(curve: curve));
-                            final offsetAnimation = animation.drive(tween);
-                            return SlideTransition(
-                              position: offsetAnimation,
-                              child: widget,
-                            );
-                          },
-                          child: desktopSideWidget,
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      width: 360,
-                      child: SearchScreen(
-                        key: db.searchKey,
-                        searchFocusNode: searchFocusNode,
+                          final tween = Tween(begin: begin, end: end)
+                              .chain(CurveTween(curve: curve));
+                          final offsetAnimation = animation.drive(tween);
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: widget,
+                          );
+                        },
+                        child: desktopSideWidget,
                       ),
+                    ],
+                  ),
+                  SizedBox(
+                    width: 360,
+                    child: SearchScreen(
+                      searchFocusNode: searchFocusNode,
                     ),
-                    const Expanded(
-                      flex: 9,
-                      child: NoteList(
-                        padding: EdgeInsets.only(top: 4, right: 8),
-                      ),
+                  ),
+                  const Expanded(
+                    flex: 9,
+                    child: NoteList(
+                      padding: EdgeInsets.only(top: 4, right: 8),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

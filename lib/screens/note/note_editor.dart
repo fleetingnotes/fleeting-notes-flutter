@@ -37,14 +37,13 @@ class NoteEditor extends ConsumerStatefulWidget {
   _NoteEditorState createState() => _NoteEditorState();
 }
 
-class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
+class _NoteEditorState extends ConsumerState<NoteEditor> {
   List<String> linkSuggestions = [];
   bool hasNewChanges = false;
   bool isNoteShareable = false;
   Timer? saveTimer;
   DateTime modifiedAt = DateTime(2000);
   DateTime? savedAt;
-  RouteObserver? routeObserver;
   StreamSubscription<NoteEvent>? noteChangeStream;
 
   late bool autofocus;

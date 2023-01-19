@@ -40,14 +40,7 @@ class Database {
       () async => getAllNotesLocal(await getBox()),
     );
   }
-  GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
-
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  GlobalKey searchKey = GlobalKey();
-  Map<Note, GlobalKey> noteHistory = {};
-  FocusNode searchFocusNode = FocusNode();
-  RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
   StreamController<NoteEvent> noteChangeController =
       StreamController.broadcast();
   String? shareUserId;
@@ -255,42 +248,6 @@ class Database {
     }
   }
 
-  // TODO: Move this out of db
-  // void navigateToSearch(String query) {
-  //   navigatorKey.currentState?.push(
-  //     PageRouteBuilder(
-  //       pageBuilder: (context, _, __) => const SearchScreen(),
-  //       transitionsBuilder: _transitionBuilder,
-  //     ),
-  //   );
-  // }
-
-  // TODO: Move this out of db
-  SlideTransition _transitionBuilder(
-      context, animation, secondaryAnimation, child) {
-    const begin = Offset(0.0, 1.0);
-    const end = Offset.zero;
-    const curve = Curves.ease;
-
-    final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-    final offsetAnimation = animation.drive(tween);
-    return SlideTransition(
-      position: offsetAnimation,
-      child: child,
-    );
-  }
-
-  // TODO: Move this out of db
-  void navigateToNote(Note note, {bool isShared = false}) {
-    GlobalKey noteKey = GlobalKey();
-    noteHistory[note] = noteKey;
-    navigatorKey.currentState?.push(PageRouteBuilder(
-      pageBuilder: (context, _, __) =>
-          NoteEditor(key: noteKey, note: note, isShared: isShared),
-      transitionsBuilder: _transitionBuilder,
-    ));
-  }
-
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
   }
@@ -304,21 +261,6 @@ class Database {
     return noteChangeController.stream.listen((event) {
       callback(event);
     });
-  }
-
-  void popAllRoutes() {
-    if (navigatorKey.currentState != null) {
-      noteHistory.clear();
-      navigatorKey.currentState?.popUntil((route) => false);
-    }
-  }
-
-  bool canPop() {
-    var nState = navigatorKey.currentState;
-    if (nState != null) {
-      return nState.canPop();
-    }
-    return false;
   }
 
   Future<void> setAnalyticsEnabled(enabled) async {
@@ -379,7 +321,6 @@ class Database {
     final search = ref.read(searchProvider.notifier);
     final viewedNotes = ref.read(viewedNotesProvider.notifier);
     shareUserId = null;
-    popAllRoutes();
     search.updateSearch(null);
     viewedNotes.deleteAllNotes();
   }
