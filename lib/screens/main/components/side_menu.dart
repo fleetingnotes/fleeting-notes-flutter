@@ -20,21 +20,23 @@ class SideMenu extends StatelessWidget {
       child: NavigationDrawer(
         onDestinationSelected: (v) => onDestinationSelected(context, v),
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Row(
-              children: [
-                Expanded(
-                    child: Text(
-                  'Fleeting Notes',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant),
-                )),
-                IconButton(
-                  onPressed: closeDrawer,
-                  icon: const Icon(Icons.menu_open),
-                )
-              ],
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Text(
+                    'Fleeting Notes',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  )),
+                  IconButton(
+                    onPressed: closeDrawer,
+                    icon: const Icon(Icons.menu_open),
+                  )
+                ],
+              ),
             ),
           ),
           Row(

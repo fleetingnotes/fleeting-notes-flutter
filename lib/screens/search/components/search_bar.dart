@@ -64,16 +64,15 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   Widget build(BuildContext context) {
     final searchQuery = ref.watch(searchProvider);
     bool hasSearchFocus = searchQuery != null;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 100),
-      margin: EdgeInsets.symmetric(
-        vertical: (hasSearchFocus) ? 0 : 4,
-        horizontal: (hasSearchFocus) ? 0 : 16,
-      ),
-      padding: EdgeInsets.symmetric(vertical: (hasSearchFocus) ? 4 : 0),
-      child: Column(
-        children: [
-          Card(
+    return SafeArea(
+      child: AnimatedContainer(
+        height: 72,
+        duration: const Duration(milliseconds: 100),
+        margin: EdgeInsets.symmetric(
+          horizontal: (hasSearchFocus) ? 0 : 16,
+        ),
+        child: Center(
+          child: Card(
             shape: RoundedRectangleBorder(
                 borderRadius: (hasSearchFocus)
                     ? BorderRadius.zero
@@ -125,7 +124,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

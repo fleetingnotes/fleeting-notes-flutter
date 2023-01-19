@@ -12,7 +12,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/search_query.dart';
 import 'components/analytics_dialog.dart';
 import 'components/note_fab.dart';
 import 'components/side_rail.dart';
@@ -176,72 +175,75 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             floatingActionButton: (Responsive.isMobile(context))
                 ? NoteFAB(onPressed: addNote)
                 : null,
-            body: Responsive(
-              mobile: SearchScreen(
-                searchFocusNode: searchFocusNode,
-                child: (searchQuery != null)
-                    ? null
-                    : const NoteList(
-                        padding: EdgeInsets.symmetric(horizontal: 4),
+            body: SafeArea(
+              child: Responsive(
+                mobile: SearchScreen(
+                  searchFocusNode: searchFocusNode,
+                  child: (searchQuery != null)
+                      ? null
+                      : const NoteList(
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                        ),
+                ),
+                tablet: Row(
+                  children: [
+                    SideRail(addNote: addNote, onMenu: db.openDrawer),
+                    Expanded(
+                      flex: 6,
+                      child: SearchScreen(
+                        key: db.searchKey,
+                        searchFocusNode: searchFocusNode,
                       ),
-              ),
-              tablet: Row(
-                children: [
-                  SideRail(addNote: addNote, onMenu: db.openDrawer),
-                  Expanded(
-                    flex: 6,
-                    child: SearchScreen(
-                      key: db.searchKey,
-                      searchFocusNode: searchFocusNode,
                     ),
-                  ),
-                  const Expanded(
-                    flex: 9,
-                    child: NoteList(
-                      padding: EdgeInsets.only(top: 4, right: 8),
+                    const Expanded(
+                      flex: 9,
+                      child: NoteList(
+                        padding: EdgeInsets.only(top: 4, right: 8),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              desktop: Row(
-                children: [
-                  Stack(
-                    children: [
-                      if (desktopSideWidget == null)
-                        SideRail(addNote: addNote, onMenu: toggleDrawerDesktop),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder: (widget, animation) {
-                          const begin = Offset(-1.0, 0.0);
-                          const end = Offset.zero;
-                          const curve = Curves.ease;
+                  ],
+                ),
+                desktop: Row(
+                  children: [
+                    Stack(
+                      children: [
+                        if (desktopSideWidget == null)
+                          SideRail(
+                              addNote: addNote, onMenu: toggleDrawerDesktop),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (widget, animation) {
+                            const begin = Offset(-1.0, 0.0);
+                            const end = Offset.zero;
+                            const curve = Curves.ease;
 
-                          final tween = Tween(begin: begin, end: end)
-                              .chain(CurveTween(curve: curve));
-                          final offsetAnimation = animation.drive(tween);
-                          return SlideTransition(
-                            position: offsetAnimation,
-                            child: widget,
-                          );
-                        },
-                        child: desktopSideWidget,
+                            final tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+                            final offsetAnimation = animation.drive(tween);
+                            return SlideTransition(
+                              position: offsetAnimation,
+                              child: widget,
+                            );
+                          },
+                          child: desktopSideWidget,
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      width: 360,
+                      child: SearchScreen(
+                        key: db.searchKey,
+                        searchFocusNode: searchFocusNode,
                       ),
-                    ],
-                  ),
-                  SizedBox(
-                    width: 360,
-                    child: SearchScreen(
-                      key: db.searchKey,
-                      searchFocusNode: searchFocusNode,
                     ),
-                  ),
-                  const Expanded(
-                    flex: 9,
-                    child: NoteList(
-                      padding: EdgeInsets.only(top: 4, right: 8),
+                    const Expanded(
+                      flex: 9,
+                      child: NoteList(
+                        padding: EdgeInsets.only(top: 4, right: 8),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
