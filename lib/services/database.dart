@@ -380,7 +380,7 @@ class Database {
     final viewedNotes = ref.read(viewedNotesProvider.notifier);
     shareUserId = null;
     popAllRoutes();
-    search.updateSearch(SearchQuery(query: ''));
+    search.updateSearch(null);
     viewedNotes.deleteAllNotes();
   }
 }
