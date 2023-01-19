@@ -133,7 +133,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget getSearchList() {
     final searchQuery = ref.read(searchProvider);
     return SafeArea(
-      right: false,
+      right: true,
       child: Column(
         children: [
           Expanded(
@@ -173,6 +173,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     ref.listen<SearchQuery?>(searchProvider, (_, sq) {
       if (sq == null) {
         queryController.text = '';
+        searchFocusNode.unfocus();
       } else if (queryController.text != sq.query) {
         queryController.text = sq.query;
       }

@@ -41,7 +41,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
 
   onQueryFocusChange() {
     final searchQuery = ref.read(searchProvider);
-    if (searchQuery == null) {
+    if (searchQuery == null && focusNode.hasFocus) {
       onQueryChange('');
     }
   }
@@ -54,10 +54,15 @@ class _SearchBarState extends ConsumerState<SearchBar> {
     ));
   }
 
+  onBack() {
+    final notifier = ref.read(searchProvider.notifier);
+    notifier.updateSearch(null);
+    focusNode.unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final searchQuery = ref.watch(searchProvider);
-    final notifier = ref.watch(searchProvider.notifier);
     bool hasSearchFocus = searchQuery != null;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 100),
@@ -78,7 +83,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
               children: [
                 LeadingIcon(
                   hasFocus: hasSearchFocus,
-                  onBack: () => notifier.updateSearch(null),
+                  onBack: onBack,
                   onMenu: widget.onMenu,
                 ),
                 Expanded(
