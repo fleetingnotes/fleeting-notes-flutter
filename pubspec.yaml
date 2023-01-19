@@ -59,7 +59,7 @@ dependencies:
   tuple: ^2.0.0
   flutter_secure_storage: ^5.0.2
   keyboard_actions: ^4.0.1
-  sentry_flutter: ^6.10.0
+  sentry_flutter: ^6.18.2
   supabase_flutter: ^1.2.0
   in_app_purchase: ^3.0.8
   home_widget: ^0.1.6
