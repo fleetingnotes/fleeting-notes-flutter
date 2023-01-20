@@ -20,124 +20,113 @@ class LargeNoteCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final noteUtils = ref.watch(noteUtilsProvider);
-    return Card(
-        child: Column(
-      children: [
-        Container(
-          width: double.infinity,
-          height: 56,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            color: Theme.of(context).colorScheme.primaryContainer,
-          ),
-          child: Row(
-            children: [
-              if (!note.isEmpty())
+    return GestureDetector(
+      onTap: () => noteUtils.openNoteEditorDialog(context, note),
+      child: Card(
+          child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            height: 56,
+            decoration: BoxDecoration(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+              color: Theme.of(context).colorScheme.primaryContainer,
+            ),
+            child: Row(
+              children: [
+                if (!note.isEmpty())
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'Saved ${note.getShortDateTimeStr(noteDateTime: note.modifiedAtDate)}',
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                  ),
+                const Spacer(),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'Saved ${note.getShortDateTimeStr(noteDateTime: note.modifiedAtDate)}',
-                    style: Theme.of(context).textTheme.labelMedium,
-                  ),
+                  padding: const EdgeInsets.only(right: 16),
+                  child: Container(
+                      decoration: ShapeDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        shape: const CircleBorder(),
+                      ),
+                      child: NotePopupMenu(
+                        note: note,
+                        onAddAttachment: (String fn, Uint8List? fb) {
+                          noteUtils.onAddAttachment(context, note, fn, fb);
+                        },
+                      )),
                 ),
-              const Spacer(),
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Container(
-                  decoration: ShapeDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    shape: const CircleBorder(),
-                  ),
-                  child: IconButton(
-                    onPressed: () =>
-                        noteUtils.openNoteEditorDialog(context, note),
-                    icon: const Icon(
-                      Icons.edit,
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Container(
-                    decoration: ShapeDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      shape: const CircleBorder(),
-                    ),
-                    child: NotePopupMenu(
-                      note: note,
-                      onAddAttachment: (String fn, Uint8List? fb) {
-                        noteUtils.onAddAttachment(context, note, fn, fb);
-                      },
-                    )),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SelectionArea(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (note.title.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Text(
-                                note.title,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                                maxLines: 1,
-                              ),
-                            ),
-                          if (note.content.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: MarkdownBody(
-                                data: note.content,
-                                softLineBreak: true,
-                                selectable: true,
-                                onTapLink: (text, href, title) {
-                                  if (href != null) {
-                                    noteUtils.launchURLBrowser(href, context);
-                                  }
-                                },
-                                extensionSet: md.ExtensionSet(
-                                  md.ExtensionSet.gitHubFlavored.blockSyntaxes,
-                                  [
-                                    md.EmojiSyntax(),
-                                    ...md.ExtensionSet.gitHubFlavored
-                                        .inlineSyntaxes,
-                                  ],
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SelectionArea(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (note.title.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Text(
+                                  note.title,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                  maxLines: 1,
                                 ),
                               ),
-                            ),
-                          if (note.source.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: SourceContainer(
-                                  text: note.source, readOnly: true),
-                            ),
-                        ],
+                            if (note.content.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: MarkdownBody(
+                                  data: note.content,
+                                  softLineBreak: true,
+                                  selectable: true,
+                                  onTapLink: (text, href, title) {
+                                    if (href != null) {
+                                      noteUtils.launchURLBrowser(href, context);
+                                    }
+                                  },
+                                  extensionSet: md.ExtensionSet(
+                                    md.ExtensionSet.gitHubFlavored
+                                        .blockSyntaxes,
+                                    [
+                                      md.EmojiSyntax(),
+                                      ...md.ExtensionSet.gitHubFlavored
+                                          .inlineSyntaxes,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            if (note.source.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: SourceContainer(
+                                    text: note.source, readOnly: true),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    ));
+        ],
+      )),
+    );
   }
 }
