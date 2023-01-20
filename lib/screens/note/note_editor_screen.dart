@@ -1,9 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
+import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../models/Note.dart';
@@ -42,10 +44,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (note != null) return note;
     if (noteId != null) {
       note = await db.getNoteById(noteId);
-      note = note ?? Note.empty(id: noteId);
-    } else {
-      note = Note.empty();
+      note ??= Note.empty(id: noteId);
     }
+    note = note ?? Note.empty();
     return note;
   }
 

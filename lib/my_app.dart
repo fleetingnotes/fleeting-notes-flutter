@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -105,6 +106,13 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
             ),
             GoRoute(
               path: 'note/:id',
+              redirect: (context, state) {
+                var noteId = state.subloc.replaceFirst('/note/', '');
+                if (isValidUuid(noteId)) {
+                  return state.subloc;
+                }
+                return '/';
+              },
               pageBuilder: (context, s) {
                 var noteId = s.subloc.replaceFirst('/note/', '');
                 Note? note = s.extra as Note?;
