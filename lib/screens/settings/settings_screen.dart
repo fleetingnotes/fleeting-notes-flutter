@@ -244,36 +244,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       SizedBox(
                           height: Theme.of(context).custom.kDefaultPadding),
                       const SettingsTitle(title: "Other Settings"),
-                      ValueListenableBuilder(
-                          valueListenable: db.settings.box
-                              .listenable(keys: ['auto-fill-source']),
-                          builder: (context, Box box, _) {
-                            String k = 'auto-fill-source';
-                            return SettingsItem(
-                              name: "Auto Fill Source",
-                              actions: [
-                                Switch(
-                                    value:
-                                        db.settings.get(k, defaultValue: false),
-                                    onChanged: (v) => db.settings.set(k, v))
-                              ],
-                            );
-                          }),
-                      ValueListenableBuilder(
-                          valueListenable:
-                              db.settings.box.listenable(keys: ['dark-mode']),
-                          builder: (context, Box box, _) {
-                            String k = 'dark-mode';
-                            return SettingsItem(
-                              name: "Dark Mode",
-                              actions: [
-                                Switch(
-                                    value:
-                                        db.settings.get(k, defaultValue: false),
-                                    onChanged: (v) => db.settings.set(k, v))
-                              ],
-                            );
-                          }),
+                      const SettingsItemSwitch(
+                          settingsKey: 'auto-fill-source',
+                          name: "Auto fill source"),
+                      const SettingsItemSwitch(
+                          settingsKey: 'dark-mode', name: "Dark mode"),
+                      const SettingsItemSwitch(
+                          settingsKey: 'new-note-on-open',
+                          name: "Open new note on startup"),
                       const SizedBox(height: 24),
                       const LegalLinks(),
                     ],
@@ -282,6 +260,40 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class SettingsItemSwitch extends ConsumerWidget {
+  const SettingsItemSwitch({
+    super.key,
+    required this.settingsKey,
+    this.name = '',
+    this.description = '',
+    this.defaultValue = false,
+  });
+
+  final String settingsKey;
+  final String name;
+  final String description;
+  final bool defaultValue;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    return ValueListenableBuilder(
+      valueListenable: settings.box.listenable(keys: [settingsKey]),
+      builder: (context, Box box, _) {
+        return SettingsItem(
+          name: name,
+          description: description,
+          actions: [
+            Switch(
+                value: settings.get(settingsKey, defaultValue: defaultValue),
+                onChanged: (v) => settings.set(settingsKey, v))
+          ],
+        );
+      },
     );
   }
 }
