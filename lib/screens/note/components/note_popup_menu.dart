@@ -4,6 +4,7 @@ import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../models/Note.dart';
 
@@ -12,6 +13,7 @@ class NotePopupMenu extends ConsumerStatefulWidget {
     Key? key,
     required this.note,
     this.onAddAttachment,
+    this.onSeeBacklinks,
     this.backlinksOption = true,
     this.deleteOption = true,
     this.shareOption = false,
@@ -19,6 +21,7 @@ class NotePopupMenu extends ConsumerStatefulWidget {
 
   final Note? note;
   final Function(String, Uint8List?)? onAddAttachment;
+  final VoidCallback? onSeeBacklinks;
   final bool backlinksOption;
   final bool deleteOption;
   final bool shareOption;
@@ -50,14 +53,11 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
   void onSeeBacklinks(Note note) {
     final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     final notifier = ref.read(searchProvider.notifier);
-    final noteUtils = ref.read(noteUtilsProvider);
     notifier.updateSearch(searchQuery.copyWith(
       query: "[[${note.title}]]",
       searchByContent: true,
     ));
-    if (noteUtils.dialogOpen) {
-      Navigator.pop(context);
-    }
+    widget.onSeeBacklinks?.call();
   }
 
   @override
@@ -125,9 +125,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
             ),
             onTap: () {
               noteUtils.handleDeleteNote(context, [note]);
-              if (noteUtils.dialogOpen) {
-                Navigator.pop(context);
-              }
+              context.pop();
             },
           ),
       ],

@@ -4,6 +4,7 @@ import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controlle
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../models/Note.dart';
@@ -60,6 +61,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     return true;
   }
 
+  void popScreen() async {
+    await onWillPop(widget.noteId);
+    context.pop();
+  }
+
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
     styles: TextPartStyleDefinitions(definitionList: [
@@ -93,7 +99,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                 elevation:
                     (Responsive.isMobile(context)) ? null : dialogElevation,
                 leading: IconButton(
-                  onPressed: () => Navigator.maybePop(context),
+                  onPressed: popScreen,
                   icon: const Icon(Icons.close),
                 ),
                 title: Text("Edit Note",
@@ -120,6 +126,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                     padding: const EdgeInsets.only(right: 8.0),
                     child: NotePopupMenu(
                       note: note,
+                      onSeeBacklinks: popScreen,
                       onAddAttachment: (String fn, Uint8List? fb) {
                         if (note == null) return;
                         noteUtils.onAddAttachment(context, note, fn, fb,
