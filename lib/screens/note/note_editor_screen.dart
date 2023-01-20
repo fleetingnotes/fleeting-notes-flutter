@@ -19,12 +19,12 @@ import 'note_editor.dart';
 class NoteEditorScreen extends ConsumerStatefulWidget {
   const NoteEditorScreen({
     super.key,
-    this.noteId,
+    required this.noteId,
     this.extraNote,
     this.isShared = false,
   });
 
-  final String? noteId;
+  final String noteId;
   final Note? extraNote;
   final bool isShared;
 
@@ -50,16 +50,16 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     return note;
   }
 
-  Future<bool> onWillPop(Note note) async {
+  Future<bool> onWillPop(String noteId) async {
     final db = ref.watch(dbProvider);
     final noteUtils = ref.read(noteUtilsProvider);
     final noteNotifier = ref.read(viewedNotesProvider.notifier);
     Note? unsavedNote = db.settings.get('unsaved-note');
-    if (unsavedNote != null && unsavedNote.id == note.id) {
+    if (unsavedNote != null && unsavedNote.id == noteId) {
       await noteUtils.handleSaveNote(context, unsavedNote);
       noteNotifier.addNote(unsavedNote);
     } else {
-      Note? postDialogNote = await db.getNoteById(note.id);
+      Note? postDialogNote = await db.getNoteById(noteId);
       if (postDialogNote != null) {
         noteNotifier.addNote(postDialogNote);
       }
@@ -91,7 +91,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         return WillPopScope(
           onWillPop: () async {
             if (note == null) return true;
-            return onWillPop(note);
+            return onWillPop(widget.noteId);
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -100,7 +100,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                 elevation:
                     (Responsive.isMobile(context)) ? null : dialogElevation,
                 leading: IconButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.maybePop(context),
                   icon: const Icon(Icons.close),
                 ),
                 title: Text("Edit Note",
