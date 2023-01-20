@@ -162,4 +162,18 @@ class NoteUtils {
       content: Text(text),
     ));
   }
+
+  Future<bool> onPopNote(BuildContext context, String noteId) async {
+    Note? unsavedNote = db.settings.get('unsaved-note');
+    if (unsavedNote != null && unsavedNote.id == noteId) {
+      await handleSaveNote(context, unsavedNote);
+      noteNotifier.addNote(unsavedNote);
+    } else {
+      Note? postDialogNote = await db.getNoteById(noteId);
+      if (postDialogNote != null) {
+        noteNotifier.addNote(postDialogNote);
+      }
+    }
+    return true;
+  }
 }

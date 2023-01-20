@@ -44,25 +44,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     return note;
   }
 
-  Future<bool> onWillPop(String noteId) async {
-    final db = ref.watch(dbProvider);
-    final noteUtils = ref.read(noteUtilsProvider);
-    final noteNotifier = ref.read(viewedNotesProvider.notifier);
-    Note? unsavedNote = db.settings.get('unsaved-note');
-    if (unsavedNote != null && unsavedNote.id == noteId) {
-      await noteUtils.handleSaveNote(context, unsavedNote);
-      noteNotifier.addNote(unsavedNote);
-    } else {
-      Note? postDialogNote = await db.getNoteById(noteId);
-      if (postDialogNote != null) {
-        noteNotifier.addNote(postDialogNote);
-      }
-    }
-    return true;
-  }
-
   void popScreen() async {
-    await onWillPop(widget.noteId);
+    final noteUtils = ref.read(noteUtilsProvider);
+    noteUtils.onPopNote(context, widget.noteId);
     context.pop();
   }
 
@@ -90,7 +74,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         return WillPopScope(
           onWillPop: () async {
             if (note == null) return true;
-            return onWillPop(widget.noteId);
+            return noteUtils.onPopNote(context, widget.noteId);
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -126,7 +110,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                     padding: const EdgeInsets.only(right: 8.0),
                     child: NotePopupMenu(
                       note: note,
-                      onSeeBacklinks: popScreen,
                       onAddAttachment: (String fn, Uint8List? fb) {
                         if (note == null) return;
                         noteUtils.onAddAttachment(context, note, fn, fb,

@@ -13,6 +13,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
 class ContentField extends ConsumerStatefulWidget {
@@ -259,9 +260,12 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
     void _onFollowLinkTap(Note note) async {
       final notifier = ref.read(searchProvider.notifier);
-      Navigator.pop(context, note);
-      notifier.updateSearch(null);
+      final noteUtils = ref.read(noteUtilsProvider);
       removeOverlay();
+      noteUtils.onPopNote(context, note.id);
+      GoRouter.of(context).pop();
+      noteUtils.openNoteEditorDialog(context, note);
+      notifier.updateSearch(null);
     }
 
     // init overlay entry
