@@ -75,9 +75,20 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
           ),
           GoRoute(
             path: 'note',
-            redirect: (context, state) {
-              var emptyNoteId = Note.empty().id;
-              return '/note/$emptyNoteId';
+            pageBuilder: (context, s) {
+              var note = s.extra as Note?;
+              note = note ??
+                  Note.empty(
+                    title: s.queryParams['title'] ?? '',
+                    content: s.queryParams['content'] ?? '',
+                    source: s.queryParams['source'] ?? '',
+                  );
+
+              return DialogPage(
+                  child: NoteEditorScreen(
+                noteId: note.id,
+                extraNote: note,
+              ));
             },
           ),
           GoRoute(
