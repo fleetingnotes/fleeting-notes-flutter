@@ -8,6 +8,15 @@ import "package:yaml/yaml.dart";
 
 part 'Note.g.dart';
 
+bool isValidUuid(String uuid) {
+  try {
+    Uuid.parse(uuid);
+    return true;
+  } on FormatException {
+    return false;
+  }
+}
+
 @HiveType(typeId: 1)
 class Note {
   @HiveField(0)
@@ -48,7 +57,11 @@ ${content}''';
     this.partition = '',
     this.source = '',
     this.isDeleted = false,
-  }) : modifiedAt = createdAt;
+  })  : modifiedAt = createdAt,
+        assert(
+          isValidUuid(id),
+          'id must be a valid UUID',
+        );
 
   DateTime get createdAtDate => DateTime.parse(createdAt);
   DateTime get modifiedAtDate => DateTime.parse(modifiedAt);

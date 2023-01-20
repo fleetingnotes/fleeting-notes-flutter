@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -61,12 +60,56 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
     authChangeController?.stream.listen(refreshApp);
     SchedulerBinding.instance
         .addPostFrameCallback((_) => refreshApp(db.supabase.currUser));
-    if (kIsWeb) {
-      setState(() {
-        initNote = db.settings.get('unsaved-note');
-      });
-    }
   }
+
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => LoadMainScreen(state: state),
+        routes: [
+          GoRoute(
+            path: 'settings',
+            pageBuilder: (context, _) =>
+                const DialogPage(child: SettingsScreen()),
+          ),
+          GoRoute(
+            path: 'note',
+            redirect: (context, state) {
+              var emptyNoteId = Note.empty().id;
+              return '/note/$emptyNoteId';
+            },
+          ),
+          GoRoute(
+            path: 'note/:id',
+            redirect: (context, state) {
+              var noteId = state.subloc.replaceFirst('/note/', '');
+              if (isValidUuid(noteId)) {
+                return state.subloc;
+              }
+              return '/';
+            },
+            pageBuilder: (context, s) {
+              var noteId = s.subloc.replaceFirst('/note/', '');
+              Note? note = s.extra as Note?;
+
+              return DialogPage(
+                  child: NoteEditorScreen(
+                noteId: noteId,
+                extraNote: note,
+              ));
+            },
+          ),
+          // https://github.com/flutter/flutter/issues/115355
+          // redirect will use empty location if below is not present
+          GoRoute(
+            path: 'web-ext.html',
+            builder: (context, state) => LoadMainScreen(state: state),
+          ),
+        ],
+      ),
+    ],
+  );
 
   @override
   void dispose() {
@@ -83,59 +126,6 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    final _router = GoRouter(
-      routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => LoadMainScreen(
-            initNote: initNote,
-            state: state,
-          ),
-          routes: [
-            GoRoute(
-              path: 'settings',
-              pageBuilder: (context, _) =>
-                  const DialogPage(child: SettingsScreen()),
-            ),
-            GoRoute(
-              path: 'note',
-              redirect: (context, state) {
-                var emptyNoteId = Note.empty().id;
-                return '/note/$emptyNoteId';
-              },
-            ),
-            GoRoute(
-              path: 'note/:id',
-              redirect: (context, state) {
-                var noteId = state.subloc.replaceFirst('/note/', '');
-                if (isValidUuid(noteId)) {
-                  return state.subloc;
-                }
-                return '/';
-              },
-              pageBuilder: (context, s) {
-                var noteId = s.subloc.replaceFirst('/note/', '');
-                Note? note = s.extra as Note?;
-
-                return DialogPage(
-                    child: NoteEditorScreen(
-                  noteId: noteId,
-                  extraNote: note,
-                  isShared: note == null,
-                ));
-              },
-            ),
-            // https://github.com/flutter/flutter/issues/115355
-            // redirect will use empty location if below is not present
-            GoRoute(
-              path: 'web-ext.html',
-              builder: (context, state) =>
-                  LoadMainScreen(initNote: initNote, state: state),
-            ),
-          ],
-        ),
-      ],
-    );
     return ValueListenableBuilder(
         valueListenable: db.settings.box.listenable(keys: ['dark-mode']),
         builder: (context, Box box, _) {
@@ -149,9 +139,9 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                   ? Brightness.dark
                   : Brightness.light,
             ),
-            routeInformationProvider: _router.routeInformationProvider,
-            routeInformationParser: _router.routeInformationParser,
-            routerDelegate: _router.routerDelegate,
+            routeInformationProvider: router.routeInformationProvider,
+            routeInformationParser: router.routeInformationParser,
+            routerDelegate: router.routerDelegate,
           );
         });
   }
@@ -160,11 +150,9 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
 class LoadMainScreen extends ConsumerStatefulWidget {
   const LoadMainScreen({
     Key? key,
-    required this.initNote,
     required this.state,
   }) : super(key: key);
 
-  final Note? initNote;
   final GoRouterState state;
 
   @override
@@ -245,8 +233,7 @@ class _LoadMainScreenState extends ConsumerState<LoadMainScreen> {
             });
           }
           return MainScreen(
-            initNote:
-                (snapshot.hasData) ? snapshot.data as Note : widget.initNote,
+            initNote: snapshot.data,
           );
         } else {
           return const Center(child: CircularProgressIndicator());

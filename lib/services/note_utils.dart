@@ -114,9 +114,9 @@ class NoteUtils {
     }
   }
 
-  Future<void> openNoteEditorDialog(BuildContext context, Note note,
-      {bool isShared = false}) async {
-    return context.go('/note/${note.id}', extra: note);
+  Future<void> openNoteEditorDialog(BuildContext context, Note note) async {
+    var url = '/note/${note.id}';
+    return context.go(url, extra: note);
   }
 
   void launchURLBrowser(String url, BuildContext context) async {

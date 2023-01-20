@@ -33,16 +33,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     super.initState();
     Note? initNote = widget.initNote;
     final db = ref.read(dbProvider);
-    bool hasInitNote = initNote != null;
     var isSharedNotes = db.isSharedNotes;
     // TODO: add setting to open a new note on startup
-    if (hasInitNote) {
+    if (initNote != null) {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         final noteUtils = ref.read(noteUtilsProvider);
         var dialogNote = initNote;
         // dialogNote ??= Note.empty();
-        noteUtils.openNoteEditorDialog(context, dialogNote,
-            isShared: hasInitNote);
+        noteUtils.openNoteEditorDialog(context, dialogNote);
       });
     }
     if (!kDebugMode) analyticsDialogWorkflow();

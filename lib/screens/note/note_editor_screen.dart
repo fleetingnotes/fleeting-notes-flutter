@@ -1,11 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
-import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../models/Note.dart';
@@ -21,32 +19,27 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
     super.key,
     required this.noteId,
     this.extraNote,
-    this.isShared = false,
   });
 
   final String noteId;
   final Note? extraNote;
-  final bool isShared;
 
   @override
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
 }
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
+  bool noteWasShared = false;
 
-  Future<Note> getNote(String? noteId) async {
+  Future<Note> getNote() async {
+    // initialize shared
     final db = ref.read(dbProvider);
-    Note? note = widget.extraNote;
-    if (note != null) return note;
-    if (noteId != null) {
-      note = await db.getNoteById(noteId);
-      note ??= Note.empty(id: noteId);
+    Note? note = await db.getNoteById(widget.noteId);
+    if (note == null) {
+      note = widget.extraNote;
+      noteWasShared = true;
     }
-    note = note ?? Note.empty();
+    note = note ?? Note.empty(id: widget.noteId);
     return note;
   }
 
@@ -85,7 +78,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     final settings = ref.watch(settingsProvider);
     final noteUtils = ref.watch(noteUtilsProvider);
     return FutureBuilder<Note>(
-      future: getNote(widget.noteId),
+      future: getNote(),
       builder: (context, snapshot) {
         Note? note = snapshot.data;
         return WillPopScope(
@@ -147,7 +140,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                         titleController: titleController,
                         contentController: contentController,
                         sourceController: sourceController,
-                        isShared: widget.isShared,
+                        isShared: noteWasShared,
                         padding: const EdgeInsets.only(
                             left: 24, right: 24, bottom: 16),
                       ),
