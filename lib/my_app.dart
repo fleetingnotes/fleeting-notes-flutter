@@ -121,7 +121,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                     child: NoteEditorScreen(
                   noteId: noteId,
                   extraNote: note,
-                  isShared: true,
+                  isShared: note == null,
                 ));
               },
             ),

@@ -230,7 +230,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                 ContentField(
                   controller: contentController,
                   onChanged: onChanged,
-                  autofocus: true,
+                  autofocus: autofocus,
                 ),
                 const SizedBox(height: 8),
                 SourceContainer(
