@@ -57,11 +57,14 @@ ${content}''';
   }
 
   static Note empty(
-      {String title = '', String content = '', String source = ''}) {
+      {String? id,
+      String title = '',
+      String content = '',
+      String source = ''}) {
     Uuid uuid = const Uuid();
     String dateStr = DateTime.now().toUtc().toIso8601String();
     return Note(
-      id: uuid.v1(),
+      id: id ?? uuid.v4(),
       title: title,
       content: content,
       source: source,

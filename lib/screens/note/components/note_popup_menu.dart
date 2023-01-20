@@ -17,7 +17,7 @@ class NotePopupMenu extends ConsumerStatefulWidget {
     this.shareOption = false,
   }) : super(key: key);
 
-  final Note note;
+  final Note? note;
   final Function(String, Uint8List?)? onAddAttachment;
   final bool backlinksOption;
   final bool deleteOption;
@@ -32,7 +32,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
 
   @override
   void initState() {
-    _isShareable = widget.note.isShareable;
+    _isShareable = widget.note?.isShareable ?? false;
     super.initState();
   }
 
@@ -47,12 +47,12 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
     }
   }
 
-  void onSeeBacklinks() {
+  void onSeeBacklinks(Note note) {
     final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     final notifier = ref.read(searchProvider.notifier);
     final noteUtils = ref.read(noteUtilsProvider);
     notifier.updateSearch(searchQuery.copyWith(
-      query: "[[${widget.note.title}]]",
+      query: "[[${note.title}]]",
       searchByContent: true,
     ));
     if (noteUtils.dialogOpen) {
@@ -63,6 +63,10 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
+    var note = widget.note;
+    if (note == null) {
+      return const IconButton(onPressed: null, icon: Icon(Icons.more_vert));
+    }
     return PopupMenuButton(
       icon: const Icon(Icons.more_vert),
       itemBuilder: (context) => [
@@ -89,29 +93,28 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
                         setState(() {
                           _isShareable = val ?? false;
                         });
-                        noteUtils.handleShareChange(
-                            widget.note.id, _isShareable);
+                        noteUtils.handleShareChange(note.id, _isShareable);
                       });
                 }),
                 message: 'Is shareable',
               ),
             ),
             onTap: () async {
-              noteUtils.handleShareChange(widget.note.id, _isShareable);
-              noteUtils.handleCopyUrl(context, widget.note.id);
+              noteUtils.handleShareChange(note.id, _isShareable);
+              noteUtils.handleCopyUrl(context, note.id);
               setState(() {
                 _isShareable = true;
               });
             },
           ),
-        if (widget.backlinksOption && widget.note.title.isNotEmpty)
+        if (widget.backlinksOption && note.title.isNotEmpty)
           PopupMenuItem(
             child: const ListTile(
               title: Text("See backlinks"),
               leading: Icon(Icons.link),
               contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
             ),
-            onTap: onSeeBacklinks,
+            onTap: () => onSeeBacklinks(note),
           ),
         if (widget.deleteOption)
           PopupMenuItem(
@@ -121,7 +124,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
               contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
             ),
             onTap: () {
-              noteUtils.handleDeleteNote(context, [widget.note]);
+              noteUtils.handleDeleteNote(context, [note]);
               if (noteUtils.dialogOpen) {
                 Navigator.pop(context);
               }

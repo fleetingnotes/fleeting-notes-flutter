@@ -17,20 +17,56 @@ import 'note_editor.dart';
 class NoteEditorScreen extends ConsumerStatefulWidget {
   const NoteEditorScreen({
     super.key,
-    required this.note,
-    required this.isShared,
-    this.appbarElevation,
+    this.noteId,
+    this.extraNote,
+    this.isShared = false,
   });
 
-  final Note note;
+  final String? noteId;
+  final Note? extraNote;
   final bool isShared;
-  final double? appbarElevation;
 
   @override
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
 }
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<Note> getNote(String? noteId) async {
+    final db = ref.read(dbProvider);
+    Note? note = widget.extraNote;
+    if (note != null) return note;
+    if (noteId != null) {
+      note = await db.getNoteById(noteId);
+      note = note ?? Note.empty(id: noteId);
+    } else {
+      note = Note.empty();
+    }
+    return note;
+  }
+
+  Future<bool> onWillPop(Note note) async {
+    final db = ref.watch(dbProvider);
+    final noteUtils = ref.read(noteUtilsProvider);
+    final noteNotifier = ref.read(viewedNotesProvider.notifier);
+    Note? unsavedNote = db.settings.get('unsaved-note');
+    if (unsavedNote != null && unsavedNote.id == note.id) {
+      await noteUtils.handleSaveNote(context, unsavedNote);
+      noteNotifier.addNote(unsavedNote);
+    } else {
+      Note? postDialogNote = await db.getNoteById(note.id);
+      if (postDialogNote != null) {
+        noteNotifier.addNote(postDialogNote);
+      }
+    }
+    return true;
+  }
+
+  TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
     styles: TextPartStyleDefinitions(definitionList: [
       TextPartStyleDefinition(
@@ -41,59 +77,84 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           ))
     ]),
   );
+  TextEditingController sourceController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
     final noteUtils = ref.watch(noteUtilsProvider);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AppBar(
-          elevation: (Responsive.isMobile(context)) ? null : dialogElevation,
-          leading: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close),
-          ),
-          title:
-              Text("Edit Note", style: Theme.of(context).textTheme.titleLarge),
-          actions: [
-            ValueListenableBuilder(
-                valueListenable:
-                    settings.box.listenable(keys: ['unsaved-note']),
-                builder: (context, Box box, _) {
-                  var unsavedNote = box.get('unsaved-note');
-                  bool saveEnabled =
-                      unsavedNote != null && unsavedNote?.id == widget.note.id;
-                  return IconButton(
-                      onPressed: (saveEnabled)
-                          ? () {
-                              noteUtils.handleSaveNote(context, unsavedNote);
-                            }
-                          : null,
-                      icon: const Icon(Icons.save));
-                }),
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: NotePopupMenu(
-                note: widget.note,
-                onAddAttachment: (String fn, Uint8List? fb) {
-                  noteUtils.onAddAttachment(context, widget.note, fn, fb,
-                      controller: contentController);
-                },
+    return FutureBuilder<Note>(
+      future: getNote(widget.noteId),
+      builder: (context, snapshot) {
+        Note? note = snapshot.data;
+        return WillPopScope(
+          onWillPop: () async {
+            if (note == null) return true;
+            return onWillPop(note);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppBar(
+                elevation:
+                    (Responsive.isMobile(context)) ? null : dialogElevation,
+                leading: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+                title: Text("Edit Note",
+                    style: Theme.of(context).textTheme.titleLarge),
+                actions: [
+                  ValueListenableBuilder(
+                      valueListenable:
+                          settings.box.listenable(keys: ['unsaved-note']),
+                      builder: (context, Box box, _) {
+                        var unsavedNote = box.get('unsaved-note');
+                        bool saveEnabled = unsavedNote != null &&
+                            note != null &&
+                            unsavedNote?.id == note.id;
+                        return IconButton(
+                            onPressed: (saveEnabled)
+                                ? () {
+                                    noteUtils.handleSaveNote(
+                                        context, unsavedNote);
+                                  }
+                                : null,
+                            icon: const Icon(Icons.save));
+                      }),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: NotePopupMenu(
+                      note: note,
+                      onAddAttachment: (String fn, Uint8List? fb) {
+                        if (note == null) return;
+                        noteUtils.onAddAttachment(context, note, fn, fb,
+                            controller: contentController);
+                      },
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
-        Flexible(
-          fit: FlexFit.loose,
-          child: NoteEditor(
-            note: widget.note,
-            contentController: contentController,
-            isShared: widget.isShared,
-            padding: const EdgeInsets.only(left: 24, right: 24, bottom: 16),
+              Flexible(
+                fit: FlexFit.loose,
+                child: (note == null)
+                    ? const SizedBox(
+                        height: 100,
+                        child: Center(child: CircularProgressIndicator()))
+                    : NoteEditor(
+                        note: note,
+                        titleController: titleController,
+                        contentController: contentController,
+                        sourceController: sourceController,
+                        isShared: widget.isShared,
+                        padding: const EdgeInsets.only(
+                            left: 24, right: 24, bottom: 16),
+                      ),
+              ),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

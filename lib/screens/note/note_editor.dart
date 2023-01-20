@@ -104,28 +104,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteChangeStream?.cancel();
   }
 
-  @override
-  void didPopNext() {
-    final db = ref.read(dbProvider);
-    // Refresh note if we traverse back
-    db.getNote(widget.note.id).then((note) {
-      if (note != null) {
-        titleController.text = note.title;
-        contentController.text = note.content;
-        sourceController.text = note.source;
-      }
-    });
-  }
-
-  @override
-  void didPushNext() {
-    // Autosave if the note was previously saved
-    // If we autosave every note, we would pollute pretty fast.
-    if (hasNewChanges) {
-      _saveNote();
-    }
-  }
-
   Future<void> _saveNote() async {
     final noteUtils = ref.read(noteUtilsProvider);
     Note updatedNote = widget.note.copyWith(
@@ -133,6 +111,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       content: contentController.text,
       source: sourceController.text,
     );
+    if (updatedNote.isEmpty()) return;
     try {
       setState(() {
         hasNewChanges = false;

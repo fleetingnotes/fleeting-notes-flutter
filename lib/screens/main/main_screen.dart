@@ -27,20 +27,20 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   FocusNode searchFocusNode = FocusNode();
   Widget? desktopSideWidget;
-  late bool hasInitNote;
   bool bannerExists = false;
   @override
   void initState() {
     super.initState();
-    var note = widget.initNote;
+    Note? initNote = widget.initNote;
     final db = ref.read(dbProvider);
-    hasInitNote = note != null;
+    bool hasInitNote = initNote != null;
     var isSharedNotes = db.isSharedNotes;
-    if (!db.settings.isFirstTimeOpen()) {
+    // TODO: add setting to open a new note on startup
+    if (hasInitNote) {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         final noteUtils = ref.read(noteUtilsProvider);
-        var dialogNote = note;
-        dialogNote ??= Note.empty();
+        var dialogNote = initNote;
+        // dialogNote ??= Note.empty();
         noteUtils.openNoteEditorDialog(context, dialogNote,
             isShared: hasInitNote);
       });
@@ -77,7 +77,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).removeCurrentMaterialBanner();
                   setState(() {
-                    hasInitNote = false;
                     bannerExists = false;
                     db.refreshApp(ref);
                   });

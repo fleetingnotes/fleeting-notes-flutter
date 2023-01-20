@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/foundation.dart';
@@ -82,15 +83,6 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
     final _router = GoRouter(
-      redirect: (context, state) {
-        if (state.subloc == '/' || state.subloc == '/settings') {
-          return null;
-        }
-        final String _queryString = Uri(
-            queryParameters: state.queryParams
-                .map((key, value) => MapEntry(key, value.toString()))).query;
-        return (_queryString.isEmpty) ? '/' : '/?$_queryString';
-      },
       routes: [
         GoRoute(
           path: '/',
@@ -103,6 +95,27 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
               path: 'settings',
               pageBuilder: (context, _) =>
                   const DialogPage(child: SettingsScreen()),
+            ),
+            GoRoute(
+              path: 'note',
+              redirect: (context, state) {
+                var emptyNoteId = Note.empty().id;
+                return '/note/$emptyNoteId';
+              },
+            ),
+            GoRoute(
+              path: 'note/:id',
+              pageBuilder: (context, s) {
+                var noteId = s.subloc.replaceFirst('/note/', '');
+                Note? note = s.extra as Note?;
+
+                return DialogPage(
+                    child: NoteEditorScreen(
+                  noteId: noteId,
+                  extraNote: note,
+                  isShared: true,
+                ));
+              },
             ),
             // https://github.com/flutter/flutter/issues/115355
             // redirect will use empty location if below is not present

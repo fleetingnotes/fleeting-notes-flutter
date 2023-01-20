@@ -1,13 +1,11 @@
 import 'package:fleeting_notes_flutter/services/notifier.dart';
-import 'package:fleeting_notes_flutter/utils/responsive.dart';
-import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/Note.dart';
 import '../models/exceptions.dart';
-import '../screens/note/note_editor_screen.dart';
 import 'database.dart';
 import 'package:path/path.dart' as p;
 
@@ -118,54 +116,7 @@ class NoteUtils {
 
   Future<void> openNoteEditorDialog(BuildContext context, Note note,
       {bool isShared = false}) async {
-    var dbNote = await db.getNoteById(note.id);
-    if (dbNote != null) {
-      note = dbNote;
-    }
-
-    dialogOpen = true;
-    Note? poppedNote = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        if (Responsive.isMobile(context)) {
-          return Dialog.fullscreen(
-            child: NoteEditorScreen(isShared: isShared, note: note),
-          );
-        }
-        return Dialog(
-          elevation: dialogElevation,
-          clipBehavior: Clip.hardEdge,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(30)),
-          ),
-          child: SizedBox(
-            width: 599,
-            child: NoteEditorScreen(
-              isShared: isShared,
-              note: note,
-            ),
-          ),
-        );
-      },
-    );
-    dialogOpen = false;
-    var postDialogNote = await db.getNoteById(note.id);
-    if (poppedNote != null) {
-      if (postDialogNote != null) {
-        noteNotifier.addNote(postDialogNote);
-      }
-      noteNotifier.addNote(poppedNote);
-    } else {
-      Note? unsavedNote = db.settings.get('unsaved-note');
-      if (unsavedNote != null && unsavedNote.id == note.id) {
-        await handleSaveNote(context, unsavedNote);
-        noteNotifier.addNote(unsavedNote);
-      } else {
-        if (postDialogNote != null) {
-          noteNotifier.addNote(postDialogNote);
-        }
-      }
-    }
+    return context.go('/note/${note.id}', extra: note);
   }
 
   void launchURLBrowser(String url, BuildContext context) async {
