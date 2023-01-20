@@ -21,16 +21,25 @@ class SettingsItem extends StatelessWidget {
         children: [
           if (leading != null)
             Padding(padding: const EdgeInsets.only(right: 8), child: leading),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (name.isNotEmpty)
-                Text(name, style: Theme.of(context).textTheme.titleSmall),
-              if (description.isNotEmpty)
-                Text(description, style: Theme.of(context).textTheme.labelSmall)
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (name.isNotEmpty)
+                  Text(
+                    name,
+                    style: Theme.of(context).textTheme.titleSmall,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (description.isNotEmpty)
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.labelSmall,
+                    overflow: TextOverflow.ellipsis,
+                  )
+              ],
+            ),
           ),
-          const Spacer(),
           ...?actions?.map((a) =>
               Padding(padding: const EdgeInsets.only(left: 8), child: a)),
         ],
