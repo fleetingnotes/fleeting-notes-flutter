@@ -38,7 +38,5 @@ final viewedNotesProvider =
   return NoteNotifier(db);
 });
 final noteUtilsProvider = Provider<NoteUtils>((ref) {
-  final db = ref.watch(dbProvider);
-  final noteNotifier = ref.watch(viewedNotesProvider.notifier);
-  return NoteUtils(db, noteNotifier);
+  return NoteUtils(ref);
 });

@@ -1,22 +1,24 @@
-import 'package:fleeting_notes_flutter/services/notifier.dart';
+import 'package:carousel_slider/carousel_controller.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/Note.dart';
 import '../models/exceptions.dart';
-import 'database.dart';
 import 'package:path/path.dart' as p;
 
 // utilities to help do things with notes
 class NoteUtils {
-  Database db;
-  NoteNotifier noteNotifier;
-  bool dialogOpen = false;
-  NoteUtils(this.db, this.noteNotifier);
+  ProviderRef ref;
+  NoteUtils(this.ref);
+  CarouselController carouselController = CarouselController();
+  int currPageIndex = 0;
 
   Future<void> handleCopyUrl(BuildContext context, String noteId) async {
+    final db = ref.read(dbProvider);
     var note = await db.getNoteById(noteId);
     if (note == null) {
       _showSnackbar(context, 'Could not find note');
@@ -30,6 +32,8 @@ class NoteUtils {
   }
 
   Future<void> handleDeleteNote(BuildContext context, List<Note> notes) async {
+    final db = ref.read(dbProvider);
+    final noteNotifier = ref.read(viewedNotesProvider.notifier);
     try {
       bool isSuccessDelete = await db.deleteNotes(notes);
       if (!isSuccessDelete) {
@@ -43,6 +47,7 @@ class NoteUtils {
   }
 
   Future<void> handleSaveNote(BuildContext context, Note note) async {
+    final db = ref.read(dbProvider);
     try {
       var oldNote = await db.getNoteById(note.id);
       await _checkTitle(note.id, note.title);
@@ -60,6 +65,7 @@ class NoteUtils {
   }
 
   Future<void> handleShareChange(String noteId, bool shareable) async {
+    final db = ref.read(dbProvider);
     var note = await db.getNoteById(noteId);
     if (note != null) {
       note.isShareable = shareable;
@@ -73,6 +79,7 @@ class NoteUtils {
       return [];
     }
 
+    final db = ref.read(dbProvider);
     var allNotes = await db.getAllNotes();
     // update backlinks
     List<Note> updatedBacklinks = [];
@@ -94,6 +101,7 @@ class NoteUtils {
   void onAddAttachment(
       BuildContext context, Note note, String filename, Uint8List? bytes,
       {TextEditingController? controller}) async {
+    final db = ref.read(dbProvider);
     try {
       String newFileName = '${note.id}/$filename';
       Note? newNote = await db.addAttachmentToNewNote(
@@ -143,6 +151,7 @@ class NoteUtils {
 
   // helpers
   Future<void> _checkTitle(id, title) async {
+    final db = ref.read(dbProvider);
     if (title == '') return;
 
     RegExp r = RegExp('[${Note.invalidChars}]');
@@ -164,16 +173,31 @@ class NoteUtils {
   }
 
   Future<bool> onPopNote(BuildContext context, String noteId) async {
-    Note? unsavedNote = db.settings.get('unsaved-note');
-    if (unsavedNote != null && unsavedNote.id == noteId) {
-      await handleSaveNote(context, unsavedNote);
-      noteNotifier.addNote(unsavedNote);
-    } else {
-      Note? postDialogNote = await db.getNoteById(noteId);
-      if (postDialogNote != null) {
-        noteNotifier.addNote(postDialogNote);
-      }
+    final noteNotifier = ref.read(viewedNotesProvider.notifier);
+    final viewedNotes = ref.read(viewedNotesProvider);
+    final db = ref.read(dbProvider);
+    try {
+      if (viewedNotes[currPageIndex].id == noteId) return true;
+    } on RangeError catch (e) {
+      debugPrint(e.toString());
     }
-    return true;
+
+    try {
+      Note? unsavedNote = db.settings.get('unsaved-note');
+      if (unsavedNote != null && unsavedNote.id == noteId) {
+        await handleSaveNote(context, unsavedNote);
+        noteNotifier.addNote(unsavedNote);
+        carouselController.jumpToPage(0);
+      } else {
+        Note? postDialogNote = await db.getNoteById(noteId);
+        if (postDialogNote != null) {
+          noteNotifier.addNote(postDialogNote);
+          carouselController.jumpToPage(0);
+        }
+      }
+      return true;
+    } on RangeError {
+      return true;
+    }
   }
 }

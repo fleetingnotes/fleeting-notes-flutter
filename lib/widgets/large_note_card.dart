@@ -61,68 +61,74 @@ class LargeNoteCard extends ConsumerWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SelectionArea(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (note.title.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: Text(
-                                  note.title,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                  maxLines: 1,
-                                ),
-                              ),
-                            if (note.content.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: MarkdownBody(
-                                  data: note.content,
-                                  softLineBreak: true,
-                                  selectable: true,
-                                  onTapLink: (text, href, title) {
-                                    if (href != null) {
-                                      noteUtils.launchURLBrowser(href, context);
-                                    }
-                                  },
-                                  extensionSet: md.ExtensionSet(
-                                    md.ExtensionSet.gitHubFlavored
-                                        .blockSyntaxes,
-                                    [
-                                      md.EmojiSyntax(),
-                                      ...md.ExtensionSet.gitHubFlavored
-                                          .inlineSyntaxes,
-                                    ],
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SelectionArea(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (note.title.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text(
+                                      note.title,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold),
+                                      maxLines: 1,
+                                    ),
                                   ),
-                                ),
-                              ),
-                            if (note.source.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: SourceContainer(
-                                    text: note.source, readOnly: true),
-                              ),
-                          ],
-                        ),
+                                if (note.content.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: MarkdownBody(
+                                      data: note.content,
+                                      softLineBreak: true,
+                                      selectable: true,
+                                      onTapLink: (text, href, title) {
+                                        if (href != null) {
+                                          noteUtils.launchURLBrowser(
+                                              href, context);
+                                        }
+                                      },
+                                      extensionSet: md.ExtensionSet(
+                                        md.ExtensionSet.gitHubFlavored
+                                            .blockSyntaxes,
+                                        [
+                                          md.EmojiSyntax(),
+                                          ...md.ExtensionSet.gitHubFlavored
+                                              .inlineSyntaxes,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                if (note.source.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: SourceContainer(
+                                        text: note.source, readOnly: true),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ],
