@@ -56,7 +56,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
       query: "[[${note.title}]]",
       searchByContent: true,
     ));
-    context.pop();
+    context.go('/');
     noteUtils.onPopNote(context, note.id);
   }
 
@@ -125,7 +125,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
             ),
             onTap: () {
               noteUtils.handleDeleteNote(context, [note]);
-              context.pop();
+              context.go('/');
             },
           ),
       ],
