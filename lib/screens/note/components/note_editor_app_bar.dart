@@ -32,6 +32,7 @@ class NoteEditorAppBar extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final n = note;
     return AppBar(
+      scrolledUnderElevation: 0,
       elevation: elevation,
       leading: IconButton(
         onPressed: onClose,
