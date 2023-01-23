@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -86,6 +87,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
 
               return DialogPage(
                   child: NoteEditorScreen(
+                appbarElevation:
+                    Responsive.isMobile(context) ? null : dialogElevation,
                 noteId: note.id,
                 extraNote: note,
               ));
@@ -106,6 +109,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
 
               return DialogPage(
                   child: NoteEditorScreen(
+                appbarElevation:
+                    Responsive.isMobile(context) ? null : dialogElevation,
                 noteId: noteId,
                 extraNote: note,
               ));

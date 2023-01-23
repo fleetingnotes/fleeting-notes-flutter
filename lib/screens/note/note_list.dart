@@ -5,6 +5,9 @@ import 'package:fleeting_notes_flutter/widgets/large_note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../models/Note.dart';
+import 'note_editor_card.dart';
+
 class NoteList extends ConsumerStatefulWidget {
   const NoteList({
     super.key,
@@ -18,26 +21,23 @@ class NoteList extends ConsumerStatefulWidget {
 }
 
 class _NoteListState extends ConsumerState<NoteList> {
+  final newNote = Note.empty();
+
   @override
   Widget build(BuildContext context) {
     final notes = ref.watch(viewedNotesProvider);
     final noteUtils = ref.watch(noteUtilsProvider);
     if (notes.isEmpty) {
       return Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.description_outlined,
-            size: 64,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: mobileLimit),
+          child: NoteEditorCard(
+            note: newNote,
+            elevation: 0,
+            onClose: () => noteUtils.onPopNote(context, newNote.id),
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Notes you view appear here',
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
-        ],
-      ));
+        ),
+      );
     }
 
     return Scaffold(

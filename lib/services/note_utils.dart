@@ -172,6 +172,7 @@ class NoteUtils {
     ));
   }
 
+  // saves note and adds it to viewed notes if it makes sense to
   Future<void> onPopNote(BuildContext context, String noteId) async {
     final noteNotifier = ref.read(viewedNotesProvider.notifier);
     final viewedNotes = ref.read(viewedNotesProvider);

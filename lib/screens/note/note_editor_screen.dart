@@ -1,18 +1,13 @@
-import 'dart:typed_data';
-
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
-import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../models/Note.dart';
 import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
-import '../../utils/responsive.dart';
-import 'components/note_popup_menu.dart';
+import 'components/note_editor_app_bar.dart';
 import 'note_editor.dart';
 
 class NoteEditorScreen extends ConsumerStatefulWidget {
@@ -20,10 +15,12 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
     super.key,
     required this.noteId,
     this.extraNote,
+    this.appbarElevation,
   });
 
   final String noteId;
   final Note? extraNote;
+  final double? appbarElevation;
 
   @override
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
@@ -65,7 +62,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = ref.watch(settingsProvider);
     final noteUtils = ref.watch(noteUtilsProvider);
     return FutureBuilder<Note>(
       future: getNote(),
@@ -80,45 +76,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AppBar(
-                elevation:
-                    (Responsive.isMobile(context)) ? null : dialogElevation,
-                leading: IconButton(
-                  onPressed: popScreen,
-                  icon: const Icon(Icons.close),
-                ),
-                title: Text("Edit Note",
-                    style: Theme.of(context).textTheme.titleLarge),
-                actions: [
-                  ValueListenableBuilder(
-                      valueListenable:
-                          settings.box.listenable(keys: ['unsaved-note']),
-                      builder: (context, Box box, _) {
-                        var unsavedNote = box.get('unsaved-note');
-                        bool saveEnabled = unsavedNote != null &&
-                            note != null &&
-                            unsavedNote?.id == note.id;
-                        return IconButton(
-                            onPressed: (saveEnabled)
-                                ? () {
-                                    noteUtils.handleSaveNote(
-                                        context, unsavedNote);
-                                  }
-                                : null,
-                            icon: const Icon(Icons.save));
-                      }),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: NotePopupMenu(
-                      note: note,
-                      onAddAttachment: (String fn, Uint8List? fb) {
-                        if (note == null) return;
-                        noteUtils.onAddAttachment(context, note, fn, fb,
-                            controller: contentController);
-                      },
-                    ),
-                  )
-                ],
+              NoteEditorAppBar(
+                note: note,
+                elevation: widget.appbarElevation,
+                onClose: popScreen,
+                contentController: contentController,
               ),
               Flexible(
                 fit: FlexFit.loose,
