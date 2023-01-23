@@ -87,8 +87,6 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
 
               return DialogPage(
                   child: NoteEditorScreen(
-                appbarElevation:
-                    Responsive.isMobile(context) ? null : dialogElevation,
                 noteId: note.id,
                 extraNote: note,
               ));
@@ -109,8 +107,6 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
 
               return DialogPage(
                   child: NoteEditorScreen(
-                appbarElevation:
-                    Responsive.isMobile(context) ? null : dialogElevation,
                 noteId: noteId,
                 extraNote: note,
               ));

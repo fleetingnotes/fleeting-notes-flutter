@@ -7,6 +7,8 @@ import '../../models/Note.dart';
 import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
+import '../../utils/responsive.dart';
+import '../../widgets/dialog_page.dart';
 import 'components/note_editor_app_bar.dart';
 import 'note_editor.dart';
 
@@ -78,7 +80,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             children: [
               NoteEditorAppBar(
                 note: note,
-                elevation: widget.appbarElevation,
+                elevation:
+                    Responsive.isMobile(context) ? null : dialogElevation,
                 onClose: popScreen,
                 contentController: contentController,
               ),
