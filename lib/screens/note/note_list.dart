@@ -4,8 +4,6 @@ import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:fleeting_notes_flutter/widgets/large_note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../models/Note.dart';
 import 'note_editor_card.dart';
 
 class NoteList extends ConsumerStatefulWidget {
@@ -26,16 +24,10 @@ class _NoteListState extends ConsumerState<NoteList> {
     final notes = ref.watch(viewedNotesProvider);
     final noteUtils = ref.watch(noteUtilsProvider);
     if (notes.isEmpty) {
-      return Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: mobileLimit),
-          child: NoteEditorCard(
-            note: noteUtils.cachedNote,
-            elevation: 0,
-            onClose: () =>
-                noteUtils.onPopNote(context, noteUtils.cachedNote.id),
-          ),
-        ),
+      return NoteEditorCard(
+        note: noteUtils.cachedNote,
+        elevation: 0,
+        onClose: () => noteUtils.onPopNote(context, noteUtils.cachedNote.id),
       );
     }
 
@@ -59,31 +51,29 @@ class _NoteListState extends ConsumerState<NoteList> {
               ],
             )
           : null,
-      body: GestureDetector(
-        child: CarouselSlider.builder(
-          itemCount: notes.length,
-          carouselController: noteUtils.carouselController,
-          options: CarouselOptions(
-            height: double.infinity,
-            initialPage: noteUtils.currPageIndex,
-            onPageChanged: (index, reason) {
-              setState(() {
-                noteUtils.currPageIndex = index;
-              });
-            },
-            scrollPhysics: (Responsive.isMobile(context))
-                ? null
-                : const NeverScrollableScrollPhysics(),
-            viewportFraction: 0.95,
-            enableInfiniteScroll: false,
-            reverse: true,
-          ),
-          itemBuilder: (context, i, realI) {
-            return Container(
-                constraints: const BoxConstraints(maxWidth: mobileLimit),
-                child: LargeNoteCard(note: notes[i]));
+      body: CarouselSlider.builder(
+        itemCount: notes.length,
+        carouselController: noteUtils.carouselController,
+        options: CarouselOptions(
+          height: double.infinity,
+          initialPage: noteUtils.currPageIndex,
+          onPageChanged: (index, reason) {
+            setState(() {
+              noteUtils.currPageIndex = index;
+            });
           },
+          scrollPhysics: (Responsive.isMobile(context))
+              ? null
+              : const NeverScrollableScrollPhysics(),
+          viewportFraction: 0.95,
+          enableInfiniteScroll: false,
+          reverse: true,
         ),
+        itemBuilder: (context, i, realI) {
+          return Container(
+              constraints: const BoxConstraints(maxWidth: mobileLimit),
+              child: LargeNoteCard(note: notes[i]));
+        },
       ),
     );
   }
