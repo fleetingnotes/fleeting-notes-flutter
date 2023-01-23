@@ -399,7 +399,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                 maxLines: null,
                 style: Theme.of(context).textTheme.bodyMedium,
                 decoration: const InputDecoration(
-                  hintText: "Note and links to other ideas",
+                  hintText: "Start writing your thoughts...",
                   border: InputBorder.none,
                 ),
                 onChanged: (text) => _onContentChanged(context, text, size),
