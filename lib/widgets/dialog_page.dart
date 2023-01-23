@@ -28,7 +28,7 @@ class DialogPage<T> extends Page<T> {
               borderRadius: BorderRadius.all(Radius.circular(30)),
             ),
             child: SizedBox(
-              width: 599,
+              width: mobileLimit,
               child: child,
             ),
           );

@@ -52,7 +52,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             builder: (_) => AlertDialog(
                 title: const Text('Register / Sign In'),
                 content: SizedBox(
-                  width: 599,
+                  width: mobileLimit,
                   child: Auth(
                     onLogin: (_) async {
                       await db.getAllNotes(forceSync: true);
