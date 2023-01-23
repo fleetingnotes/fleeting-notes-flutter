@@ -74,7 +74,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         return WillPopScope(
           onWillPop: () async {
             if (note == null) return true;
-            return noteUtils.onPopNote(context, widget.noteId);
+            noteUtils.onPopNote(context, widget.noteId);
+            return true;
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,

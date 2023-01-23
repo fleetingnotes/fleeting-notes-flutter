@@ -172,12 +172,12 @@ class NoteUtils {
     ));
   }
 
-  Future<bool> onPopNote(BuildContext context, String noteId) async {
+  Future<void> onPopNote(BuildContext context, String noteId) async {
     final noteNotifier = ref.read(viewedNotesProvider.notifier);
     final viewedNotes = ref.read(viewedNotesProvider);
     final db = ref.read(dbProvider);
     try {
-      if (viewedNotes[currPageIndex].id == noteId) return true;
+      if (viewedNotes[currPageIndex].id == noteId) return;
     } on RangeError catch (e) {
       debugPrint(e.toString());
     }
@@ -195,9 +195,9 @@ class NoteUtils {
           carouselController.jumpToPage(0);
         }
       }
-      return true;
+      return;
     } on RangeError {
-      return true;
+      return;
     }
   }
 }
