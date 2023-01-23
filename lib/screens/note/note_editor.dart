@@ -125,19 +125,24 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     }
   }
 
-  void storeUnsavedNote() {
-    final db = ref.read(dbProvider);
-    Note unsavedNote = Note(
+  Note getNote() {
+    Note note = Note(
       id: widget.note.id,
       title: titleController.text,
       content: contentController.text,
       source: sourceController.text,
       createdAt: widget.note.createdAt,
     );
-    db.settings.set('unsaved-note', unsavedNote);
+    return note;
+  }
+
+  void storeUnsavedNote() {
+    final db = ref.read(dbProvider);
+    db.settings.set('unsaved-note', getNote());
   }
 
   void onChanged() async {
+    final noteUtils = ref.read(noteUtilsProvider);
     modifiedAt = DateTime.now().toUtc();
     bool isNoteDiff = widget.note.content != contentController.text ||
         widget.note.title != titleController.text ||
@@ -148,6 +153,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     if (isNoteDiff && !isNoteEmpty) {
       if (titleController.text.isNotEmpty ||
           contentController.text.isNotEmpty) {
+        noteUtils.cachedNote = getNote();
         storeUnsavedNote();
       }
       setState(() {

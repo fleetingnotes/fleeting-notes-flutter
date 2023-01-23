@@ -16,6 +16,7 @@ class NoteUtils {
   NoteUtils(this.ref);
   CarouselController carouselController = CarouselController();
   int currPageIndex = 0;
+  Note cachedNote = Note.empty();
 
   Future<void> handleCopyUrl(BuildContext context, String noteId) async {
     final db = ref.read(dbProvider);
@@ -184,6 +185,9 @@ class NoteUtils {
     }
 
     try {
+      if (viewedNotes.isEmpty && !cachedNote.isEmpty()) {
+        noteNotifier.addNote(cachedNote);
+      }
       Note? unsavedNote = db.settings.get('unsaved-note');
       if (unsavedNote != null && unsavedNote.id == noteId) {
         await handleSaveNote(context, unsavedNote);

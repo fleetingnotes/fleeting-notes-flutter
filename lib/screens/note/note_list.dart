@@ -21,8 +21,6 @@ class NoteList extends ConsumerStatefulWidget {
 }
 
 class _NoteListState extends ConsumerState<NoteList> {
-  final newNote = Note.empty();
-
   @override
   Widget build(BuildContext context) {
     final notes = ref.watch(viewedNotesProvider);
@@ -32,9 +30,10 @@ class _NoteListState extends ConsumerState<NoteList> {
         child: Container(
           constraints: const BoxConstraints(maxWidth: mobileLimit),
           child: NoteEditorCard(
-            note: newNote,
+            note: noteUtils.cachedNote,
             elevation: 0,
-            onClose: () => noteUtils.onPopNote(context, newNote.id),
+            onClose: () =>
+                noteUtils.onPopNote(context, noteUtils.cachedNote.id),
           ),
         ),
       );
