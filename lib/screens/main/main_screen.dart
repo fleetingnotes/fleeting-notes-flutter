@@ -51,17 +51,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             context: context,
             builder: (_) => AlertDialog(
                 title: const Text('Register / Sign In'),
-                content: Auth(
-                  onLogin: (_) async {
-                    await db.getAllNotes(forceSync: true);
-                    Navigator.pop(context);
-                    // wait to make sure the user is logged in
-                    Future.delayed(const Duration(milliseconds: 500), () {
-                      setState(() {
-                        db.refreshApp(ref);
+                content: SizedBox(
+                  width: 599,
+                  child: Auth(
+                    onLogin: (_) async {
+                      await db.getAllNotes(forceSync: true);
+                      Navigator.pop(context);
+                      // wait to make sure the user is logged in
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        setState(() {
+                          db.refreshApp(ref);
+                        });
                       });
-                    });
-                  },
+                    },
+                  ),
                 )));
       });
     }
@@ -148,6 +151,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
     final searchQuery = ref.watch(searchProvider);
+    final viewedNotes = ref.watch(viewedNotesProvider);
     return Shortcuts(
       shortcuts: shortcutMapping,
       child: Actions(
@@ -172,7 +176,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             child: Responsive(
               mobile: SearchScreen(
                 searchFocusNode: searchFocusNode,
-                child: (searchQuery != null)
+                child: (searchQuery != null || viewedNotes.isEmpty)
                     ? null
                     : const NoteList(
                         padding: EdgeInsets.symmetric(horizontal: 4),
