@@ -66,15 +66,18 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   final router = GoRouter(
     routes: [
       GoRoute(
+        name: 'home',
         path: '/',
         builder: (context, state) => LoadMainScreen(state: state),
         routes: [
           GoRoute(
+            name: 'settings',
             path: 'settings',
             pageBuilder: (context, _) =>
                 const DialogPage(child: SettingsScreen()),
           ),
           GoRoute(
+            name: 'new_note',
             path: 'note',
             pageBuilder: (context, s) {
               var note = s.extra as Note?;
@@ -93,6 +96,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
             },
           ),
           GoRoute(
+            name: 'note',
             path: 'note/:id',
             redirect: (context, state) {
               var noteId = state.subloc.replaceFirst('/note/', '');
