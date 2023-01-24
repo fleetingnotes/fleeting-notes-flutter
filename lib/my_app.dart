@@ -120,7 +120,13 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
           // redirect will use empty location if below is not present
           GoRoute(
             path: 'web-ext.html',
-            builder: (context, state) => LoadMainScreen(state: state),
+            redirect: (context, state) {
+              final String _queryString = Uri(
+                      queryParameters: state.queryParams
+                          .map((key, value) => MapEntry(key, value.toString())))
+                  .query;
+              return (_queryString.isEmpty) ? '/' : '/?$_queryString';
+            },
           ),
         ],
       ),
