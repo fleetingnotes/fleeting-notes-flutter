@@ -43,7 +43,6 @@ class _NoteEditorCardState extends State<NoteEditorCard> {
       elevation: widget.elevation,
       clipBehavior: Clip.hardEdge,
       child: Column(
-        mainAxisSize: MainAxisSize.max,
         children: [
           NoteEditorAppBar(
             elevation: widget.elevation,

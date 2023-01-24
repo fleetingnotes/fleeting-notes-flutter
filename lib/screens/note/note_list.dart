@@ -71,8 +71,10 @@ class _NoteListState extends ConsumerState<NoteList> {
         ),
         itemBuilder: (context, i, realI) {
           return Container(
-              constraints: const BoxConstraints(maxWidth: mobileLimit),
-              child: LargeNoteCard(note: notes[i]));
+            constraints: const BoxConstraints(maxWidth: mobileLimit),
+            child: LargeNoteCard(note: notes[i]),
+            padding: const EdgeInsets.only(bottom: 8),
+          );
         },
       ),
     );
