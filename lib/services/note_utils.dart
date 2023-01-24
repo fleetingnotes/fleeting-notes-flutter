@@ -124,6 +124,11 @@ class NoteUtils {
   }
 
   Future<void> openNoteEditorDialog(BuildContext context, Note note) async {
+    final db = ref.read(dbProvider);
+    Note? dbNote = await db.getNoteById(note.id);
+    if (dbNote == null) {
+      db.settings.set('unsaved-note', note);
+    }
     return context.goNamed('note', params: {'id': note.id}, extra: note);
   }
 
