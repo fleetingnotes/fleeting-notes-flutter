@@ -92,14 +92,17 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
   @override
   Widget build(BuildContext context) {
     filteredTitles = filterTitles(widget.query);
-    double tileHeight = 50;
+    const double tileHeight = 50;
+    const int maxDisplayed = 3;
     return Positioned(
       width: width,
-      height: min(150, filteredTitles.length * tileHeight),
+      height:
+          min(tileHeight * maxDisplayed, filteredTitles.length * tileHeight),
       child: CompositedTransformFollower(
         link: widget.layerLink,
         offset: newCaretOffset,
         child: Card(
+          margin: EdgeInsets.zero,
           clipBehavior: Clip.hardEdge,
           child: ListView.builder(
             padding: EdgeInsets.zero,
