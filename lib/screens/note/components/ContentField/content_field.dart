@@ -22,10 +22,12 @@ class ContentField extends ConsumerStatefulWidget {
     required this.controller,
     this.autofocus = false,
     this.onChanged,
+    this.onPop,
   }) : super(key: key);
 
   final TextEditingController controller;
   final VoidCallback? onChanged;
+  final VoidCallback? onPop;
   final bool autofocus;
 
   @override
@@ -262,8 +264,8 @@ class _ContentFieldState extends ConsumerState<ContentField> {
       final notifier = ref.read(searchProvider.notifier);
       final noteUtils = ref.read(noteUtilsProvider);
       removeOverlay();
-      noteUtils.onPopNote(context, note.id);
       GoRouter.of(context).pop();
+      widget.onPop?.call();
       noteUtils.openNoteEditorDialog(context, note);
       notifier.updateSearch(null);
     }

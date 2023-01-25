@@ -212,6 +212,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final noteUtils = ref.watch(noteUtilsProvider);
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {
@@ -237,6 +238,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                   controller: contentController,
                   onChanged: onChanged,
                   autofocus: autofocus,
+                  onPop: () => noteUtils.onPopNote(context, widget.note.id),
                 ),
                 const SizedBox(height: 8),
                 SourceContainer(
