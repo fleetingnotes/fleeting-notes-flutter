@@ -107,7 +107,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       String type = (intent.extra?['type'] ?? '').toString();
       if (type != 'DigitalDocument' && body.isEmpty) return;
       var note = getNoteFromShareText(title: title, body: body);
-      router.go('/note', extra: note);
+      router.goNamed('note', params: {'id': note.id}, extra: note);
     }
 
     if (Platform.isAndroid) {
@@ -123,7 +123,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       receiveShareSub =
           ReceiveSharingIntent.getTextStream().listen((String sharedText) {
         var note = getNoteFromShareText(body: sharedText);
-        router.go('/note', extra: note);
+        router.goNamed('note', params: {'id': note.id}, extra: note);
       }, onError: (err) {
         // ignore: avoid_print
         print("getLinkStream error: $err");
@@ -133,7 +133,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       ReceiveSharingIntent.getInitialText().then((String? sharedText) {
         if (sharedText != null) {
           var note = getNoteFromShareText(body: sharedText);
-          router.go('/note', extra: note);
+          router.goNamed('note', params: {'id': note.id}, extra: note);
         }
       });
 
@@ -142,7 +142,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
         if (uri != null) {
           getNoteFromWidgetUri(uri).then((note) {
-            router.go('/note', extra: note);
+            router.goNamed('note', params: {'id': note.id}, extra: note);
           });
         }
       });
@@ -150,7 +150,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       homeWidgetSub = HomeWidget.widgetClicked.listen((uri) {
         if (uri != null) {
           getNoteFromWidgetUri(uri).then((note) {
-            router.go('/note', extra: note);
+            router.goNamed('note', params: {'id': note.id}, extra: note);
           });
         }
       }, onError: (err) {

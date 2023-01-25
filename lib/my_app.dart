@@ -77,25 +77,6 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                 const DialogPage(child: SettingsScreen()),
           ),
           GoRoute(
-            name: 'new_note',
-            path: 'note',
-            pageBuilder: (context, s) {
-              var note = s.extra as Note?;
-              note = note ??
-                  Note.empty(
-                    title: s.queryParams['title'] ?? '',
-                    content: s.queryParams['content'] ?? '',
-                    source: s.queryParams['source'] ?? '',
-                  );
-
-              return DialogPage(
-                  child: NoteEditorScreen(
-                noteId: note.id,
-                extraNote: note,
-              ));
-            },
-          ),
-          GoRoute(
             name: 'note',
             path: 'note/:id',
             redirect: (context, state) {
