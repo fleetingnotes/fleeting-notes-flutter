@@ -168,7 +168,9 @@ class NoteUtils {
 
   void _showSnackbar(BuildContext context, String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      behavior: SnackBarBehavior.floating,
       content: Text(text),
+      showCloseIcon: true,
     ));
   }
 
