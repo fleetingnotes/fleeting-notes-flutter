@@ -180,7 +180,14 @@ class NoteUtils {
     final viewedNotes = ref.read(viewedNotesProvider);
     final db = ref.read(dbProvider);
     try {
-      if (viewedNotes[currPageIndex].id == noteId) return;
+      if (viewedNotes[currPageIndex].id == noteId) {
+        Note? unsavedNote = db.settings.get('unsaved-note');
+        if (unsavedNote != null && unsavedNote.id == noteId) {
+          await handleSaveNote(context, unsavedNote);
+          noteNotifier.updateNotes([unsavedNote]);
+        }
+        return;
+      }
       // ignore: empty_catches
     } on RangeError {}
 
