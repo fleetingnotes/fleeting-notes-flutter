@@ -19,7 +19,7 @@ class DialogPage<T> extends Page<T> {
         settings: this,
         builder: (context) {
           if (Responsive.isMobile(context)) {
-            return Dialog.fullscreen(child: child);
+            return Scaffold(body: Dialog.fullscreen(child: child));
           }
           return Dialog(
             elevation: dialogElevation,
