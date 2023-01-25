@@ -176,24 +176,26 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       loadNotes();
     });
     Widget? child = widget.child;
-    return Scaffold(
-      appBar: selectedNotes.isNotEmpty
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(72),
-              child: ModifyNotesAppBar(
-                selectedNotes: selectedNotes,
-                clearNotes: clearNotes,
-                deleteNotes: deleteNotes,
-              ))
-          : PreferredSize(
-              preferredSize: const Size.fromHeight(72),
-              child: SearchBar(
-                onMenu: db.openDrawer,
-                controller: queryController,
-                focusNode: widget.searchFocusNode,
+    return Column(
+      children: [
+        selectedNotes.isNotEmpty
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(72),
+                child: ModifyNotesAppBar(
+                  selectedNotes: selectedNotes,
+                  clearNotes: clearNotes,
+                  deleteNotes: deleteNotes,
+                ))
+            : PreferredSize(
+                preferredSize: const Size.fromHeight(72),
+                child: SearchBar(
+                  onMenu: db.openDrawer,
+                  controller: queryController,
+                  focusNode: widget.searchFocusNode,
+                ),
               ),
-            ),
-      body: (child == null) ? getSearchList() : child,
+        Expanded(child: (child == null) ? getSearchList() : child),
+      ],
     );
   }
 }

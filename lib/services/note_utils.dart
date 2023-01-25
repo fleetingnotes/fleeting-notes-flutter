@@ -181,9 +181,8 @@ class NoteUtils {
     final db = ref.read(dbProvider);
     try {
       if (viewedNotes[currPageIndex].id == noteId) return;
-    } on RangeError catch (e) {
-      debugPrint(e.toString());
-    }
+      // ignore: empty_catches
+    } on RangeError {}
 
     try {
       if (viewedNotes.isEmpty && !cachedNote.isEmpty()) {

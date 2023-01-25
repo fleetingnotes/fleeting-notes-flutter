@@ -31,9 +31,12 @@ class _NoteListState extends ConsumerState<NoteList> {
       );
     }
 
-    return Scaffold(
-      appBar: (!Responsive.isMobile(context))
-          ? AppBar(
+    return Column(
+      children: [
+        if (!Responsive.isMobile(context))
+          PreferredSize(
+            preferredSize: const Size.fromHeight(64),
+            child: AppBar(
               actions: [
                 IconButton(
                     onPressed: (noteUtils.currPageIndex == notes.length - 1)
@@ -49,34 +52,37 @@ class _NoteListState extends ConsumerState<NoteList> {
                       icon: const Icon(Icons.arrow_forward)),
                 ),
               ],
-            )
-          : null,
-      body: CarouselSlider.builder(
-        itemCount: notes.length,
-        carouselController: noteUtils.carouselController,
-        options: CarouselOptions(
-          height: double.infinity,
-          initialPage: noteUtils.currPageIndex,
-          onPageChanged: (index, reason) {
-            setState(() {
-              noteUtils.currPageIndex = index;
-            });
-          },
-          scrollPhysics: (Responsive.isMobile(context))
-              ? null
-              : const NeverScrollableScrollPhysics(),
-          viewportFraction: 0.95,
-          enableInfiniteScroll: false,
-          reverse: true,
-        ),
-        itemBuilder: (context, i, realI) {
-          return Container(
-            constraints: const BoxConstraints(maxWidth: mobileLimit),
-            child: LargeNoteCard(note: notes[i]),
-            padding: const EdgeInsets.only(bottom: 8),
-          );
-        },
-      ),
+            ),
+          ),
+        Expanded(
+          child: CarouselSlider.builder(
+            itemCount: notes.length,
+            carouselController: noteUtils.carouselController,
+            options: CarouselOptions(
+              height: double.infinity,
+              initialPage: noteUtils.currPageIndex,
+              onPageChanged: (index, reason) {
+                setState(() {
+                  noteUtils.currPageIndex = index;
+                });
+              },
+              scrollPhysics: (Responsive.isMobile(context))
+                  ? null
+                  : const NeverScrollableScrollPhysics(),
+              viewportFraction: 0.95,
+              enableInfiniteScroll: false,
+              reverse: true,
+            ),
+            itemBuilder: (context, i, realI) {
+              return Container(
+                constraints: const BoxConstraints(maxWidth: mobileLimit),
+                child: LargeNoteCard(note: notes[i]),
+                padding: const EdgeInsets.only(bottom: 8),
+              );
+            },
+          ),
+        )
+      ],
     );
   }
 }
