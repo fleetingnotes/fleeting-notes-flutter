@@ -113,6 +113,15 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
             ),
             onTap: () => onSeeBacklinks(note),
           ),
+        if (GoRouter.of(context).location != '/')
+          PopupMenuItem(
+            child: const ListTile(
+              title: Text("Clear note history"),
+              leading: Icon(Icons.close),
+              contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
+            ),
+            onTap: () => context.go('/'),
+          ),
         if (widget.deleteOption)
           PopupMenuItem(
             child: const ListTile(
