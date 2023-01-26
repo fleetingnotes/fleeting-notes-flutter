@@ -3,7 +3,6 @@ import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -58,8 +57,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
     });
 
     authChangeController?.stream.listen(refreshApp);
-    SchedulerBinding.instance
-        .addPostFrameCallback((_) => refreshApp(db.supabase.currUser));
+    db.initNotes();
   }
 
   final router = GoRouter(
@@ -108,8 +106,6 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
               );
             },
           ),
-          // https://github.com/flutter/flutter/issues/115355
-          // redirect will use empty location if below is not present
         ],
       ),
       GoRoute(

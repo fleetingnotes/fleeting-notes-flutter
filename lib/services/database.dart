@@ -205,8 +205,7 @@ class Database {
       box.clear();
     }
     await supabase.logout();
-    var notes = await getAllNotes();
-    noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
+    await initNotes();
   }
 
   Future<void> register(String email, String password) async {
@@ -215,8 +214,7 @@ class Database {
 
   Future<void> login(String email, String password) async {
     await supabase.login(email, password);
-    var notes = await getAllNotes(forceSync: true);
-    noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
+    await initNotes();
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
@@ -229,6 +227,11 @@ class Database {
       return r.hasMatch(note.content);
     }).toList();
     return notes;
+  }
+
+  Future<void> initNotes() async {
+    var notes = await getAllNotes(forceSync: true);
+    noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
   }
 
   void handleSyncFromExternal(NoteEvent e) async {
