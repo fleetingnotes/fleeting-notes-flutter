@@ -1,4 +1,3 @@
-import 'package:carousel_slider/carousel_controller.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +13,6 @@ import 'package:path/path.dart' as p;
 class NoteUtils {
   ProviderRef ref;
   NoteUtils(this.ref);
-  CarouselController carouselController = CarouselController();
-  int currPageIndex = 0;
   Note cachedNote = Note.empty();
 
   Future<void> handleCopyUrl(BuildContext context, String noteId) async {
@@ -34,13 +31,11 @@ class NoteUtils {
 
   Future<void> handleDeleteNote(BuildContext context, List<Note> notes) async {
     final db = ref.read(dbProvider);
-    final noteNotifier = ref.read(viewedNotesProvider.notifier);
     try {
       bool isSuccessDelete = await db.deleteNotes(notes);
       if (!isSuccessDelete) {
         throw FleetingNotesException('Failed to delete note');
       }
-      noteNotifier.deleteNotes(notes.map((n) => n.id));
     } on FleetingNotesException catch (e) {
       _showSnackbar(context, e.message);
       rethrow;
@@ -179,46 +174,11 @@ class NoteUtils {
     ));
   }
 
-  // saves note and adds it to viewed notes if it makes sense to
   Future<void> onPopNote(BuildContext context, String noteId) async {
-    final noteNotifier = ref.read(viewedNotesProvider.notifier);
-    final viewedNotes = ref.read(viewedNotesProvider);
     final db = ref.read(dbProvider);
-    try {
-      if (viewedNotes[currPageIndex].id == noteId) {
-        Note? unsavedNote = db.settings.get('unsaved-note');
-        if (unsavedNote != null && unsavedNote.id == noteId) {
-          await handleSaveNote(context, unsavedNote);
-          noteNotifier.updateNotes([unsavedNote]);
-        }
-        return;
-      }
-      // ignore: empty_catches
-    } on RangeError {}
-
-    try {
-      if (viewedNotes.isEmpty && !cachedNote.isEmpty()) {
-        noteNotifier.addNote(cachedNote);
-      }
-      Note? unsavedNote = db.settings.get('unsaved-note');
-      if (unsavedNote != null && unsavedNote.id == noteId) {
-        await handleSaveNote(context, unsavedNote);
-        noteNotifier.addNote(unsavedNote);
-        if (currPageIndex != 0) {
-          carouselController.jumpToPage(0);
-        }
-      } else {
-        Note? postDialogNote = await db.getNoteById(noteId);
-        if (postDialogNote != null) {
-          noteNotifier.addNote(postDialogNote);
-          if (currPageIndex != 0) {
-            carouselController.jumpToPage(0);
-          }
-        }
-      }
-      return;
-    } on RangeError {
-      return;
+    Note? unsavedNote = db.settings.get('unsaved-note');
+    if (unsavedNote != null && unsavedNote.id == noteId) {
+      await handleSaveNote(context, unsavedNote);
     }
   }
 }
