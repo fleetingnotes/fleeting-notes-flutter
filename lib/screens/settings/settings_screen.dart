@@ -195,9 +195,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   (Responsive.isMobile(context)) ? null : dialogElevation,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  context.go('/');
-                },
+                onPressed: context.pop,
               ),
               title: const Text('Settings'),
             ),

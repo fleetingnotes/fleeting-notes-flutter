@@ -1,4 +1,6 @@
 import 'package:fleeting_notes_flutter/screens/main/components/note_fab.dart';
+import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
+import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,7 +8,10 @@ void onDestinationSelected(BuildContext context, int v) {
   if (v == 0) {
     context.go('/');
   } else if (v == 1) {
-    context.go('/settings');
+    showDialog(
+      context: context,
+      builder: (context) => const DynamicDialog(child: SettingsScreen()),
+    );
   }
 }
 

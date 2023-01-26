@@ -1,4 +1,4 @@
-import 'package:fleeting_notes_flutter/screens/note/note_list.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
@@ -17,9 +17,9 @@ import 'components/note_fab.dart';
 import 'components/side_rail.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
-  const MainScreen({Key? key, this.initNote}) : super(key: key);
+  const MainScreen({Key? key, required this.child}) : super(key: key);
 
-  final Note? initNote;
+  final Widget child;
   @override
   ConsumerState<MainScreen> createState() => _MainScreenState();
 }
@@ -31,19 +31,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   void initState() {
     super.initState();
-    Note? initNote = widget.initNote;
     final db = ref.read(dbProvider);
     var isSharedNotes = db.isSharedNotes;
-    var newNoteOnOpen =
-        db.settings.get('new-note-on-open', defaultValue: false);
-    if (initNote != null || newNoteOnOpen) {
-      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        final noteUtils = ref.read(noteUtilsProvider);
-        var dialogNote = initNote;
-        dialogNote ??= Note.empty();
-        noteUtils.openNoteEditorDialog(context, dialogNote);
-      });
-    }
     if (!kDebugMode) analyticsDialogWorkflow();
     if (!db.isLoggedIn() && !isSharedNotes && db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -178,9 +167,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 searchFocusNode: searchFocusNode,
                 child: (searchQuery != null || viewedNotes.isEmpty)
                     ? null
-                    : const NoteList(
-                        padding: EdgeInsets.symmetric(horizontal: 4),
-                      ),
+                    : widget.child,
               ),
               tablet: Row(
                 children: [
@@ -191,11 +178,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
-                  const Expanded(
+                  Expanded(
                     flex: 9,
-                    child: NoteList(
-                      padding: EdgeInsets.only(top: 4, right: 8),
-                    ),
+                    child: widget.child,
                   ),
                 ],
               ),
@@ -230,11 +215,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       searchFocusNode: searchFocusNode,
                     ),
                   ),
-                  const Expanded(
+                  Expanded(
                     flex: 9,
-                    child: NoteList(
-                      padding: EdgeInsets.only(top: 4, right: 8),
-                    ),
+                    child: widget.child,
                   ),
                 ],
               ),

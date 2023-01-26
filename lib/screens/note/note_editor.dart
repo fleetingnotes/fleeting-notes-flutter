@@ -73,9 +73,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     titleController = widget.titleController ?? titleController;
     contentController = widget.contentController ?? contentController;
     sourceController = widget.sourceController ?? sourceController;
-    titleController.text = widget.note.title;
-    contentController.text = widget.note.content;
-    sourceController.text = widget.note.source;
 
     noteChangeStream = db.noteChangeController.stream.listen(handleNoteEvent);
     modifiedAt = DateTime.parse(widget.note.modifiedAt);

@@ -17,21 +17,29 @@ class DialogPage<T> extends Page<T> {
   Route<T> createRoute(BuildContext context) => DialogRoute<T>(
         context: context,
         settings: this,
-        builder: (context) {
-          if (Responsive.isMobile(context)) {
-            return Scaffold(body: Dialog.fullscreen(child: child));
-          }
-          return Dialog(
-            elevation: dialogElevation,
-            clipBehavior: Clip.hardEdge,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(30)),
-            ),
-            child: SizedBox(
-              width: mobileLimit,
-              child: child,
-            ),
-          );
-        },
+        builder: (context) => DynamicDialog(child: child),
       );
+}
+
+class DynamicDialog extends StatelessWidget {
+  const DynamicDialog({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (Responsive.isMobile(context)) {
+      return Scaffold(body: Dialog.fullscreen(child: child));
+    }
+    return Dialog(
+      elevation: dialogElevation,
+      clipBehavior: Clip.hardEdge,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(30)),
+      ),
+      child: SizedBox(
+        width: mobileLimit,
+        child: child,
+      ),
+    );
+  }
 }

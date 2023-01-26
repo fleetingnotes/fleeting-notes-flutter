@@ -1,20 +1,21 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/utils/responsive.dart';
-import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
-import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'models/syncterface.dart';
+
+// private navigators
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -64,21 +65,30 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   }
 
   final router = GoRouter(
+    navigatorKey: _rootNavigatorKey,
     routes: [
-      GoRoute(
-        name: 'home',
-        path: '/',
-        builder: (context, state) => LoadMainScreen(state: state),
+      ShellRoute(
+        navigatorKey: _shellNavigatorKey,
+        builder: (context, state, child) => MainScreen(child: child),
         routes: [
           GoRoute(
-            name: 'settings',
-            path: 'settings',
-            pageBuilder: (context, _) =>
-                const DialogPage(child: SettingsScreen()),
-          ),
+              name: 'home',
+              path: '/',
+              builder: (context, state) {
+                var params = state.queryParams;
+                var newNote = Note.empty(
+                  title: params['title'] ?? '',
+                  content: params['content'] ?? '',
+                  source: params['source'] ?? '',
+                );
+                return NoteEditorScreen(
+                  noteId: newNote.id,
+                  extraNote: newNote,
+                );
+              }),
           GoRoute(
             name: 'note',
-            path: 'note/:id',
+            path: '/note/:id',
             redirect: (context, state) {
               var noteId = state.subloc.replaceFirst('/note/', '');
               if (isValidUuid(noteId)) {
@@ -86,30 +96,28 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
               }
               return '/';
             },
-            pageBuilder: (context, s) {
-              var noteId = s.subloc.replaceFirst('/note/', '');
+            builder: (context, s) {
               Note? note = s.extra as Note?;
+              var noteId = note?.id ?? s.subloc.replaceFirst('/note/', '');
 
-              return DialogPage(
-                  child: NoteEditorScreen(
+              return NoteEditorScreen(
                 noteId: noteId,
                 extraNote: note,
-              ));
+              );
             },
           ),
           // https://github.com/flutter/flutter/issues/115355
           // redirect will use empty location if below is not present
-          GoRoute(
-            path: 'web-ext.html',
-            redirect: (context, state) {
-              final String _queryString = Uri(
-                      queryParameters: state.queryParams
-                          .map((key, value) => MapEntry(key, value.toString())))
-                  .query;
-              return (_queryString.isEmpty) ? '/' : '/?$_queryString';
-            },
-          ),
         ],
+      ),
+      GoRoute(
+        path: '/web-ext.html',
+        redirect: (context, state) {
+          final String _queryString = Uri(
+              queryParameters: state.queryParams
+                  .map((key, value) => MapEntry(key, value.toString()))).query;
+          return (_queryString.isEmpty) ? '/' : '/?$_queryString';
+        },
       ),
     ],
   );
@@ -147,101 +155,5 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
             routerDelegate: router.routerDelegate,
           );
         });
-  }
-}
-
-class LoadMainScreen extends ConsumerStatefulWidget {
-  const LoadMainScreen({
-    Key? key,
-    required this.state,
-  }) : super(key: key);
-
-  final GoRouterState state;
-
-  @override
-  ConsumerState<LoadMainScreen> createState() => _LoadMainScreenState();
-}
-
-class _LoadMainScreenState extends ConsumerState<LoadMainScreen> {
-  late final Future<Note?> loadFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    loadFuture = loadInitNote();
-  }
-
-  Future<Note?> loadInitNote() async {
-    Map params = widget.state.queryParams;
-    bool paramContains =
-        ['title', 'content', 'source'].any((key) => params.containsKey(key));
-    Note? newNote;
-    if (params['note'] != null) {
-      return await getNoteFromId(params['note']);
-    } else if (paramContains) {
-      newNote = Note.empty(
-        title: params['title'] ?? '',
-        content: params['content'] ?? '',
-        source: params['source'] ?? '',
-      );
-    } else {
-      final be = ref.read(browserExtensionProvider);
-      String selectionText = await be.getSelectionText();
-      if (selectionText.isNotEmpty) {
-        String sourceUrl = await be.getSourceUrl();
-        newNote = Note.empty(content: selectionText, source: sourceUrl);
-      }
-    }
-    return (newNote == null || newNote.isEmpty()) ? null : newNote;
-  }
-
-  Future<Note?> getNoteFromId(String noteId) async {
-    final db = ref.read(dbProvider);
-    Note? note = await db.getNote(noteId);
-    note ??= await db.supabase.getNoteById(noteId);
-    if (note != null && note.partition.isNotEmpty) {
-      db.shareUserId = note.partition;
-    }
-    return note;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<Note?>(
-      future: loadFuture,
-      builder: (BuildContext context, AsyncSnapshot<Note?> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (!snapshot.hasData &&
-              widget.state.queryParams['note'] != null &&
-              widget.state.path == '/') {
-            Future.delayed(Duration.zero, () {
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    content: const Text('Note not found'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text('Ok'),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          context.go('/');
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            });
-          }
-          return MainScreen(
-            initNote: snapshot.data,
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
-    );
   }
 }
