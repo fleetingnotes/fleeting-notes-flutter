@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
@@ -33,7 +34,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   var selectedNotes = <Note>[];
 
   late List<Note> notes = [];
-  String activeNoteId = '';
 
   Future<void> loadNotes({forceSync = false}) async {
     final db = ref.read(dbProvider);
@@ -81,9 +81,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void _pressNote(BuildContext context, Note note) {
     final noteUtils = ref.read(noteUtilsProvider);
     if (selectedNotes.isEmpty) {
-      setState(() {
-        activeNoteId = note.id;
-      });
       noteUtils.openNoteEditorDialog(context, note);
     } else {
       setState(() {
@@ -126,6 +123,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget getSearchList() {
     final searchQuery = ref.read(searchProvider);
+    final activeNoteId =
+        GoRouter.of(context).location.replaceFirst('/note/', '');
     return SafeArea(
       right: true,
       child: Column(

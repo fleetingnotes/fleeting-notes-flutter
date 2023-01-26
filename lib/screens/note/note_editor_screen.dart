@@ -99,8 +99,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             children: [
               NoteEditorAppBar(
                 note: note,
-                elevation:
-                    Responsive.isMobile(context) ? null : dialogElevation,
                 onClose:
                     Responsive.isMobile(context) ? popScreenMobile : popScreen,
                 contentController: contentController,
