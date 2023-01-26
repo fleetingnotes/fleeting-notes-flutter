@@ -37,6 +37,7 @@ class _NoteListState extends ConsumerState<NoteList> {
           PreferredSize(
             preferredSize: const Size.fromHeight(64),
             child: AppBar(
+              automaticallyImplyLeading: false,
               actions: [
                 IconButton(
                     onPressed: (noteUtils.currPageIndex == notes.length - 1)
