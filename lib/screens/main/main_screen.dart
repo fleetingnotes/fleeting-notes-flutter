@@ -42,17 +42,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 title: const Text('Register / Sign In'),
                 content: SizedBox(
                   width: mobileLimit,
-                  child: Auth(
-                    onLogin: (_) async {
-                      await db.getAllNotes(forceSync: true);
-                      Navigator.pop(context);
-                      // wait to make sure the user is logged in
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        setState(() {
-                          db.refreshApp(ref);
+                  child: SingleChildScrollView(
+                    child: Auth(
+                      onLogin: (_) async {
+                        await db.getAllNotes(forceSync: true);
+                        Navigator.pop(context);
+                        // wait to make sure the user is logged in
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          setState(() {
+                            db.refreshApp(ref);
+                          });
                         });
-                      });
-                    },
+                      },
+                    ),
                   ),
                 )));
       });

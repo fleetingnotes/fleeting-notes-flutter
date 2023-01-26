@@ -11,7 +11,6 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../utils/responsive.dart';
@@ -247,9 +246,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           name: "Auto fill source"),
                       const SettingsItemSwitch(
                           settingsKey: 'dark-mode', name: "Dark mode"),
-                      const SettingsItemSwitch(
-                          settingsKey: 'new-note-on-open',
-                          name: "Open new note on startup"),
                       const SizedBox(height: 24),
                       const LegalLinks(),
                     ],
