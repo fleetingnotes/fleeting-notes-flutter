@@ -1,6 +1,9 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
@@ -11,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'mocks/mock_database.dart';
 import 'mocks/mock_local_file_sync.dart';
@@ -71,6 +75,21 @@ Future<void> resizeToMobile(WidgetTester tester) async {
 }
 
 // screen interactions
+Future<void> searchNotes(WidgetTester tester, String query) async {
+  await tester.enterText(
+      find.descendant(
+          of: find.byType(SearchScreen), matching: find.byType(TextField)),
+      query);
+}
+
+Future<void> goToNewNote(WidgetTester tester,
+    {String title = '', String content = '', String source = ''}) async {
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  final newNote = Note.empty(title: title, content: content, source: source);
+  context.goNamed('note', params: {'id': newNote.id}, extra: newNote);
+  await tester.pumpAndSettle();
+}
+
 Future<void> addNote(WidgetTester tester,
     {String title = "", String content = "note"}) async {
   await tester.tap(find.byIcon(Icons.add));
@@ -81,13 +100,13 @@ Future<void> addNote(WidgetTester tester,
 Future<void> modifyCurrentNote(WidgetTester tester,
     {String? title, String? content}) async {
   if (title != null) {
-    await tester.enterText(find.bySemanticsLabel('Title of the idea'), title);
+    await tester.enterText(find.bySemanticsLabel('New note title'), title);
   }
   if (content != null) {
     await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), content);
+        find.bySemanticsLabel('Start writing your thoughts...'), content);
   }
-  await tester.tap(find.text('Save'));
+  await tester.tap(find.byIcon(Icons.save));
   await tester.pumpAndSettle(
       const Duration(seconds: 1)); // Wait for animation to finish
 }
