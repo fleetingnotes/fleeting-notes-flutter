@@ -8,7 +8,6 @@ import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
 import '../../utils/responsive.dart';
-import '../../widgets/dialog_page.dart';
 import 'components/note_editor_app_bar.dart';
 import 'note_editor.dart';
 
@@ -29,7 +28,7 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 }
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
-  bool noteWasShared = false;
+  bool nonExistantNote = false;
 
   Future<Note> getNote() async {
     // initialize shared
@@ -50,7 +49,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       if (!note.isEmpty()) {
         db.settings.set('unsaved-note', note);
       }
-      noteWasShared = true;
+      nonExistantNote = true;
     }
     titleController.text = note.title;
     contentController.text = note.content;
@@ -61,10 +60,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   void popScreen() async {
     final noteUtils = ref.read(noteUtilsProvider);
     noteUtils.onPopNote(context, widget.noteId);
-    context.pop();
-  }
-
-  void popScreenMobile() async {
     context.go('/');
   }
 
@@ -99,8 +94,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             children: [
               NoteEditorAppBar(
                 note: note,
-                onClose:
-                    Responsive.isMobile(context) ? popScreenMobile : popScreen,
+                onClose: popScreen,
                 contentController: contentController,
               ),
               Flexible(
@@ -114,7 +108,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                         titleController: titleController,
                         contentController: contentController,
                         sourceController: sourceController,
-                        isShared: noteWasShared,
+                        autofocus: nonExistantNote,
                         padding: const EdgeInsets.only(
                             left: 24, right: 24, bottom: 16),
                       ),

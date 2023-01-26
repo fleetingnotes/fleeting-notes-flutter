@@ -328,6 +328,9 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.autofocus) {
+      contentFocusNode.requestFocus();
+    }
     return CompositedTransformTarget(
       link: layerLink,
       child: LayoutBuilder(builder: (context, size) {

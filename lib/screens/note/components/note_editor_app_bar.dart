@@ -1,10 +1,12 @@
 import 'dart:typed_data';
 
+import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../../models/Note.dart';
+import '../../../models/search_query.dart';
 import '../../../services/providers.dart';
 import 'note_popup_menu.dart';
 
@@ -35,10 +37,12 @@ class NoteEditorAppBar extends ConsumerWidget {
       scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,
       elevation: elevation,
-      leading: IconButton(
-        onPressed: onClose,
-        icon: const Icon(Icons.close),
-      ),
+      leading: (Responsive.isMobile(context))
+          ? IconButton(
+              onPressed: onClose,
+              icon: const Icon(Icons.close),
+            )
+          : null,
       title: title,
       actions: [
         ValueListenableBuilder(

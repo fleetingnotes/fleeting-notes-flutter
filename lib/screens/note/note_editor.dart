@@ -22,12 +22,12 @@ class NoteEditor extends ConsumerStatefulWidget {
     this.titleController,
     this.contentController,
     this.sourceController,
-    this.isShared = false,
+    this.autofocus = false,
     this.padding,
   }) : super(key: key);
 
   final Note note;
-  final bool isShared;
+  final bool autofocus;
   final TextEditingController? titleController;
   final TextEditingController? contentController;
   final TextEditingController? sourceController;
@@ -46,7 +46,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   DateTime? savedAt;
   StreamSubscription<NoteEvent>? noteChangeStream;
 
-  late bool autofocus;
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
     styles: TextPartStyleDefinitions(definitionList: [
@@ -64,10 +63,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    routeObserver = db.routeObserver;
-    hasNewChanges = widget.isShared;
+    hasNewChanges = widget.autofocus;
     isNoteShareable = widget.note.isShareable;
-    autofocus = widget.note.isEmpty() || widget.isShared;
 
     // update controllers
     titleController = widget.titleController ?? titleController;
@@ -234,7 +231,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                 ContentField(
                   controller: contentController,
                   onChanged: onChanged,
-                  autofocus: autofocus,
+                  autofocus: widget.autofocus,
                   onPop: () => noteUtils.onPopNote(context, widget.note.id),
                 ),
                 const SizedBox(height: 8),
