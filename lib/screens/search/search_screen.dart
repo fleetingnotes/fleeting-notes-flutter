@@ -66,10 +66,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
+    final sq = ref.read(searchProvider);
     loadNotes();
     db.listenNoteChange((e) => loadNotes()).then((stream) {
       noteChangeStream = stream;
     });
+    queryController.text = sq?.query ?? '';
   }
 
   @override
@@ -80,7 +82,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   void _pressNote(BuildContext context, Note note) {
     final noteUtils = ref.read(noteUtilsProvider);
+    final sqNotifier = ref.read(searchProvider.notifier);
     if (selectedNotes.isEmpty) {
+      if (Responsive.isMobile(context)) {
+        sqNotifier.updateSearch(null);
+      }
       noteUtils.openNoteEditorDialog(context, note);
     } else {
       setState(() {

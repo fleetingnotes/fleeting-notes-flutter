@@ -139,6 +139,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    final search = ref.watch(searchProvider);
     return Shortcuts(
       shortcuts: shortcutMapping,
       child: Actions(
@@ -161,7 +162,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               : null,
           body: SafeArea(
             child: Responsive(
-              mobile: (GoRouter.of(context).location.startsWith('/note/'))
+              mobile: (GoRouter.of(context).location.startsWith('/note/') &&
+                      search == null)
                   ? widget.child
                   : SearchScreen(searchFocusNode: searchFocusNode),
               tablet: Row(

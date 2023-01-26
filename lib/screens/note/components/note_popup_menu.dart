@@ -51,13 +51,10 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
   void onSeeBacklinks(Note note) {
     final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     final notifier = ref.read(searchProvider.notifier);
-    final noteUtils = ref.read(noteUtilsProvider);
     notifier.updateSearch(searchQuery.copyWith(
       query: "[[${note.title}]]",
       searchByContent: true,
     ));
-    context.go('/');
-    noteUtils.onPopNote(context, note.id);
   }
 
   @override
