@@ -199,12 +199,16 @@ class NoteUtils {
       if (unsavedNote != null && unsavedNote.id == noteId) {
         await handleSaveNote(context, unsavedNote);
         noteNotifier.addNote(unsavedNote);
-        carouselController.jumpToPage(0);
+        if (currPageIndex != 0) {
+          carouselController.jumpToPage(0);
+        }
       } else {
         Note? postDialogNote = await db.getNoteById(noteId);
         if (postDialogNote != null) {
           noteNotifier.addNote(postDialogNote);
-          carouselController.jumpToPage(0);
+          if (currPageIndex != 0) {
+            carouselController.jumpToPage(0);
+          }
         }
       }
       return;
