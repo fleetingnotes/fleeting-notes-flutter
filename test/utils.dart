@@ -3,6 +3,7 @@ import 'package:file/memory.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
@@ -153,22 +154,35 @@ Future<void> attemptLogin(WidgetTester tester) async {
 }
 
 Future<void> clickLinkInContentField(WidgetTester tester) async {
-  await tester.enterText(find.bySemanticsLabel('Note and links to other ideas'),
+  await tester.enterText(
+      find.bySemanticsLabel('Start writing your thoughts...'),
       '[[hello world]]');
   await tester.pump();
   await tester.tapAt(tester
-      .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
+      .getTopLeft(find.bySemanticsLabel('Start writing your thoughts...'))
       .translate(20, 10));
   await tester.pumpAndSettle();
 }
 
-Future<void> sortBy(WidgetTester tester, sortByText) async {
-  await tester.tap(find.byType(DropdownButton<String>));
+Future<void> sortBy(WidgetTester tester, String sortByText,
+    {bool asc = true}) async {
+  await tester.tap(find.descendant(
+      of: find.byType(SearchScreen), matching: find.byType(TextField)));
   await tester.pumpAndSettle();
-  await tester
-      .tap(find.widgetWithText(DropdownMenuItem<String>, sortByText).last);
+  await tester.tap(find.byIcon(Icons.tune));
   await tester.pumpAndSettle();
-  await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+  await tester.tap(find.byType(DropdownSortMenu));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(sortByText, findRichText: true).last);
+  // await tester.tap(find.descendant(
+  //     of: find.byType(DropdownMenuEntry),
+  //     matching: find.text(sortByText, findRichText: true)).last);
+
+  await tester.pumpAndSettle();
+  if (asc) {
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+  }
+  await tester.pumpAndSettle();
 }
 
 List<String> getContentNoteCardList(WidgetTester tester) {
