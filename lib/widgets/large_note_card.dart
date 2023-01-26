@@ -21,7 +21,7 @@ class LargeNoteCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final noteUtils = ref.watch(noteUtilsProvider);
     return GestureDetector(
-      onTap: () => noteUtils.openNoteEditorDialog(context, note),
+      onTap: () => noteUtils.navigateToNote(context, note),
       child: Card(
           child: Column(
         children: [

@@ -122,7 +122,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final search = ref.read(searchProvider.notifier);
     db.closeDrawer();
     search.updateSearch(null);
-    noteUtils.openNoteEditorDialog(context, Note.empty());
+    noteUtils.navigateToNote(context, Note.empty());
   }
 
   void toggleDrawerDesktop() {

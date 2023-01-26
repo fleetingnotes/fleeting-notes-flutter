@@ -265,7 +265,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
       final noteUtils = ref.read(noteUtilsProvider);
       removeOverlay();
       widget.onPop?.call();
-      noteUtils.openNoteEditorDialog(context, note);
+      noteUtils.navigateToNote(context, note);
       notifier.updateSearch(null);
     }
 

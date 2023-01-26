@@ -125,7 +125,7 @@ class NoteUtils {
     }
   }
 
-  Future<void> openNoteEditorDialog(BuildContext context, Note note) async {
+  Future<void> navigateToNote(BuildContext context, Note note) async {
     var currNoteId = GoRouter.of(context).location.replaceFirst('/note/', '');
     if (currNoteId != note.id) {
       return context.pushNamed('note', params: {'id': note.id}, extra: note);

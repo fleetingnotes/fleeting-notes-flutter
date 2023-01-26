@@ -87,7 +87,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (Responsive.isMobile(context)) {
         sqNotifier.updateSearch(null);
       }
-      noteUtils.openNoteEditorDialog(context, note);
+      noteUtils.navigateToNote(context, note);
     } else {
       setState(() {
         if (selectedNotes.contains(note)) {
