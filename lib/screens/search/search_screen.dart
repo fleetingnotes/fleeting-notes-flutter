@@ -155,7 +155,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     _longPressNote(context, notes[index]);
                   },
                   onTap: () {
-                    _pressNote(context, notes[index]);
+                    if (notes[index].id != activeNoteId) {
+                      _pressNote(context, notes[index]);
+                    }
                   },
                 ),
               ),

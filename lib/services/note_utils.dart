@@ -126,7 +126,10 @@ class NoteUtils {
   }
 
   Future<void> openNoteEditorDialog(BuildContext context, Note note) async {
-    return context.goNamed('note', params: {'id': note.id}, extra: note);
+    var currNoteId = GoRouter.of(context).location.replaceFirst('/note/', '');
+    if (currNoteId != note.id) {
+      return context.pushNamed('note', params: {'id': note.id}, extra: note);
+    }
   }
 
   void launchURLBrowser(String url, BuildContext context) async {

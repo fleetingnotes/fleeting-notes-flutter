@@ -7,7 +7,6 @@ import '../../models/Note.dart';
 import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
-import '../../utils/responsive.dart';
 import 'components/note_editor_app_bar.dart';
 import 'note_editor.dart';
 
@@ -60,7 +59,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   void popScreen() async {
     final noteUtils = ref.read(noteUtilsProvider);
     noteUtils.onPopNote(context, widget.noteId);
-    context.go('/');
+    context.pop();
   }
 
   TextEditingController titleController = TextEditingController();
@@ -94,7 +93,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             children: [
               NoteEditorAppBar(
                 note: note,
-                onClose: popScreen,
+                onBack: (context.canPop()) ? popScreen : null,
                 contentController: contentController,
               ),
               Flexible(

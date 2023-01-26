@@ -74,16 +74,18 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
           GoRoute(
               name: 'home',
               path: '/',
-              builder: (context, state) {
+              pageBuilder: (context, state) {
                 var params = state.queryParams;
                 var newNote = Note.empty(
                   title: params['title'] ?? '',
                   content: params['content'] ?? '',
                   source: params['source'] ?? '',
                 );
-                return NoteEditorScreen(
-                  noteId: newNote.id,
-                  extraNote: newNote,
+                return NoTransitionPage(
+                  child: NoteEditorScreen(
+                    noteId: newNote.id,
+                    extraNote: newNote,
+                  ),
                 );
               }),
           GoRoute(
