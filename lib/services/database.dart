@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
@@ -206,6 +205,8 @@ class Database {
       box.clear();
     }
     await supabase.logout();
+    var notes = await getAllNotes();
+    noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
   }
 
   Future<void> register(String email, String password) async {
@@ -214,6 +215,8 @@ class Database {
 
   Future<void> login(String email, String password) async {
     await supabase.login(email, password);
+    var notes = await getAllNotes(forceSync: true);
+    noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
@@ -319,9 +322,7 @@ class Database {
 
   void refreshApp(WidgetRef ref) {
     final search = ref.read(searchProvider.notifier);
-    final viewedNotes = ref.read(viewedNotesProvider.notifier);
     shareUserId = null;
     search.updateSearch(null);
-    viewedNotes.deleteAllNotes();
   }
 }

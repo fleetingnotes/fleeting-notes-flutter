@@ -37,10 +37,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
 
   void refreshApp(User? user) {
     final db = ref.read(dbProvider);
-    if (user != null) {
-      db.getAllNotes(forceSync: true);
-    }
     db.refreshApp(ref);
+    router.goNamed('home');
   }
 
   @override

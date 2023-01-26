@@ -73,7 +73,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     bannerExists = false;
                     db.refreshApp(ref);
                   });
-                  context.go('/');
+                  context.goNamed('home');
                 },
                 child: const Text('Your Notes'),
               );

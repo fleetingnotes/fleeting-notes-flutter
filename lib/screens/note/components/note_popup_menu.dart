@@ -120,7 +120,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
               leading: Icon(Icons.close),
               contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
             ),
-            onTap: () => context.go('/'),
+            onTap: () => context.goNamed('home'),
           ),
         if (widget.deleteOption)
           PopupMenuItem(
@@ -131,7 +131,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
             ),
             onTap: () {
               noteUtils.handleDeleteNote(context, [note]);
-              context.go('/');
+              context.goNamed('home');
             },
           ),
       ],

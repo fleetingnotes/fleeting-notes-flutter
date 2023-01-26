@@ -162,6 +162,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   }
 
   void handleNoteEvent(NoteEvent e) {
+    if (e.status == NoteEventStatus.init) {
+      return updateFields(Note.empty());
+    }
     Note? n = e.notes.firstWhereOrNull((n) => n.id == widget.note.id);
     if (n == null) return;
     isNoteShareable = n.isShareable;

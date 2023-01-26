@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 void onDestinationSelected(BuildContext context, int v) {
   if (v == 0) {
-    context.go('/');
+    context.goNamed('home');
   } else if (v == 1) {
     showDialog(
       context: context,
