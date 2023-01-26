@@ -14,13 +14,11 @@ class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({
     Key? key,
     this.searchFocusNode,
-    this.child,
     this.hasSearchFocus = false,
     // keep track of notes selected
   }) : super(key: key);
 
   final FocusNode? searchFocusNode;
-  final Widget? child;
   final bool hasSearchFocus;
 
   @override
@@ -175,7 +173,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
       loadNotes();
     });
-    Widget? child = widget.child;
     return Column(
       children: [
         selectedNotes.isNotEmpty
@@ -194,7 +191,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   focusNode: widget.searchFocusNode,
                 ),
               ),
-        Expanded(child: (child == null) ? getSearchList() : child),
+        Expanded(child: getSearchList()),
       ],
     );
   }

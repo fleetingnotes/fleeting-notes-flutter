@@ -92,7 +92,9 @@ class NoteUtils {
       }
     }
     if (await db.upsertNotes(updatedBacklinks, setModifiedAt: true)) {
-      _showSnackbar(context, '${updatedBacklinks.length} link(s) updated');
+      if (updatedBacklinks.isNotEmpty) {
+        _showSnackbar(context, '${updatedBacklinks.length} link(s) updated');
+      }
       return updatedBacklinks;
     } else {
       throw FleetingNotesException('Failed to update backlinks');

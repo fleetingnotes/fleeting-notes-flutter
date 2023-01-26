@@ -64,6 +64,10 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     context.pop();
   }
 
+  void popScreenMobile() async {
+    context.go('/');
+  }
+
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
     styles: TextPartStyleDefinitions(definitionList: [
@@ -97,7 +101,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                 note: note,
                 elevation:
                     Responsive.isMobile(context) ? null : dialogElevation,
-                onClose: popScreen,
+                onClose:
+                    Responsive.isMobile(context) ? popScreenMobile : popScreen,
                 contentController: contentController,
               ),
               Flexible(

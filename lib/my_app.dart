@@ -96,13 +96,15 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
               }
               return '/';
             },
-            builder: (context, s) {
+            pageBuilder: (context, s) {
               Note? note = s.extra as Note?;
               var noteId = note?.id ?? s.subloc.replaceFirst('/note/', '');
 
-              return NoteEditorScreen(
-                noteId: noteId,
-                extraNote: note,
+              return NoTransitionPage(
+                child: NoteEditorScreen(
+                  noteId: noteId,
+                  extraNote: note,
+                ),
               );
             },
           ),
