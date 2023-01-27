@@ -219,32 +219,30 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
           return null;
         }),
       },
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: widget.padding ?? EdgeInsets.zero,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TitleField(
-                  controller: titleController,
-                  onChanged: onChanged,
-                ),
-                ContentField(
-                  controller: contentController,
-                  onChanged: onChanged,
-                  autofocus: widget.autofocus,
-                  onPop: () => noteUtils.onPopNote(context, widget.note.id),
-                ),
-                const SizedBox(height: 8),
-                SourceContainer(
-                  controller: sourceController,
-                  onChanged: onChanged,
-                  overrideSourceUrl: widget.note.isEmpty(),
-                ),
-              ],
-            ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: widget.padding ?? EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TitleField(
+                controller: titleController,
+                onChanged: onChanged,
+              ),
+              ContentField(
+                controller: contentController,
+                onChanged: onChanged,
+                autofocus: widget.autofocus,
+                onPop: () => noteUtils.onPopNote(context, widget.note.id),
+              ),
+              const SizedBox(height: 8),
+              SourceContainer(
+                controller: sourceController,
+                onChanged: onChanged,
+                overrideSourceUrl: widget.note.isEmpty(),
+              ),
+            ],
           ),
         ),
       ),

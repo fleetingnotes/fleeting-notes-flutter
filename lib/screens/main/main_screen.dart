@@ -162,64 +162,62 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           floatingActionButton: (Responsive.isMobile(context))
               ? NoteFAB(onPressed: addNote)
               : null,
-          body: SafeArea(
-            child: Responsive(
-              mobile: (GoRouter.of(context).location.startsWith('/note/') &&
-                      search == null)
-                  ? widget.child
-                  : SearchScreen(searchFocusNode: searchFocusNode),
-              tablet: Row(
-                children: [
-                  SideRail(addNote: addNote, onMenu: db.openDrawer),
-                  Expanded(
-                    flex: 6,
-                    child: SearchScreen(
-                      searchFocusNode: searchFocusNode,
-                    ),
+          body: Responsive(
+            mobile: (GoRouter.of(context).location.startsWith('/note/') &&
+                    search == null)
+                ? widget.child
+                : SearchScreen(searchFocusNode: searchFocusNode),
+            tablet: Row(
+              children: [
+                SideRail(addNote: addNote, onMenu: db.openDrawer),
+                Expanded(
+                  flex: 6,
+                  child: SearchScreen(
+                    searchFocusNode: searchFocusNode,
                   ),
-                  Expanded(
-                    flex: 9,
-                    child: widget.child,
-                  ),
-                ],
-              ),
-              desktop: Row(
-                children: [
-                  Stack(
-                    children: [
-                      if (desktopSideWidget == null)
-                        SideRail(addNote: addNote, onMenu: toggleDrawerDesktop),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder: (widget, animation) {
-                          const begin = Offset(-1.0, 0.0);
-                          const end = Offset.zero;
-                          const curve = Curves.ease;
+                ),
+                Expanded(
+                  flex: 9,
+                  child: widget.child,
+                ),
+              ],
+            ),
+            desktop: Row(
+              children: [
+                Stack(
+                  children: [
+                    if (desktopSideWidget == null)
+                      SideRail(addNote: addNote, onMenu: toggleDrawerDesktop),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder: (widget, animation) {
+                        const begin = Offset(-1.0, 0.0);
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
 
-                          final tween = Tween(begin: begin, end: end)
-                              .chain(CurveTween(curve: curve));
-                          final offsetAnimation = animation.drive(tween);
-                          return SlideTransition(
-                            position: offsetAnimation,
-                            child: widget,
-                          );
-                        },
-                        child: desktopSideWidget,
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    width: 360,
-                    child: SearchScreen(
-                      searchFocusNode: searchFocusNode,
+                        final tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+                        final offsetAnimation = animation.drive(tween);
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: widget,
+                        );
+                      },
+                      child: desktopSideWidget,
                     ),
+                  ],
+                ),
+                SizedBox(
+                  width: 360,
+                  child: SearchScreen(
+                    searchFocusNode: searchFocusNode,
                   ),
-                  Expanded(
-                    flex: 9,
-                    child: widget.child,
-                  ),
-                ],
-              ),
+                ),
+                Expanded(
+                  flex: 9,
+                  child: widget.child,
+                ),
+              ],
             ),
           ),
         ),

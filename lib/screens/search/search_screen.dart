@@ -131,38 +131,35 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final searchQuery = ref.read(searchProvider);
     final activeNoteId =
         GoRouter.of(context).location.replaceFirst('/note/', '');
-    return SafeArea(
-      right: true,
-      child: Column(
-        children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _pullRefreshNotes,
-              child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                key: const PageStorageKey('ListOfNotes'),
-                controller: scrollController,
-                itemCount: notes.length,
-                padding: const EdgeInsets.all(8),
-                itemBuilder: (context, index) => NoteCard(
-                  sQuery: searchQuery,
-                  note: notes[index],
-                  isActive: Responsive.isMobile(context)
-                      ? false
-                      : notes[index].id == activeNoteId,
-                  isSelected: selectedNotes.contains(notes[index]),
-                  onLongPress: () {
-                    _longPressNote(context, notes[index]);
-                  },
-                  onTap: () {
-                    _pressNote(context, notes[index]);
-                  },
-                ),
+    return Column(
+      children: [
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _pullRefreshNotes,
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              key: const PageStorageKey('ListOfNotes'),
+              controller: scrollController,
+              itemCount: notes.length,
+              padding: const EdgeInsets.all(8),
+              itemBuilder: (context, index) => NoteCard(
+                sQuery: searchQuery,
+                note: notes[index],
+                isActive: Responsive.isMobile(context)
+                    ? false
+                    : notes[index].id == activeNoteId,
+                isSelected: selectedNotes.contains(notes[index]),
+                onLongPress: () {
+                  _longPressNote(context, notes[index]);
+                },
+                onTap: () {
+                  _pressNote(context, notes[index]);
+                },
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
