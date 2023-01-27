@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:fleeting_notes_flutter/models/search_query.dart';
+import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -30,6 +32,7 @@ class NoteEditorAppBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final noteUtils = ref.watch(noteUtilsProvider);
     final settings = ref.watch(settingsProvider);
+    final sqNotifier = ref.watch(searchProvider.notifier);
     final n = note;
     return AppBar(
       scrolledUnderElevation: 0,
@@ -47,14 +50,25 @@ class NoteEditorAppBar extends ConsumerWidget {
               var unsavedNote = box.get('unsaved-note');
               bool saveEnabled =
                   unsavedNote != null && n != null && unsavedNote?.id == n.id;
-              return IconButton(
-                  onPressed: (saveEnabled)
-                      ? () {
-                          noteUtils.handleSaveNote(context, unsavedNote);
-                        }
-                      : null,
-                  icon: const Icon(Icons.save));
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: IconButton(
+                    onPressed: (saveEnabled)
+                        ? () {
+                            noteUtils.handleSaveNote(context, unsavedNote);
+                          }
+                        : null,
+                    icon: const Icon(Icons.save)),
+              );
             }),
+        if (Responsive.isMobile(context))
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              onPressed: () => sqNotifier.updateSearch(SearchQuery()),
+              icon: const Icon(Icons.search),
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.only(right: 8.0),
           child: NotePopupMenu(
