@@ -38,7 +38,7 @@ class NoteUtils {
       }
     } on FleetingNotesException catch (e) {
       _showSnackbar(context, e.message);
-      rethrow;
+      return;
     }
   }
 
@@ -56,7 +56,7 @@ class NoteUtils {
       }
     } on FleetingNotesException catch (e) {
       _showSnackbar(context, e.message);
-      rethrow;
+      return;
     }
   }
 

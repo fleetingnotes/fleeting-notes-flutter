@@ -1,10 +1,9 @@
+import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:watcher/watcher.dart';
 import 'package:file/file.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
 import 'package:path/path.dart' as p;
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'mocks/mock_database.dart';
 import 'mocks/mock_local_file_sync.dart';
@@ -17,7 +16,7 @@ void main() {
     testWidgets("Adding note creates a file", (WidgetTester tester) async {
       var settings = MockSettings();
       var lfs = await setupLfs(settings: settings);
-      await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+      await fnPumpWidget(tester, const MyApp(),
           settings: settings, localFs: lfs);
 
       expect(lfs.fs.directory(lfs.syncDir).listSync().isEmpty, isTrue);
@@ -34,7 +33,7 @@ void main() {
       (WidgetTester tester) async {
         var settings = MockSettings();
         var lfs = await setupLfs(settings: settings);
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+        await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
         await addNote(tester, title: "hello-world");
 
@@ -49,7 +48,7 @@ void main() {
       (WidgetTester tester) async {
         var settings = MockSettings();
         var lfs = await setupLfs(settings: settings);
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+        await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
         await addNote(tester, title: "hello-world");
 
@@ -63,7 +62,7 @@ void main() {
       (WidgetTester tester) async {
         var settings = MockSettings();
         var lfs = await setupLfs(settings: settings);
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+        await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
         await addNote(tester, title: "hello-world", content: "");
 
@@ -86,7 +85,7 @@ void main() {
       (WidgetTester tester) async {
         var settings = MockSettings();
         var lfs = await setupLfs(settings: settings);
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+        await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
         await addNote(tester, title: "hello-world", content: "");
 
@@ -104,7 +103,7 @@ void main() {
       (WidgetTester tester) async {
         var settings = MockSettings();
         var lfs = await setupLfs(settings: settings);
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+        await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
         await addNote(tester, title: "hello-world", content: "");
 
@@ -114,7 +113,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
             find.descendant(
-                of: find.bySemanticsLabel('Note and links to other ideas'),
+                of: find.bySemanticsLabel('Start writing your thoughts...'),
                 matching: find.text('a modification', findRichText: true)),
             findsOneWidget);
       },
@@ -124,7 +123,7 @@ void main() {
       (WidgetTester tester) async {
         var settings = MockSettings();
         var lfs = await setupLfs(settings: settings);
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+        await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
         await addNote(tester, title: "hello-world", content: "");
 
@@ -140,7 +139,7 @@ void main() {
       (WidgetTester tester) async {
         var settings = MockSettings();
         var lfs = await setupLfs(settings: settings);
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+        await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
         await addNote(tester, title: "hello-world", content: "");
 
@@ -153,7 +152,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
             find.descendant(
-                of: find.bySemanticsLabel('Note and links to other ideas'),
+                of: find.bySemanticsLabel('Start writing your thoughts...'),
                 matching: find.text('a modification', findRichText: true)),
             findsOneWidget);
       },
@@ -179,7 +178,7 @@ void main() {
       await db.upsertNotes([n]);
       await lfs.init(notes: await db.getAllNotes()); // run sync
 
-      await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
+      await fnPumpWidget(tester, const MyApp(),
           settings: settings, localFs: lfs, db: db);
       return file;
     }
@@ -193,7 +192,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
             find.descendant(
-                of: find.bySemanticsLabel('Note and links to other ideas'),
+                of: find.bySemanticsLabel('Start writing your thoughts...'),
                 matching: find.text('local mod', findRichText: true)),
             findsOneWidget);
 
@@ -210,7 +209,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(
             find.descendant(
-                of: find.bySemanticsLabel('Note and links to other ideas'),
+                of: find.bySemanticsLabel('Start writing your thoughts...'),
                 matching: find.text('filesystem mod', findRichText: true)),
             findsOneWidget);
 
