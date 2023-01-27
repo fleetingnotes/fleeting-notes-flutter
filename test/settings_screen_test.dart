@@ -5,6 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/login_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
@@ -24,8 +25,8 @@ void main() {
 
   testWidgets('Render settings when logged in', (WidgetTester tester) async {
     var mockSupabase = getBaseMockSupabaseDB();
-    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
-        supabase: mockSupabase);
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    await navigateToSettings(tester);
     await attemptLogin(tester);
     expect(find.byType(Auth), findsNothing);
     expect(find.byType(Account), findsOneWidget);
@@ -33,15 +34,16 @@ void main() {
 
   testWidgets('Render settings when not logged in',
       (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()));
+    await fnPumpWidget(tester, const MyApp());
+    await navigateToSettings(tester);
     expect(find.byType(Auth), findsOneWidget);
     expect(find.byType(Account), findsNothing);
   });
 
   testWidgets('Login works as expected', (WidgetTester tester) async {
     var mockSupabase = getBaseMockSupabaseDB();
-    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
-        supabase: mockSupabase);
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    await navigateToSettings(tester);
     await attemptLogin(tester);
     expect(find.text('Logout'), findsOneWidget);
   });
@@ -51,26 +53,28 @@ void main() {
     when(() => mockSupabase.getSubscriptionTier())
         .thenAnswer((_) => Future.value(SubscriptionTier.premiumSub));
 
-    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
-        supabase: mockSupabase);
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    await navigateToSettings(tester);
     await attemptLogin(tester);
     expect(find.byType(LoginDialog), findsNothing);
   });
+
   testWidgets('Free user sees login dialog', (WidgetTester tester) async {
     var mockSupabase = getBaseMockSupabaseDB();
     when(() => mockSupabase.getSubscriptionTier())
         .thenAnswer((_) => Future.value(SubscriptionTier.freeSub));
-    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
-        supabase: mockSupabase);
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    await navigateToSettings(tester);
     await attemptLogin(tester);
     expect(find.byType(LoginDialog), findsOneWidget);
   });
+
   testWidgets('Unknwn user sees no login dialog', (WidgetTester tester) async {
     var mockSupabase = getBaseMockSupabaseDB();
     when(() => mockSupabase.getSubscriptionTier())
         .thenAnswer((_) => Future.value(SubscriptionTier.unknownSub));
-    await fnPumpWidget(tester, const MaterialApp(home: SettingsScreen()),
-        supabase: mockSupabase);
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    await navigateToSettings(tester);
     await attemptLogin(tester);
     expect(find.byType(LoginDialog), findsNothing);
   });

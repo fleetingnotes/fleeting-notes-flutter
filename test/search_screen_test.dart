@@ -6,7 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:fleeting_notes_flutter/models/search_query.dart';
-import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
@@ -23,29 +23,33 @@ void main() {
   });
 
   testWidgets('Render List of Notes', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
     await addNote(tester);
     expect(find.byType(SearchScreen), findsOneWidget);
     expect(find.byType(NoteCard), findsOneWidget);
   });
 
   testWidgets('Test search filters properly', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'hello');
     await addNote(tester, content: 'world');
 
-    expect(find.byType(NoteCard), findsOneWidget);
+    expect(find.byType(NoteCard), findsNWidgets(2));
     await tester.enterText(
         find.descendant(
             of: find.byType(SearchScreen), matching: find.byType(TextField)),
         'hello');
     await tester.pumpAndSettle();
-    expect(find.byType(NoteCard), findsNothing);
+    expect(find.byType(NoteCard), findsOneWidget);
   });
 
   testWidgets('Test filter button opens search dialog',
       (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    await tester.tap(find.byIcon(Icons.filter_list));
+    await fnPumpWidget(tester, const MyApp());
+    await tester.tap(find.descendant(
+        of: find.byType(SearchScreen), matching: find.byType(TextField)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.tune));
     await tester.pumpAndSettle();
     expect(find.byType(SearchDialog), findsOneWidget);
   });

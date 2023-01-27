@@ -20,7 +20,7 @@ void main() {
     await fnPumpWidget(tester, const MyApp());
     expect(find.byType(MainScreen), findsOneWidget);
     await navigateToSettings(tester);
-    expect(find.byType(MainScreen), findsNothing);
+    expect(find.byType(MainScreen), findsOneWidget);
     expect(find.byType(SettingsScreen), findsOneWidget);
   });
 
@@ -31,9 +31,11 @@ void main() {
     await addNote(tester);
     await navigateToSettings(tester);
     await attemptLogin(tester);
-    await tester.pump(const Duration(seconds: 1)); // wait for notes to update
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.descendant(
+      of: find.byType(SettingsScreen),
+      matching: find.byIcon(Icons.arrow_back),
+    ));
     await tester.pumpAndSettle();
     expect(
         find.descendant(
@@ -52,7 +54,10 @@ void main() {
     await navigateToSettings(tester);
     await attemptLogin(tester);
     await tester.tap(find.text('Logout'));
-    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.tap(find.descendant(
+      of: find.byType(SettingsScreen),
+      matching: find.byIcon(Icons.arrow_back),
+    ));
     await tester.pumpAndSettle();
     expect(
         find.descendant(

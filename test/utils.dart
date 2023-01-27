@@ -137,8 +137,6 @@ Future<void> createNoteWithBacklink(WidgetTester tester) async {
 }
 
 Future<void> navigateToSettings(WidgetTester tester) async {
-  await tester.tap(find.byIcon(Icons.menu));
-  await tester.pumpAndSettle();
   await tester.tap(find.byIcon(Icons.settings));
   await tester.pumpAndSettle();
 }
