@@ -3,8 +3,10 @@ import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
+import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'utils.dart';
@@ -182,6 +184,26 @@ void main() {
         tester.widget<ContentField>(find.byType(ContentField)).controller;
     expect(nextController.text == 'save', isTrue);
   });
+
+  testWidgets('Title field doesnt lose focus when typing',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await tester.enterText(find.bySemanticsLabel('New note title'), 'test');
+    await tester.pumpAndSettle();
+
+    expect(contentFieldHasFocus(tester), isFalse);
+  });
+
+  testWidgets('New note has focus on content field',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await tester.tap(find.bySemanticsLabel('New note title'));
+    await tester.pumpAndSettle();
+    expect(contentFieldHasFocus(tester), isFalse);
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pumpAndSettle();
+    expect(contentFieldHasFocus(tester), isTrue);
+  });
 }
 
 IconButton findSaveButton(WidgetTester tester) {
@@ -190,4 +212,13 @@ IconButton findSaveButton(WidgetTester tester) {
         of: find.byIcon(Icons.save),
         matching: find.byWidgetPredicate((widget) => widget is IconButton)),
   );
+}
+
+bool? contentFieldHasFocus(WidgetTester tester) {
+  return tester
+      .widget<TextField>(find.ancestor(
+          of: find.bySemanticsLabel('Start writing your thoughts...'),
+          matching: find.byType(TextField)))
+      .focusNode
+      ?.hasFocus;
 }
