@@ -121,9 +121,36 @@ Future<void> saveCurrentNote(WidgetTester tester) async {
 Future<void> deleteCurrentNote(WidgetTester tester) async {
   await tester.tap(find.byIcon(Icons.more_vert));
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Delete'));
+  await tester.tap(find.byIcon(Icons.delete));
   await tester.pumpAndSettle();
   await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+}
+
+Future<void> seeCurrNoteBacklinks(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.more_vert));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byIcon(Icons.link));
+  await tester.pumpAndSettle();
+}
+
+Future<void> clearNoteHistory(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.more_vert));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byIcon(Icons.close));
+  await tester.pumpAndSettle();
+}
+
+Finder findSearchbar(WidgetTester tester) {
+  return find.descendant(
+      of: find.byType(SearchScreen), matching: find.byType(TextField));
+}
+
+IconButton findSaveButton(WidgetTester tester) {
+  return tester.widget<IconButton>(
+    find.ancestor(
+        of: find.byIcon(Icons.save),
+        matching: find.byWidgetPredicate((widget) => widget is IconButton)),
+  );
 }
 
 Future<void> createNoteWithBacklink(WidgetTester tester) async {

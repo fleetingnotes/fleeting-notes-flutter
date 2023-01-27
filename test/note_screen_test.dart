@@ -3,10 +3,8 @@ import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
-import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'utils.dart';
@@ -22,56 +20,8 @@ void main() {
         findsOneWidget);
   });
 
-  testWidgets('Save note button is enabled when note is changed',
-      (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MyApp());
-    await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), 'new note');
-    await tester.pumpAndSettle();
-
-    expect(findSaveButton(tester).onPressed, isNotNull);
-  });
-
-  testWidgets('Save note button is disabled when pressed',
-      (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MyApp());
-    await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), 'new note');
-    await saveCurrentNote(tester);
-
-    expect(findSaveButton(tester).onPressed, isNull);
-  });
-
-  testWidgets('Save note button shows snackbar if save failed',
-      (WidgetTester tester) async {
-    // mock supabase to fail on upsert
-    var mockSupabase = getSupabaseMockThrowOnUpsert();
-
-    // test for snackbar failure
-    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
-    await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), 'new note');
-    await saveCurrentNote(tester);
-    expect(find.byType(SnackBar), findsOneWidget);
-  });
-
-  testWidgets('Delete note shows snackbar if delete failed',
-      (WidgetTester tester) async {
-    // mock supabase to fail on upsert
-    var mockSupabase = getSupabaseMockThrowOnUpsert();
-    // test for snackbar failure
-    await fnPumpWidget(
-      tester,
-      const MyApp(),
-      supabase: mockSupabase,
-    );
-    await deleteCurrentNote(tester);
-    expect(find.byType(SnackBar), findsOneWidget);
-  });
-
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    // await createNoteWithBacklink(tester);
 
     await addNote(tester, title: 'link', content: '[[link]]');
     await tester.enterText(
@@ -204,14 +154,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(contentFieldHasFocus(tester), isTrue);
   });
-}
-
-IconButton findSaveButton(WidgetTester tester) {
-  return tester.widget<IconButton>(
-    find.ancestor(
-        of: find.byIcon(Icons.save),
-        matching: find.byWidgetPredicate((widget) => widget is IconButton)),
-  );
 }
 
 bool? contentFieldHasFocus(WidgetTester tester) {

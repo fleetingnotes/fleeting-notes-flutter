@@ -35,10 +35,7 @@ void main() {
     await addNote(tester, content: 'world');
 
     expect(find.byType(NoteCard), findsNWidgets(2));
-    await tester.enterText(
-        find.descendant(
-            of: find.byType(SearchScreen), matching: find.byType(TextField)),
-        'hello');
+    await tester.enterText(findSearchbar(tester), 'hello');
     await tester.pumpAndSettle();
     expect(find.byType(NoteCard), findsOneWidget);
   });
@@ -46,8 +43,7 @@ void main() {
   testWidgets('Test filter button opens search dialog',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await tester.tap(find.descendant(
-        of: find.byType(SearchScreen), matching: find.byType(TextField)));
+    await tester.tap(findSearchbar(tester));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.tune));
     await tester.pumpAndSettle();
