@@ -66,10 +66,17 @@ const createSidebar = () => {
   return rootElement;
 };
 
+const getIframeSrc = () => {
+  const selectionText = window.getSelection().toString().trim();
+  let url = `${chrome.runtime.getURL("web-ext.html")}?`;
+  url += (selectionText) ? `content=${encodeURIComponent(selectionText)}&` : '';
+  url += `source=${encodeURIComponent(window.location.href)}&`;
+  return url;
+}
 
 const toggleSidebar = () => {
   if (sidebar?.style.right.startsWith('-')) {
-    const url = `${chrome.runtime.getURL("web-ext.html")}?source=${encodeURIComponent(window.location.href)}`;
+    const url = getIframeSrc();
     console.log('set toggle sidebar url');
     sidebar.src = url
     sidebar?.style.setProperty("right", "8px");
