@@ -74,11 +74,12 @@ const getIframeSrc = () => {
   return url;
 }
 
-const toggleSidebar = () => {
+const toggleSidebar = (src) => {
   if (sidebar?.style.right.startsWith('-')) {
-    const url = getIframeSrc();
-    console.log('set toggle sidebar url');
-    sidebar.src = url
+    if (!src) {
+      src = getIframeSrc();
+    }
+    sidebar.src = src
     sidebar?.style.setProperty("right", "8px");
   } else {
     sidebar?.style.setProperty("right", `-${sidebarWidth}px`);
@@ -101,7 +102,7 @@ function listenMessages() {
       const selectionText = window.getSelection().toString();
       response(selectionText);
     } else if (request.msg === "toggle-sidebar") {
-      toggleSidebar();
+      toggleSidebar(request.src);
     }
     return true; // used to send response async
   });

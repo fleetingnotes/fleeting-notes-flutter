@@ -1,12 +1,12 @@
 // contextMenu.js
-const onClicked = async({ menuItemId, linkUrl, pageUrl, srcUrl, selectionText }) => {
+const onClicked = async({ menuItemId, linkUrl, pageUrl, srcUrl, selectionText }, tab) => {
     let content = '';
     let source = '';
-    let closeOnFocusChange = true;
+    let url = chrome.runtime.getURL("web-ext.html");
     switch(menuItemId) {
         case 'new_window':
-            closeOnFocusChange = false;
-            break;
+            open(url, false);
+            return;
         case 'save_page':
             source = pageUrl;
             break;
@@ -24,11 +24,10 @@ const onClicked = async({ menuItemId, linkUrl, pageUrl, srcUrl, selectionText })
             source = pageUrl;
             break;
     }
-    const url = `${chrome.runtime.getURL("web-ext.html")}?content=${encodeURIComponent(content)}&source=${encodeURIComponent(source)}`;
-    open(url, closeOnFocusChange);
+    url += `?content=${encodeURIComponent(content)}&source=${encodeURIComponent(source)}`;
+    chrome.tabs.sendMessage(tab.id, { msg: "toggle-sidebar", src: url });
 }
 const onCommand = (command) => {
-  console.log(command);
   switch (command) {
     case "open-persistent-window":
       const url = chrome.runtime.getURL("web-ext.html");
