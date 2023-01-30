@@ -37,13 +37,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       note = widget.extraNote ?? Note.empty(id: widget.noteId);
 
       // add browser extension stuff
-      final be = ref.read(browserExtensionProvider);
-      String selectionText = await be.getSelectionText();
-      if (selectionText.isNotEmpty) {
-        String sourceUrl = await be.getSourceUrl();
-        note.content = (note.content.isEmpty) ? selectionText : note.content;
-        note.source = (note.source.isEmpty) ? sourceUrl : note.source;
-      }
+      // final be = ref.read(browserExtensionProvider);
+      // String selectionText = await be.getSelectionText();
+      // if (selectionText.isNotEmpty) {
+      //   String sourceUrl = await be.getSourceUrl();
+      //   note.content = (note.content.isEmpty) ? selectionText : note.content;
+      //   note.source = (note.source.isEmpty) ? sourceUrl : note.source;
+      // }
 
       if (!note.isEmpty()) {
         db.settings.set('unsaved-note', note);
