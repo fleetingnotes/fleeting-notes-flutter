@@ -163,7 +163,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               ? NoteFAB(onPressed: addNote)
               : null,
           body: Responsive(
-            mobile: (GoRouter.of(context).location.startsWith('/note/') &&
+            mobile: (GoRouter.of(context).location.startsWith('/note') &&
                     search == null)
                 ? widget.child
                 : SearchScreen(searchFocusNode: searchFocusNode),

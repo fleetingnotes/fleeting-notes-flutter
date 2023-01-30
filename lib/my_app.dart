@@ -70,6 +70,31 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
           GoRoute(
               name: 'home',
               path: '/',
+              redirect: (context, state) {
+                var params = state.queryParams;
+                var newNote = Note.empty(
+                  title: params['title'] ?? '',
+                  content: params['content'] ?? '',
+                  source: params['source'] ?? '',
+                );
+                final String _queryString = Uri(
+                    queryParameters: state.queryParams.map(
+                        (key, value) => MapEntry(key, value.toString()))).query;
+                if (!newNote.isEmpty()) {
+                  return '/note?$_queryString';
+                }
+              },
+              pageBuilder: (context, state) {
+                var newNote = Note.empty();
+                return NoTransitionPage(
+                  child: NoteEditorScreen(
+                    noteId: newNote.id,
+                    extraNote: newNote,
+                  ),
+                );
+              }),
+          GoRoute(
+              path: '/note',
               pageBuilder: (context, state) {
                 var params = state.queryParams;
                 var newNote = Note.empty(

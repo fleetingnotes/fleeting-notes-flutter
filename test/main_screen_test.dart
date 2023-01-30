@@ -204,4 +204,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('init note'), findsOneWidget);
   });
+  testWidgets('When Mobile Size with initial note from query params',
+      (WidgetTester tester) async {
+    resizeToMobile(tester);
+    await fnPumpWidget(
+      tester,
+      const MyApp(),
+    );
+    final BuildContext context = tester.element(find.byType(MainScreen));
+    context.goNamed('home', queryParams: {'content': 'init note'});
+    await tester.pumpAndSettle();
+    expect(find.text('init note'), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
+  });
 }
