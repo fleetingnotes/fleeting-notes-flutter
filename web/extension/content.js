@@ -70,9 +70,9 @@ function modifySrc(src) {
     const ytRegex = /https:\/\/www.youtube.com\/watch\?v=.+/;
     if (src.match(ytRegex)) {
       const timestampData = getCurrentTimestampInfo();
-      url = `https://www.youtube.com/watch?v=${timestampData.videoId}&t=${timestampData.timestamp}s`
+      src = `https://www.youtube.com/watch?v=${timestampData.videoId}&t=${timestampData.timestamp}s`
     }
-    return url;
+    return src;
 }
 
 const getIframeSrc = () => {
@@ -105,14 +105,14 @@ function initSidebar() {
 function listenMessages() {
   // Listen for add timestamp request msg from popup
   chrome.runtime.onMessage.addListener((request, sender, response) => {
-    if (request.msg === "obtain-timestamp") {
-      const timestampData = getCurrentTimestampInfo();
-      response(timestampData);
-    } else if (request.msg === "get-selection-text") {
+    if (request.msg === "get-selection-text") {
       const selectionText = window.getSelection().toString();
       response(selectionText);
     } else if (request.msg === "toggle-sidebar") {
       toggleSidebar(request.src);
+    } else if (request.msg === "get-src") {
+      const src = modifySrc(window.location.href);
+      response(src);
     }
     return true; // used to send response async
   });
