@@ -118,7 +118,17 @@ const initPopup = () => {
     chrome.windows.onFocusChanged.addListener(onFocusChanged);
 }
 
+const onActionPressed = (tab) => {
+  chrome.tabs.sendMessage(tab.id, { msg: "toggle-sidebar" });
+}
+
+const initSidebar = () => {
+  chrome.action.onClicked.removeListener(onActionPressed);
+  chrome.action.onClicked.addListener(onActionPressed);
+}
+
 // init
 initContextMenu();
 initPopup();
 initCommands();
+initSidebar();
