@@ -121,13 +121,10 @@ class NoteUtils {
   }
 
   Future<void> navigateToNote(BuildContext context, Note note) async {
-    var currNoteId = GoRouter.of(context).location.replaceFirst('/note/', '');
+    var currLoc = GoRouter.of(context).location;
+    var currNoteId = currLoc.replaceFirst('/note/', '');
     if (currNoteId != note.id) {
-      if (GoRouter.of(context).location.startsWith('/note/')) {
-        context.pushNamed('note', params: {'id': note.id}, extra: note);
-      } else {
-        context.goNamed('note', params: {'id': note.id}, extra: note);
-      }
+      context.pushNamed('note', params: {'id': note.id}, extra: note);
     }
   }
 

@@ -154,6 +154,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(contentFieldHasFocus(tester), isTrue);
   });
+
+  testWidgets('auth change refreshes current note',
+      (WidgetTester tester) async {
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    await modifyCurrentNote(tester, content: 'init note');
+    mocks.supabase.authChangeController.add(null);
+    await tester.pumpAndSettle();
+    expect(
+        find.descendant(
+            of: find.byType(ContentField), matching: find.text('init note')),
+        findsNothing);
+  });
 }
 
 bool? contentFieldHasFocus(WidgetTester tester) {

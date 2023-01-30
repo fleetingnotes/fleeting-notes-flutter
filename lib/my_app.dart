@@ -81,27 +81,11 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                     queryParameters: state.queryParams.map(
                         (key, value) => MapEntry(key, value.toString()))).query;
                 if (!newNote.isEmpty()) {
-                  return '/note?$_queryString';
+                  return '/note/${newNote.id}?$_queryString';
                 }
               },
               pageBuilder: (context, state) {
                 var newNote = Note.empty();
-                return NoTransitionPage(
-                  child: NoteEditorScreen(
-                    noteId: newNote.id,
-                    extraNote: newNote,
-                  ),
-                );
-              }),
-          GoRoute(
-              path: '/note',
-              pageBuilder: (context, state) {
-                var params = state.queryParams;
-                var newNote = Note.empty(
-                  title: params['title'] ?? '',
-                  content: params['content'] ?? '',
-                  source: params['source'] ?? '',
-                );
                 return NoTransitionPage(
                   child: NoteEditorScreen(
                     noteId: newNote.id,
@@ -115,13 +99,20 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
             redirect: (context, state) {
               var noteId = state.subloc.replaceFirst('/note/', '');
               if (isValidUuid(noteId)) {
-                return state.subloc;
+                return state.location;
               }
               return '/';
             },
-            pageBuilder: (context, s) {
-              Note? note = s.extra as Note?;
-              var noteId = note?.id ?? s.subloc.replaceFirst('/note/', '');
+            pageBuilder: (context, state) {
+              var params = state.queryParams;
+              Note? note = state.extra as Note?;
+              var noteId = note?.id ?? state.subloc.replaceFirst('/note/', '');
+              note ??= Note.empty(
+                id: noteId,
+                title: params['title'] ?? '',
+                content: params['content'] ?? '',
+                source: params['source'] ?? '',
+              );
 
               return NoTransitionPage(
                 child: NoteEditorScreen(
