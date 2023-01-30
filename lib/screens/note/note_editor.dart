@@ -45,6 +45,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   DateTime modifiedAt = DateTime(2000);
   DateTime? savedAt;
   StreamSubscription<NoteEvent>? noteChangeStream;
+  StreamSubscription? authChangeStream;
 
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
@@ -72,6 +73,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     sourceController = widget.sourceController ?? sourceController;
 
     noteChangeStream = db.noteChangeController.stream.listen(handleNoteEvent);
+    authChangeStream =
+        db.supabase.authChangeController.stream.listen(handleAuthChange);
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
   }
 
@@ -96,6 +99,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     super.dispose();
     saveTimer?.cancel();
     noteChangeStream?.cancel();
+    authChangeStream?.cancel();
   }
 
   Future<void> _saveNote() async {
@@ -162,9 +166,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   }
 
   void handleNoteEvent(NoteEvent e) {
-    if (e.status == NoteEventStatus.init) {
-      return updateFields(Note.empty());
-    }
     Note? n = e.notes.firstWhereOrNull((n) => n.id == widget.note.id);
     if (n == null) return;
     isNoteShareable = n.isShareable;
@@ -178,6 +179,10 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     if (!noteSimilar && !n.isDeleted && isNewerNote) {
       updateFields(n);
     }
+  }
+
+  void handleAuthChange(user) {
+    updateFields(Note.empty());
   }
 
   void updateFields(Note n) {
