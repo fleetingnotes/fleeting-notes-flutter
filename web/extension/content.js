@@ -66,11 +66,21 @@ const createSidebar = () => {
   return rootElement;
 };
 
+function modifySrc(src) {
+    const ytRegex = /https:\/\/www.youtube.com\/watch\?v=.+/;
+    if (src.match(ytRegex)) {
+      const timestampData = getCurrentTimestampInfo();
+      url = `https://www.youtube.com/watch?v=${timestampData.videoId}&t=${timestampData.timestamp}s`
+    }
+    return url;
+}
+
 const getIframeSrc = () => {
   const selectionText = window.getSelection().toString().trim();
+  const src = modifySrc(window.location.href);
   let url = `${chrome.runtime.getURL("web-ext.html")}?`;
   url += (selectionText) ? `content=${encodeURIComponent(selectionText)}&` : '';
-  url += `source=${encodeURIComponent(window.location.href)}&`;
+  url += `source=${encodeURIComponent(src)}&`;
   return url;
 }
 
