@@ -91,6 +91,8 @@ const toggleSidebar = (src) => {
     }
     sidebar.src = src
     sidebar?.style.setProperty("right", "8px");
+  } else if (src) {
+    sidebar.src = src;
   } else {
     sidebar?.style.setProperty("right", `-${sidebarWidth}px`);
   }
