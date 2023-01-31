@@ -19,12 +19,7 @@
       "js": ["extension/content.js"]
     }
   ],
-  "web_accessible_resources": [
-    {
-      "resources": [ "web-ext.html" ],
-      "matches": [ "<all_urls>" ]
-    }
-  ],
+  "web_accessible_resources": [ "web-ext.html" ],
   "permissions": [
     "activeTab",
     "contextMenus"
