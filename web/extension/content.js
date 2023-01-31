@@ -30,9 +30,10 @@ function getCurrentTimestampInfo() {
 }
 
 // sidebar logic
-const sidebarWidth = 400;
+const sidebarWidth = 365;
 let rootElement;
 let sidebar;
+let closeBtn;
 const createSidebar = () => {
   rootElement = document.createElement("div");
   // remove potential global styles
@@ -53,15 +54,38 @@ const createSidebar = () => {
         background-color: white;
         border-radius: 12px;
         transition: right 0.15s ease-in;
-        transition-delay: 0.3s;
+        transition-delay: 0.2s;
         box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 20%), 0 1px 5px 0 rgb(0 0 0 / 12%);
         z-index: ${Number.MAX_SAFE_INTEGER};
       }
+      #close-fab {
+        position:fixed;
+        top: ${height + 15}px;
+        z-index: ${Number.MAX_SAFE_INTEGER};
+        right: 8px;
+        transition: right 0.15s ease-in;
+        transition-delay: 0.2s;
+        border: none;
+        border-radius: 12px;
+        padding: 10px;
+        color: rgb(255, 255, 255);
+        background-color: rgb(10, 10, 35);
+        cursor: pointer;
+        box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 20%), 0 1px 5px 0 rgb(0 0 0 / 12%);
+      }
     </style>
     <iframe frameborder="0" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox" class="${className}" src="${url}"></iframe>
+    <button id='close-fab'>Close</button>
   `;
   sidebar = rootShadow.querySelector(`.${className}`);
   sidebar?.style.setProperty("right", `${-sidebarWidth}px`);
+  closeBtn = rootShadow.querySelector('#close-fab')
+  closeBtn?.style.setProperty("right", `${-sidebarWidth}px`);
+  closeBtn.addEventListener('click', (e) => {
+    if (e.target.id === 'close-fab') {
+      toggleSidebar();
+    }
+  });
 
   return rootElement;
 };
@@ -91,10 +115,12 @@ const toggleSidebar = (src) => {
     }
     sidebar.src = src
     sidebar?.style.setProperty("right", "8px");
+    closeBtn?.style.setProperty("right", "8px")
   } else if (src) {
     sidebar.src = src;
   } else {
     sidebar?.style.setProperty("right", `-${sidebarWidth}px`);
+    closeBtn?.style.setProperty("right", `-${sidebarWidth}px`)
   }
 };
 
@@ -112,6 +138,7 @@ function listenMessages() {
       response(selectionText);
     } else if (request.msg === "toggle-sidebar") {
       toggleSidebar(request.src);
+      response(true);
     } else if (request.msg === "get-src") {
       const src = modifySrc(window.location.href);
       response(src);
