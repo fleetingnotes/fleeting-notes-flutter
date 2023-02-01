@@ -8,7 +8,6 @@
   },
   "version": "0.7.6",
   "browser_action": {
-    "default_popup": "popup.html",
     "default_icon": "/icons/196.png"
   },
   "background": {
@@ -20,6 +19,7 @@
       "js": ["extension/content.js"]
     }
   ],
+  "web_accessible_resources": [ "web-ext.html" ],
   "permissions": [
     "activeTab",
     "contextMenus"

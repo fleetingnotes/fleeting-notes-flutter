@@ -36,8 +36,7 @@ function sendMessage(tabId, message, browser_type) {
 // functions exposed to dart
 window.getSourceUrl = async function getSourceUrl(browser_type) {
     const tabs = await queryCurrentTab(null, browser_type);
-    var url = tabs[0].url
-    url = await modifyUrl(url, browser_type);
+    const url = await sendMessage(tabs[0].id, { msg: "get-src" }, browser_type);
     return url;
 }
 
@@ -57,22 +56,6 @@ async function modifyUrl(url, browser_type) {
         }
     }
     return url;
-}
-
-// youtube utils
-// Parse the current page URL for the video ID and returns the ID.
-// https://stackoverflow.com/questions/3452546/how-do-i-get-the-youtube-video-id-from-a-url
-function getVideoId() {
-    if (window.location.search.split('v=')[1] === undefined) {
-        return "";
-    }
-    let videoId = window.location.search.split('v=')[1];
-    let ampersandPosition = videoId.indexOf('&');
-    // filter out irrevelant query part
-    if (ampersandPosition != -1) {
-        videoId = videoId.substring(0, ampersandPosition);
-    }
-    return videoId;
 }
 
 const pasteHandler = function (e) {
