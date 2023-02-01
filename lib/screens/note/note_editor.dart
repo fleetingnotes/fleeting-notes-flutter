@@ -52,7 +52,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    resetSaveTimer();
     routeObserver = db.routeObserver;
     hasNewChanges = widget.isShared;
     isNoteShareable = widget.note.isShareable;
