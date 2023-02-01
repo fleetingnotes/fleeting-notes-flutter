@@ -40,7 +40,7 @@ const createSidebar = () => {
   rootElement.style.setProperty("all", "initial");
 
   const className = "sidebar";
-  const height = 360;
+  const height = 400;
   const rootShadow = rootElement.attachShadow({ mode: "closed" });
   const url = `${chrome.runtime.getURL("web-ext.html")}`;
   
