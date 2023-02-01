@@ -22,6 +22,9 @@ class BE extends d.BE {
       var buffer = event2.data as Uint8List?;
       pasteController.add(buffer);
     });
+    window.addEventListener('blur', (Event event) {
+      blurController.add(event);
+    });
   }
 
   @override

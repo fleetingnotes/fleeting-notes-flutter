@@ -27,6 +27,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   StreamController<User?>? authChangeController;
   StreamSubscription? authSubscription;
   StreamController<Uint8List?>? pasteController;
+  StreamController? blurController;
   StreamController<NoteEvent>? noteChangeController;
   StreamController<NoteEvent>? localFileSyncController;
 
@@ -49,6 +50,10 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
     authChangeController = db.supabase.authChangeController;
     authSubscription = db.supabase.authSubscription;
     pasteController = be.pasteController;
+    blurController = be.blurController;
+    be.blurController.stream.listen((_) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    });
 
     authChangeController?.stream.listen(refreshApp);
     refreshApp(db.supabase.currUser);
@@ -65,6 +70,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
     authSubscription?.cancel();
     authChangeController?.close();
     pasteController?.close();
+    blurController?.close();
     noteChangeController?.close();
     localFileSyncController?.close();
   }
