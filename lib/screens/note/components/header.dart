@@ -72,8 +72,11 @@ class _HeaderState extends State<Header> {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed:
-                (Navigator.canPop(context)) ? () => _onBack(context) : null,
+            onPressed: (Navigator.canPop(context))
+                ? () => _onBack(context)
+                : (Responsive.isMobile(context))
+                    ? widget.onSearch
+                    : null,
           ),
           SizedBox(width: Theme.of(context).custom.kDefaultPadding / 2),
           Text(
