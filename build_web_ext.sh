@@ -18,5 +18,9 @@ zip -q -x 'manifest\d.json' -r ../web-ext-3.zip .
 cp manifest2.json manifest.json
 zip -q -x 'manifest\d.json' -r ../web-ext-2.zip . 
 
+rm -rf ../web-ext-3
+mkdir ../web-ext-3
+unzip ../web-ext-3.zip -d ../web-ext-3
+
 rm manifest.json
 echo "Finished building web extension in build/manifest2.zip and build/manifest3.zip"
