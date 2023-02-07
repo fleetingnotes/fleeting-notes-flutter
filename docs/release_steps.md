@@ -9,6 +9,11 @@ git checkout -b version-X.X.X
 6. Use these assets to distribute app on App Store Connect, Google Play Store, Firefox Extension, Google Extension,  Netlify, & MacOS
 7. Drag and drop the "build/ios/ipa/*.ipa" bundle into the Apple Transport macOS app https://apps.apple.com/us/app/transporter/id1450874784
 
+## Releasing Safari Ext
+8. Run `./build_web_ext.sh`
+9. Open XCode for `safari` project and update version
+10. Product > Archive, then upload to App Store + Automatically Sign
+
 Release Checklist:
 - [ ] iOS (https://appstoreconnect.apple.com/apps/1615226800/appstore/ios/version/inflight)
 - [ ] Android (https://play.google.com/console/u/0/developers/5327230890052241772/app/4976191625623411474/tracks/production)
