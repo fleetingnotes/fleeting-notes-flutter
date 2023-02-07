@@ -1,0 +1,641 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3394D7D22991652900958F80 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394D7D12991652900958F80 /* AppDelegate.swift */; };
+		3394D7D62991652900958F80 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7D42991652900958F80 /* Main.html */; };
+		3394D7D82991652900958F80 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7D72991652900958F80 /* Icon.png */; };
+		3394D7DA2991652900958F80 /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7D92991652900958F80 /* Style.css */; };
+		3394D7DC2991652900958F80 /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7DB2991652900958F80 /* Script.js */; };
+		3394D7DE2991652900958F80 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394D7DD2991652900958F80 /* ViewController.swift */; };
+		3394D7E12991652900958F80 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7DF2991652900958F80 /* Main.storyboard */; };
+		3394D7E32991652900958F80 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7E22991652900958F80 /* Assets.xcassets */; };
+		3394D7EC2991652A00958F80 /* Fleeting Notes Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3394D7EB2991652A00958F80 /* Fleeting Notes Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3394D7F12991652A00958F80 /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394D7F02991652A00958F80 /* SafariWebExtensionHandler.swift */; };
+		3394D80D2991652A00958F80 /* version.json in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7FE2991652A00958F80 /* version.json */; };
+		3394D80E2991652A00958F80 /* web-ext.html in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7FF2991652A00958F80 /* web-ext.html */; };
+		3394D80F2991652A00958F80 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8002991652A00958F80 /* index.html */; };
+		3394D8102991652A00958F80 /* extension in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8012991652A00958F80 /* extension */; };
+		3394D8112991652A00958F80 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8022991652A00958F80 /* popup.html */; };
+		3394D8122991652A00958F80 /* main.dart.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8032991652A00958F80 /* main.dart.js */; };
+		3394D8132991652A00958F80 /* manifest2.json in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8042991652A00958F80 /* manifest2.json */; };
+		3394D8142991652A00958F80 /* shortcuts.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8052991652A00958F80 /* shortcuts.js */; };
+		3394D8152991652A00958F80 /* flutter.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8062991652A00958F80 /* flutter.js */; };
+		3394D8162991652A00958F80 /* manifest3.json in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8072991652A00958F80 /* manifest3.json */; };
+		3394D8172991652A00958F80 /* flutter_service_worker.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8082991652A00958F80 /* flutter_service_worker.js */; };
+		3394D8182991652A00958F80 /* icons in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8092991652A00958F80 /* icons */; };
+		3394D8192991652A00958F80 /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 3394D80A2991652A00958F80 /* manifest.json */; };
+		3394D81A2991652A00958F80 /* utils.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D80B2991652A00958F80 /* utils.js */; };
+		3394D81B2991652A00958F80 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 3394D80C2991652A00958F80 /* assets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3394D7ED2991652A00958F80 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3394D7C62991652900958F80 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3394D7EA2991652A00958F80;
+			remoteInfo = "Fleeting Notes Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3394D7F92991652A00958F80 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3394D7EC2991652A00958F80 /* Fleeting Notes Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		3394D7CE2991652900958F80 /* Fleeting Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Fleeting Notes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3394D7D12991652900958F80 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3394D7D52991652900958F80 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = ../Base.lproj/Main.html; sourceTree = "<group>"; };
+		3394D7D72991652900958F80 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		3394D7D92991652900958F80 /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		3394D7DB2991652900958F80 /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		3394D7DD2991652900958F80 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		3394D7E02991652900958F80 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		3394D7E22991652900958F80 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3394D7E42991652900958F80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3394D7E52991652900958F80 /* Fleeting_Notes.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Fleeting_Notes.entitlements; sourceTree = "<group>"; };
+		3394D7E62991652900958F80 /* Fleeting Notes.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Fleeting Notes.entitlements"; sourceTree = "<group>"; };
+		3394D7EB2991652A00958F80 /* Fleeting Notes Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Fleeting Notes Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3394D7F02991652A00958F80 /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		3394D7F22991652A00958F80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3394D7F32991652A00958F80 /* Fleeting_Notes_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Fleeting_Notes_Extension.entitlements; sourceTree = "<group>"; };
+		3394D7FE2991652A00958F80 /* version.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = version.json; path = "../../build/web-ext-3/version.json"; sourceTree = "<group>"; };
+		3394D7FF2991652A00958F80 /* web-ext.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "web-ext.html"; path = "../../build/web-ext-3/web-ext.html"; sourceTree = "<group>"; };
+		3394D8002991652A00958F80 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = index.html; path = "../../build/web-ext-3/index.html"; sourceTree = "<group>"; };
+		3394D8012991652A00958F80 /* extension */ = {isa = PBXFileReference; lastKnownFileType = folder; name = extension; path = "../../build/web-ext-3/extension"; sourceTree = "<group>"; };
+		3394D8022991652A00958F80 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = "../../build/web-ext-3/popup.html"; sourceTree = "<group>"; };
+		3394D8032991652A00958F80 /* main.dart.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = main.dart.js; path = "../../build/web-ext-3/main.dart.js"; sourceTree = "<group>"; };
+		3394D8042991652A00958F80 /* manifest2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest2.json; path = "../../build/web-ext-3/manifest2.json"; sourceTree = "<group>"; };
+		3394D8052991652A00958F80 /* shortcuts.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = shortcuts.js; path = "../../build/web-ext-3/shortcuts.js"; sourceTree = "<group>"; };
+		3394D8062991652A00958F80 /* flutter.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = flutter.js; path = "../../build/web-ext-3/flutter.js"; sourceTree = "<group>"; };
+		3394D8072991652A00958F80 /* manifest3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest3.json; path = "../../build/web-ext-3/manifest3.json"; sourceTree = "<group>"; };
+		3394D8082991652A00958F80 /* flutter_service_worker.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = flutter_service_worker.js; path = "../../build/web-ext-3/flutter_service_worker.js"; sourceTree = "<group>"; };
+		3394D8092991652A00958F80 /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = "../../build/web-ext-3/icons"; sourceTree = "<group>"; };
+		3394D80A2991652A00958F80 /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = "../../build/web-ext-3/manifest.json"; sourceTree = "<group>"; };
+		3394D80B2991652A00958F80 /* utils.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = utils.js; path = "../../build/web-ext-3/utils.js"; sourceTree = "<group>"; };
+		3394D80C2991652A00958F80 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = "../../build/web-ext-3/assets"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3394D7CB2991652900958F80 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3394D7E82991652A00958F80 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3394D7C52991652900958F80 = {
+			isa = PBXGroup;
+			children = (
+				3394D7D02991652900958F80 /* Fleeting Notes */,
+				3394D7EF2991652A00958F80 /* Fleeting Notes Extension */,
+				3394D7CF2991652900958F80 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3394D7CF2991652900958F80 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3394D7CE2991652900958F80 /* Fleeting Notes.app */,
+				3394D7EB2991652A00958F80 /* Fleeting Notes Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3394D7D02991652900958F80 /* Fleeting Notes */ = {
+			isa = PBXGroup;
+			children = (
+				3394D7D12991652900958F80 /* AppDelegate.swift */,
+				3394D7DD2991652900958F80 /* ViewController.swift */,
+				3394D7DF2991652900958F80 /* Main.storyboard */,
+				3394D7E22991652900958F80 /* Assets.xcassets */,
+				3394D7E42991652900958F80 /* Info.plist */,
+				3394D7E52991652900958F80 /* Fleeting_Notes.entitlements */,
+				3394D7E62991652900958F80 /* Fleeting Notes.entitlements */,
+				3394D7D32991652900958F80 /* Resources */,
+			);
+			path = "Fleeting Notes";
+			sourceTree = "<group>";
+		};
+		3394D7D32991652900958F80 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3394D7D42991652900958F80 /* Main.html */,
+				3394D7D72991652900958F80 /* Icon.png */,
+				3394D7D92991652900958F80 /* Style.css */,
+				3394D7DB2991652900958F80 /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3394D7EF2991652A00958F80 /* Fleeting Notes Extension */ = {
+			isa = PBXGroup;
+			children = (
+				3394D7FD2991652A00958F80 /* Resources */,
+				3394D7F02991652A00958F80 /* SafariWebExtensionHandler.swift */,
+				3394D7F22991652A00958F80 /* Info.plist */,
+				3394D7F32991652A00958F80 /* Fleeting_Notes_Extension.entitlements */,
+			);
+			path = "Fleeting Notes Extension";
+			sourceTree = "<group>";
+		};
+		3394D7FD2991652A00958F80 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3394D7FE2991652A00958F80 /* version.json */,
+				3394D7FF2991652A00958F80 /* web-ext.html */,
+				3394D8002991652A00958F80 /* index.html */,
+				3394D8012991652A00958F80 /* extension */,
+				3394D8022991652A00958F80 /* popup.html */,
+				3394D8032991652A00958F80 /* main.dart.js */,
+				3394D8042991652A00958F80 /* manifest2.json */,
+				3394D8052991652A00958F80 /* shortcuts.js */,
+				3394D8062991652A00958F80 /* flutter.js */,
+				3394D8072991652A00958F80 /* manifest3.json */,
+				3394D8082991652A00958F80 /* flutter_service_worker.js */,
+				3394D8092991652A00958F80 /* icons */,
+				3394D80A2991652A00958F80 /* manifest.json */,
+				3394D80B2991652A00958F80 /* utils.js */,
+				3394D80C2991652A00958F80 /* assets */,
+			);
+			name = Resources;
+			path = "Fleeting Notes Extension";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3394D7CD2991652900958F80 /* Fleeting Notes */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3394D7FA2991652A00958F80 /* Build configuration list for PBXNativeTarget "Fleeting Notes" */;
+			buildPhases = (
+				3394D7CA2991652900958F80 /* Sources */,
+				3394D7CB2991652900958F80 /* Frameworks */,
+				3394D7CC2991652900958F80 /* Resources */,
+				3394D7F92991652A00958F80 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3394D7EE2991652A00958F80 /* PBXTargetDependency */,
+			);
+			name = "Fleeting Notes";
+			productName = "Fleeting Notes";
+			productReference = 3394D7CE2991652900958F80 /* Fleeting Notes.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3394D7EA2991652A00958F80 /* Fleeting Notes Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3394D7F62991652A00958F80 /* Build configuration list for PBXNativeTarget "Fleeting Notes Extension" */;
+			buildPhases = (
+				3394D7E72991652A00958F80 /* Sources */,
+				3394D7E82991652A00958F80 /* Frameworks */,
+				3394D7E92991652A00958F80 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Fleeting Notes Extension";
+			productName = "Fleeting Notes Extension";
+			productReference = 3394D7EB2991652A00958F80 /* Fleeting Notes Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3394D7C62991652900958F80 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1400;
+				LastUpgradeCheck = 1400;
+				TargetAttributes = {
+					3394D7CD2991652900958F80 = {
+						CreatedOnToolsVersion = 14.0.1;
+					};
+					3394D7EA2991652A00958F80 = {
+						CreatedOnToolsVersion = 14.0.1;
+					};
+				};
+			};
+			buildConfigurationList = 3394D7C92991652900958F80 /* Build configuration list for PBXProject "Fleeting Notes" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3394D7C52991652900958F80;
+			productRefGroup = 3394D7CF2991652900958F80 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3394D7CD2991652900958F80 /* Fleeting Notes */,
+				3394D7EA2991652A00958F80 /* Fleeting Notes Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3394D7CC2991652900958F80 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3394D7D82991652900958F80 /* Icon.png in Resources */,
+				3394D7E12991652900958F80 /* Main.storyboard in Resources */,
+				3394D7DC2991652900958F80 /* Script.js in Resources */,
+				3394D7D62991652900958F80 /* Main.html in Resources */,
+				3394D7E32991652900958F80 /* Assets.xcassets in Resources */,
+				3394D7DA2991652900958F80 /* Style.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3394D7E92991652A00958F80 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3394D81B2991652A00958F80 /* assets in Resources */,
+				3394D8172991652A00958F80 /* flutter_service_worker.js in Resources */,
+				3394D80F2991652A00958F80 /* index.html in Resources */,
+				3394D81A2991652A00958F80 /* utils.js in Resources */,
+				3394D8122991652A00958F80 /* main.dart.js in Resources */,
+				3394D8192991652A00958F80 /* manifest.json in Resources */,
+				3394D8162991652A00958F80 /* manifest3.json in Resources */,
+				3394D8112991652A00958F80 /* popup.html in Resources */,
+				3394D80D2991652A00958F80 /* version.json in Resources */,
+				3394D8102991652A00958F80 /* extension in Resources */,
+				3394D80E2991652A00958F80 /* web-ext.html in Resources */,
+				3394D8142991652A00958F80 /* shortcuts.js in Resources */,
+				3394D8182991652A00958F80 /* icons in Resources */,
+				3394D8152991652A00958F80 /* flutter.js in Resources */,
+				3394D8132991652A00958F80 /* manifest2.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3394D7CA2991652900958F80 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3394D7DE2991652900958F80 /* ViewController.swift in Sources */,
+				3394D7D22991652900958F80 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3394D7E72991652A00958F80 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3394D7F12991652A00958F80 /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3394D7EE2991652A00958F80 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3394D7EA2991652A00958F80 /* Fleeting Notes Extension */;
+			targetProxy = 3394D7ED2991652A00958F80 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		3394D7D42991652900958F80 /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3394D7D52991652900958F80 /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		3394D7DF2991652900958F80 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3394D7E02991652900958F80 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3394D7F42991652A00958F80 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3394D7F52991652A00958F80 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		3394D7F72991652A00958F80 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Fleeting Notes Extension/Fleeting_Notes_Extension.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4MLDMH9QYL;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Fleeting Notes Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Fleeting Notes Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 0.7.8;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.fleetingnotes.webextension.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3394D7F82991652A00958F80 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Fleeting Notes Extension/Fleeting_Notes_Extension.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4MLDMH9QYL;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Fleeting Notes Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Fleeting Notes Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 0.7.8;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.fleetingnotes.webextension.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		3394D7FB2991652A00958F80 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Fleeting Notes/Fleeting Notes.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4MLDMH9QYL;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Fleeting Notes/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Fleeting Notes";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 0.7.8;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.fleetingnotes.webextension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3394D7FC2991652A00958F80 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Fleeting Notes/Fleeting Notes.entitlements";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4MLDMH9QYL;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Fleeting Notes/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Fleeting Notes";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 0.7.8;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.fleetingnotes.webextension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3394D7C92991652900958F80 /* Build configuration list for PBXProject "Fleeting Notes" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3394D7F42991652A00958F80 /* Debug */,
+				3394D7F52991652A00958F80 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3394D7F62991652A00958F80 /* Build configuration list for PBXNativeTarget "Fleeting Notes Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3394D7F72991652A00958F80 /* Debug */,
+				3394D7F82991652A00958F80 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3394D7FA2991652A00958F80 /* Build configuration list for PBXNativeTarget "Fleeting Notes" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3394D7FB2991652A00958F80 /* Debug */,
+				3394D7FC2991652A00958F80 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3394D7C62991652900958F80 /* Project object */;
+}
