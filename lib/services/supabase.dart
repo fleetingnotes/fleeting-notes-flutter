@@ -122,7 +122,11 @@ class SupabaseDB {
   Future<void> refreshSession() async {
     if (currUser == null) return;
     try {
-      await client.auth.refreshSession();
+      int threeDaySec = 259200;
+      int? tokenExpiresIn = client.auth.currentSession?.expiresIn;
+      if (tokenExpiresIn != null && tokenExpiresIn < threeDaySec) {
+        await client.auth.refreshSession();
+      }
     } on AuthException catch (e) {
       debugPrint("${e.statusCode} ${e.message}");
     }
