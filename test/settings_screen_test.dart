@@ -8,10 +8,8 @@
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/login_dialog.dart';
-import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/account.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';

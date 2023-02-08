@@ -6,7 +6,6 @@ import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 
-import '../models/Note.dart';
 import '../models/search_query.dart';
 import 'notifier.dart';
 

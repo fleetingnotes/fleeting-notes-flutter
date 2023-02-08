@@ -2,7 +2,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -231,15 +230,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onExportPress: onExportPress,
                         onBackupOptionChange: onBackupDropdownChange,
                       ),
-                      SizedBox(
-                          height: Theme.of(context).custom.kDefaultPadding),
+                      const SizedBox(height: 8),
                       const SettingsTitle(title: "Sync"),
                       LocalSyncSetting(
                         settings: db.settings,
                         getAllNotes: db.getAllNotes,
                       ),
-                      SizedBox(
-                          height: Theme.of(context).custom.kDefaultPadding),
+                      const SizedBox(height: 8),
                       const SettingsTitle(title: "Other Settings"),
                       const SettingsItemSwitch(
                           settingsKey: 'auto-fill-source',

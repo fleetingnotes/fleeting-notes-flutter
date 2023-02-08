@@ -1,4 +1,3 @@
-import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';

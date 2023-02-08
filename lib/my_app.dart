@@ -83,6 +83,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                 if (!newNote.isEmpty()) {
                   return '/note/${newNote.id}?$_queryString';
                 }
+                return null;
               },
               pageBuilder: (context, state) {
                 var newNote = Note.empty();

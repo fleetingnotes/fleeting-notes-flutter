@@ -13,7 +13,6 @@ import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
 class ContentField extends ConsumerStatefulWidget {
