@@ -41,17 +41,15 @@ class SupabaseDB {
   bool get canSync => currUser != null;
 
   // auth stuff
-  Future<User> login(String email, String password) async {
-    final res = await client.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
-    var user = res.user;
-    if (user == null) {
-      throw FleetingNotesException('Login failed');
-    } else {
-      currUser = user;
-      return user;
+  Future<User?> login(String email, String password) async {
+    try {
+      final res = await client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      return res.user;
+    } on AuthException catch (e) {
+      throw FleetingNotesException(e.message);
     }
   }
 
