@@ -47,6 +47,7 @@ class SupabaseDB {
         email: email,
         password: password,
       );
+      currUser = res.user ?? currUser;
       return res.user;
     } on AuthException catch (e) {
       throw FleetingNotesException(e.message);
