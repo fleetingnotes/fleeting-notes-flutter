@@ -30,17 +30,19 @@ function getCurrentTimestampInfo() {
 }
 
 // sidebar logic
-const sidebarWidth = 365;
+let sidebarWidth = parseInt(window.localStorage.getItem('sidebarWidth')) || 365;
+let sidebarHeight = parseInt(window.localStorage.getItem('sidebarHeight')) || 400;
 let rootElement;
 let sidebar;
 let closeBtn;
+let resizer;
+let startX, startY, startWidth, startHeight;
 const createSidebar = () => {
   rootElement = document.createElement("div");
   // remove potential global styles
   rootElement.style.setProperty("all", "initial");
 
   const className = "sidebar";
-  const height = 400;
   const rootShadow = rootElement.attachShadow({ mode: "closed" });
   const url = `${chrome.runtime.getURL("web-ext.html")}`;
   
@@ -48,21 +50,22 @@ const createSidebar = () => {
     <style>
       .${className} {
         width: ${sidebarWidth}px;
-        height: ${height}px;
+        height: ${sidebarHeight}px;
         position: fixed;
         top: 8px;
+        right: ${-sidebarWidth}px;
         background-color: white;
         border-radius: 12px;
         transition: right 0.15s ease-in;
         transition-delay: 0.2s;
         box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 20%), 0 1px 5px 0 rgb(0 0 0 / 12%);
-        z-index: ${Number.MAX_SAFE_INTEGER};
+        z-index: ${Number.MAX_SAFE_INTEGER - 1};
       }
       #close-fab {
         position:fixed;
-        top: ${height + 15}px;
+        top: ${sidebarHeight + 15}px;
+        right: ${-sidebarHeight}px;
         z-index: ${Number.MAX_SAFE_INTEGER};
-        right: 8px;
         transition: right 0.15s ease-in;
         transition-delay: 0.2s;
         border: none;
@@ -73,22 +76,88 @@ const createSidebar = () => {
         cursor: pointer;
         box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 20%), 0 1px 5px 0 rgb(0 0 0 / 12%);
       }
+      #resizer {
+        display: none;
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: transparent;
+        z-index: ${Number.MAX_SAFE_INTEGER};
+        top: ${sidebarHeight}px;
+        right: ${sidebarWidth}px;
+        cursor: nesw-resize;
+      }
     </style>
     <iframe frameborder="0" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox" class="${className}" src="${url}"></iframe>
+    <div id='resizer'></div>
     <button id='close-fab'>Close</button>
   `;
   sidebar = rootShadow.querySelector(`.${className}`);
   sidebar?.style.setProperty("right", `${-sidebarWidth}px`);
-  closeBtn = rootShadow.querySelector('#close-fab')
-  closeBtn?.style.setProperty("right", `${-sidebarWidth}px`);
+
+  // sidebar listener
+  closeBtn = rootShadow.querySelector('#close-fab');
   closeBtn.addEventListener('click', (e) => {
     if (e.target.id === 'close-fab') {
       toggleSidebar();
     }
   });
 
+  resizer = rootShadow.querySelector('#resizer');
+  resizer.addEventListener('mousedown', initDrag, false);
+
   return rootElement;
 };
+
+function updateSidebarDimensions({ width = null, height = null }) {
+  if (width) {
+    sidebar?.style.setProperty("width", `${width}px`);
+    sidebarWidth = width;
+  }
+  if (height) {
+    sidebar?.style.setProperty("height", `${height}px`);
+    closeBtn?.style.setProperty("top", `${height + 15}px`)
+    sidebarHeight = height;
+  }
+}
+
+function initDrag(e) {
+  startX = e.clientX;
+  startY = e.clientY;
+  startWidth = sidebarWidth;
+  startHeight = sidebarHeight;
+  // expand resizer so iframe doesnt eat up inputs
+  resizer.style.top = 0;
+  resizer.style.right = 0;
+  resizer.style.height = '100%';
+  resizer.style.width = '100%';
+  document.documentElement.addEventListener('mousemove', doDrag, false);
+  document.documentElement.addEventListener('mouseup', stopDrag, false);
+}
+
+function doDrag(e) {
+  e.preventDefault();
+  const width = startWidth + startX - e.clientX;
+  const height = startHeight + e.clientY - startY;
+  console.log(width, height);
+  updateSidebarDimensions({
+    width: (width > 250) ? width : 250,
+    height: (height > 300) ? height: 300,
+  })
+}
+
+function stopDrag(e) {
+  window.localStorage.setItem('sidebarWidth', sidebarWidth);
+  window.localStorage.setItem('sidebarHeight', sidebarHeight);
+  // shrink resizer
+  resizer?.style.setProperty("right", `${sidebarWidth}px`);
+  resizer?.style.setProperty("top", `${sidebarHeight}px`);
+  resizer?.style.setProperty("width", "10px");
+  resizer?.style.setProperty("height", "10px");
+  document.documentElement.removeEventListener('mousemove', doDrag, false);
+  document.documentElement.removeEventListener('mouseup', stopDrag, false);
+}
+
 
 function modifySrc(src) {
     const ytRegex = /https:\/\/www.youtube.com\/watch\?v=.+/;
@@ -116,11 +185,13 @@ const toggleSidebar = (src) => {
     sidebar.src = src
     sidebar?.style.setProperty("right", "8px");
     closeBtn?.style.setProperty("right", "8px")
+    resizer?.style.setProperty("display", "block")
   } else if (src) {
     sidebar.src = src;
   } else {
     sidebar?.style.setProperty("right", `-${sidebarWidth}px`);
     closeBtn?.style.setProperty("right", `-${sidebarWidth}px`)
+    resizer?.style.setProperty("display", "none")
   }
 };
 
