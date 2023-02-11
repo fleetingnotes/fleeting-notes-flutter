@@ -55,13 +55,11 @@ class SideMenu extends StatelessWidget {
               ),
             ],
           ),
-          const Spacer(),
           const NavigationDrawerDestination(
               icon: Icon(Icons.home), label: Text('Home')),
           const SizedBox(height: 8),
           const NavigationDrawerDestination(
               icon: Icon(Icons.settings), label: Text('Settings')),
-          const Spacer(),
         ],
       ),
     );
