@@ -111,7 +111,14 @@ jobs:
         channel: 'stable'
     - run: flutter doctor -v
     - run: flutter pub get
+    # build ios release
     - run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist
+    # build safari ext release
+    # - run: |
+    #     ./build_web_ext.sh
+    #     cd safari
+    #     xcodebuild -scheme "Fleeting Notes" -archivePath ../build/FN.xcarchive archive
+    #     xcodebuild -exportArchive -archivePath ../build/FN.xcarchive -exportOptionsPlist Fleeting\ Notes/ExportOptions.plist -exportPath ../build
     # - run: flutter build macos --release
     - uses: softprops/action-gh-release@v1 
       if: startsWith(github.ref, 'refs/tags/')
