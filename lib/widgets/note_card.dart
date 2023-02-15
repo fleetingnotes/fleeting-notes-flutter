@@ -28,7 +28,8 @@ class NoteCard extends StatelessWidget {
     TextStyle highlight = defaultStyle.copyWith(backgroundColor: Colors.orange);
     int placeHolder = 0;
     List<TextSpan> textSpanner = [];
-    r.allMatches(text).forEach((element) {
+    final element = r.firstMatch(text);
+    if (element != null) {
       if (textSpanner.isNotEmpty) {
         textSpanner.add(TextSpan(
             text: text.substring(placeHolder, element.start),
@@ -44,7 +45,7 @@ class NoteCard extends StatelessWidget {
       textSpanner.add(TextSpan(
           text: text.substring(element.start, element.end), style: highlight));
       placeHolder = element.end;
-    });
+    }
     textSpanner.add(TextSpan(
         text: text.substring(placeHolder, text.length), style: defaultStyle));
     return textSpanner;
