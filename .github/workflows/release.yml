@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.3.4'
@@ -16,13 +18,17 @@ jobs:
     - run: flutter pub get
     - run: ./build_web_app.sh
     - run: ./build_web_ext.sh
+    - name: Rename files
+      run: |
+        mv build/web-ext-2.zip build/fn-web-ext-2-${{ env.RELEASE_VERSION }}.zip
+        mv build/web-ext-3.zip build/fn-web-ext-3-${{ env.RELEASE_VERSION }}.zip
+        mv build/web-app.zip build/fn-web-app-${{ env.RELEASE_VERSION }}.zip
     - uses: softprops/action-gh-release@v1 
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          build/web-ext-2.zip
-          build/web-ext-3.zip
-          build/web-app.zip
+          build/fn-web-ext-*.zip
+          build/fn-web-app-*.zip
         draft: true
         fail_on_unmatched_files: true
   release-android:
