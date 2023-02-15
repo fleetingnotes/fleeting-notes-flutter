@@ -185,6 +185,7 @@ jobs:
     - run: flutter doctor -v
     - run: flutter pub get
     - run: flutter build linux --release
+    - run: ls build/linux/release/bundle
 
   release-windows:
     runs-on: windows-latest
