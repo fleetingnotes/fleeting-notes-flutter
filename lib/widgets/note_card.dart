@@ -1,8 +1,8 @@
 import 'dart:math';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
 import '../models/Note.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
+import 'note_source.dart';
 
 class NoteCard extends StatelessWidget {
   const NoteCard({
@@ -68,7 +68,7 @@ class NoteCard extends StatelessWidget {
                           maxLines: 3,
                         ),
                       if (note.source.isNotEmpty)
-                        NoteSource(source: note.source),
+                        NoteSource(source: note.source, height: 100),
                     ],
                   ),
                 ),
@@ -78,43 +78,6 @@ class NoteCard extends StatelessWidget {
               ],
             ),
           )),
-    );
-  }
-}
-
-class NoteSource extends StatelessWidget {
-  const NoteSource({
-    Key? key,
-    required this.source,
-    this.height = 100,
-  }) : super(key: key);
-
-  final String source;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      width: double.infinity,
-      imageUrl: source,
-      imageBuilder: (context, imageProvider) {
-        return Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              height: height,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.fitWidth,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-      errorWidget: (context, url, err) => Container(),
     );
   }
 }

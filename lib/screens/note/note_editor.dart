@@ -12,8 +12,7 @@ import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart'
-    if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container_web.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart';
 
 class NoteEditor extends ConsumerStatefulWidget {
   const NoteEditor({

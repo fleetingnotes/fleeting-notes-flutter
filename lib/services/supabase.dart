@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:hive/hive.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:flutter/material.dart';
@@ -116,6 +117,25 @@ class SupabaseDB {
         (tableSubTier.firstOrNull ?? {})['subscription_tier'] as String? ??
             'free';
     return subscriptionTier.isEmpty ? 'free' : subscriptionTier;
+  }
+
+  Future<UrlMetadata?> getUrlMetadata(String url) async {
+    try {
+      final res =
+          await client.functions.invoke('get-metadata', body: {"url": url});
+      final status = res.status;
+      final ok = status != null && status >= 200 && status < 300;
+      if (!ok) return null;
+      Map<String, dynamic> json = res.data;
+      return UrlMetadata(
+        url: url,
+        title: json['ogTitle'],
+        description: json['ogDescription'],
+        imageUrl: (json['ogImage'] != null) ? json['ogImage']['url'] : null,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<void> refreshSession() async {
