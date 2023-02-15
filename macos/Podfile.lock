@@ -10,15 +10,15 @@ PODS:
   - FlutterMacOS (1.0.0)
   - package_info_plus_macos (0.0.1):
     - FlutterMacOS
+  - pasteboard (0.0.1):
+    - FlutterMacOS
   - path_provider_macos (0.0.1):
     - FlutterMacOS
-  - Sentry (7.25.1):
-    - Sentry/Core (= 7.25.1)
-  - Sentry/Core (7.25.1)
+  - Sentry/HybridSDK (7.31.2)
   - sentry_flutter (0.0.1):
     - Flutter
     - FlutterMacOS
-    - Sentry (~> 7.25.1)
+    - Sentry/HybridSDK (= 7.31.2)
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
 
@@ -29,6 +29,7 @@ DEPENDENCIES:
   - flutter_secure_storage_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - package_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus_macos/macos`)
+  - pasteboard (from `Flutter/ephemeral/.symlinks/plugins/pasteboard/macos`)
   - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
   - sentry_flutter (from `Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
@@ -50,6 +51,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral
   package_info_plus_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus_macos/macos
+  pasteboard:
+    :path: Flutter/ephemeral/.symlinks/plugins/pasteboard/macos
   path_provider_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos
   sentry_flutter:
@@ -62,11 +65,12 @@ SPEC CHECKSUMS:
   device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
   file_saver: 44e6fbf666677faf097302460e214e977fdd977b
   flutter_secure_storage_macos: 6ceee8fbc7f484553ad17f79361b556259df89aa
-  FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   package_info_plus_macos: f010621b07802a241d96d01876d6705f15e77c1c
-  path_provider_macos: 160cab0d5461f0c0e02995469a98f24bdb9a3f1f
-  Sentry: dd29c18c32b0af9269949f079cf631d581ca76ca
-  sentry_flutter: 544b23de27343d0cd12d8d16b0fac71dc884f0e6
+  pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
+  path_provider_macos: 3c0c3b4b0d4a76d2bf989a913c2de869c5641a19
+  Sentry: b15765d11769852fe78c9add942f7df60ed5dbf5
+  sentry_flutter: 8ef5e68ee2d301805279ed134b3b38dbe9e090f0
   url_launcher_macos: 597e05b8e514239626bcf4a850fcf9ef5c856ec3
 
 PODFILE CHECKSUM: 54580d4d280dbb32cc8a083b9e54b7de70acaf13
