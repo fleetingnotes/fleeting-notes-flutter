@@ -179,6 +179,7 @@ const getIframeSrc = () => {
 
 const toggleSidebar = (src) => {
   if (sidebar?.style.right.startsWith('-')) {
+    document.body.appendChild(rootElement);
     if (!src) {
       src = getIframeSrc();
     }
@@ -192,12 +193,12 @@ const toggleSidebar = (src) => {
     sidebar?.style.setProperty("right", `-${sidebarWidth}px`);
     closeBtn?.style.setProperty("right", `-${sidebarWidth}px`)
     resizer?.style.setProperty("display", "none")
+    setTimeout(() => document.body.removeChild(rootElement), 500);
   }
 };
 
 function initSidebar() {
   rootElement = createSidebar();
-  document.body.appendChild(rootElement);
 }
 
 // listeneres
