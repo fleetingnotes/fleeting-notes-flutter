@@ -21,11 +21,9 @@
 		3394D80E2991652A00958F80 /* web-ext.html in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7FF2991652A00958F80 /* web-ext.html */; };
 		3394D80F2991652A00958F80 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8002991652A00958F80 /* index.html */; };
 		3394D8102991652A00958F80 /* extension in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8012991652A00958F80 /* extension */; };
-		3394D8112991652A00958F80 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8022991652A00958F80 /* popup.html */; };
 		3394D8122991652A00958F80 /* main.dart.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8032991652A00958F80 /* main.dart.js */; };
 		3394D8132991652A00958F80 /* manifest2.json in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8042991652A00958F80 /* manifest2.json */; };
 		3394D8142991652A00958F80 /* shortcuts.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8052991652A00958F80 /* shortcuts.js */; };
-		3394D8152991652A00958F80 /* flutter.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8062991652A00958F80 /* flutter.js */; };
 		3394D8162991652A00958F80 /* manifest3.json in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8072991652A00958F80 /* manifest3.json */; };
 		3394D8172991652A00958F80 /* flutter_service_worker.js in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8082991652A00958F80 /* flutter_service_worker.js */; };
 		3394D8182991652A00958F80 /* icons in Resources */ = {isa = PBXBuildFile; fileRef = 3394D8092991652A00958F80 /* icons */; };
@@ -289,13 +287,11 @@
 				3394D8122991652A00958F80 /* main.dart.js in Resources */,
 				3394D8192991652A00958F80 /* manifest.json in Resources */,
 				3394D8162991652A00958F80 /* manifest3.json in Resources */,
-				3394D8112991652A00958F80 /* popup.html in Resources */,
 				3394D80D2991652A00958F80 /* version.json in Resources */,
 				3394D8102991652A00958F80 /* extension in Resources */,
 				3394D80E2991652A00958F80 /* web-ext.html in Resources */,
 				3394D8142991652A00958F80 /* shortcuts.js in Resources */,
 				3394D8182991652A00958F80 /* icons in Resources */,
-				3394D8152991652A00958F80 /* flutter.js in Resources */,
 				3394D8132991652A00958F80 /* manifest2.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

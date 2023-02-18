@@ -21,3 +21,4 @@ Release Checklist:
 - [ ] Chrome (https://chrome.google.com/webstore/devconsole/4d8ee7e3-234d-4403-85bb-2b633b407fbb/gcplhmogdjioeaenmehmapbdonklmdnc/edit/package?hl=en)
 - [ ] Web (https://app.netlify.com/sites/my-fleetingnotes/deploys)
 - [ ] MacOS (https://appstoreconnect.apple.com/apps/1615226800/appstore/macos/version/inflight)
+- [ ] Safari (https://appstoreconnect.apple.com/apps/1669824754/testflight/macos)
