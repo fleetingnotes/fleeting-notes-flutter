@@ -22,6 +22,14 @@ jobs:
     - run: flutter pub get
     - run: flutter build linux --release -v
     - run: tree build
+    - run: zip -r build/fn-linux.zip build/linux/x64/release/bundle 
+    - uses: softprops/action-gh-release@v1 
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          build/fn-*.zip
+        draft: true
+        fail_on_unmatched_files: true
 
   release-windows:
     runs-on: windows-latest
@@ -38,10 +46,11 @@ jobs:
     # install vs_buildtools.exe https://git.openprivacy.ca/openprivacy/flutter-desktop/src/branch/main/windows/Dockerfile
     - name: Install vs_buildtools
       run: | 
+        curl -SL --output VisualStudio.chman.exe https://aka.ms/vs/16/release/channel 
         curl -SL --output vs_buildtools.exe https://aka.ms/vs/16/release/vs_buildtools.exe 
-        vs_buildtools.exe --quiet --wait --norestart --nocache \
-          --channelUri C:\TEMP\VisualStudio.chman \
-          --installChannelUri C:\TEMP\VisualStudio.chman \
+        .\vs_buildtools.exe --quiet --wait --norestart --nocache \
+          --channelUri VisualStudio.chman \
+          --installChannelUri VisualStudio.chman \
           --add Microsoft.VisualStudio.Component.Windows10SDK.19041 \
           --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
           --add Microsoft.VisualStudio.Component.VC.CMake.Project \
