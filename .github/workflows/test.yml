@@ -38,7 +38,7 @@ jobs:
     # install vs_buildtools.exe https://git.openprivacy.ca/openprivacy/flutter-desktop/src/branch/main/windows/Dockerfile
     - name: Install vs_buildtools
       run: | 
-        curl https://aka.ms/vs/16/release/vs_buildtools.exe > vs_buildtools.exe
+        curl -SL --output vs_buildtools.exe https://aka.ms/vs/16/release/vs_buildtools.exe 
         vs_buildtools.exe --quiet --wait --norestart --nocache \
           --channelUri C:\TEMP\VisualStudio.chman \
           --installChannelUri C:\TEMP\VisualStudio.chman \
@@ -49,7 +49,8 @@ jobs:
           --add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools \
           --add Microsoft.VisualStudio.Workload.VCTools \
           --add Microsoft.VisualStudio.Component.VC.CLI.Support \
-          --installPath C:\BuildTools
+          --installPath C:\BuildTools \
+          || IF "%ERRORLEVEL%"=="3010" EXIT 0
     - run: flutter build windows --release -v
     - run: tree build
 
