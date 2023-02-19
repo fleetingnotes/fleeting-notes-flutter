@@ -35,6 +35,21 @@ jobs:
         channel: 'stable'
     - run: flutter doctor -v
     - run: flutter pub get
+    # install vs_buildtools.exe
+    - name: Install vs_buildtools
+    - run: | 
+        wget https://aka.ms/vs/16/release/vs_buildtools.exe
+        vs_buildtools.exe --quiet --wait --norestart --nocache \
+          --channelUri C:\TEMP\VisualStudio.chman \
+          --installChannelUri C:\TEMP\VisualStudio.chman \
+          --add Microsoft.VisualStudio.Component.Windows10SDK.19041 \
+          --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
+          --add Microsoft.VisualStudio.Component.VC.CMake.Project \
+          --add Microsoft.VisualStudio.Workload.NativeDesktop \
+          --add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools \
+          --add Microsoft.VisualStudio.Workload.VCTools \
+          --add Microsoft.VisualStudio.Component.VC.CLI.Support \
+          --installPath C:\BuildTools
     - run: flutter build windows --release -v
     - run: tree build
 
