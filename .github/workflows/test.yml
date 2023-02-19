@@ -35,7 +35,7 @@ jobs:
         channel: 'stable'
     - run: flutter doctor -v
     - run: flutter pub get
-    # install vs_buildtools.exe
+    # install vs_buildtools.exe https://git.openprivacy.ca/openprivacy/flutter-desktop/src/branch/main/windows/Dockerfile
     - name: Install vs_buildtools
     - run: | 
         wget https://aka.ms/vs/16/release/vs_buildtools.exe
