@@ -16,9 +16,8 @@ import 'components/note_fab.dart';
 import 'components/side_rail.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
-  const MainScreen({Key? key, required this.child}) : super(key: key);
+  const MainScreen({Key? key}) : super(key: key);
 
-  final Widget child;
   @override
   ConsumerState<MainScreen> createState() => _MainScreenState();
 }
@@ -162,10 +161,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               ? NoteFAB(onPressed: addNote)
               : null,
           body: Responsive(
-            mobile: (GoRouter.of(context).location.startsWith('/note') &&
-                    search == null)
-                ? widget.child
-                : SearchScreen(searchFocusNode: searchFocusNode),
+            mobile: SearchScreen(searchFocusNode: searchFocusNode),
             tablet: Row(
               children: [
                 SideRail(addNote: addNote, onMenu: db.openDrawer),
@@ -177,7 +173,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 ),
                 Expanded(
                   flex: 9,
-                  child: widget.child,
+                  child: Container(),
                 ),
               ],
             ),
@@ -214,7 +210,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 ),
                 Expanded(
                   flex: 9,
-                  child: widget.child,
+                  child: Container(),
                 ),
               ],
             ),

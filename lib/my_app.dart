@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -63,68 +64,58 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     routes: [
-      ShellRoute(
-        navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) => MainScreen(child: child),
-        routes: [
-          GoRoute(
-              name: 'home',
-              path: '/',
+      GoRoute(
+          name: 'home',
+          path: '/',
+          redirect: (context, state) {
+            var params = state.queryParams;
+            var newNote = Note.empty(
+              title: params['title'] ?? '',
+              content: params['content'] ?? '',
+              source: params['source'] ?? '',
+            );
+            final String _queryString = Uri(
+                    queryParameters: state.queryParams
+                        .map((key, value) => MapEntry(key, value.toString())))
+                .query;
+            if (!newNote.isEmpty() && !state.location.startsWith('/note/')) {
+              return '/note/${newNote.id}?$_queryString';
+            }
+            return null;
+          },
+          builder: (context, state) => const MainScreen(),
+          routes: [
+            GoRoute(
+              name: 'note',
+              path: 'note/:id',
               redirect: (context, state) {
+                var noteId =
+                    state.subloc.split('?').first.replaceFirst('/note/', '');
+                if (isValidUuid(noteId)) {
+                  return null;
+                }
+                return '/';
+              },
+              pageBuilder: (context, state) {
                 var params = state.queryParams;
-                var newNote = Note.empty(
+                Note? note = state.extra as Note?;
+                var noteId =
+                    state.subloc.split('?').first.replaceFirst('/note/', '');
+                note ??= Note.empty(
+                  id: noteId,
                   title: params['title'] ?? '',
                   content: params['content'] ?? '',
                   source: params['source'] ?? '',
                 );
-                final String _queryString = Uri(
-                    queryParameters: state.queryParams.map(
-                        (key, value) => MapEntry(key, value.toString()))).query;
-                if (!newNote.isEmpty()) {
-                  return '/note/${newNote.id}?$_queryString';
-                }
-                return null;
-              },
-              pageBuilder: (context, state) {
-                var newNote = Note.empty();
-                return NoTransitionPage(
+                return DialogPage(
                   child: NoteEditorScreen(
-                    noteId: newNote.id,
-                    extraNote: newNote,
+                    noteId: noteId,
+                    extraNote: note,
                   ),
                 );
-              }),
-          GoRoute(
-            name: 'note',
-            path: '/note/:id',
-            redirect: (context, state) {
-              var noteId = state.subloc.replaceFirst('/note/', '');
-              if (isValidUuid(noteId)) {
-                return state.location;
-              }
-              return '/';
-            },
-            pageBuilder: (context, state) {
-              var params = state.queryParams;
-              Note? note = state.extra as Note?;
-              var noteId = note?.id ?? state.subloc.replaceFirst('/note/', '');
-              note ??= Note.empty(
-                id: noteId,
-                title: params['title'] ?? '',
-                content: params['content'] ?? '',
-                source: params['source'] ?? '',
-              );
-
-              return NoTransitionPage(
-                child: NoteEditorScreen(
-                  noteId: noteId,
-                  extraNote: note,
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+              },
+            ),
+          ]),
       GoRoute(
         path: '/web-ext.html',
         redirect: (context, state) {
