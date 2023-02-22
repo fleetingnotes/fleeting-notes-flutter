@@ -124,7 +124,8 @@ class NoteUtils {
     var currLoc = GoRouter.of(context).location;
     var currNoteId = currLoc.replaceFirst('/note/', '');
     if (currNoteId != note.id) {
-      context.pushNamed('note', params: {'id': note.id}, extra: note);
+      context.pushNamed('note',
+          params: {'id': note.id}, extra: {'note': note, 'prevLoc': currLoc});
     }
   }
 

@@ -6,19 +6,23 @@ const double dialogElevation = 3;
 
 class DialogPage<T> extends Page<T> {
   final Widget child;
+  final Color? barrierColor;
 
-  const DialogPage({required this.child, super.key});
+  const DialogPage({required this.child, this.barrierColor, super.key});
 
   AppBar updateAppBar(AppBar bar) {
     return AppBar();
   }
 
   @override
-  Route<T> createRoute(BuildContext context) => DialogRoute<T>(
-        context: context,
-        settings: this,
-        builder: (context) => DynamicDialog(child: child),
-      );
+  Route<T> createRoute(BuildContext context) {
+    return DialogRoute<T>(
+      barrierColor: barrierColor,
+      context: context,
+      settings: this,
+      builder: (context) => DynamicDialog(child: child),
+    );
+  }
 }
 
 class DynamicDialog extends StatelessWidget {
