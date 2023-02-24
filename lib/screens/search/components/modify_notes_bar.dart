@@ -15,23 +15,31 @@ class ModifyNotesAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      toolbarHeight: 72,
-      leading: IconButton(
-        icon: const Icon(Icons.close),
-        onPressed: clearNotes,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        color: Theme.of(context).colorScheme.surfaceVariant,
       ),
-      title: Text(
-        '${selectedNotes.length} notes selected',
-        style: Theme.of(context).textTheme.titleMedium,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 56,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(onPressed: clearNotes, icon: const Icon(Icons.close)),
+          const SizedBox(width: 16),
+          Text(
+            "${selectedNotes.length} notes selected",
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(width: 16),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () => deleteNotes(context),
+          )
+        ],
       ),
-      actions: <Widget>[
-        // action button
-        IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () => deleteNotes(context),
-        )
-      ],
     );
   }
 }

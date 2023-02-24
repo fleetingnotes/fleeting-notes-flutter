@@ -66,14 +66,17 @@ class _NoteCardState extends State<NoteCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (widget.note.title.isNotEmpty)
-                        CustomRichText(
-                          text: widget.note.title,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          sQuery: widget.sQuery,
-                          maxLines: 1,
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: CustomRichText(
+                            text: widget.note.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                            sQuery: widget.sQuery,
+                            maxLines: 1,
+                          ),
                         ),
                       if (widget.note.content.isNotEmpty)
                         Flexible(

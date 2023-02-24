@@ -196,40 +196,40 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: selectedNotes.isNotEmpty
-                    ? ModifyNotesAppBar(
-                        selectedNotes: selectedNotes,
-                        clearNotes: clearNotes,
-                        deleteNotes: deleteNotes,
-                      )
-                    : SearchBar(
+          selectedNotes.isEmpty
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: SearchBar(
                         onMenu: db.openDrawer,
                         controller: queryController,
                         focusNode: widget.searchFocusNode,
                       ),
-              ),
-              if (!Responsive.isMobile(context))
-                Padding(
-                  padding: const EdgeInsets.only(left: 32),
-                  child: FilledButton(
-                    onPressed: addNote,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Row(
-                        children: const [
-                          Icon(Icons.add),
-                          SizedBox(width: 8),
-                          Text('New note'),
-                        ],
-                      ),
                     ),
-                  ),
+                    if (!Responsive.isMobile(context))
+                      Padding(
+                        padding: const EdgeInsets.only(left: 32),
+                        child: FilledButton(
+                          onPressed: addNote,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              children: const [
+                                Icon(Icons.add),
+                                SizedBox(width: 8),
+                                Text('New note'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                  ],
                 )
-            ],
-          ),
+              : ModifyNotesAppBar(
+                  selectedNotes: selectedNotes,
+                  clearNotes: clearNotes,
+                  deleteNotes: deleteNotes,
+                ),
           Expanded(child: getSearchList()),
         ],
       ),
