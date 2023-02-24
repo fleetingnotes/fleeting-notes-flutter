@@ -126,21 +126,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     nh.addNote(context, note);
   }
 
-  void toggleDrawerDesktop() {
-    setState(() {
-      if (desktopSideWidget == null) {
-        desktopSideWidget = SideMenu(
-            addNote: addNote, closeDrawer: toggleDrawerDesktop, width: 240);
-      } else {
-        desktopSideWidget = null;
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    final search = ref.watch(searchProvider);
     return Shortcuts(
       shortcuts: shortcutMapping,
       child: Actions(
@@ -152,12 +140,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         child: Scaffold(
           key: db.scaffoldKey,
           resizeToAvoidBottomInset: false,
-          drawer: (Responsive.isDesktop(context))
-              ? null
-              : SideMenu(
-                  addNote: addNote,
-                  closeDrawer: db.closeDrawer,
-                ),
+          drawer: SideMenu(
+            addNote: addNote,
+            closeDrawer: db.closeDrawer,
+          ),
           floatingActionButton: (Responsive.isMobile(context))
               ? NoteFAB(onPressed: addNote)
               : null,
@@ -180,29 +166,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
             desktop: Row(
               children: [
-                Stack(
-                  children: [
-                    if (desktopSideWidget == null)
-                      SideRail(addNote: addNote, onMenu: toggleDrawerDesktop),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (widget, animation) {
-                        const begin = Offset(-1.0, 0.0);
-                        const end = Offset.zero;
-                        const curve = Curves.ease;
-
-                        final tween = Tween(begin: begin, end: end)
-                            .chain(CurveTween(curve: curve));
-                        final offsetAnimation = animation.drive(tween);
-                        return SlideTransition(
-                          position: offsetAnimation,
-                          child: widget,
-                        );
-                      },
-                      child: desktopSideWidget,
-                    ),
-                  ],
-                ),
+                SideRail(addNote: addNote, onMenu: db.openDrawer),
                 SizedBox(
                   width: 360,
                   child: SearchScreen(
