@@ -81,6 +81,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
   }
 
+  void onClose() {
+    final noteUtils = ref.read(noteUtilsProvider);
+    noteUtils.onPopNote(context, widget.noteId);
+    context.go('/');
+  }
+
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
     styles: TextPartStyleDefinitions(definitionList: [
@@ -105,15 +111,15 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         return WillPopScope(
           onWillPop: () async {
             if (note == null) return true;
-            noteUtils.onPopNote(context, widget.noteId);
-            context.go('/');
-            return true;
+            onClose();
+            return false;
           },
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               NoteEditorAppBar(
                 note: note,
+                onClose: onClose,
                 onBack: (noteUtils.backNoteHistory.isNotEmpty) ? onBack : null,
                 onForward: (forwardNoteHistory.isNotEmpty) ? onForward : null,
                 contentController: contentController,

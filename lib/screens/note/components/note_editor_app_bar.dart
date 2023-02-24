@@ -18,6 +18,7 @@ class NoteEditorAppBar extends ConsumerWidget {
     this.title,
     this.onBack,
     this.onForward,
+    this.onClose,
     this.contentController,
     this.titleController,
   });
@@ -25,6 +26,7 @@ class NoteEditorAppBar extends ConsumerWidget {
   final Note? note;
   final VoidCallback? onBack;
   final VoidCallback? onForward;
+  final VoidCallback? onClose;
   final double? elevation;
   final Widget? title;
   final TextEditingController? contentController;
@@ -36,52 +38,36 @@ class NoteEditorAppBar extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final sqNotifier = ref.watch(searchProvider.notifier);
     final n = note;
-    return AppBar(
-      scrolledUnderElevation: 0,
-      automaticallyImplyLeading: false,
-      elevation: elevation,
-      leading: Row(
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+      child: Row(
         children: [
+          IconButton(onPressed: onClose, icon: const Icon(Icons.close)),
+          const Spacer(),
+          IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
           IconButton(
-            onPressed: onBack,
-            icon: const Icon(Icons.arrow_back),
-          ),
-          IconButton(
-            onPressed: onForward,
-            icon: const Icon(Icons.arrow_forward),
-          ),
-        ],
-      ),
-      title: title,
-      actions: [
-        ValueListenableBuilder(
-            valueListenable: settings.box.listenable(keys: ['unsaved-note']),
-            builder: (context, Box box, _) {
-              var unsavedNote = box.get('unsaved-note');
-              bool saveEnabled =
-                  unsavedNote != null && n != null && unsavedNote?.id == n.id;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: IconButton(
+              onPressed: onForward, icon: const Icon(Icons.arrow_forward)),
+          const Spacer(),
+          ValueListenableBuilder(
+              valueListenable: settings.box.listenable(keys: ['unsaved-note']),
+              builder: (context, Box box, _) {
+                var unsavedNote = box.get('unsaved-note');
+                bool saveEnabled =
+                    unsavedNote != null && n != null && unsavedNote?.id == n.id;
+                return IconButton(
                     onPressed: (saveEnabled)
                         ? () {
                             noteUtils.handleSaveNote(context, unsavedNote);
                           }
                         : null,
-                    icon: const Icon(Icons.save)),
-              );
-            }),
-        if (Responsive.isMobile(context))
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
+                    icon: const Icon(Icons.save));
+              }),
+          if (Responsive.isMobile(context))
+            IconButton(
               onPressed: () => sqNotifier.updateSearch(SearchQuery()),
               icon: const Icon(Icons.search),
             ),
-          ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: NotePopupMenu(
+          NotePopupMenu(
             note: note,
             onAddAttachment: (String fn, Uint8List? fb) {
               if (n == null) return;
@@ -89,8 +75,21 @@ class NoteEditorAppBar extends ConsumerWidget {
                   controller: contentController);
             },
           ),
-        )
-      ],
+          OutlinedButton(
+            onPressed: () {},
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                children: const [
+                  Icon(Icons.link),
+                  SizedBox(width: 8),
+                  Text('Backlinks'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
