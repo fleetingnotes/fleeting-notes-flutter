@@ -33,9 +33,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     // initialize shared
     final db = ref.read(dbProvider);
     final noteId = currNote?.id ?? widget.noteId;
-    Note? note = currNote ?? (await db.getNoteById(noteId));
+    Note? note = await db.getNoteById(noteId);
     if (note == null) {
-      note = widget.extraNote ?? Note.empty(id: noteId);
+      note = currNote ?? widget.extraNote ?? Note.empty(id: noteId);
       if (!note.isEmpty()) {
         db.settings.set('unsaved-note', note);
       }
