@@ -127,6 +127,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
+  void addNote() {
+    final nh = ref.read(noteHistoryProvider.notifier);
+    final db = ref.read(dbProvider);
+    db.closeDrawer();
+    final note = Note.empty();
+    nh.addNote(context, note);
+  }
+
   Widget getSearchList() {
     final searchQuery = ref.read(searchProvider);
     final activeNoteId =
@@ -141,7 +149,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               key: const PageStorageKey('ListOfNotes'),
               controller: scrollController,
               itemCount: notes.length,
-              padding: const EdgeInsets.all(8),
               itemBuilder: (context, index) => NoteCard(
                 sQuery: searchQuery,
                 note: notes[index],
@@ -175,26 +182,47 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
       loadNotes();
     });
-    return Column(
-      children: [
-        selectedNotes.isNotEmpty
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(72),
-                child: ModifyNotesAppBar(
-                  selectedNotes: selectedNotes,
-                  clearNotes: clearNotes,
-                  deleteNotes: deleteNotes,
-                ))
-            : PreferredSize(
-                preferredSize: const Size.fromHeight(72),
-                child: SearchBar(
-                  onMenu: db.openDrawer,
-                  controller: queryController,
-                  focusNode: widget.searchFocusNode,
-                ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: selectedNotes.isNotEmpty
+                    ? ModifyNotesAppBar(
+                        selectedNotes: selectedNotes,
+                        clearNotes: clearNotes,
+                        deleteNotes: deleteNotes,
+                      )
+                    : SearchBar(
+                        onMenu: db.openDrawer,
+                        controller: queryController,
+                        focusNode: widget.searchFocusNode,
+                      ),
               ),
-        Expanded(child: getSearchList()),
-      ],
+              if (!Responsive.isMobile(context))
+                Padding(
+                  padding: const EdgeInsets.only(left: 32),
+                  child: FilledButton(
+                    onPressed: addNote,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.add),
+                          SizedBox(width: 8),
+                          Text('New note'),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+            ],
+          ),
+          Expanded(child: getSearchList()),
+        ],
+      ),
     );
   }
 }

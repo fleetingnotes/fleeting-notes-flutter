@@ -63,66 +63,61 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   @override
   Widget build(BuildContext context) {
     final searchQuery = ref.watch(searchProvider);
-    bool hasSearchFocus = searchQuery != null;
+    bool hasSearchFocus = searchQuery != null && Responsive.isMobile(context);
     return SafeArea(
       child: AnimatedContainer(
         height: 72,
         duration: const Duration(milliseconds: 100),
-        margin: EdgeInsets.symmetric(
-          horizontal: (hasSearchFocus) ? 0 : 16,
-        ),
-        child: Center(
-          child: Card(
-            shape: RoundedRectangleBorder(
-                borderRadius: (hasSearchFocus)
-                    ? BorderRadius.zero
-                    : BorderRadius.circular(30)),
-            elevation: (hasSearchFocus) ? 0 : 3,
-            child: Row(
-              children: [
-                LeadingIcon(
-                  hasFocus: hasSearchFocus,
-                  onBack: onBack,
-                  onMenu: widget.onMenu,
-                ),
-                Expanded(
-                  child: TextField(
-                    focusNode: focusNode,
-                    controller: widget.controller,
-                    onChanged: onQueryChange,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    decoration: const InputDecoration(
-                      hintText: 'Search Notes',
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
+        child: Card(
+          shape: RoundedRectangleBorder(
+              borderRadius: (hasSearchFocus)
+                  ? BorderRadius.zero
+                  : BorderRadius.circular(30)),
+          elevation: (hasSearchFocus) ? 0 : 3,
+          child: Row(
+            children: [
+              LeadingIcon(
+                hasFocus: hasSearchFocus,
+                onBack: onBack,
+                onMenu: widget.onMenu,
+              ),
+              Expanded(
+                child: TextField(
+                  focusNode: focusNode,
+                  controller: widget.controller,
+                  onChanged: onQueryChange,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  decoration: const InputDecoration(
+                    hintText: 'Search Notes',
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                (hasSearchFocus)
-                    ? (Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: IconButton(
-                          tooltip: "Sort and Filter",
-                          padding: const EdgeInsets.all(0),
-                          onPressed: () async {
-                            await showDialog(
-                              context: context,
-                              builder: (_) {
-                                return const SearchDialog();
-                              },
-                            );
-                            focusNode.requestFocus();
-                          },
-                          icon: const Icon(Icons.tune, size: 24),
-                        ),
-                      ))
-                    : (const Padding(
-                        padding: EdgeInsets.only(right: 16),
-                        child: Icon(Icons.search, size: 24),
-                      )),
-              ],
-            ),
+              ),
+              (hasSearchFocus || !Responsive.isMobile(context))
+                  ? (Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: IconButton(
+                        tooltip: "Sort and Filter",
+                        padding: const EdgeInsets.all(0),
+                        onPressed: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (_) {
+                              return const SearchDialog();
+                            },
+                          );
+                          focusNode.requestFocus();
+                        },
+                        icon: const Icon(Icons.tune, size: 24),
+                      ),
+                    ))
+                  : const Padding(
+                      padding: EdgeInsets.only(right: 16),
+                      child: (Icon(Icons.search)),
+                    ),
+            ],
           ),
         ),
       ),
@@ -164,7 +159,10 @@ class LeadingIcon extends StatelessWidget {
         ),
       );
     } else {
-      return const SizedBox(width: 16);
+      return const Padding(
+        padding: EdgeInsets.only(left: 16),
+        child: Icon(Icons.search, size: 24),
+      );
     }
   }
 }

@@ -39,22 +39,6 @@ class SideMenu extends StatelessWidget {
               ),
             ),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: FloatingActionButton.extended(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.tertiaryContainer,
-                    onPressed: addNote,
-                    label: const Text('Add Note'),
-                    icon: const Icon(Icons.add),
-                  ),
-                ),
-              ),
-            ],
-          ),
           const NavigationDrawerDestination(
               icon: Icon(Icons.home), label: Text('Home')),
           const SizedBox(height: 8),

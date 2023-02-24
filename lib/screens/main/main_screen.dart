@@ -119,9 +119,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void addNote() {
     final nh = ref.read(noteHistoryProvider.notifier);
     final db = ref.read(dbProvider);
-    final search = ref.read(searchProvider.notifier);
     db.closeDrawer();
-    search.updateSearch(null);
     final note = Note.empty();
     nh.addNote(context, note);
   }
@@ -152,30 +150,30 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             tablet: Row(
               children: [
                 SideRail(addNote: addNote, onMenu: db.openDrawer),
-                Expanded(
-                  flex: 6,
-                  child: SearchScreen(
-                    searchFocusNode: searchFocusNode,
+                Flexible(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: mobileLimit),
+                      child: SearchScreen(
+                        searchFocusNode: searchFocusNode,
+                      ),
+                    ),
                   ),
-                ),
-                Expanded(
-                  flex: 9,
-                  child: Container(),
                 ),
               ],
             ),
             desktop: Row(
               children: [
                 SideRail(addNote: addNote, onMenu: db.openDrawer),
-                SizedBox(
-                  width: 360,
-                  child: SearchScreen(
-                    searchFocusNode: searchFocusNode,
+                Flexible(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: tabletLimit),
+                      child: SearchScreen(
+                        searchFocusNode: searchFocusNode,
+                      ),
+                    ),
                   ),
-                ),
-                Expanded(
-                  flex: 9,
-                  child: Container(),
                 ),
               ],
             ),

@@ -35,7 +35,6 @@ class SideRail extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: IconButton(onPressed: onMenu, icon: const Icon(Icons.menu)),
           ),
-          NoteFAB(onPressed: addNote),
         ],
       ),
       groupAlignment: 0,
