@@ -8,6 +8,7 @@ import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
 import '../../utils/responsive.dart';
+import 'components/backlinks_drawer.dart';
 import 'components/note_editor_app_bar.dart';
 import 'note_editor.dart';
 
@@ -91,6 +92,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     ]),
   );
   TextEditingController sourceController = TextEditingController();
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -105,40 +107,46 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             onClose();
             return false;
           },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              NoteEditorAppBar(
-                note: note,
-                onClose: onClose,
-                contentController: contentController,
-              ),
-              Flexible(
-                fit: (Responsive.isMobile(context))
-                    ? FlexFit.tight
-                    : FlexFit.loose,
-                child: (note == null)
-                    ? const SizedBox(
-                        height: 100,
-                        child: Center(child: CircularProgressIndicator()))
-                    : NoteEditor(
-                        note: note,
-                        titleController: titleController,
-                        contentController: contentController,
-                        sourceController: sourceController,
-                        autofocus: nonExistantNote,
-                        padding: const EdgeInsets.only(
-                            left: 24, right: 24, bottom: 16),
-                      ),
-              ),
-              NoteEditorBottomAppBar(
-                onBack:
-                    (noteHistory.backNoteHistory.isNotEmpty) ? onBack : null,
-                onForward: (noteHistory.forwardNoteHistory.isNotEmpty)
-                    ? onForward
-                    : null,
-              )
-            ],
+          child: Scaffold(
+            key: scaffoldKey,
+            drawerScrimColor: Colors.transparent,
+            endDrawer: BacklinksDrawer(
+              closeDrawer: scaffoldKey.currentState?.closeEndDrawer,
+            ),
+            body: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                NoteEditorAppBar(
+                  note: note,
+                  onClose: onClose,
+                  onBacklinks: scaffoldKey.currentState?.openEndDrawer,
+                  contentController: contentController,
+                ),
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: (note == null)
+                      ? const SizedBox(
+                          height: 100,
+                          child: Center(child: CircularProgressIndicator()))
+                      : NoteEditor(
+                          note: note,
+                          titleController: titleController,
+                          contentController: contentController,
+                          sourceController: sourceController,
+                          autofocus: nonExistantNote,
+                          padding: const EdgeInsets.only(
+                              left: 24, right: 24, bottom: 16),
+                        ),
+                ),
+                NoteEditorBottomAppBar(
+                  onBack:
+                      (noteHistory.backNoteHistory.isNotEmpty) ? onBack : null,
+                  onForward: (noteHistory.forwardNoteHistory.isNotEmpty)
+                      ? onForward
+                      : null,
+                )
+              ],
+            ),
           ),
         );
       },

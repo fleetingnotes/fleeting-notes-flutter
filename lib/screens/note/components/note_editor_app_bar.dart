@@ -14,12 +14,14 @@ class NoteEditorAppBar extends ConsumerWidget {
     this.elevation,
     this.title,
     this.onClose,
+    this.onBacklinks,
     this.contentController,
     this.titleController,
   });
 
   final Note? note;
   final VoidCallback? onClose;
+  final VoidCallback? onBacklinks;
   final double? elevation;
   final Widget? title;
   final TextEditingController? contentController;
@@ -59,7 +61,7 @@ class NoteEditorAppBar extends ConsumerWidget {
             },
           ),
           OutlinedButton(
-            onPressed: () {},
+            onPressed: onBacklinks,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Row(
