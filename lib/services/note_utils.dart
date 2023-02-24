@@ -121,22 +121,6 @@ class NoteUtils {
     }
   }
 
-  Future<void> navigateToNote(BuildContext context, Note note) async {
-    var currLoc = GoRouter.of(context).location;
-    var currNoteId = currLoc.split('?').first.replaceFirst('/note/', '');
-    if (currNoteId != note.id) {
-      if (currLoc.startsWith('/note/')) {
-        backNoteHistory.add(currNoteId);
-      } else {
-        final forwardNoteHistory = ref.read(forwardNoteProvider.notifier);
-        forwardNoteHistory.state = [];
-        backNoteHistory = [];
-      }
-      context.pushNamed('note',
-          params: {'id': note.id}, extra: {'note': note, 'prevLoc': currLoc});
-    }
-  }
-
   void launchURLBrowser(String url, BuildContext context) async {
     void _failUrlSnackbar(String message) {
       var snackBar = SnackBar(

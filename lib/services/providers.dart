@@ -6,6 +6,7 @@ import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
 
+import '../models/note_history.dart';
 import '../models/search_query.dart';
 import 'notifier.dart';
 
@@ -31,7 +32,9 @@ final dbProvider = Provider<Database>((ref) {
 
 final searchProvider = StateNotifierProvider<SearchNotifier, SearchQuery?>(
     (ref) => SearchNotifier());
-final forwardNoteProvider = StateProvider<List<String>>((ref) => []);
+final noteHistoryProvider =
+    StateNotifierProvider<NoteHistoryNotifier, NoteHistory>(
+        (ref) => NoteHistoryNotifier());
 final noteUtilsProvider = Provider<NoteUtils>((ref) {
   return NoteUtils(ref);
 });

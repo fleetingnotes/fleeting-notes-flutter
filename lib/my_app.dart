@@ -100,10 +100,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                 var params = state.queryParams;
                 Map? extra = state.extra as Map?;
                 Note? note;
-                String prevLoc = '';
                 if (extra != null) {
                   note = extra['note'] as Note?;
-                  prevLoc = extra['prevLoc'];
                 }
                 var noteId =
                     state.subloc.split('?').first.replaceFirst('/note/', '');
@@ -114,12 +112,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                   source: params['source'] ?? '',
                 );
 
-                Color barrierColor = Colors.black54;
-                if (prevLoc.startsWith('/note/')) {
-                  barrierColor = Colors.transparent;
-                }
                 return DialogPage(
-                  barrierColor: barrierColor,
                   child: NoteEditorScreen(
                     noteId: noteId,
                     extraNote: note,

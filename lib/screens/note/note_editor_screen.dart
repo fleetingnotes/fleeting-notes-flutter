@@ -29,22 +29,13 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool nonExistantNote = false;
 
-  Future<Note> getNote() async {
+  Future<Note> getNote(Note? currNote) async {
     // initialize shared
     final db = ref.read(dbProvider);
-    Note? note = await db.getNoteById(widget.noteId);
+    final noteId = currNote?.id ?? widget.noteId;
+    Note? note = currNote ?? (await db.getNoteById(noteId));
     if (note == null) {
-      note = widget.extraNote ?? Note.empty(id: widget.noteId);
-
-      // add browser extension stuff
-      // final be = ref.read(browserExtensionProvider);
-      // String selectionText = await be.getSelectionText();
-      // if (selectionText.isNotEmpty) {
-      //   String sourceUrl = await be.getSourceUrl();
-      //   note.content = (note.content.isEmpty) ? selectionText : note.content;
-      //   note.source = (note.source.isEmpty) ? sourceUrl : note.source;
-      // }
-
+      note = widget.extraNote ?? Note.empty(id: noteId);
       if (!note.isEmpty()) {
         db.settings.set('unsaved-note', note);
       }
@@ -58,33 +49,33 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
 
   void onBack() async {
     final noteUtils = ref.read(noteUtilsProvider);
-    noteUtils.onPopNote(context, widget.noteId);
-    var currLoc = GoRouter.of(context).location;
-    var noteId = currLoc.split('?').first.replaceFirst('/note/', '');
-    final forwardNoteHistory = ref.read(forwardNoteProvider.notifier);
-    forwardNoteHistory.state = [...forwardNoteHistory.state, noteId];
-    noteUtils.backNoteHistory.removeLast();
-    context.pop();
+
+    // update note history
+    final noteHistoryNotifier = ref.read(noteHistoryProvider.notifier);
+    Note? prevNote = noteHistoryNotifier.goBack(context);
+    if (prevNote != null) {
+      noteUtils.onPopNote(context, prevNote.id);
+    }
   }
 
   void onForward() async {
     final noteUtils = ref.read(noteUtilsProvider);
-    final db = ref.read(dbProvider);
 
-    final forwardNoteHistory = ref.read(forwardNoteProvider.notifier);
-    var newForwardNoteHistory = [...forwardNoteHistory.state];
-    var noteId = newForwardNoteHistory.removeLast();
-    forwardNoteHistory.state = [...newForwardNoteHistory];
-    Note? note = await db.getNoteById(noteId);
-    if (note != null) {
-      noteUtils.navigateToNote(context, note);
+    // update note history
+    final noteHistoryNotifier = ref.read(noteHistoryProvider.notifier);
+    Note? prevNote = noteHistoryNotifier.goForward(context);
+    if (prevNote != null) {
+      noteUtils.onPopNote(context, prevNote.id);
     }
   }
 
   void onClose() {
     final noteUtils = ref.read(noteUtilsProvider);
-    noteUtils.onPopNote(context, widget.noteId);
-    context.go('/');
+    final noteHistoryNotifier = ref.read(noteHistoryProvider.notifier);
+    Note? prevNote = noteHistoryNotifier.goHome(context);
+    if (prevNote != null) {
+      noteUtils.onPopNote(context, prevNote.id);
+    }
   }
 
   TextEditingController titleController = TextEditingController();
@@ -102,10 +93,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final noteUtils = ref.watch(noteUtilsProvider);
-    final forwardNoteHistory = ref.watch(forwardNoteProvider);
+    final noteHistory = ref.watch(noteHistoryProvider);
     return FutureBuilder<Note>(
-      future: getNote(),
+      future: getNote(noteHistory.currNote),
       builder: (context, snapshot) {
         Note? note = snapshot.data;
         return WillPopScope(
@@ -120,8 +110,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
               NoteEditorAppBar(
                 note: note,
                 onClose: onClose,
-                onBack: (noteUtils.backNoteHistory.isNotEmpty) ? onBack : null,
-                onForward: (forwardNoteHistory.isNotEmpty) ? onForward : null,
+                onBack:
+                    (noteHistory.backNoteHistory.isNotEmpty) ? onBack : null,
+                onForward: (noteHistory.forwardNoteHistory.isNotEmpty)
+                    ? onForward
+                    : null,
                 contentController: contentController,
               ),
               Flexible(
