@@ -31,9 +31,13 @@ class LinkPreview extends StatelessWidget {
         offset: newCaretOffset,
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
-          child: NoteCard(
-            note: note,
-            onTap: onTap,
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: NoteCard(
+              note: note,
+              onTap: onTap,
+            ),
           ),
         ),
       ),

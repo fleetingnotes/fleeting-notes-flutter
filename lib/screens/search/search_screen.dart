@@ -139,12 +139,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final searchQuery = ref.read(searchProvider);
     final activeNoteId =
         GoRouter.of(context).location.replaceFirst('/note/', '');
+    int crossAxisCount = 2;
+    if (Responsive.isTablet(context)) {
+      crossAxisCount = 3;
+    } else if (Responsive.isDesktop(context)) {
+      crossAxisCount = 4;
+    }
     return Column(
       children: [
         Expanded(
           child: RefreshIndicator(
             onRefresh: _pullRefreshNotes,
-            child: ListView.builder(
+            child: GridView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               key: const PageStorageKey('ListOfNotes'),
               controller: scrollController,
@@ -162,6 +168,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 onTap: () {
                   _pressNote(context, notes[index]);
                 },
+              ),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: 1,
               ),
             ),
           ),

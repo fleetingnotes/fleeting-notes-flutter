@@ -4,7 +4,7 @@ import '../models/Note.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'note_source.dart';
 
-class NoteCard extends StatelessWidget {
+class NoteCard extends StatefulWidget {
   const NoteCard({
     Key? key,
     required this.note,
@@ -23,59 +23,89 @@ class NoteCard extends StatelessWidget {
   final SearchQuery? sQuery;
 
   @override
+  State<NoteCard> createState() => _NoteCardState();
+}
+
+class _NoteCardState extends State<NoteCard> {
+  bool hovering = false;
+
+  onSelect(bool? value) {
+    if (value == true) {
+      widget.onLongPress?.call();
+    }
+    if (value == false && widget.isSelected) {
+      widget.onTap?.call();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: onLongPress,
-      onTap: onTap,
-      child: Card(
-          elevation: (isActive || isSelected) ? 0 : null,
-          color:
-              (isActive) ? Theme.of(context).colorScheme.surfaceVariant : null,
-          shape: (isSelected)
-              ? RoundedRectangleBorder(
-                  side: BorderSide(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                  borderRadius: const BorderRadius.all(Radius.circular(12)),
-                )
-              : null,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
+    return MouseRegion(
+      onEnter: (_) => setState(() {
+        hovering = true;
+      }),
+      onExit: (_) => setState(() {
+        hovering = false;
+      }),
+      child: GestureDetector(
+        onLongPress: widget.onLongPress,
+        onTap: widget.onTap,
+        child: Card(
+            elevation: (widget.isSelected) ? 1 : 0,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(12)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Stack(
+                children: [
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (note.title.isNotEmpty)
+                      if (widget.note.title.isNotEmpty)
                         CustomRichText(
-                          text: note.title,
+                          text: widget.note.title,
                           style: Theme.of(context)
                               .textTheme
                               .titleSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
-                          sQuery: sQuery,
+                          sQuery: widget.sQuery,
                           maxLines: 1,
                         ),
-                      if (note.content.isNotEmpty)
-                        CustomRichText(
-                          text: note.content,
-                          style: Theme.of(context).textTheme.bodySmall,
-                          sQuery: sQuery,
-                          maxLines: 3,
+                      if (widget.note.content.isNotEmpty)
+                        Flexible(
+                          child: CustomRichText(
+                            text: widget.note.content,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            sQuery: widget.sQuery,
+                          ),
                         ),
-                      if (note.source.isNotEmpty)
-                        NoteSource(source: note.source, height: 100),
+                      if (widget.note.source.isNotEmpty)
+                        NoteSource(source: widget.note.source, height: 100),
                     ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(note.getShortDateTimeStr(),
-                    style: Theme.of(context).textTheme.labelSmall),
-              ],
-            ),
-          )),
+                  if (hovering || widget.isSelected)
+                    Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Checkbox(
+                          onChanged: onSelect,
+                          value: widget.isSelected,
+                        )),
+                  if (hovering)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Text(widget.note.getShortDateTimeStr(),
+                          style: Theme.of(context).textTheme.labelSmall),
+                    ),
+                ],
+              ),
+            )),
+      ),
     );
   }
 }

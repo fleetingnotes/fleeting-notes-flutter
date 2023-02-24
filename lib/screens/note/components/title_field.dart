@@ -18,7 +18,7 @@ class TitleField extends StatelessWidget {
       style: Theme.of(context).textTheme.titleLarge,
       controller: controller,
       decoration: const InputDecoration(
-        hintText: "New note title",
+        hintText: "Title",
         border: InputBorder.none,
       ),
       onChanged: (text) {
