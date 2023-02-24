@@ -137,45 +137,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget getSearchList() {
     final searchQuery = ref.read(searchProvider);
-    final activeNoteId =
-        GoRouter.of(context).location.replaceFirst('/note/', '');
     int crossAxisCount = 2;
     if (Responsive.isTablet(context)) {
       crossAxisCount = 3;
     } else if (Responsive.isDesktop(context)) {
       crossAxisCount = 4;
     }
-    return Column(
-      children: [
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: _pullRefreshNotes,
-            child: GridView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              key: const PageStorageKey('ListOfNotes'),
-              controller: scrollController,
-              itemCount: notes.length,
-              itemBuilder: (context, index) => NoteCard(
-                sQuery: searchQuery,
-                note: notes[index],
-                isActive: Responsive.isMobile(context)
-                    ? false
-                    : notes[index].id == activeNoteId,
-                isSelected: selectedNotes.contains(notes[index]),
-                onSelect: () {
-                  _longPressNote(context, notes[index]);
-                },
-                onTap: () {
-                  _pressNote(context, notes[index]);
-                },
-              ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-              ),
-            ),
-          ),
-        ),
-      ],
+    return NoteGrid(
+      notes: notes,
+      selectedNotes: selectedNotes,
+      searchQuery: searchQuery,
+      crossAxisCount: crossAxisCount,
+      controller: scrollController,
+      onRefresh: _pullRefreshNotes,
+      onSelect: _longPressNote,
+      onTap: _pressNote,
     );
   }
 
@@ -236,6 +212,65 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Expanded(child: getSearchList()),
         ],
       ),
+    );
+  }
+}
+
+class NoteGrid extends StatelessWidget {
+  const NoteGrid({
+    super.key,
+    required this.notes,
+    this.selectedNotes = const [],
+    this.searchQuery,
+    this.crossAxisCount = 1,
+    this.childAspectRatio = 1,
+    this.onRefresh,
+    this.onSelect,
+    this.onTap,
+    this.controller,
+  });
+
+  final List<Note> notes;
+  final List<Note> selectedNotes;
+  final SearchQuery? searchQuery;
+  final int crossAxisCount;
+  final double childAspectRatio;
+  final Future<void> Function()? onRefresh;
+  final Function(BuildContext, Note)? onSelect;
+  final Function(BuildContext, Note)? onTap;
+  final ScrollController? controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              onRefresh?.call();
+            },
+            child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              key: const PageStorageKey('ListOfNotes'),
+              controller: controller,
+              itemCount: notes.length,
+              itemBuilder: (context, index) => NoteCard(
+                sQuery: searchQuery,
+                note: notes[index],
+                isSelected: selectedNotes.contains(notes[index]),
+                onSelect: (onSelect == null)
+                    ? null
+                    : () => onSelect?.call(context, notes[index]),
+                onTap: () => onTap?.call(context, notes[index]),
+              ),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: childAspectRatio,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

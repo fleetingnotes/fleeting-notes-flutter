@@ -112,6 +112,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             drawerScrimColor: Colors.transparent,
             endDrawer: BacklinksDrawer(
               closeDrawer: scaffoldKey.currentState?.closeEndDrawer,
+              title: note?.title ?? '',
             ),
             body: Column(
               mainAxisSize: MainAxisSize.min,
