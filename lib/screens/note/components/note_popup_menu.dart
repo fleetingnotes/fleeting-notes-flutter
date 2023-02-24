@@ -60,6 +60,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
+    final noteHistory = ref.watch(noteHistoryProvider.notifier);
     var note = widget.note;
     if (note == null) {
       return const IconButton(onPressed: null, icon: Icon(Icons.more_vert));
@@ -104,24 +105,6 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
               });
             },
           ),
-        if (widget.backlinksOption && note.title.isNotEmpty)
-          PopupMenuItem(
-            child: const ListTile(
-              title: Text("See backlinks"),
-              leading: Icon(Icons.link),
-              contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
-            ),
-            onTap: () => onSeeBacklinks(note),
-          ),
-        if (GoRouter.of(context).location != '/')
-          PopupMenuItem(
-            child: const ListTile(
-              title: Text("Clear note history"),
-              leading: Icon(Icons.close),
-              contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
-            ),
-            onTap: () => context.goNamed('home'),
-          ),
         if (widget.deleteOption)
           PopupMenuItem(
             child: const ListTile(
@@ -130,8 +113,8 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
               contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
             ),
             onTap: () {
+              noteHistory.goBack(context);
               noteUtils.handleDeleteNote(context, [note]);
-              context.goNamed('home');
             },
           ),
       ],

@@ -37,7 +37,7 @@ class NoteHistoryNotifier extends StateNotifier<NoteHistory> {
   // returns popped noteId
   Note? goBack(BuildContext context) {
     var nh = state.copy();
-    if (nh.backNoteHistory.isEmpty) return null;
+    if (nh.backNoteHistory.isEmpty) return goHome(context);
     Note? prevNote = nh.currNote;
     if (prevNote != null) {
       nh.forwardNoteHistory.add(prevNote);
