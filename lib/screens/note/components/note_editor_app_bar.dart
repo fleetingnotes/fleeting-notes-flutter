@@ -1,7 +1,4 @@
 import 'dart:typed_data';
-
-import 'package:fleeting_notes_flutter/models/search_query.dart';
-import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -16,16 +13,12 @@ class NoteEditorAppBar extends ConsumerWidget {
     required this.note,
     this.elevation,
     this.title,
-    this.onBack,
-    this.onForward,
     this.onClose,
     this.contentController,
     this.titleController,
   });
 
   final Note? note;
-  final VoidCallback? onBack;
-  final VoidCallback? onForward;
   final VoidCallback? onClose;
   final double? elevation;
   final Widget? title;
@@ -36,17 +29,12 @@ class NoteEditorAppBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final noteUtils = ref.watch(noteUtilsProvider);
     final settings = ref.watch(settingsProvider);
-    final sqNotifier = ref.watch(searchProvider.notifier);
     final n = note;
     return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           IconButton(onPressed: onClose, icon: const Icon(Icons.close)),
-          const Spacer(),
-          IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
-          IconButton(
-              onPressed: onForward, icon: const Icon(Icons.arrow_forward)),
           const Spacer(),
           ValueListenableBuilder(
               valueListenable: settings.box.listenable(keys: ['unsaved-note']),
@@ -62,11 +50,6 @@ class NoteEditorAppBar extends ConsumerWidget {
                         : null,
                     icon: const Icon(Icons.save));
               }),
-          if (Responsive.isMobile(context))
-            IconButton(
-              onPressed: () => sqNotifier.updateSearch(SearchQuery()),
-              icon: const Icon(Icons.search),
-            ),
           NotePopupMenu(
             note: note,
             onAddAttachment: (String fn, Uint8List? fb) {

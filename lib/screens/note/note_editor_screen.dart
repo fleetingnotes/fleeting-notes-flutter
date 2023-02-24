@@ -1,12 +1,13 @@
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../models/Note.dart';
 import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
+import '../../utils/responsive.dart';
 import 'components/note_editor_app_bar.dart';
 import 'note_editor.dart';
 
@@ -110,15 +111,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
               NoteEditorAppBar(
                 note: note,
                 onClose: onClose,
-                onBack:
-                    (noteHistory.backNoteHistory.isNotEmpty) ? onBack : null,
-                onForward: (noteHistory.forwardNoteHistory.isNotEmpty)
-                    ? onForward
-                    : null,
                 contentController: contentController,
               ),
               Flexible(
-                fit: FlexFit.loose,
+                fit: (Responsive.isMobile(context))
+                    ? FlexFit.tight
+                    : FlexFit.loose,
                 child: (note == null)
                     ? const SizedBox(
                         height: 100,
@@ -133,6 +131,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                             left: 24, right: 24, bottom: 16),
                       ),
               ),
+              NoteEditorBottomAppBar(
+                onBack:
+                    (noteHistory.backNoteHistory.isNotEmpty) ? onBack : null,
+                onForward: (noteHistory.forwardNoteHistory.isNotEmpty)
+                    ? onForward
+                    : null,
+              )
             ],
           ),
         );
