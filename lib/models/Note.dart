@@ -188,10 +188,8 @@ ${content}''';
 
     if (noteDate == today) {
       return DateFormat('jm').format(noteDateTime.toLocal());
-    } else if (today.year == noteDate.year) {
-      return DateFormat('MMM. d').format(noteDateTime.toLocal());
     } else {
-      return DateFormat('yyyy-M-d').format(noteDateTime.toLocal());
+      return DateFormat('MMM d, yyyy').format(noteDateTime.toLocal());
     }
   }
 

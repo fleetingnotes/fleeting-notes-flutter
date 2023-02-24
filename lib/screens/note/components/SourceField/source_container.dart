@@ -67,7 +67,6 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final noteUtils = ref.watch(noteUtilsProvider);
     final m = metadata;
 
     if (m != null) {
@@ -78,27 +77,17 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
       );
     }
     return TextField(
-      readOnly: widget.readOnly,
-      style: Theme.of(context).textTheme.bodyMedium,
-      controller: controller,
-      onChanged: (text) {
-        updateMetadata(text);
-        widget.onChanged?.call();
-      },
-      decoration: InputDecoration(
-        hintText: "Source",
-        border: const OutlineInputBorder(),
-        suffixIcon: Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: IconButton(
-            tooltip: 'Open URL',
-            icon: const Icon(Icons.open_in_new),
-            onPressed: (controller.text == '')
-                ? null
-                : () => noteUtils.launchURLBrowser(controller.text, context),
-          ),
-        ),
-      ),
-    );
+        readOnly: widget.readOnly,
+        style: Theme.of(context).textTheme.bodySmall,
+        controller: controller,
+        onChanged: (text) {
+          updateMetadata(text);
+          widget.onChanged?.call();
+        },
+        decoration: const InputDecoration(
+          isDense: true,
+          hintText: "Source",
+          border: InputBorder.none,
+        ));
   }
 }

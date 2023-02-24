@@ -230,21 +230,25 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              Text(
+                widget.note.getShortDateTimeStr(),
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
               TitleField(
                 controller: titleController,
                 onChanged: onChanged,
               ),
+              SourceContainer(
+                controller: sourceController,
+                onChanged: onChanged,
+                overrideSourceUrl: widget.note.isEmpty(),
+              ),
+              const Divider(),
               ContentField(
                 controller: contentController,
                 onChanged: onChanged,
                 autofocus: widget.autofocus,
                 onPop: () => noteUtils.onPopNote(context, widget.note.id),
-              ),
-              const SizedBox(height: 8),
-              SourceContainer(
-                controller: sourceController,
-                onChanged: onChanged,
-                overrideSourceUrl: widget.note.isEmpty(),
               ),
             ],
           ),

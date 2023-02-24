@@ -15,9 +15,7 @@ class TitleField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+      style: Theme.of(context).textTheme.titleLarge,
       controller: controller,
       decoration: const InputDecoration(
         hintText: "New note title",
