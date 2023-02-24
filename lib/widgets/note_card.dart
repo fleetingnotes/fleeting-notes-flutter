@@ -8,7 +8,7 @@ class NoteCard extends StatefulWidget {
   const NoteCard({
     Key? key,
     required this.note,
-    this.onLongPress,
+    this.onSelect,
     this.onTap,
     this.sQuery,
     this.isActive = false,
@@ -17,7 +17,7 @@ class NoteCard extends StatefulWidget {
 
   final bool isActive;
   final bool isSelected;
-  final VoidCallback? onLongPress;
+  final VoidCallback? onSelect;
   final VoidCallback? onTap;
   final Note note;
   final SearchQuery? sQuery;
@@ -31,7 +31,7 @@ class _NoteCardState extends State<NoteCard> {
 
   onSelect(bool? value) {
     if (value == true) {
-      widget.onLongPress?.call();
+      widget.onSelect?.call();
     }
     if (value == false && widget.isSelected) {
       widget.onTap?.call();
@@ -48,7 +48,7 @@ class _NoteCardState extends State<NoteCard> {
         hovering = false;
       }),
       child: GestureDetector(
-        onLongPress: widget.onLongPress,
+        onLongPress: widget.onSelect,
         onTap: widget.onTap,
         child: Card(
             elevation: (widget.isSelected) ? 1 : 0,
@@ -90,7 +90,8 @@ class _NoteCardState extends State<NoteCard> {
                         NoteSource(source: widget.note.source, height: 100),
                     ],
                   ),
-                  if (hovering || widget.isSelected)
+                  if (widget.onSelect != null &&
+                      (hovering || widget.isSelected))
                     Positioned(
                         top: 0,
                         right: 0,
@@ -98,7 +99,7 @@ class _NoteCardState extends State<NoteCard> {
                           onChanged: onSelect,
                           value: widget.isSelected,
                         )),
-                  if (hovering)
+                  if (hovering || widget.onSelect == null)
                     Positioned(
                       bottom: 0,
                       right: 0,

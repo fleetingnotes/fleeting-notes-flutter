@@ -162,7 +162,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ? false
                     : notes[index].id == activeNoteId,
                 isSelected: selectedNotes.contains(notes[index]),
-                onLongPress: () {
+                onSelect: () {
                   _longPressNote(context, notes[index]);
                 },
                 onTap: () {
@@ -171,7 +171,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
-                childAspectRatio: 1,
               ),
             ),
           ),
