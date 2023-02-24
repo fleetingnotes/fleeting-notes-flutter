@@ -17,12 +17,14 @@ class NoteEditorAppBar extends ConsumerWidget {
     this.elevation,
     this.title,
     this.onBack,
+    this.onForward,
     this.contentController,
     this.titleController,
   });
 
   final Note? note;
   final VoidCallback? onBack;
+  final VoidCallback? onForward;
   final double? elevation;
   final Widget? title;
   final TextEditingController? contentController;
@@ -38,9 +40,17 @@ class NoteEditorAppBar extends ConsumerWidget {
       scrolledUnderElevation: 0,
       automaticallyImplyLeading: false,
       elevation: elevation,
-      leading: IconButton(
-        onPressed: onBack,
-        icon: const Icon(Icons.arrow_back),
+      leading: Row(
+        children: [
+          IconButton(
+            onPressed: onBack,
+            icon: const Icon(Icons.arrow_back),
+          ),
+          IconButton(
+            onPressed: onForward,
+            icon: const Icon(Icons.arrow_forward),
+          ),
+        ],
       ),
       title: title,
       actions: [

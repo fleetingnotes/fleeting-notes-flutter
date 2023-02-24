@@ -56,10 +56,29 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     return note;
   }
 
-  void popScreen() async {
+  void onBack() async {
     final noteUtils = ref.read(noteUtilsProvider);
     noteUtils.onPopNote(context, widget.noteId);
+    var currLoc = GoRouter.of(context).location;
+    var noteId = currLoc.split('?').first.replaceFirst('/note/', '');
+    final forwardNoteHistory = ref.read(forwardNoteProvider.notifier);
+    forwardNoteHistory.state = [...forwardNoteHistory.state, noteId];
+    noteUtils.backNoteHistory.removeLast();
     context.pop();
+  }
+
+  void onForward() async {
+    final noteUtils = ref.read(noteUtilsProvider);
+    final db = ref.read(dbProvider);
+
+    final forwardNoteHistory = ref.read(forwardNoteProvider.notifier);
+    var newForwardNoteHistory = [...forwardNoteHistory.state];
+    var noteId = newForwardNoteHistory.removeLast();
+    forwardNoteHistory.state = [...newForwardNoteHistory];
+    Note? note = await db.getNoteById(noteId);
+    if (note != null) {
+      noteUtils.navigateToNote(context, note);
+    }
   }
 
   TextEditingController titleController = TextEditingController();
@@ -78,6 +97,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
+    final forwardNoteHistory = ref.watch(forwardNoteProvider);
     return FutureBuilder<Note>(
       future: getNote(),
       builder: (context, snapshot) {
@@ -86,6 +106,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           onWillPop: () async {
             if (note == null) return true;
             noteUtils.onPopNote(context, widget.noteId);
+            context.go('/');
             return true;
           },
           child: Column(
@@ -93,7 +114,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             children: [
               NoteEditorAppBar(
                 note: note,
-                onBack: (context.canPop()) ? popScreen : null,
+                onBack: (noteUtils.backNoteHistory.isNotEmpty) ? onBack : null,
+                onForward: (forwardNoteHistory.isNotEmpty) ? onForward : null,
                 contentController: contentController,
               ),
               Flexible(

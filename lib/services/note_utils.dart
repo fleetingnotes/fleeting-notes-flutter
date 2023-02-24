@@ -14,6 +14,7 @@ class NoteUtils {
   ProviderRef ref;
   NoteUtils(this.ref);
   Note cachedNote = Note.empty();
+  List<String> backNoteHistory = [];
 
   Future<void> handleCopyUrl(BuildContext context, String noteId) async {
     final db = ref.read(dbProvider);
@@ -122,8 +123,15 @@ class NoteUtils {
 
   Future<void> navigateToNote(BuildContext context, Note note) async {
     var currLoc = GoRouter.of(context).location;
-    var currNoteId = currLoc.replaceFirst('/note/', '');
+    var currNoteId = currLoc.split('?').first.replaceFirst('/note/', '');
     if (currNoteId != note.id) {
+      if (currLoc.startsWith('/note/')) {
+        backNoteHistory.add(currNoteId);
+      } else {
+        final forwardNoteHistory = ref.read(forwardNoteProvider.notifier);
+        forwardNoteHistory.state = [];
+        backNoteHistory = [];
+      }
       context.pushNamed('note',
           params: {'id': note.id}, extra: {'note': note, 'prevLoc': currLoc});
     }

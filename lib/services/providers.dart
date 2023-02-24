@@ -31,6 +31,7 @@ final dbProvider = Provider<Database>((ref) {
 
 final searchProvider = StateNotifierProvider<SearchNotifier, SearchQuery?>(
     (ref) => SearchNotifier());
+final forwardNoteProvider = StateProvider<List<String>>((ref) => []);
 final noteUtilsProvider = Provider<NoteUtils>((ref) {
   return NoteUtils(ref);
 });
