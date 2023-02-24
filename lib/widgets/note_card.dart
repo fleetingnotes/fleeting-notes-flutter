@@ -55,7 +55,6 @@ class NoteCard extends StatelessWidget {
                               .textTheme
                               .titleSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
-                          isActive: isActive,
                           sQuery: sQuery,
                           maxLines: 1,
                         ),
@@ -63,7 +62,6 @@ class NoteCard extends StatelessWidget {
                         CustomRichText(
                           text: note.content,
                           style: Theme.of(context).textTheme.bodySmall,
-                          isActive: isActive,
                           sQuery: sQuery,
                           maxLines: 3,
                         ),
@@ -87,23 +85,24 @@ class CustomRichText extends StatelessWidget {
     Key? key,
     required this.text,
     this.style,
-    this.isActive = false,
+    this.highlightStyle,
     this.sQuery,
     this.maxLines,
   }) : super(key: key);
 
   final String text;
   final SearchQuery? sQuery;
-  final bool isActive;
   final TextStyle? style;
+  final TextStyle? highlightStyle;
   final int? maxLines;
 
-  List<TextSpan> highlightString(String query, String text,
-      Color highlightColor, TextStyle? defaultStyle) {
+  List<TextSpan> highlightString(BuildContext context, String query,
+      String text, TextStyle? highlightStyle, TextStyle? defaultStyle) {
     RegExp r = getQueryRegex(query);
     defaultStyle ??= const TextStyle();
-    TextStyle highlight =
-        defaultStyle.copyWith(backgroundColor: highlightColor);
+    highlightStyle ??= defaultStyle.copyWith(
+      backgroundColor: Theme.of(context).highlightColor,
+    );
     int placeHolder = 0;
     List<TextSpan> textSpanner = [];
     final element = r.firstMatch(text);
@@ -121,7 +120,8 @@ class CustomRichText extends StatelessWidget {
             text: text.substring(prev, element.start), style: defaultStyle));
       }
       textSpanner.add(TextSpan(
-          text: text.substring(element.start, element.end), style: highlight));
+          text: text.substring(element.start, element.end),
+          style: highlightStyle));
       placeHolder = element.end;
     }
     textSpanner.add(TextSpan(
@@ -134,9 +134,10 @@ class CustomRichText extends StatelessWidget {
     return RichText(
       text: TextSpan(
           children: highlightString(
+        context,
         (sQuery != null && sQuery!.searchByTitle) ? sQuery!.query : '',
         text,
-        Theme.of(context).highlightColor,
+        highlightStyle,
         style,
       )),
       maxLines: maxLines,

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
+import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -44,24 +45,6 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
   void dispose() {
     super.dispose();
     HardwareKeyboard.instance.removeHandler(onKeyEvent);
-  }
-
-  List<TextSpan> highlightString(String text, TextStyle defaultStyle) {
-    RegExp r = getQueryRegex(widget.query);
-    TextStyle highlight = defaultStyle.copyWith(fontWeight: FontWeight.bold);
-    int placeHolder = 0;
-    List<TextSpan> textSpanner = [];
-    r.allMatches(text).forEach((element) {
-      textSpanner.add(TextSpan(
-          text: text.substring(placeHolder, element.start),
-          style: defaultStyle));
-      textSpanner.add(TextSpan(
-          text: text.substring(element.start, element.end), style: highlight));
-      placeHolder = element.end;
-    });
-    textSpanner.add(TextSpan(
-        text: text.substring(placeHolder, text.length), style: defaultStyle));
-    return textSpanner;
   }
 
   List filterTitles(query) {
@@ -122,13 +105,15 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
                       ? Theme.of(context).hoverColor
                       : null,
                   hoverColor: Colors.transparent,
-                  title: RichText(
-                      text: TextSpan(
-                    children: highlightString(
-                      item,
-                      Theme.of(context).textTheme.bodyMedium!,
-                    ),
-                  )),
+                  title: CustomRichText(
+                    text: item,
+                    sQuery: SearchQuery(query: widget.query),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    highlightStyle: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
                   onTap: () {
                     widget.onLinkSelect(item);
                   },
