@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/Note.dart';
+import '../../models/search_query.dart';
 import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
-import '../../utils/responsive.dart';
 import 'components/backlinks_drawer.dart';
 import 'components/note_editor_app_bar.dart';
 import 'note_editor.dart';
@@ -30,6 +30,8 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool nonExistantNote = false;
+  List<Note> backlinks = [];
+  SearchQuery backlinksSq = SearchQuery();
 
   Future<Note> getNote(Note? currNote) async {
     // initialize shared
@@ -46,6 +48,17 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     titleController.text = note.title;
     contentController.text = note.content;
     sourceController.text = note.source;
+
+    // get backlinks (async)
+    if (note.title.isNotEmpty) {
+      backlinksSq = SearchQuery(query: "[[${note.title}]]");
+      db.getSearchNotes(backlinksSq).then((notes) {
+        setState(() {
+          backlinks = notes;
+        });
+      });
+    }
+
     return note;
   }
 
@@ -112,7 +125,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             drawerScrimColor: Colors.transparent,
             endDrawer: BacklinksDrawer(
               closeDrawer: scaffoldKey.currentState?.closeEndDrawer,
-              title: note?.title ?? '',
+              backlinks: backlinks,
+              searchQuery: backlinksSq,
             ),
             body: Column(
               mainAxisSize: MainAxisSize.min,
@@ -120,7 +134,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                 NoteEditorAppBar(
                   note: note,
                   onClose: onClose,
-                  onBacklinks: scaffoldKey.currentState?.openEndDrawer,
+                  onBacklinks: (backlinks.isEmpty)
+                      ? null
+                      : scaffoldKey.currentState?.openEndDrawer,
                   contentController: contentController,
                 ),
                 Flexible(

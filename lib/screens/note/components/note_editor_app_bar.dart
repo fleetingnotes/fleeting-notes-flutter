@@ -60,19 +60,20 @@ class NoteEditorAppBar extends ConsumerWidget {
                   controller: contentController);
             },
           ),
-          OutlinedButton(
-            onPressed: onBacklinks,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: const [
-                  Icon(Icons.link),
-                  SizedBox(width: 8),
-                  Text('Backlinks'),
-                ],
+          if (onBacklinks != null)
+            OutlinedButton(
+              onPressed: onBacklinks,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  children: const [
+                    Icon(Icons.link),
+                    SizedBox(width: 8),
+                    Text('Backlinks'),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

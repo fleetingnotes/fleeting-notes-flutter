@@ -9,12 +9,14 @@ import '../../../models/Note.dart';
 class BacklinksDrawer extends ConsumerStatefulWidget {
   const BacklinksDrawer({
     Key? key,
-    this.title = '',
+    this.searchQuery,
+    this.backlinks = const [],
     this.closeDrawer,
     this.width,
   }) : super(key: key);
 
-  final String title;
+  final SearchQuery? searchQuery;
+  final List<Note> backlinks;
   final VoidCallback? closeDrawer;
   final double? width;
 
@@ -23,20 +25,6 @@ class BacklinksDrawer extends ConsumerStatefulWidget {
 }
 
 class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
-  SearchQuery searchQuery = SearchQuery();
-  List<Note> backlinks = [];
-  @override
-  void initState() {
-    final db = ref.read(dbProvider);
-    searchQuery.query = "[[${widget.title}]]";
-    db.getSearchNotes(searchQuery).then((notes) {
-      setState(() {
-        backlinks = notes;
-      });
-    });
-    super.initState();
-  }
-
   void onNoteTap(context, note) {
     var nh = ref.read(noteHistoryProvider.notifier);
     widget.closeDrawer?.call();
@@ -72,8 +60,8 @@ class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
             Expanded(
               child: NoteGrid(
                 childAspectRatio: 3,
-                searchQuery: SearchQuery(query: "[[${widget.title}]]"),
-                notes: backlinks,
+                searchQuery: widget.searchQuery,
+                notes: widget.backlinks,
                 onTap: onNoteTap,
               ),
             ),
