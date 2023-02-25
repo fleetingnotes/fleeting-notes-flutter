@@ -37,6 +37,12 @@ class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
     super.initState();
   }
 
+  void onNoteTap(context, note) {
+    var nh = ref.read(noteHistoryProvider.notifier);
+    widget.closeDrawer?.call();
+    nh.addNote(context, note);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -68,6 +74,7 @@ class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
                 childAspectRatio: 3,
                 searchQuery: SearchQuery(query: "[[${widget.title}]]"),
                 notes: backlinks,
+                onTap: onNoteTap,
               ),
             ),
           ],
