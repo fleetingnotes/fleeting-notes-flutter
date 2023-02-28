@@ -51,7 +51,6 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
     return sc.SourceContainer(
       controller: widget.controller,
       onChanged: widget.onChanged,
-      overrideSourceUrl: widget.overrideSourceUrl,
     );
   }
 

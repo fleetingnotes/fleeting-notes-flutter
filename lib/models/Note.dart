@@ -1,5 +1,6 @@
 // ignore_for_file: file_names
 import 'dart:convert';
+import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
@@ -35,6 +36,12 @@ class Note {
   bool isShareable;
   @HiveField(8, defaultValue: '2000-01-01')
   String modifiedAt;
+  @HiveField(9)
+  String? sourceTitle;
+  @HiveField(10)
+  String? sourceDescription;
+  @HiveField(12)
+  String? sourceImageUrl;
   final String partition;
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex =
@@ -57,6 +64,9 @@ ${content}''';
     this.partition = '',
     this.source = '',
     this.isDeleted = false,
+    this.sourceTitle,
+    this.sourceDescription,
+    this.sourceImageUrl,
   })  : modifiedAt = createdAt,
         assert(
           isValidUuid(id),
@@ -65,6 +75,12 @@ ${content}''';
 
   DateTime get createdAtDate => DateTime.parse(createdAt);
   DateTime get modifiedAtDate => DateTime.parse(modifiedAt);
+  UrlMetadata get sourceMetadata => UrlMetadata(
+        url: source,
+        title: sourceTitle,
+        description: sourceDescription,
+        imageUrl: sourceImageUrl,
+      );
   set modifiedAtDate(DateTime d) {
     modifiedAt = d.toUtc().toIso8601String();
   }

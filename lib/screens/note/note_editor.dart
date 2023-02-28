@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:collection/collection.dart';
+import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   DateTime? savedAt;
   StreamSubscription<NoteEvent>? noteChangeStream;
   StreamSubscription? authChangeStream;
+  UrlMetadata? sourceMetadata;
 
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
@@ -75,6 +77,18 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     authChangeStream =
         db.supabase.authChangeController.stream.listen(handleAuthChange);
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
+
+    // initialize sourceMetadata
+    if (widget.note.source.isNotEmpty) {
+      var tempMetadata = widget.note.sourceMetadata;
+      if (!tempMetadata.isEmpty) {
+        setState(() {
+          sourceMetadata = tempMetadata;
+        });
+      } else {
+        updateSourceMetadata(widget.note.source);
+      }
+    }
   }
 
   void resetSaveTimer() {
@@ -82,9 +96,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     var saveMs = settings.get('save-delay-ms');
     saveTimer?.cancel();
     saveTimer = Timer(Duration(milliseconds: saveMs), () {
-      if (hasNewChanges) {
-        _saveNote();
-      }
+      _saveNote();
     });
   }
 
@@ -108,6 +120,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       content: contentController.text,
       source: sourceController.text,
     );
+    // populate source metadata!
+    updatedNote.sourceTitle = sourceMetadata?.title;
+    updatedNote.sourceDescription = sourceMetadata?.description;
+    updatedNote.sourceImageUrl = sourceMetadata?.imageUrl;
+
     if (updatedNote.isEmpty()) return;
     try {
       setState(() {
@@ -184,6 +201,21 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     updateFields(Note.empty());
   }
 
+  void onClearSource() {
+    sourceMetadata = null;
+    sourceController.text = '';
+    onChanged();
+  }
+
+  void updateSourceMetadata(url) async {
+    final db = ref.read(dbProvider);
+    var m = await db.supabase.getUrlMetadata(url);
+    setState(() {
+      sourceMetadata = (m?.isEmpty == true) ? null : m;
+    });
+    resetSaveTimer();
+  }
+
   void updateFields(Note n) {
     var prevTitleSel = titleController.selection;
     var prevContentSel = contentController.selection;
@@ -240,8 +272,12 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
               ),
               SourceContainer(
                 controller: sourceController,
-                onChanged: onChanged,
-                overrideSourceUrl: widget.note.isEmpty(),
+                metadata: sourceMetadata,
+                onChanged: () {
+                  updateSourceMetadata(sourceController.text);
+                  onChanged();
+                },
+                onClearSource: onClearSource,
               ),
               const Divider(),
               ContentField(

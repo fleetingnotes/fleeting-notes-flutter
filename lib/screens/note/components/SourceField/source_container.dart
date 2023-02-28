@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
-import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -12,15 +11,17 @@ class SourceContainer extends ConsumerStatefulWidget {
     Key? key,
     this.controller,
     this.text,
+    this.metadata,
     this.onChanged,
-    this.overrideSourceUrl = false,
+    this.onClearSource,
     this.readOnly = false,
   }) : super(key: key);
 
   final String? text;
+  final UrlMetadata? metadata;
   final TextEditingController? controller;
   final VoidCallback? onChanged;
-  final bool overrideSourceUrl;
+  final VoidCallback? onClearSource;
   final bool readOnly;
 
   @override
@@ -30,7 +31,6 @@ class SourceContainer extends ConsumerStatefulWidget {
 class _SourceContainerState extends ConsumerState<SourceContainer> {
   TextEditingController controller = TextEditingController();
   Timer? saveTimer;
-  UrlMetadata? metadata;
 
   @override
   void initState() {
@@ -38,26 +38,6 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
     controller = widget.controller ?? controller;
     final sourceUrl = widget.text ?? controller.text;
     controller.text = sourceUrl;
-    updateMetadata(sourceUrl, msDelay: 0);
-  }
-
-  void updateMetadata(url, {int msDelay = 3000}) {
-    final db = ref.read(dbProvider);
-    saveTimer?.cancel();
-    saveTimer = Timer(Duration(milliseconds: msDelay), () async {
-      var m = await db.supabase.getUrlMetadata(url);
-      setState(() {
-        metadata = m;
-      });
-    });
-  }
-
-  void clearSource() {
-    setState(() {
-      metadata = null;
-      controller.text = '';
-      widget.onChanged?.call();
-    });
   }
 
   void onPressedPreview(String url) {
@@ -67,23 +47,19 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final m = metadata;
-
+    final m = widget.metadata;
     if (m != null) {
       return SourcePreview(
         metadata: m,
         onPressed: () => onPressedPreview(m.url),
-        onClear: clearSource,
+        onClear: widget.onClearSource,
       );
     }
     return TextField(
         readOnly: widget.readOnly,
         style: Theme.of(context).textTheme.bodySmall,
         controller: controller,
-        onChanged: (text) {
-          updateMetadata(text);
-          widget.onChanged?.call();
-        },
+        onChanged: (text) => widget.onChanged?.call(),
         decoration: const InputDecoration(
           isDense: true,
           hintText: "Source",

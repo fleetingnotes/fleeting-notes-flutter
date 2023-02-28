@@ -5,4 +5,6 @@ class UrlMetadata {
   String? imageUrl;
 
   UrlMetadata({required this.url, this.title, this.description, this.imageUrl});
+
+  bool get isEmpty => title == null && description == null && imageUrl == null;
 }
