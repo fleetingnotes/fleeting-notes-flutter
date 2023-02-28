@@ -18,7 +18,6 @@ class SideMenu extends StatelessWidget {
     return SizedBox(
       width: width,
       child: Drawer(
-        // onDestinationSelected: (v) => onDestinationSelected(context, v),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
