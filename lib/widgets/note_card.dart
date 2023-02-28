@@ -110,7 +110,7 @@ class _NoteCardState extends State<NoteCard> {
                                 onChanged: onSelect,
                                 value: widget.isSelected,
                               )),
-                        if (hovering || widget.onSelect == null)
+                        if (hovering && widget.onSelect != null)
                           Positioned(
                             bottom: 0,
                             right: 0,
