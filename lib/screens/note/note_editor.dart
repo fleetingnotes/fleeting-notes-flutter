@@ -10,6 +10,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
@@ -77,13 +78,24 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     authChangeStream =
         db.supabase.authChangeController.stream.listen(handleAuthChange);
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
+    initSourceMetadata(widget.note.sourceMetadata);
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      ref.watch(noteHistoryProvider.notifier).addListener((nh) {
+        var currNote = nh.currNote;
+        if (currNote != null) {
+          saveTimer?.cancel();
+          initSourceMetadata(currNote.sourceMetadata);
+        }
+      });
+    });
+  }
 
-    // initialize sourceMetadata
-    if (widget.note.source.isNotEmpty) {
-      var tempMetadata = widget.note.sourceMetadata;
-      if (!tempMetadata.isEmpty) {
+  void initSourceMetadata(UrlMetadata metadata) {
+    if (metadata.url.isNotEmpty) {
+      if (!metadata.isEmpty) {
+        if (!mounted) return;
         setState(() {
-          sourceMetadata = tempMetadata;
+          sourceMetadata = metadata;
         });
       } else {
         updateSourceMetadata(widget.note.source);
@@ -121,9 +133,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       source: sourceController.text,
     );
     // populate source metadata!
-    updatedNote.sourceTitle = sourceMetadata?.title;
-    updatedNote.sourceDescription = sourceMetadata?.description;
-    updatedNote.sourceImageUrl = sourceMetadata?.imageUrl;
+    if (sourceMetadata != null) {
+      updatedNote.sourceTitle = sourceMetadata?.title;
+      updatedNote.sourceDescription = sourceMetadata?.description;
+      updatedNote.sourceImageUrl = sourceMetadata?.imageUrl;
+    }
 
     if (updatedNote.isEmpty()) return;
     try {
@@ -210,6 +224,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   void updateSourceMetadata(url) async {
     final db = ref.read(dbProvider);
     var m = await db.supabase.getUrlMetadata(url);
+    if (!mounted) return;
     setState(() {
       sourceMetadata = (m?.isEmpty == true) ? null : m;
     });
