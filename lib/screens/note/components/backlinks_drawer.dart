@@ -59,7 +59,7 @@ class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
             const Divider(),
             Expanded(
               child: NoteGrid(
-                childAspectRatio: 3,
+                childAspectRatio: 2,
                 searchQuery: widget.searchQuery,
                 notes: widget.backlinks,
                 onTap: onNoteTap,
