@@ -24,7 +24,9 @@ class SearchBar extends ConsumerStatefulWidget {
 
 class _SearchBarState extends ConsumerState<SearchBar> {
   bool maintainFocus = false;
+  MenuController menuController = MenuController();
   FocusNode focusNode = FocusNode();
+  FocusNode menuFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -96,23 +98,24 @@ class _SearchBarState extends ConsumerState<SearchBar> {
                 ),
               ),
               (hasSearchFocus || !Responsive.isMobile(context))
-                  ? (Padding(
+                  ? Padding(
                       padding: const EdgeInsets.only(right: 16),
-                      child: IconButton(
-                        tooltip: "Sort and Filter",
-                        padding: const EdgeInsets.all(0),
-                        onPressed: () async {
-                          await showDialog(
-                            context: context,
-                            builder: (_) {
-                              return const SearchDialog();
-                            },
-                          );
-                          focusNode.requestFocus();
-                        },
-                        icon: const Icon(Icons.tune, size: 24),
+                      child: MenuAnchor(
+                        childFocusNode: menuFocusNode,
+                        style: const MenuStyle(
+                            padding: MaterialStatePropertyAll(EdgeInsets.zero)),
+                        controller: menuController,
+                        menuChildren: [
+                          SearchDialog(onClose: menuController.close),
+                        ],
+                        child: IconButton(
+                          padding: const EdgeInsets.all(0),
+                          tooltip: "Sort and Filter",
+                          onPressed: menuController.open,
+                          icon: const Icon(Icons.tune),
+                        ),
                       ),
-                    ))
+                    )
                   : const Padding(
                       padding: EdgeInsets.only(right: 16),
                       child: (Icon(Icons.search)),

@@ -3,9 +3,14 @@ import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../utils/responsive.dart';
+
 class SearchDialog extends ConsumerWidget {
+  final VoidCallback? onClose;
+
   const SearchDialog({
     Key? key,
+    this.onClose,
   }) : super(key: key);
 
   updateSearchFilter(WidgetRef ref, String key, bool val) {
@@ -21,49 +26,71 @@ class SearchDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = ref.watch(searchProvider) ?? SearchQuery();
-    return SimpleDialog(
-      title: const Text('Sort and Filter'),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      color: Theme.of(context).colorScheme.background,
+      width: Responsive.isMobile(context) ? null : 420,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Text('Sort By', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              const DropdownSortMenu(),
-              const SizedBox(height: 24),
-              Text('Filter By', style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilterChip(
-                    label: Text('Title',
-                        style: Theme.of(context).textTheme.labelLarge),
-                    selected: searchQuery.searchByTitle,
-                    onSelected: (val) => updateSearchFilter(ref, 'title', val),
-                  ),
-                  FilterChip(
-                    label: Text('Content',
-                        style: Theme.of(context).textTheme.labelLarge),
-                    selected: searchQuery.searchByContent,
-                    onSelected: (val) =>
-                        updateSearchFilter(ref, 'content', val),
-                  ),
-                  FilterChip(
-                    label: Text('Source',
-                        style: Theme.of(context).textTheme.labelLarge),
-                    selected: searchQuery.searchBySource,
-                    onSelected: (val) => updateSearchFilter(ref, 'source', val),
-                  ),
-                ],
-              ),
+              const Spacer(),
+              IconButton(onPressed: onClose, icon: const Icon(Icons.close))
             ],
           ),
-        )
-      ],
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 36),
+                child: Text('Sort By',
+                    style: Theme.of(context).textTheme.labelLarge),
+              ),
+              const Expanded(child: DropdownSortMenu()),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 36),
+                child: Text('Filter By',
+                    style: Theme.of(context).textTheme.labelLarge),
+              ),
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilterChip(
+                      label: Text('Title',
+                          style: Theme.of(context).textTheme.labelLarge),
+                      selected: searchQuery.searchByTitle,
+                      onSelected: (val) =>
+                          updateSearchFilter(ref, 'title', val),
+                    ),
+                    FilterChip(
+                      label: Text('Content',
+                          style: Theme.of(context).textTheme.labelLarge),
+                      selected: searchQuery.searchByContent,
+                      onSelected: (val) =>
+                          updateSearchFilter(ref, 'content', val),
+                    ),
+                    FilterChip(
+                      label: Text('Source',
+                          style: Theme.of(context).textTheme.labelLarge),
+                      selected: searchQuery.searchBySource,
+                      onSelected: (val) =>
+                          updateSearchFilter(ref, 'source', val),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 }
@@ -118,6 +145,7 @@ class _DropdownSortMenuState extends ConsumerState<DropdownSortMenu> {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         DropdownMenu(
           onSelected: setSortVal,
@@ -131,7 +159,7 @@ class _DropdownSortMenuState extends ConsumerState<DropdownSortMenu> {
             DropdownMenuEntry(value: 'source', label: 'Source'),
           ],
         ),
-        const Spacer(),
+        const SizedBox(width: 16),
         (sortDir == 'asc')
             ? (IconButton(
                 onPressed: () => setSortDir(false),
