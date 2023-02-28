@@ -66,7 +66,10 @@ class Database {
     var notes = allNotes.where((note) {
       return (query.searchByTitle && r.hasMatch(note.title)) ||
           (query.searchByContent && r.hasMatch(note.content)) ||
-          (query.searchBySource && r.hasMatch(note.source));
+          (query.searchBySource &&
+              (r.hasMatch(note.source) ||
+                  r.hasMatch(note.sourceTitle ?? '') ||
+                  r.hasMatch(note.sourceDescription ?? '')));
     }).toList();
     notes.sort(sortMap[query.sortBy]);
     return notes.sublist(0, min(notes.length, query.limit));
