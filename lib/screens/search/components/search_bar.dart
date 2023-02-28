@@ -103,7 +103,8 @@ class _SearchBarState extends ConsumerState<SearchBar> {
                       child: MenuAnchor(
                         childFocusNode: menuFocusNode,
                         style: const MenuStyle(
-                            padding: MaterialStatePropertyAll(EdgeInsets.zero)),
+                          padding: MaterialStatePropertyAll(EdgeInsets.zero),
+                        ),
                         controller: menuController,
                         menuChildren: [
                           SearchDialog(onClose: menuController.close),
