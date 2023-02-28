@@ -53,9 +53,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (note.title.isNotEmpty) {
       backlinksSq = SearchQuery(query: "[[${note.title}]]");
       db.getSearchNotes(backlinksSq).then((notes) {
-        setState(() {
-          backlinks = notes;
-        });
+        backlinks = notes;
       });
     }
 
@@ -113,6 +111,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     return FutureBuilder<Note>(
       future: getNote(noteHistory.currNote),
       builder: (context, snapshot) {
+        print('rebuild');
         Note? note = snapshot.data;
         return WillPopScope(
           onWillPop: () async {
