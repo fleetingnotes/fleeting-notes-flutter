@@ -16,10 +16,20 @@ class SourcePreview extends StatelessWidget {
   final VoidCallback? onPressed;
   final VoidCallback? onClear;
 
+  String getTitle() {
+    String? title = metadata.title;
+    if (title == null &&
+        metadata.description == null &&
+        metadata.imageUrl != null) {
+      title = metadata.url.split('/').last;
+    }
+    return title ?? 'No title';
+  }
+
   @override
   Widget build(BuildContext context) {
     final imageUrl = metadata.imageUrl ?? metadata.url;
-    final title = metadata.title ?? 'No Title';
+    final title = getTitle();
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
@@ -28,21 +38,24 @@ class SourcePreview extends StatelessWidget {
           height: height,
           constraints: const BoxConstraints(maxWidth: 400),
           child: Card(
+            color: Theme.of(context).colorScheme.surfaceVariant,
             clipBehavior: Clip.antiAlias,
             child: Row(
               children: [
-                SizedBox(
-                  width: height,
-                  height: height,
-                  child: NoteSource(
-                    source: imageUrl,
-                    fit: BoxFit.fitHeight,
+                if (metadata.imageUrl != null)
+                  Container(
+                    color: Colors.white,
+                    width: height,
                     height: height,
+                    child: NoteSource(
+                      source: imageUrl,
+                      fit: BoxFit.fitHeight,
+                      height: height,
+                    ),
                   ),
-                ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 16),
+                    padding: const EdgeInsets.only(left: 12),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,

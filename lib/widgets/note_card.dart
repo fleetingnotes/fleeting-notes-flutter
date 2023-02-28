@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/Note.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
-import 'note_source.dart';
 
 class NoteCard extends StatefulWidget {
   const NoteCard({
@@ -38,78 +39,97 @@ class _NoteCardState extends State<NoteCard> {
     }
   }
 
+  void onPressedPreview(String url) {
+    Uri uri = Uri.parse(url);
+    launchUrl(uri);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() {
-        hovering = true;
-      }),
-      onExit: (_) => setState(() {
-        hovering = false;
-      }),
-      child: GestureDetector(
-        onLongPress: widget.onSelect,
-        onTap: widget.onTap,
-        child: Card(
-            elevation: (widget.isSelected) ? 1 : 0,
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
+    var sourceMetadata = widget.note.sourceMetadata;
+    return GestureDetector(
+      onLongPress: widget.onSelect,
+      onTap: widget.onTap,
+      child: Card(
+          elevation: (widget.isSelected) ? 1 : 0,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outline,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (widget.note.title.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: CustomRichText(
-                            text: widget.note.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                            sQuery: widget.sQuery,
-                            maxLines: 1,
-                          ),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: MouseRegion(
+                  onEnter: (_) => setState(() {
+                    hovering = true;
+                  }),
+                  onExit: (_) => setState(() {
+                    hovering = false;
+                  }),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (widget.note.title.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: CustomRichText(
+                                  text: widget.note.title,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                  sQuery: widget.sQuery,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            if (widget.note.content.isNotEmpty)
+                              Flexible(
+                                child: CustomRichText(
+                                  text: widget.note.content,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                  sQuery: widget.sQuery,
+                                  maxLines: null,
+                                ),
+                              ),
+                          ],
                         ),
-                      if (widget.note.content.isNotEmpty)
-                        Flexible(
-                          child: CustomRichText(
-                            text: widget.note.content,
-                            style: Theme.of(context).textTheme.bodySmall,
-                            sQuery: widget.sQuery,
+                        if (widget.onSelect != null &&
+                            (hovering || widget.isSelected))
+                          Positioned(
+                              top: 0,
+                              right: 0,
+                              child: Checkbox(
+                                onChanged: onSelect,
+                                value: widget.isSelected,
+                              )),
+                        if (hovering || widget.onSelect == null)
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Text(widget.note.getShortDateTimeStr(),
+                                style: Theme.of(context).textTheme.labelSmall),
                           ),
-                        ),
-                      if (widget.note.source.isNotEmpty)
-                        NoteSource(source: widget.note.source, height: 100),
-                    ],
-                  ),
-                  if (widget.onSelect != null &&
-                      (hovering || widget.isSelected))
-                    Positioned(
-                        top: 0,
-                        right: 0,
-                        child: Checkbox(
-                          onChanged: onSelect,
-                          value: widget.isSelected,
-                        )),
-                  if (hovering || widget.onSelect == null)
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Text(widget.note.getShortDateTimeStr(),
-                          style: Theme.of(context).textTheme.labelSmall),
+                      ],
                     ),
-                ],
+                  ),
+                ),
               ),
-            )),
-      ),
+              if (!sourceMetadata.isEmpty)
+                SourcePreview(
+                  height: 75,
+                  metadata: sourceMetadata,
+                  onPressed: () => onPressedPreview(sourceMetadata.url),
+                )
+            ],
+          )),
     );
   }
 }
@@ -175,7 +195,7 @@ class CustomRichText extends StatelessWidget {
         style,
       )),
       maxLines: maxLines,
-      overflow: TextOverflow.ellipsis,
+      overflow: TextOverflow.clip,
     );
   }
 }
