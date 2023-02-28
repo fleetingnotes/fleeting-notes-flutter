@@ -111,7 +111,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     return FutureBuilder<Note>(
       future: getNote(noteHistory.currNote),
       builder: (context, snapshot) {
-        print('rebuild');
         Note? note = snapshot.data;
         return WillPopScope(
           onWillPop: () async {
@@ -154,6 +153,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                               left: 24, right: 24, bottom: 16),
                         ),
                 ),
+                const Divider(),
                 NoteEditorBottomAppBar(
                   onBack:
                       (noteHistory.backNoteHistory.isNotEmpty) ? onBack : null,
