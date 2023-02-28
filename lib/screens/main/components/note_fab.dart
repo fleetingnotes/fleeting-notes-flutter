@@ -11,9 +11,10 @@ class NoteFAB extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
-      backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       child: const Icon(Icons.add),
-      tooltip: 'Add note',
+      tooltip: 'New note',
       onPressed: onPressed,
     );
   }
