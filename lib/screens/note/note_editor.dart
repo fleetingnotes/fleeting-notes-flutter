@@ -84,6 +84,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         var currNote = nh.currNote;
         if (currNote != null) {
           saveTimer?.cancel();
+          sourceMetadata = null;
           initSourceMetadata(currNote.sourceMetadata);
         }
       });
