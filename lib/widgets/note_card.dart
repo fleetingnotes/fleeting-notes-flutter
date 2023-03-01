@@ -47,11 +47,12 @@ class _NoteCardState extends State<NoteCard> {
   @override
   Widget build(BuildContext context) {
     var sourceMetadata = widget.note.sourceMetadata;
+    double elevation = (widget.isSelected) ? 1 : 0;
     return GestureDetector(
       onLongPress: widget.onSelect,
       onTap: widget.onTap,
       child: Card(
-          elevation: (widget.isSelected) ? 1 : 0,
+          elevation: elevation,
           shape: RoundedRectangleBorder(
             side: BorderSide(
               color: Theme.of(context).colorScheme.outline,
@@ -104,8 +105,10 @@ class _NoteCardState extends State<NoteCard> {
                           Positioned(
                             top: 0,
                             right: 0,
-                            child: Container(
-                              color: Theme.of(context).colorScheme.background,
+                            child: Card(
+                              elevation: elevation,
+                              margin: EdgeInsets.zero,
+                              shadowColor: Colors.transparent,
                               child: Checkbox(
                                 onChanged: onSelect,
                                 value: widget.isSelected,
