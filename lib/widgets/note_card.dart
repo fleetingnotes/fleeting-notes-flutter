@@ -14,6 +14,7 @@ class NoteCard extends StatefulWidget {
     this.sQuery,
     this.isActive = false,
     this.isSelected = false,
+    this.maxLines,
   }) : super(key: key);
 
   final bool isActive;
@@ -22,6 +23,7 @@ class NoteCard extends StatefulWidget {
   final VoidCallback? onTap;
   final Note note;
   final SearchQuery? sQuery;
+  final int? maxLines;
 
   @override
   State<NoteCard> createState() => _NoteCardState();
@@ -51,7 +53,15 @@ class _NoteCardState extends State<NoteCard> {
     return GestureDetector(
       onLongPress: widget.onSelect,
       onTap: widget.onTap,
-      child: Card(
+      child: MouseRegion(
+        onEnter: (_) => setState(() {
+          hovering = true;
+        }),
+        onExit: (_) => setState(() {
+          hovering = false;
+        }),
+        child: Card(
+          clipBehavior: Clip.hardEdge,
           elevation: elevation,
           shape: RoundedRectangleBorder(
             side: BorderSide(
@@ -59,75 +69,68 @@ class _NoteCardState extends State<NoteCard> {
             ),
             borderRadius: const BorderRadius.all(Radius.circular(12)),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              Expanded(
-                child: MouseRegion(
-                  onEnter: (_) => setState(() {
-                    hovering = true;
-                  }),
-                  onExit: (_) => setState(() {
-                    hovering = false;
-                  }),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (widget.note.title.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: CustomRichText(
-                                  text: widget.note.title,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
-                                  sQuery: widget.sQuery,
-                                  maxLines: 1,
-                                ),
-                              ),
-                            if (widget.note.content.isNotEmpty)
-                              Flexible(
-                                child: CustomRichText(
-                                  text: widget.note.content,
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  sQuery: widget.sQuery,
-                                  maxLines: null,
-                                ),
-                              ),
-                          ],
-                        ),
-                        if (widget.onSelect != null &&
-                            (hovering || widget.isSelected))
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Card(
-                              elevation: elevation,
-                              margin: EdgeInsets.zero,
-                              shadowColor: Colors.transparent,
-                              child: Checkbox(
-                                onChanged: onSelect,
-                                value: widget.isSelected,
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (widget.note.title.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: CustomRichText(
+                                text: widget.note.title,
+                                style: Theme.of(context).textTheme.titleMedium,
+                                sQuery: widget.sQuery,
+                                maxLines: 1,
                               ),
                             ),
-                          ),
-                      ],
+                          if (widget.note.content.isNotEmpty)
+                            Flexible(
+                              child: CustomRichText(
+                                text: widget.note.content,
+                                style: Theme.of(context).textTheme.bodySmall,
+                                sQuery: widget.sQuery,
+                                maxLines: widget.maxLines,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (!sourceMetadata.isEmpty)
+                    SourcePreview(
+                      height: 75,
+                      metadata: sourceMetadata,
+                      onPressed: () => onPressedPreview(sourceMetadata.url),
+                    )
+                ],
+              ),
+              if (widget.onSelect != null && (hovering || widget.isSelected))
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Card(
+                    elevation: elevation,
+                    margin: EdgeInsets.zero,
+                    shadowColor: Colors.transparent,
+                    child: Checkbox(
+                      onChanged: onSelect,
+                      value: widget.isSelected,
                     ),
                   ),
                 ),
-              ),
-              if (!sourceMetadata.isEmpty)
-                SourcePreview(
-                  height: 75,
-                  metadata: sourceMetadata,
-                  onPressed: () => onPressedPreview(sourceMetadata.url),
-                )
             ],
-          )),
+          ),
+        ),
+      ),
     );
   }
 }

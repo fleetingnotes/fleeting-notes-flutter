@@ -38,28 +38,27 @@ class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
       child: Drawer(
         child: Column(
           children: [
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8, right: 16, left: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Text(
-                      'Backlinks',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    )),
-                    IconButton(
-                      onPressed: widget.closeDrawer,
-                      icon: const Icon(Icons.close),
-                    )
-                  ],
-                ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8, right: 16, left: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Text(
+                    'Backlinks',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  )),
+                  IconButton(
+                    onPressed: widget.closeDrawer,
+                    icon: const Icon(Icons.close),
+                  )
+                ],
               ),
             ),
             const Divider(),
             Expanded(
               child: NoteGrid(
-                childAspectRatio: 2,
+                crossAxisCount: 1,
+                maxLines: 2,
                 searchQuery: widget.searchQuery,
                 notes: widget.backlinks,
                 onTap: onNoteTap,

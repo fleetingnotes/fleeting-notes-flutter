@@ -223,7 +223,8 @@ class NoteGrid extends StatelessWidget {
     this.selectedNotes = const [],
     this.searchQuery,
     this.crossAxisCount = 1,
-    this.childAspectRatio = 1,
+    this.childAspectRatio,
+    this.maxLines,
     this.onRefresh,
     this.onSelect,
     this.onTap,
@@ -234,7 +235,8 @@ class NoteGrid extends StatelessWidget {
   final List<Note> selectedNotes;
   final SearchQuery? searchQuery;
   final int crossAxisCount;
-  final double childAspectRatio;
+  final double? childAspectRatio;
+  final int? maxLines;
   final Future<void> Function()? onRefresh;
   final Function(BuildContext, Note)? onSelect;
   final Function(BuildContext, Note)? onTap;
@@ -242,14 +244,28 @@ class NoteGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              onRefresh?.call();
-            },
-            child: GridView.builder(
+    return RefreshIndicator(
+      onRefresh: () async {
+        onRefresh?.call();
+      },
+      child: (crossAxisCount == 1 && childAspectRatio == null)
+          ? ListView.builder(
+              key: const PageStorageKey('ListOfNotes'),
+              controller: controller,
+              itemCount: notes.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) => NoteCard(
+                sQuery: searchQuery,
+                note: notes[index],
+                isSelected: selectedNotes.contains(notes[index]),
+                onSelect: (onSelect == null)
+                    ? null
+                    : () => onSelect?.call(context, notes[index]),
+                onTap: () => onTap?.call(context, notes[index]),
+                maxLines: maxLines,
+              ),
+            )
+          : GridView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               key: const PageStorageKey('ListOfNotes'),
               controller: controller,
@@ -262,15 +278,13 @@ class NoteGrid extends StatelessWidget {
                     ? null
                     : () => onSelect?.call(context, notes[index]),
                 onTap: () => onTap?.call(context, notes[index]),
+                maxLines: maxLines,
               ),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
-                childAspectRatio: childAspectRatio,
+                childAspectRatio: childAspectRatio ?? 1,
               ),
             ),
-          ),
-        ),
-      ],
     );
   }
 }
