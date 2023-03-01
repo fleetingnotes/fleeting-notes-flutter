@@ -2,6 +2,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/note_editor_botto
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../models/Note.dart';
 import '../../models/search_query.dart';
@@ -33,6 +34,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   List<Note> backlinks = [];
   SearchQuery backlinksSq = SearchQuery();
 
+  @override
+  void initState() {}
+
   Future<Note> getNote(Note? currNote) async {
     // initialize shared
     final db = ref.read(dbProvider);
@@ -55,6 +59,14 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       db.getSearchNotes(backlinksSq).then((notes) {
         backlinks = notes;
       });
+    }
+
+    // add to noteHistory if empty and location correct
+    final noteHistory = ref.read(noteHistoryProvider);
+    if (noteHistory.currNote == null &&
+        GoRouter.of(context).location.startsWith('/note/')) {
+      final noteHistoryNotifier = ref.read(noteHistoryProvider.notifier);
+      noteHistoryNotifier.addNote(context, note);
     }
 
     return note;
