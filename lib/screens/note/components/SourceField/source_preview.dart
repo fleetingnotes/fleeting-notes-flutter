@@ -6,7 +6,7 @@ class SourcePreview extends StatelessWidget {
   const SourcePreview({
     Key? key,
     required this.metadata,
-    this.height = 100,
+    this.height = 75,
     this.onPressed,
     this.onClear,
   }) : super(key: key);
@@ -64,7 +64,7 @@ class SourcePreview extends StatelessWidget {
                           message: title,
                           child: Text(
                             title,
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: Theme.of(context).textTheme.titleSmall,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),

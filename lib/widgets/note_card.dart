@@ -82,10 +82,8 @@ class _NoteCardState extends State<NoteCard> {
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: CustomRichText(
                                   text: widget.note.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                   sQuery: widget.sQuery,
                                   maxLines: 1,
                                 ),
