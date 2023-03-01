@@ -34,9 +34,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   List<Note> backlinks = [];
   SearchQuery backlinksSq = SearchQuery();
 
-  @override
-  void initState() {}
-
   Future<Note> getNote(Note? currNote) async {
     // initialize shared
     final db = ref.read(dbProvider);
