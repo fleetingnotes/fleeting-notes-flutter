@@ -30,7 +30,7 @@ class NoteHistoryNotifier extends StateNotifier<NoteHistory> {
     }
     nh.forwardNoteHistory = [];
     nh.currNote = note;
-    context.goNamed('note', params: {'id': note.id}, extra: {'note': note});
+    context.goNamed('note', params: {'id': note.id}, extra: note);
     state = nh;
   }
 
