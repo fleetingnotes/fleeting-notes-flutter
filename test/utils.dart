@@ -92,10 +92,16 @@ Future<void> goToNewNote(WidgetTester tester,
 }
 
 Future<void> addNote(WidgetTester tester,
-    {String title = "", String content = "note"}) async {
+    {String title = "",
+    String content = "note",
+    bool closeDialog = false}) async {
   await tester.tap(find.byIcon(Icons.add));
   await tester.pumpAndSettle();
   await modifyCurrentNote(tester, title: title, content: content);
+  if (closeDialog) {
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+  }
 }
 
 Future<void> modifyCurrentNote(WidgetTester tester,

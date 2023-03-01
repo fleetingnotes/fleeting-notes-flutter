@@ -27,7 +27,6 @@ class SearchDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchQuery = ref.watch(searchProvider) ?? SearchQuery();
     return Container(
-      width: Responsive.isMobile(context) ? null : 450,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
