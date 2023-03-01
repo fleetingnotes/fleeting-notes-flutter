@@ -279,7 +279,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
             children: [
               Text(
                 widget.note.getShortDateTimeStr(),
-                style: Theme.of(context).textTheme.labelMedium,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               TitleField(
                 controller: titleController,

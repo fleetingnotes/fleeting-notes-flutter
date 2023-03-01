@@ -38,6 +38,7 @@ class SourcePreview extends StatelessWidget {
           height: height,
           constraints: const BoxConstraints(maxWidth: 400),
           child: Card(
+            margin: EdgeInsets.zero,
             color: Theme.of(context).colorScheme.surfaceVariant,
             clipBehavior: Clip.antiAlias,
             child: Row(

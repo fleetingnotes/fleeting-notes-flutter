@@ -102,18 +102,15 @@ class _NoteCardState extends State<NoteCard> {
                         if (widget.onSelect != null &&
                             (hovering || widget.isSelected))
                           Positioned(
-                              top: 0,
-                              right: 0,
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              color: Theme.of(context).colorScheme.background,
                               child: Checkbox(
                                 onChanged: onSelect,
                                 value: widget.isSelected,
-                              )),
-                        if (hovering && widget.onSelect != null)
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Text(widget.note.getShortDateTimeStr(),
-                                style: Theme.of(context).textTheme.labelSmall),
+                              ),
+                            ),
                           ),
                       ],
                     ),
