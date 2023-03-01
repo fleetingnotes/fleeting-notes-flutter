@@ -101,7 +101,7 @@ Future<void> addNote(WidgetTester tester,
 Future<void> modifyCurrentNote(WidgetTester tester,
     {String? title, String? content}) async {
   if (title != null) {
-    await tester.enterText(find.bySemanticsLabel('New note title'), title);
+    await tester.enterText(find.bySemanticsLabel('Title'), title);
   }
   if (content != null) {
     await tester.enterText(
