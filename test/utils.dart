@@ -102,7 +102,7 @@ Future<void> addNote(WidgetTester tester,
 }
 
 Future<void> modifyCurrentNote(WidgetTester tester,
-    {String? title, String? content, closeDialog = false}) async {
+    {String? title, String? content, bool closeDialog = false}) async {
   if (title != null) {
     await tester.enterText(find.bySemanticsLabel('Title'), title);
   }
@@ -152,10 +152,10 @@ Finder findSearchbar(WidgetTester tester) {
       of: find.byType(SearchScreen), matching: find.byType(TextField));
 }
 
-IconButton findSaveButton(WidgetTester tester) {
+IconButton findIconButtonByIcon(WidgetTester tester, IconData icon) {
   return tester.widget<IconButton>(
     find.ancestor(
-        of: find.byIcon(Icons.save),
+        of: find.byIcon(icon),
         matching: find.byWidgetPredicate((widget) => widget is IconButton)),
   );
 }
@@ -185,10 +185,10 @@ Future<void> attemptLogin(WidgetTester tester) async {
   await tester.pump(); // pumpAndSettle doesnt work with circular progress
 }
 
-Future<void> clickLinkInContentField(WidgetTester tester) async {
+Future<void> clickLinkInContentField(WidgetTester tester,
+    {String linkName = "hello world"}) async {
   await tester.enterText(
-      find.bySemanticsLabel('Start writing your thoughts...'),
-      '[[hello world]]');
+      find.bySemanticsLabel('Start writing your thoughts...'), '[[$linkName]]');
   await tester.pump();
   await tester.tapAt(tester
       .getTopLeft(find.bySemanticsLabel('Start writing your thoughts...'))
