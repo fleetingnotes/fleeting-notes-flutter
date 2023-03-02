@@ -195,11 +195,11 @@ class SupabaseDB {
     if (notes.isEmpty) return true;
 
     // attempt to upsert notes to supabase
-    String? encryptionKey = await getEncryptionKey();
-    var supaNotes = notes
-        .map((note) => toSupabaseJson(note, encryptionKey: encryptionKey))
-        .toList();
     try {
+      String? encryptionKey = await getEncryptionKey();
+      var supaNotes = notes
+          .map((note) => toSupabaseJson(note, encryptionKey: encryptionKey))
+          .toList();
       var res = await client.from('notes').upsert(supaNotes);
       if (res?.error != null) {
         throw FleetingNotesException("Failed to upsert note");
@@ -320,6 +320,9 @@ class SupabaseDB {
     String title = supaNote['title'];
     String content = supaNote['content'];
     String source = supaNote['source'];
+    String? sourceTitle = supaNote['source_title'];
+    String? sourceDescription = supaNote['source_description'];
+    String? sourceImageUrl = supaNote['source_image_url'];
     if (isEncrypted) {
       if (encryptionKey == null) {
         throw FleetingNotesException(
@@ -334,6 +337,15 @@ class SupabaseDB {
       if (source.isNotEmpty) {
         source = decryptAESCryptoJS(source, encryptionKey);
       }
+      if (sourceTitle?.isNotEmpty == true) {
+        source = decryptAESCryptoJS(source, encryptionKey);
+      }
+      if (sourceDescription?.isNotEmpty == true) {
+        source = decryptAESCryptoJS(source, encryptionKey);
+      }
+      if (sourceImageUrl?.isNotEmpty == true) {
+        source = decryptAESCryptoJS(source, encryptionKey);
+      }
     }
     return Note(
       id: supaNote['id'],
@@ -344,6 +356,9 @@ class SupabaseDB {
       isDeleted: supaNote['deleted'],
       isShareable: supaNote['shared'],
       createdAt: dt.toIso8601String(),
+      sourceTitle: sourceTitle,
+      sourceDescription: sourceDescription,
+      sourceImageUrl: sourceImageUrl,
     );
   }
 
@@ -352,6 +367,9 @@ class SupabaseDB {
     String title = note.title;
     String content = note.content;
     String source = note.source;
+    String? sourceTitle = note.sourceTitle;
+    String? sourceDescription = note.sourceDescription;
+    String? sourceImageUrl = note.sourceImageUrl;
     if (isEncrypted) {
       if (note.title.isNotEmpty) {
         title = encryptAESCryptoJS(note.title, encryptionKey);
@@ -362,12 +380,24 @@ class SupabaseDB {
       if (note.source.isNotEmpty) {
         source = encryptAESCryptoJS(note.source, encryptionKey);
       }
+      if (sourceTitle != null && sourceTitle.isNotEmpty == true) {
+        sourceTitle = encryptAESCryptoJS(sourceTitle, encryptionKey);
+      }
+      if (sourceDescription != null && sourceDescription.isNotEmpty == true) {
+        sourceDescription = encryptAESCryptoJS(source, encryptionKey);
+      }
+      if (sourceImageUrl != null && sourceImageUrl.isNotEmpty == true) {
+        sourceImageUrl = encryptAESCryptoJS(source, encryptionKey);
+      }
     }
     return {
       'id': note.id,
       'title': title,
       'content': content,
       'source': source,
+      'source_title': sourceTitle,
+      'source_description': sourceDescription,
+      'source_image_url': sourceImageUrl,
       'created_at': note.createdAt,
       'modified_at': note.modifiedAt,
       'deleted': note.isDeleted,
