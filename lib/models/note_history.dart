@@ -6,6 +6,9 @@ class NoteHistory {
     this.backNoteHistory = const [],
     this.forwardNoteHistory = const [],
   });
+
+  bool get isEmpty =>
+      currNote == null && backNoteHistory.isEmpty && forwardNoteHistory.isEmpty;
   Note? currNote;
   List<Note> backNoteHistory;
   List<Note> forwardNoteHistory;

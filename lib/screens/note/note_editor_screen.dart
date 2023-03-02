@@ -41,20 +41,18 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   void initState() {
     super.initState();
 
-    final noteHistory = ref.read(noteHistoryProvider);
-    SchedulerBinding.instance
-        .addPostFrameCallback((_) => initNoteScreen(noteHistory));
-    ref.read(noteHistoryProvider.notifier).addListener((noteHistory) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      await initNoteScreen(null);
+      ref.read(noteHistoryProvider.notifier).addListener((noteHistory) {
         initNoteScreen(noteHistory);
       });
     });
   }
 
-  void initNoteScreen(NoteHistory noteHistory) async {
+  Future<void> initNoteScreen(NoteHistory? noteHistory) async {
     if (!mounted || !GoRouter.of(context).location.startsWith('/note/')) return;
     final db = ref.read(dbProvider);
-    var tempNote = await getNote(noteHistory.currNote);
+    var tempNote = await getNote(noteHistory?.currNote);
     setState(() {
       note = tempNote;
       titleController.text = tempNote.title;
@@ -77,7 +75,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
 
     // add to noteHistory if empty and location correct
-    if (noteHistory.currNote == null) {
+    if (noteHistory?.isEmpty == true) {
       final noteHistoryNotifier = ref.read(noteHistoryProvider.notifier);
       noteHistoryNotifier.addNote(context, tempNote);
     }

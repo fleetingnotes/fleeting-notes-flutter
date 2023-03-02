@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'utils.dart';
 
-// Currently Only Testing Web
 void main() {
   testWidgets('Save note button is enabled when note is changed',
       (WidgetTester tester) async {
