@@ -169,11 +169,6 @@ class CustomRichText extends StatelessWidget {
     List<TextSpan> textSpanner = [];
     final element = r.firstMatch(text);
     if (element != null) {
-      // add text before highlight
-      textSpanner.add(TextSpan(
-          text: text.substring(placeHolder, element.start),
-          style: defaultStyle));
-
       // clip part before highlight
       int prev = max(element.start - 10, 0);
       if (prev > 0) {
