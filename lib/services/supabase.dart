@@ -30,6 +30,9 @@ class SupabaseDB {
     currUser = client.auth.currentUser;
     authSubscription?.cancel();
     authSubscription = client.auth.onAuthStateChange.listen((state) {
+      if (currUser == null) {
+        subTier = SubscriptionTier.freeSub;
+      }
       if (currUser?.id != state.session?.user.id) {
         authChangeController.add(state.session?.user);
       }
@@ -37,6 +40,7 @@ class SupabaseDB {
     });
   }
   User? currUser;
+  SubscriptionTier? subTier;
   String? get userId =>
       (currUser?.userMetadata ?? {})['firebaseUid'] ?? currUser?.id;
   bool get canSync => currUser != null;
@@ -87,20 +91,26 @@ class SupabaseDB {
 
   // TODO: use a join table to only make 1 request
   Future<SubscriptionTier> getSubscriptionTier() async {
+    var subscriptionTier = subTier;
+    if (subscriptionTier != null) return subscriptionTier;
     if (currUser == null) return SubscriptionTier.freeSub;
     try {
-      var subscriptionTier = await getSubscriptionTierFromTable('stripe');
-      if (subscriptionTier == 'free') {
-        subscriptionTier = await getSubscriptionTierFromTable('apple_iap');
+      var subscriptionTierStr = await getSubscriptionTierFromTable('stripe');
+      if (subscriptionTierStr == 'free') {
+        subscriptionTierStr = await getSubscriptionTierFromTable('apple_iap');
       }
-      switch (subscriptionTier) {
+      switch (subscriptionTierStr) {
         case 'basic':
-          return SubscriptionTier.basicSub;
+          subscriptionTier = SubscriptionTier.basicSub;
+          break;
         case 'premium':
-          return SubscriptionTier.premiumSub;
+          subscriptionTier = SubscriptionTier.premiumSub;
+          break;
         default:
-          return SubscriptionTier.freeSub;
+          subscriptionTier = SubscriptionTier.freeSub;
       }
+      subTier = subscriptionTier;
+      return subscriptionTier;
     } catch (e) {
       debugPrint(e.toString());
       return SubscriptionTier.unknownSub;

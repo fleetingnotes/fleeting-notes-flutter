@@ -219,8 +219,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   }
 
   Future<void> updateSourceMetadata(String url) async {
-    UrlMetadata? m;
-    if (url.isNotEmpty) {
+    UrlMetadata? m = sourceMetadata;
+    if (url.isNotEmpty && m?.url != sourceController.text) {
       final db = ref.read(dbProvider);
       m = await db.supabase.getUrlMetadata(url);
     }
