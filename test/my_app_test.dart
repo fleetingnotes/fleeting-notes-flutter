@@ -28,7 +28,7 @@ void main() {
     resizeToDesktop(tester);
     var mockSupabase = getBaseMockSupabaseDB();
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
-    await addNote(tester);
+    await addNote(tester, closeDialog: true);
     await navigateToSettings(tester);
     await attemptLogin(tester);
     await tester.pumpAndSettle();
@@ -50,7 +50,7 @@ void main() {
     resizeToDesktop(tester);
     var mockSupabase = getBaseMockSupabaseDB();
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
-    await addNote(tester);
+    await addNote(tester, closeDialog: true);
     await navigateToSettings(tester);
     await attemptLogin(tester);
     await tester.tap(find.text('Logout'));
