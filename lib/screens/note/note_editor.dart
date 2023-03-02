@@ -108,8 +108,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     final settings = ref.read(settingsProvider);
     var saveMs = settings.get('save-delay-ms');
     saveTimer?.cancel();
-    saveTimer = Timer(Duration(milliseconds: saveMs), () {
-      _saveNote();
+    saveTimer = Timer(Duration(milliseconds: saveMs), () async {
+      await _saveNote();
+      await updateSourceMetadata(sourceController.text);
     });
   }
 
@@ -172,9 +173,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   void onChanged() async {
     final noteUtils = ref.read(noteUtilsProvider);
     modifiedAt = DateTime.now().toUtc();
-    bool isNoteDiff = widget.note.content != contentController.text ||
-        widget.note.title != titleController.text ||
-        widget.note.source != sourceController.text;
+    final db = ref.read(dbProvider);
+    Note unsavedNote = db.settings.get('unsaved-note') ?? widget.note;
+    bool isNoteDiff = unsavedNote.content != contentController.text ||
+        unsavedNote.title != titleController.text ||
+        unsavedNote.source != sourceController.text;
     if (isNoteDiff) {
       noteUtils.cachedNote = getNote();
       storeUnsavedNote();
@@ -215,14 +218,17 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     onChanged();
   }
 
-  void updateSourceMetadata(url) async {
-    final db = ref.read(dbProvider);
-    var m = await db.supabase.getUrlMetadata(url);
+  Future<void> updateSourceMetadata(String url) async {
+    UrlMetadata? m;
+    if (url.isNotEmpty) {
+      final db = ref.read(dbProvider);
+      m = await db.supabase.getUrlMetadata(url);
+    }
     if (!mounted) return;
     setState(() {
       sourceMetadata = (m?.isEmpty == true) ? null : m;
     });
-    resetSaveTimer();
+    _saveNote();
   }
 
   void updateFields(Note n) {
@@ -283,10 +289,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
               SourceContainer(
                 controller: sourceController,
                 metadata: sourceMetadata,
-                onChanged: () {
-                  updateSourceMetadata(sourceController.text);
-                  onChanged();
-                },
+                onChanged: onChanged,
                 onClearSource: onClearSource,
               ),
               const Divider(),
