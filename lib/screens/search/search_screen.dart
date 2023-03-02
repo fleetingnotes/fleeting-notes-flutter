@@ -144,6 +144,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
     return NoteGrid(
       notes: notes,
+      maxLines: 10,
       selectedNotes: selectedNotes,
       searchQuery: searchQuery,
       crossAxisCount: crossAxisCount,
