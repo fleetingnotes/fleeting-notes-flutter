@@ -239,9 +239,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 8),
                       const SettingsTitle(title: "Other Settings"),
                       const SettingsItemSwitch(
-                          settingsKey: 'auto-fill-source',
-                          name: "Auto fill source"),
-                      const SettingsItemSwitch(
                           settingsKey: 'dark-mode', name: "Dark mode"),
                       const SizedBox(height: 24),
                       const LegalLinks(),
