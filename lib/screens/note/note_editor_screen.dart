@@ -44,11 +44,15 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     final noteHistory = ref.read(noteHistoryProvider);
     SchedulerBinding.instance
         .addPostFrameCallback((_) => initNoteScreen(noteHistory));
-    ref.read(noteHistoryProvider.notifier).addListener(initNoteScreen);
+    ref.read(noteHistoryProvider.notifier).addListener((noteHistory) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        initNoteScreen(noteHistory);
+      });
+    });
   }
 
   void initNoteScreen(NoteHistory noteHistory) async {
-    if (!GoRouter.of(context).location.startsWith('/note/')) return;
+    if (!mounted || !GoRouter.of(context).location.startsWith('/note/')) return;
     final db = ref.read(dbProvider);
     var tempNote = await getNote(noteHistory.currNote);
     setState(() {
