@@ -4,7 +4,6 @@ import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
