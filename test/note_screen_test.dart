@@ -5,7 +5,6 @@ import 'package:fleeting_notes_flutter/screens/note/components/ContentField/cont
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';

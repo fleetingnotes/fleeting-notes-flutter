@@ -3,8 +3,6 @@ import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../utils/responsive.dart';
-
 class SearchDialog extends ConsumerWidget {
   final VoidCallback? onClose;
 
