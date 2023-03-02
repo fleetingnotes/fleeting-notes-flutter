@@ -67,9 +67,7 @@ class Database {
       return (query.searchByTitle && r.hasMatch(note.title)) ||
           (query.searchByContent && r.hasMatch(note.content)) ||
           (query.searchBySource &&
-              (r.hasMatch(note.source) ||
-                  r.hasMatch(note.sourceTitle ?? '') ||
-                  r.hasMatch(note.sourceDescription ?? '')));
+              (r.hasMatch(note.source) || r.hasMatch(note.sourceTitle ?? '')));
     }).toList();
     notes.sort(sortMap[query.sortBy]);
     return notes.sublist(0, min(notes.length, query.limit));
