@@ -97,15 +97,12 @@ Future<void> addNote(WidgetTester tester,
     bool closeDialog = false}) async {
   await tester.tap(find.byIcon(Icons.add));
   await tester.pumpAndSettle();
-  await modifyCurrentNote(tester, title: title, content: content);
-  if (closeDialog) {
-    await tester.tap(find.byIcon(Icons.close));
-    await tester.pumpAndSettle();
-  }
+  await modifyCurrentNote(tester,
+      title: title, content: content, closeDialog: closeDialog);
 }
 
 Future<void> modifyCurrentNote(WidgetTester tester,
-    {String? title, String? content}) async {
+    {String? title, String? content, closeDialog = false}) async {
   if (title != null) {
     await tester.enterText(find.bySemanticsLabel('Title'), title);
   }
@@ -116,6 +113,10 @@ Future<void> modifyCurrentNote(WidgetTester tester,
   await tester.tap(find.byIcon(Icons.save));
   await tester.pumpAndSettle(
       const Duration(seconds: 1)); // Wait for animation to finish
+  if (closeDialog) {
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+  }
 }
 
 Future<void> saveCurrentNote(WidgetTester tester) async {
@@ -205,9 +206,6 @@ Future<void> sortBy(WidgetTester tester, String sortByText,
   await tester.tap(find.byType(DropdownSortMenu));
   await tester.pumpAndSettle();
   await tester.tap(find.text(sortByText, findRichText: true).last);
-  // await tester.tap(find.descendant(
-  //     of: find.byType(DropdownMenuEntry),
-  //     matching: find.text(sortByText, findRichText: true)).last);
 
   await tester.pumpAndSettle();
   if (asc) {

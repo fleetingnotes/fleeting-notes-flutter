@@ -20,6 +20,7 @@ void main() {
     expect(find.byType(NoteEditor), findsNothing);
     expect(find.byType(SearchScreen), findsOneWidget);
     expect(find.byType(SideRail), findsOneWidget);
+    expect(find.byIcon(Icons.tune), findsOneWidget);
     expect(find.byType(NoteCard), findsNothing);
     final BuildContext context = tester.element(find.byType(MainScreen));
     expect(GoRouter.of(context).location == '/', isTrue);
@@ -37,9 +38,7 @@ void main() {
   testWidgets('Clicking NoteCard opens Note Editor',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester, content: 'Click me note!');
-    await tester.tap(find.byIcon(Icons.close));
-    await tester.pumpAndSettle(); // Wait for animation to finish
+    await addNote(tester, content: 'Click me note!', closeDialog: true);
     await tester.tap(find.descendant(
         of: find.byType(SearchScreen), matching: find.byType(NoteCard)));
     await tester.pumpAndSettle(); // Wait for animation to finish
@@ -52,7 +51,7 @@ void main() {
 
   testWidgets('Save note updates list of notes', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester, content: 'Test save note!');
+    await addNote(tester, content: 'Test save note!', closeDialog: true);
     expect(
         find.descendant(
             of: find.byType(NoteCard),
@@ -164,6 +163,7 @@ void main() {
     await goToNewNote(tester, content: 'init note');
 
     // Mobile on Note Screen
+    expect(find.byType(NoteEditor), findsOneWidget);
     expect(find.text('init note'), findsOneWidget);
   });
 

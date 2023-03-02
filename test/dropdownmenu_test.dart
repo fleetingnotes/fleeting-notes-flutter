@@ -9,7 +9,7 @@ void main() {
     List<String> noteContentList = ['1', '2', '3', '4', '5'];
     await fnPumpWidget(tester, const MyApp());
     for (var content in noteContentList) {
-      await addNote(tester, content: content);
+      await addNote(tester, content: content, closeDialog: true);
     }
 
     List<String> orderedContentList = getContentNoteCardList(tester);
@@ -18,7 +18,7 @@ void main() {
     // modify middle note
     await tester.tap(find.text('3', findRichText: true));
     await tester.pumpAndSettle();
-    await modifyCurrentNote(tester, content: '3 - modified');
+    await modifyCurrentNote(tester, content: '3 - modified', closeDialog: true);
 
     // sort by modified and check
     await sortBy(tester, "Modified At", asc: false);
