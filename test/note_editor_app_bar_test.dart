@@ -55,7 +55,7 @@ void main() {
   // Note traversal tests
   testWidgets('New note has no history', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester);
+    await goToNewNote(tester);
 
     expect(findIconButtonByIcon(tester, Icons.arrow_back).onPressed, isNull);
     expect(findIconButtonByIcon(tester, Icons.arrow_forward).onPressed, isNull);
@@ -64,7 +64,7 @@ void main() {
   testWidgets('Traversing forwards by clicking link preview',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester);
+    await goToNewNote(tester);
     await clickLinkInContentField(tester, linkName: 'link');
     await tester.tap(find.descendant(
         of: find.byType(LinkPreview), matching: find.byType(NoteCard)));
@@ -81,7 +81,7 @@ void main() {
 
   testWidgets('Traversing forwards and back', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester);
+    await goToNewNote(tester);
     await clickLinkInContentField(tester, linkName: 'link');
     await tester.tap(find.descendant(
         of: find.byType(LinkPreview), matching: find.byType(NoteCard)));
@@ -101,7 +101,7 @@ void main() {
   testWidgets('No backlinks button when no backlinks exist',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester);
+    await goToNewNote(tester);
     expect(find.text('Backlinks', findRichText: true), findsNothing);
   });
 

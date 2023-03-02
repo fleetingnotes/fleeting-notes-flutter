@@ -190,6 +190,8 @@ Future<void> clickLinkInContentField(WidgetTester tester,
   await tester.enterText(
       find.bySemanticsLabel('Start writing your thoughts...'), '[[$linkName]]');
   await tester.pump();
+  await tester.tap(find.byIcon(Icons.save));
+  await tester.pumpAndSettle();
   await tester.tapAt(tester
       .getTopLeft(find.bySemanticsLabel('Start writing your thoughts...'))
       .translate(20, 10));
