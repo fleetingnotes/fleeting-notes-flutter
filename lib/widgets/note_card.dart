@@ -14,11 +14,13 @@ class NoteCard extends StatefulWidget {
     this.sQuery,
     this.isActive = false,
     this.isSelected = false,
+    this.expanded = false,
     this.maxLines,
   }) : super(key: key);
 
   final bool isActive;
   final bool isSelected;
+  final bool expanded;
   final VoidCallback? onSelect;
   final VoidCallback? onTap;
   final Note note;
@@ -94,6 +96,9 @@ class _NoteCardState extends State<NoteCard> {
                             ),
                           if (widget.note.content.isNotEmpty)
                             Flexible(
+                              fit: (widget.expanded)
+                                  ? FlexFit.tight
+                                  : FlexFit.loose,
                               child: CustomRichText(
                                 text: widget.note.content,
                                 style: Theme.of(context).textTheme.bodySmall,

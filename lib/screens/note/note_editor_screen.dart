@@ -1,6 +1,8 @@
+import 'package:fleeting_notes_flutter/models/note_history.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -31,8 +33,51 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool nonExistantNote = false;
+  Note? note;
   List<Note> backlinks = [];
   SearchQuery backlinksSq = SearchQuery();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final noteHistory = ref.read(noteHistoryProvider);
+    SchedulerBinding.instance
+        .addPostFrameCallback((_) => initNoteScreen(noteHistory));
+    ref.read(noteHistoryProvider.notifier).addListener(initNoteScreen);
+  }
+
+  void initNoteScreen(NoteHistory noteHistory) async {
+    if (!GoRouter.of(context).location.startsWith('/note/')) return;
+    final db = ref.read(dbProvider);
+    var tempNote = await getNote(noteHistory.currNote);
+    setState(() {
+      note = tempNote;
+      titleController.text = tempNote.title;
+      contentController.text = tempNote.content;
+      sourceController.text = tempNote.source;
+    });
+
+    // get backlinks (async)
+    if (tempNote.title.isNotEmpty) {
+      backlinksSq = SearchQuery(query: "[[${tempNote.title}]]");
+      db.getSearchNotes(backlinksSq).then((notes) {
+        setState(() {
+          backlinks = notes;
+        });
+      });
+    } else {
+      setState(() {
+        backlinks = [];
+      });
+    }
+
+    // add to noteHistory if empty and location correct
+    if (noteHistory.currNote == null) {
+      final noteHistoryNotifier = ref.read(noteHistoryProvider.notifier);
+      noteHistoryNotifier.addNote(context, tempNote);
+    }
+  }
 
   Future<Note> getNote(Note? currNote) async {
     // initialize shared
@@ -45,25 +90,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         db.settings.set('unsaved-note', note);
       }
       nonExistantNote = true;
-    }
-    titleController.text = note.title;
-    contentController.text = note.content;
-    sourceController.text = note.source;
-
-    // get backlinks (async)
-    if (note.title.isNotEmpty) {
-      backlinksSq = SearchQuery(query: "[[${note.title}]]");
-      db.getSearchNotes(backlinksSq).then((notes) {
-        backlinks = notes;
-      });
-    }
-
-    // add to noteHistory if empty and location correct
-    final noteHistory = ref.read(noteHistoryProvider);
-    if (noteHistory.currNote == null &&
-        GoRouter.of(context).location.startsWith('/note/')) {
-      final noteHistoryNotifier = ref.read(noteHistoryProvider.notifier);
-      noteHistoryNotifier.addNote(context, note);
     }
 
     return note;
@@ -117,64 +143,61 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final noteHistory = ref.watch(noteHistoryProvider);
-    return FutureBuilder<Note>(
-      future: getNote(noteHistory.currNote),
-      builder: (context, snapshot) {
-        Note? note = snapshot.data;
-        return WillPopScope(
-          onWillPop: () async {
-            if (note == null) return true;
-            onClose();
-            return true;
-          },
-          child: Scaffold(
-            key: scaffoldKey,
-            drawerScrimColor: Colors.transparent,
-            endDrawer: BacklinksDrawer(
-              closeDrawer: scaffoldKey.currentState?.closeEndDrawer,
-              backlinks: backlinks,
-              searchQuery: backlinksSq,
-            ),
-            body: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                NoteEditorAppBar(
-                  note: note,
-                  onClose: onClose,
-                  onBacklinks: (backlinks.isEmpty)
-                      ? null
-                      : scaffoldKey.currentState?.openEndDrawer,
-                  contentController: contentController,
-                ),
-                Flexible(
-                  fit: FlexFit.tight,
-                  child: (note == null)
-                      ? const SizedBox(
-                          height: 100,
-                          child: Center(child: CircularProgressIndicator()))
-                      : NoteEditor(
-                          note: note,
-                          titleController: titleController,
-                          contentController: contentController,
-                          sourceController: sourceController,
-                          autofocus: nonExistantNote,
-                          padding: const EdgeInsets.only(
-                              left: 24, right: 24, bottom: 16),
-                        ),
-                ),
-                const Divider(),
-                NoteEditorBottomAppBar(
-                  onBack:
-                      (noteHistory.backNoteHistory.isNotEmpty) ? onBack : null,
-                  onForward: (noteHistory.forwardNoteHistory.isNotEmpty)
-                      ? onForward
-                      : null,
-                )
-              ],
-            ),
-          ),
-        );
+    final renderNote = note;
+    return WillPopScope(
+      onWillPop: () async {
+        if (renderNote == null) return true;
+        onClose();
+        return true;
       },
+      child: ScaffoldMessenger(
+        child: Scaffold(
+          key: scaffoldKey,
+          drawerScrimColor: Colors.transparent,
+          endDrawer: BacklinksDrawer(
+            closeDrawer: scaffoldKey.currentState?.closeEndDrawer,
+            backlinks: backlinks,
+            searchQuery: backlinksSq,
+          ),
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              NoteEditorAppBar(
+                note: renderNote,
+                onClose: onClose,
+                onBacklinks: (backlinks.isEmpty)
+                    ? null
+                    : scaffoldKey.currentState?.openEndDrawer,
+                contentController: contentController,
+              ),
+              Flexible(
+                fit: FlexFit.tight,
+                child: (renderNote == null)
+                    ? const SizedBox(
+                        height: 100,
+                        child: Center(child: CircularProgressIndicator()))
+                    : NoteEditor(
+                        note: renderNote,
+                        titleController: titleController,
+                        contentController: contentController,
+                        sourceController: sourceController,
+                        autofocus: nonExistantNote,
+                        padding: const EdgeInsets.only(
+                            left: 24, right: 24, bottom: 16),
+                      ),
+              ),
+              const Divider(),
+              NoteEditorBottomAppBar(
+                onBack:
+                    (noteHistory.backNoteHistory.isNotEmpty) ? onBack : null,
+                onForward: (noteHistory.forwardNoteHistory.isNotEmpty)
+                    ? onForward
+                    : null,
+              )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -273,6 +273,7 @@ class NoteGrid extends StatelessWidget {
               itemBuilder: (context, index) => NoteCard(
                 sQuery: searchQuery,
                 note: notes[index],
+                expanded: true,
                 isSelected: selectedNotes.contains(notes[index]),
                 onSelect: (onSelect == null)
                     ? null
