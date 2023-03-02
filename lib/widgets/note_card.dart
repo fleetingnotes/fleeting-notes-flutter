@@ -106,6 +106,7 @@ class _NoteCardState extends State<NoteCard> {
                                 maxLines: widget.maxLines,
                               ),
                             ),
+                          if (widget.expanded) const Spacer(),
                         ],
                       ),
                     ),
