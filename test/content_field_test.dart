@@ -23,6 +23,7 @@ void main() {
 
   testWidgets('LinkPreview appears on link tap', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
+    await addNote(tester);
     await clickLinkInContentField(tester);
     expect(find.byType(LinkPreview), findsOneWidget);
   });
@@ -30,6 +31,7 @@ void main() {
   testWidgets('TitleLinks list appears on `[[` type',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
+    await addNote(tester);
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), '[[');
     await tester.pump();
@@ -64,15 +66,9 @@ void main() {
 
 Future<void> setupLinkSuggestions(WidgetTester tester) async {
   // add notes
-  await addNote(tester, title: 'hello');
-  await addNote(tester, content: '[[world]]');
-  // refresh note editor
-  await tester.tap(find.byIcon(Icons.arrow_back));
-  await tester.pumpAndSettle();
-  await tester.tap(find.byIcon(Icons.arrow_back));
-  await tester.pumpAndSettle();
-  await tester.tap(find.byIcon(Icons.add));
-  await tester.pumpAndSettle();
+  await addNote(tester, title: 'hello', closeDialog: true);
+  await addNote(tester, content: '[[world]]', closeDialog: true);
+  await addNote(tester);
 
   // trigger link suggestion
   await tester.tap(find.bySemanticsLabel('Start writing your thoughts...'));
