@@ -1,8 +1,10 @@
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
+import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
@@ -10,6 +12,7 @@ import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'mocks/mock_supabase.dart';
 import 'utils.dart';
 
 void main() {
@@ -151,6 +154,23 @@ void main() {
     await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
     await tester.pumpAndSettle();
+    expect(contentFieldHasFocus(tester), isTrue);
+  });
+
+  testWidgets('New note with source preview has focus on content field',
+      (WidgetTester tester) async {
+    var mockSupabase = getBaseMockSupabaseDB();
+    when(() => mockSupabase.getUrlMetadata(any())).thenAnswer((_) =>
+        Future.value(UrlMetadata(
+            url: 'https://test.test',
+            title: 'Test',
+            description: 'Test',
+            imageUrl: 'https://test.image/')));
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    await goToNewNote(tester);
+    await tester.enterText(
+        find.bySemanticsLabel('Source'), 'https://test.test');
+    await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(contentFieldHasFocus(tester), isTrue);
   });
 
