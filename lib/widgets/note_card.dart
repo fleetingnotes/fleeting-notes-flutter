@@ -185,6 +185,8 @@ class CustomRichText extends StatelessWidget {
       if (postHighlightText.isNotEmpty) {
         textSpanner.add(TextSpan(text: postHighlightText, style: defaultStyle));
       }
+    } else {
+      textSpanner.add(TextSpan(text: text, style: defaultStyle));
     }
     return textSpanner;
   }
