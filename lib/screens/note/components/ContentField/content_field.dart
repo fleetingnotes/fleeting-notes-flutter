@@ -395,7 +395,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                 autofocus: widget.autofocus,
                 controller: widget.controller,
                 keyboardType: TextInputType.multiline,
-                minLines: 5,
+                minLines: 10,
                 maxLines: null,
                 style: Theme.of(context).textTheme.bodyMedium,
                 decoration: const InputDecoration(

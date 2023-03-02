@@ -29,15 +29,13 @@ class LinkPreview extends StatelessWidget {
       child: CompositedTransformFollower(
         link: layerLink,
         offset: newCaretOffset,
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: SizedBox(
-            width: 200,
-            height: 200,
-            child: NoteCard(
-              note: note,
-              onTap: onTap,
-            ),
+        child: SizedBox(
+          width: 200,
+          height: 200,
+          child: NoteCard(
+            expanded: true,
+            note: note,
+            onTap: onTap,
           ),
         ),
       ),
