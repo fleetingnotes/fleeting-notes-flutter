@@ -29,16 +29,17 @@ class NoteUtils {
     _showSnackbar(context, 'URL copied to clipboard');
   }
 
-  Future<void> handleDeleteNote(BuildContext context, List<Note> notes) async {
+  Future<bool> handleDeleteNote(BuildContext context, List<Note> notes) async {
     final db = ref.read(dbProvider);
     try {
       bool isSuccessDelete = await db.deleteNotes(notes);
       if (!isSuccessDelete) {
         throw FleetingNotesException('Failed to delete note');
       }
+      return true;
     } on FleetingNotesException catch (e) {
       _showSnackbar(context, e.message);
-      return;
+      return false;
     }
   }
 

@@ -112,9 +112,10 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
               leading: Icon(Icons.delete),
               contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
             ),
-            onTap: () {
-              noteHistory.goBack(context);
-              noteUtils.handleDeleteNote(context, [note]);
+            onTap: () async {
+              if (await noteUtils.handleDeleteNote(context, [note])) {
+                noteHistory.goBack(context);
+              }
             },
           ),
       ],
