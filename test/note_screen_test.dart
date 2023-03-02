@@ -3,6 +3,10 @@ import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor_app_bar.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
+import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,17 +19,16 @@ void main() {
   });
   testWidgets('Render Note Screen', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    expect(find.bySemanticsLabel('New note title'), findsOneWidget);
-    expect(find.bySemanticsLabel('Start writing your thoughts...'),
-        findsOneWidget);
+    await goToNewNote(tester);
+    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.byType(NoteEditorAppBar), findsOneWidget);
+    expect(find.byType(NoteEditorBottomAppBar), findsOneWidget);
   });
 
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-
     await addNote(tester, title: 'link', content: '[[link]]');
-    await tester.enterText(
-        find.bySemanticsLabel('New note title'), 'hello world');
+    await tester.enterText(find.bySemanticsLabel('Title'), 'hello world');
     await saveCurrentNote(tester);
     await tester.pumpAndSettle(); // wait for notes to update
     expect(
@@ -36,9 +39,10 @@ void main() {
         findsOneWidget);
   });
 
-  testWidgets('Clicking TitleField removes LinkPreview overlay',
+  testWidgets('Clicking outside of ContentField removes LinkPreview overlay',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     await clickLinkInContentField(tester);
     await tester.tapAt(tester
         .getTopRight(find.bySemanticsLabel('Start writing your thoughts...'))
@@ -49,25 +53,21 @@ void main() {
 
   testWidgets('Autosave works', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     // auto save
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), 'save');
     await tester.pumpAndSettle();
-    expect(findSaveButton(tester).onPressed, isNotNull);
+    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
     await tester.pumpAndSettle(const Duration(seconds: 3));
-    expect(findSaveButton(tester).onPressed, isNull);
-
-    // empty notes are not saved
-    await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), '');
-    await tester.pump();
-    expect(findSaveButton(tester).onPressed, isNull);
+    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNull);
   });
 
   testWidgets('Cursor location doesnt change when handling note event',
       (WidgetTester tester) async {
     // setup
     var mocks = await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), 'save');
     await tester.tap(find.byIcon(Icons.save));
@@ -93,6 +93,7 @@ void main() {
       (WidgetTester tester) async {
     // setup
     var mocks = await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), 'save');
     await tester.tap(find.byIcon(Icons.save));
@@ -117,6 +118,7 @@ void main() {
       (WidgetTester tester) async {
     // setup
     var mocks = await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), 'save');
     await tester.tap(find.byIcon(Icons.save));
@@ -138,7 +140,8 @@ void main() {
   testWidgets('Title field doesnt lose focus when typing',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await tester.enterText(find.bySemanticsLabel('New note title'), 'test');
+    await goToNewNote(tester);
+    await tester.enterText(find.bySemanticsLabel('Title'), 'test');
     await tester.pumpAndSettle();
 
     expect(contentFieldHasFocus(tester), isFalse);
@@ -147,10 +150,7 @@ void main() {
   testWidgets('New note has focus on content field',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await tester.tap(find.bySemanticsLabel('New note title'));
-    await tester.pumpAndSettle();
-    expect(contentFieldHasFocus(tester), isFalse);
-    await tester.tap(find.byIcon(Icons.add));
+    await goToNewNote(tester);
     await tester.pumpAndSettle();
     expect(contentFieldHasFocus(tester), isTrue);
   });
@@ -158,6 +158,7 @@ void main() {
   testWidgets('auth change refreshes current note',
       (WidgetTester tester) async {
     var mocks = await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     await modifyCurrentNote(tester, content: 'init note');
     mocks.supabase.authChangeController.add(null);
     await tester.pumpAndSettle();

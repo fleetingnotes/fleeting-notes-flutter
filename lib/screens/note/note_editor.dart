@@ -140,7 +140,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       updatedNote.sourceImageUrl = sourceMetadata?.imageUrl;
     }
 
-    if (updatedNote.isEmpty()) return;
     try {
       setState(() {
         hasNewChanges = false;
@@ -176,15 +175,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     bool isNoteDiff = widget.note.content != contentController.text ||
         widget.note.title != titleController.text ||
         widget.note.source != sourceController.text;
-    bool isNoteEmpty = contentController.text.isEmpty &&
-        titleController.text.isEmpty &&
-        sourceController.text.isEmpty;
-    if (isNoteDiff && !isNoteEmpty) {
-      if (titleController.text.isNotEmpty ||
-          contentController.text.isNotEmpty) {
-        noteUtils.cachedNote = getNote();
-        storeUnsavedNote();
-      }
+    if (isNoteDiff) {
+      noteUtils.cachedNote = getNote();
+      storeUnsavedNote();
       setState(() {
         hasNewChanges = true;
       });
