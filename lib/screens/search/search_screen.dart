@@ -37,6 +37,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Future<void> loadNotes({forceSync = false}) async {
     final db = ref.read(dbProvider);
     final searchQuery = ref.read(searchProvider) ?? SearchQuery();
+    searchQuery.limit = 36; // divisible by more numbers
     try {
       var tempNotes = await db.getSearchNotes(
         searchQuery,
@@ -144,7 +145,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
     return NoteGrid(
       notes: notes,
-      maxLines: 10,
+      maxLines: 12,
       selectedNotes: selectedNotes,
       searchQuery: searchQuery,
       crossAxisCount: crossAxisCount,
