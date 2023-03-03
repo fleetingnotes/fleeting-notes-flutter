@@ -23,7 +23,7 @@ void main() {
     await goToNewNote(tester);
     expect(find.byType(NoteEditor), findsOneWidget);
     expect(find.byType(NoteEditorAppBar), findsOneWidget);
-    expect(find.byType(NoteEditorBottomAppBar), findsOneWidget);
+    expect(find.byType(NoteEditorBottomAppBar), findsNothing);
   });
 
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {

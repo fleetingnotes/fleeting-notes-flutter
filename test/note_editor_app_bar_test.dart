@@ -2,6 +2,7 @@ import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/backlinks_drawer.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
@@ -56,9 +57,9 @@ void main() {
   testWidgets('New note has no history', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
-
-    expect(findIconButtonByIcon(tester, Icons.arrow_back).onPressed, isNull);
-    expect(findIconButtonByIcon(tester, Icons.arrow_forward).onPressed, isNull);
+    expect(find.byType(NoteEditorBottomAppBar), findsNothing);
+    expect(find.byIcon(Icons.arrow_back), findsNothing);
+    expect(find.byIcon(Icons.arrow_forward), findsNothing);
   });
 
   testWidgets('Traversing forwards by clicking link preview',
@@ -70,6 +71,7 @@ void main() {
         of: find.byType(LinkPreview), matching: find.byType(NoteCard)));
     await tester.pumpAndSettle();
 
+    expect(find.byType(NoteEditorBottomAppBar), findsOneWidget);
     expect(findIconButtonByIcon(tester, Icons.arrow_back).onPressed, isNotNull);
     expect(findIconButtonByIcon(tester, Icons.arrow_forward).onPressed, isNull);
     expect(find.text('Backlinks', findRichText: true), findsOneWidget);
@@ -89,6 +91,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
 
+    expect(find.byType(NoteEditorBottomAppBar), findsOneWidget);
     expect(findIconButtonByIcon(tester, Icons.arrow_back).onPressed, isNull);
     expect(
         findIconButtonByIcon(tester, Icons.arrow_forward).onPressed, isNotNull);

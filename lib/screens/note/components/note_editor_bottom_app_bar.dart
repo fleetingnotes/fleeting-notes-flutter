@@ -12,15 +12,21 @@ class NoteEditorBottomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-      child: Row(
-        children: [
-          IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
-          IconButton(
-              onPressed: onForward, icon: const Icon(Icons.arrow_forward)),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Divider(),
+        Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+          child: Row(
+            children: [
+              IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
+              IconButton(
+                  onPressed: onForward, icon: const Icon(Icons.arrow_forward)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

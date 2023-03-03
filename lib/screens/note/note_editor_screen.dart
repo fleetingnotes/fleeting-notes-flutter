@@ -146,6 +146,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Widget build(BuildContext context) {
     final noteHistory = ref.watch(noteHistoryProvider);
     final renderNote = note;
+    bool bottomAppBarVisible = !(noteHistory.backNoteHistory.isEmpty &&
+        noteHistory.forwardNoteHistory.isEmpty);
     return WillPopScope(
       onWillPop: () async {
         if (renderNote == null) return true;
@@ -188,14 +190,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                             left: 24, right: 24, bottom: 16),
                       ),
               ),
-              const Divider(),
-              NoteEditorBottomAppBar(
-                onBack:
-                    (noteHistory.backNoteHistory.isNotEmpty) ? onBack : null,
-                onForward: (noteHistory.forwardNoteHistory.isNotEmpty)
-                    ? onForward
-                    : null,
-              )
+              if (bottomAppBarVisible)
+                NoteEditorBottomAppBar(
+                  onBack: (noteHistory.backNoteHistory.isEmpty) ? null : onBack,
+                  onForward: (noteHistory.forwardNoteHistory.isEmpty)
+                      ? null
+                      : onForward,
+                )
             ],
           ),
         ),
