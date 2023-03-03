@@ -203,7 +203,7 @@ class CustomRichText extends StatelessWidget {
         style,
       )),
       maxLines: maxLines,
-      overflow: TextOverflow.clip,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

@@ -106,6 +106,7 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
                       : null,
                   hoverColor: Colors.transparent,
                   title: CustomRichText(
+                    maxLines: 1,
                     text: item,
                     sQuery: SearchQuery(query: widget.query),
                     style: Theme.of(context).textTheme.bodyMedium,
