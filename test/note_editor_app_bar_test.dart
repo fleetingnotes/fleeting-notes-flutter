@@ -100,6 +100,11 @@ void main() {
         find.descendant(
             of: find.bySemanticsLabel('Title'), matching: find.text('link')),
         findsNothing);
+    expect(
+        find.descendant(
+            of: find.byType(ContentField),
+            matching: find.text('[[link]]', findRichText: true)),
+        findsOneWidget);
   });
   testWidgets('No backlinks button when no backlinks exist',
       (WidgetTester tester) async {

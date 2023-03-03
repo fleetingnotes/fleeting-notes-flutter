@@ -53,24 +53,25 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (!mounted || !GoRouter.of(context).location.startsWith('/note/')) return;
     final db = ref.read(dbProvider);
     var tempNote = await getNote(noteHistory?.currNote);
-    setState(() {
-      note = tempNote;
-      titleController.text = tempNote.title;
-      contentController.text = tempNote.content;
-      sourceController.text = tempNote.source;
-      scaffoldKey = GlobalKey<ScaffoldState>();
-    });
 
     // get backlinks (async)
     if (tempNote.title.isNotEmpty) {
       backlinksSq = SearchQuery(query: "[[${tempNote.title}]]");
       db.getSearchNotes(backlinksSq).then((notes) {
         setState(() {
+          note = tempNote;
+          titleController.text = tempNote.title;
+          contentController.text = tempNote.content;
+          sourceController.text = tempNote.source;
           backlinks = notes;
         });
       });
     } else {
       setState(() {
+        note = tempNote;
+        titleController.text = tempNote.title;
+        contentController.text = tempNote.content;
+        sourceController.text = tempNote.source;
         backlinks = [];
       });
     }
@@ -141,7 +142,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     ]),
   );
   TextEditingController sourceController = TextEditingController();
-  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {

@@ -30,7 +30,7 @@ class DynamicDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (Responsive.isMobile(context)) {
-      return Scaffold(body: Dialog.fullscreen(child: child));
+      return Dialog.fullscreen(child: child);
     }
     return Dialog(
       elevation: dialogElevation,
