@@ -72,7 +72,10 @@ class NoteUtils {
 
   Future<List<Note>> updateBacklinks(
       BuildContext context, Note? oldNote, Note newNote) async {
-    if (oldNote == null || oldNote.title == newNote.title) {
+    if (oldNote == null ||
+        oldNote.title == newNote.title ||
+        oldNote.title.isEmpty ||
+        newNote.title.isEmpty) {
       return [];
     }
 
