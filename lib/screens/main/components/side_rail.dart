@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 void onSetting(BuildContext context) {
   showDialog(
     context: context,
+    useSafeArea: false,
     builder: (context) => const DynamicDialog(child: SettingsScreen()),
   );
 }
