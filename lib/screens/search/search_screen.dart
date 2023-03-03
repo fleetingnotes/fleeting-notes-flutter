@@ -146,6 +146,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return NoteGrid(
       notes: notes,
       maxLines: 12,
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
       selectedNotes: selectedNotes,
       searchQuery: searchQuery,
       crossAxisCount: crossAxisCount,
@@ -168,51 +169,47 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
       loadNotes();
     });
-    return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: selectedNotes.isEmpty
-                ? Row(
-                    children: [
-                      Expanded(
-                        child: SearchBar(
-                          onMenu: db.openDrawer,
-                          controller: queryController,
-                          focusNode: widget.searchFocusNode,
-                        ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: selectedNotes.isEmpty
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: SearchBar(
+                        onMenu: db.openDrawer,
+                        controller: queryController,
+                        focusNode: widget.searchFocusNode,
                       ),
-                      if (!Responsive.isMobile(context))
-                        Padding(
-                          padding: const EdgeInsets.only(left: 32),
-                          child: FilledButton(
-                            onPressed: addNote,
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: const [
-                                  Icon(Icons.add),
-                                  SizedBox(width: 8),
-                                  Text('New note'),
-                                ],
-                              ),
+                    ),
+                    if (!Responsive.isMobile(context))
+                      Padding(
+                        padding: const EdgeInsets.only(left: 32),
+                        child: FilledButton(
+                          onPressed: addNote,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              children: const [
+                                Icon(Icons.add),
+                                SizedBox(width: 8),
+                                Text('New note'),
+                              ],
                             ),
                           ),
-                        )
-                    ],
-                  )
-                : ModifyNotesAppBar(
-                    selectedNotes: selectedNotes,
-                    clearNotes: clearNotes,
-                    deleteNotes: deleteNotes,
-                  ),
-          ),
-          Expanded(child: getSearchList()),
-        ],
-      ),
+                        ),
+                      )
+                  ],
+                )
+              : ModifyNotesAppBar(
+                  selectedNotes: selectedNotes,
+                  clearNotes: clearNotes,
+                  deleteNotes: deleteNotes,
+                ),
+        ),
+        Expanded(child: getSearchList()),
+      ],
     );
   }
 }
@@ -226,6 +223,7 @@ class NoteGrid extends StatelessWidget {
     this.crossAxisCount = 1,
     this.childAspectRatio,
     this.maxLines,
+    this.padding,
     this.onRefresh,
     this.onSelect,
     this.onTap,
@@ -238,6 +236,7 @@ class NoteGrid extends StatelessWidget {
   final int crossAxisCount;
   final double? childAspectRatio;
   final int? maxLines;
+  final EdgeInsetsGeometry? padding;
   final Future<void> Function()? onRefresh;
   final Function(BuildContext, Note)? onSelect;
   final Function(BuildContext, Note)? onTap;
@@ -252,6 +251,7 @@ class NoteGrid extends StatelessWidget {
       child: (crossAxisCount == 1 && childAspectRatio == null)
           ? ListView.builder(
               key: const PageStorageKey('ListOfNotes'),
+              padding: padding,
               controller: controller,
               itemCount: notes.length,
               shrinkWrap: true,
@@ -269,6 +269,7 @@ class NoteGrid extends StatelessWidget {
           : GridView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               key: const PageStorageKey('ListOfNotes'),
+              padding: padding,
               controller: controller,
               itemCount: notes.length,
               itemBuilder: (context, index) => NoteCard(
