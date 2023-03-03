@@ -136,7 +136,7 @@ class NoteUtils {
       return;
     }
     try {
-      await launchUrl(uri);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       String errText = 'Could not launch `$url`';
       _failUrlSnackbar(errText);

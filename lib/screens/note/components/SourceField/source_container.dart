@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,7 +43,7 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
 
   void onPressedPreview(String url) {
     Uri uri = Uri.parse(url);
-    launchUrl(uri);
+    launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -56,6 +57,25 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
       );
     }
     return TextField(
+        contextMenuBuilder: (context, editableTextState) {
+          SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+            controller.selection = TextSelection(
+                baseOffset: 0, extentOffset: controller.value.text.length);
+          });
+          Uri? uri = Uri.tryParse(controller.text);
+          return AdaptiveTextSelectionToolbar.buttonItems(
+            anchors: editableTextState.contextMenuAnchors,
+            buttonItems: [
+              if (controller.text.isNotEmpty && uri != null)
+                ContextMenuButtonItem(
+                  onPressed: () =>
+                      launchUrl(uri, mode: LaunchMode.externalApplication),
+                  label: 'Open Source',
+                ),
+              ...editableTextState.contextMenuButtonItems,
+            ],
+          );
+        },
         readOnly: widget.readOnly,
         style: Theme.of(context).textTheme.bodySmall,
         controller: controller,

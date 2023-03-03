@@ -29,7 +29,7 @@ class _AuthState extends ConsumerState<Auth> {
 
   void onSeePricing() {
     Uri pricingUrl = Uri.parse("https://fleetingnotes.app/pricing?ref=app");
-    launchUrl(pricingUrl);
+    launchUrl(pricingUrl, mode: LaunchMode.externalApplication);
   }
 
   Future<void> onLoginPress(String email, String password) async {

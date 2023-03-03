@@ -324,7 +324,7 @@ class LegalLinks extends StatelessWidget {
             ..onTap = () {
               Uri pricingUrl =
                   Uri.parse("https://fleetingnotes.app/privacy-policy");
-              launchUrl(pricingUrl);
+              launchUrl(pricingUrl, mode: LaunchMode.externalApplication);
             },
         ),
       ),
@@ -338,7 +338,7 @@ class LegalLinks extends StatelessWidget {
             ..onTap = () {
               Uri pricingUrl =
                   Uri.parse("https://fleetingnotes.app/terms-and-conditions");
-              launchUrl(pricingUrl);
+              launchUrl(pricingUrl, mode: LaunchMode.externalApplication);
             },
         ),
       ),

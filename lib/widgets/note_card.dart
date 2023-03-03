@@ -45,7 +45,7 @@ class _NoteCardState extends State<NoteCard> {
 
   void onPressedPreview(String url) {
     Uri uri = Uri.parse(url);
-    launchUrl(uri);
+    launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
