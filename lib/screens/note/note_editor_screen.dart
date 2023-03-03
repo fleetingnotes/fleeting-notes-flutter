@@ -58,6 +58,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       titleController.text = tempNote.title;
       contentController.text = tempNote.content;
       sourceController.text = tempNote.source;
+      scaffoldKey = GlobalKey<ScaffoldState>();
     });
 
     // get backlinks (async)
@@ -140,7 +141,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     ]),
   );
   TextEditingController sourceController = TextEditingController();
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
