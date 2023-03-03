@@ -70,11 +70,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
         allLinks = links;
       });
     });
-    contentFocusNode.addListener(() {
-      if (!contentFocusNode.hasFocus) {
-        removeOverlay();
-      }
-    });
   }
 
   void handlePaste({Uint8List? pasteImage}) async {
@@ -143,6 +138,10 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     if (filteredMatches.isNotEmpty) {
       String? title = filteredMatches.first.group(1);
       if (title != null) {
+        bool keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+        if (!keyboardVisible) {
+          contentFocusNode.unfocus();
+        }
         showFollowLinkOverlay(context, title, size);
       }
     }
@@ -267,6 +266,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     void _onFollowLinkTap(Note note) async {
       final notifier = ref.read(searchProvider.notifier);
       final noteHistory = ref.read(noteHistoryProvider.notifier);
+      contentFocusNode.unfocus();
       removeOverlay();
       widget.onPop?.call();
       noteHistory.addNote(context, note);
