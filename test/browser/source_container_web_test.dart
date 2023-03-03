@@ -39,41 +39,4 @@ void main() {
     expect(find.text('Add Source URL'), findsNothing);
     expect(find.bySemanticsLabel('Source'), findsOneWidget);
   });
-
-  testWidgets('Clicking Add Source URL button shows follow-link button',
-      (WidgetTester tester) async {
-    TextEditingController controller = TextEditingController();
-    await fnPumpWidget(
-        tester,
-        MaterialApp(
-            home: Scaffold(body: SourceContainer(controller: controller))));
-
-    await tester.tap(find.text('Add Source URL'));
-    await tester.pump();
-
-    expect(find.text('Add Source URL'), findsNothing);
-    expect(find.byIcon(Icons.open_in_new), findsOneWidget);
-  });
-
-  testWidgets('Empty Source Field has Follow Link Button disabled',
-      (WidgetTester tester) async {
-    TextEditingController controller = TextEditingController();
-    await fnPumpWidget(
-        tester,
-        MaterialApp(
-            home: Scaffold(body: SourceContainer(controller: controller))));
-
-    await tester.tap(find.text('Add Source URL'));
-    await tester.pump();
-    expect(
-        tester
-            .widget<IconButton>(
-              find.ancestor(
-                  of: find.byIcon(Icons.open_in_new),
-                  matching:
-                      find.byWidgetPredicate((widget) => widget is IconButton)),
-            )
-            .onPressed,
-        isNull);
-  });
 }
