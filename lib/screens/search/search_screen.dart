@@ -177,10 +177,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ? Row(
                   children: [
                     Expanded(
-                      child: SearchBar(
-                        onMenu: db.openDrawer,
-                        controller: queryController,
-                        focusNode: widget.searchFocusNode,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: SearchBar(
+                          onMenu: db.openDrawer,
+                          controller: queryController,
+                          focusNode: widget.searchFocusNode,
+                        ),
                       ),
                     ),
                     if (!Responsive.isMobile(context))
