@@ -85,7 +85,6 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   @override
   void initState() {
     super.initState();
-    final db = ref.read(dbProvider);
     Note getNoteFromShareText({String title = '', String body = ''}) {
       var ph = findAndroidHighlight(body);
       if (ph != null) {
@@ -107,8 +106,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       String body = (intent.extra?['articleBody'] ?? '').toString();
       String type = (intent.extra?['type'] ?? '').toString();
       if (type != 'DigitalDocument' && body.isEmpty) return;
-      db.navigateToNote(getNoteFromShareText(title: title, body: body),
-          isShared: true);
+      var note = getNoteFromShareText(title: title, body: body);
+      router.goNamed('note', params: {'id': note.id}, extra: note);
     }
 
     if (Platform.isAndroid) {
@@ -123,8 +122,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       // For sharing or opening urls/text coming from outside the app while the app is in the memory
       receiveShareSub =
           ReceiveSharingIntent.getTextStream().listen((String sharedText) {
-        db.navigateToNote(getNoteFromShareText(body: sharedText),
-            isShared: true);
+        var note = getNoteFromShareText(body: sharedText);
+        router.goNamed('note', params: {'id': note.id}, extra: note);
       }, onError: (err) {
         // ignore: avoid_print
         print("getLinkStream error: $err");
@@ -133,9 +132,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       // For sharing or opening urls/text coming from outside the app while the app is closed
       ReceiveSharingIntent.getInitialText().then((String? sharedText) {
         if (sharedText != null) {
-          db.popAllRoutes();
-          db.navigateToNote(getNoteFromShareText(body: sharedText),
-              isShared: true);
+          var note = getNoteFromShareText(body: sharedText);
+          router.goNamed('note', params: {'id': note.id}, extra: note);
         }
       });
 
@@ -143,9 +141,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       HomeWidget.setAppGroupId('group.com.fleetingnotes');
       HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
         if (uri != null) {
-          db.popAllRoutes();
           getNoteFromWidgetUri(uri).then((note) {
-            db.navigateToNote(note);
+            router.goNamed('note', params: {'id': note.id}, extra: note);
           });
         }
       });
@@ -153,7 +150,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       homeWidgetSub = HomeWidget.widgetClicked.listen((uri) {
         if (uri != null) {
           getNoteFromWidgetUri(uri).then((note) {
-            db.navigateToNote(note);
+            router.goNamed('note', params: {'id': note.id}, extra: note);
           });
         }
       }, onError: (err) {

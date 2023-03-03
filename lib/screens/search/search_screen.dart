@@ -1,26 +1,25 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../utils/responsive.dart';
-import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
-
-import 'package:flutter/foundation.dart' show kIsWeb;
-import '../note/note_editor.dart';
+import 'components/modify_notes_bar.dart';
+import 'components/search_bar.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({
     Key? key,
     this.searchFocusNode,
+    this.hasSearchFocus = false,
     // keep track of notes selected
   }) : super(key: key);
 
   final FocusNode? searchFocusNode;
+  final bool hasSearchFocus;
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -34,33 +33,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   var selectedNotes = <Note>[];
 
   late List<Note> notes = [];
-  String sortBy = 'Sort by created (new to old)';
-  Map<String, SortOptions> sortOptionMap = {
-    'Sort by modified (new to old)': SortOptions.modifiedASC,
-    'Sort by modified (old to new)': SortOptions.modifiedDESC,
-    'Sort by created (new to old)': SortOptions.createdASC,
-    'Sort by created (old to new)': SortOptions.createdDESC,
-    'Sort by title (A to Z)': SortOptions.titleASC,
-    'Sort by title (Z to A)': SortOptions.titleDSC,
-    'Sort by content (A to Z)': SortOptions.contentASC,
-    'Sort by content (Z to A)': SortOptions.contentDESC,
-    'Sort by source (A to Z)': SortOptions.sourceASC,
-    'Sort by source (Z to A)': SortOptions.sourceDESC,
-  };
-  String activeNoteId = '';
-  Map searchFilter = {'title': true, 'content': true, 'source': true};
 
-  Future<void> loadNotes(queryRegex, {forceSync = false}) async {
+  Future<void> loadNotes({forceSync = false}) async {
     final db = ref.read(dbProvider);
-    SearchQuery query = SearchQuery(
-        query: queryRegex,
-        searchByTitle: searchFilter['title'],
-        searchByContent: searchFilter['content'],
-        searchBySource: searchFilter['source'],
-        sortBy: sortOptionMap[sortBy]!);
+    final searchQuery = ref.read(searchProvider) ?? SearchQuery();
+    searchQuery.limit = 36; // divisible by more numbers
     try {
       var tempNotes = await db.getSearchNotes(
-        query,
+        searchQuery,
         forceSync: forceSync,
       );
       if (!mounted) return;
@@ -71,7 +51,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (e is FleetingNotesException) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(e.message),
-          duration: const Duration(seconds: 2),
         ));
       } else {
         rethrow;
@@ -79,22 +58,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  void listenCallback(event) {
-    loadNotes(queryController.text);
-  }
-
   Future<void> _pullRefreshNotes() async {
-    await loadNotes(queryController.text, forceSync: true);
+    await loadNotes(forceSync: true);
   }
 
   @override
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    loadNotes(queryController.text);
-    db.listenNoteChange(listenCallback).then((stream) {
+    final sq = ref.read(searchProvider);
+    loadNotes();
+    db.listenNoteChange((e) => loadNotes()).then((stream) {
       noteChangeStream = stream;
     });
+    queryController.text = sq?.query ?? '';
   }
 
   @override
@@ -104,15 +81,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   void _pressNote(BuildContext context, Note note) {
-    final db = ref.read(dbProvider);
+    final noteHistory = ref.read(noteHistoryProvider.notifier);
+    final sqNotifier = ref.read(searchProvider.notifier);
     if (selectedNotes.isEmpty) {
-      setState(() {
-        activeNoteId = note.id;
-      });
-      if (!Responsive.isMobile(context)) {
-        db.popAllRoutes();
+      if (Responsive.isMobile(context)) {
+        sqNotifier.updateSearch(null);
       }
-      db.navigateToNote(note);
+      noteHistory.addNote(context, note);
     } else {
       setState(() {
         if (selectedNotes.contains(note)) {
@@ -143,239 +118,179 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   void deleteNotes(BuildContext context) async {
-    final db = ref.read(dbProvider);
-    bool isSuccessDelete = await db.deleteNotes(selectedNotes);
-    if (isSuccessDelete) {
-      for (var note in selectedNotes) {
-        db.noteHistory.remove(note);
-      }
+    final noteUtil = ref.read(noteUtilsProvider);
+    try {
+      await noteUtil.handleDeleteNote(context, selectedNotes);
       clearNotes();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Notes deletion failed'),
-        duration: Duration(seconds: 2),
-      ));
+    } on FleetingNotesException {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Notes successfully deleted'),
-      duration: Duration(seconds: 2),
-    ));
+  }
+
+  void addNote() {
+    final nh = ref.read(noteHistoryProvider.notifier);
+    final db = ref.read(dbProvider);
+    db.closeDrawer();
+    final note = Note.empty();
+    nh.addNote(context, note);
+  }
+
+  Widget getSearchList() {
+    final searchQuery = ref.read(searchProvider);
+    int crossAxisCount = 2;
+    if (Responsive.isTablet(context)) {
+      crossAxisCount = 3;
+    } else if (Responsive.isDesktop(context)) {
+      crossAxisCount = 4;
+    }
+    return NoteGrid(
+      notes: notes,
+      maxLines: 12,
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+      selectedNotes: selectedNotes,
+      searchQuery: searchQuery,
+      crossAxisCount: crossAxisCount,
+      controller: scrollController,
+      onRefresh: _pullRefreshNotes,
+      onSelect: _longPressNote,
+      onTap: _pressNote,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    return Scaffold(
-      appBar: selectedNotes.isNotEmpty
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(50),
-              child: ModifyNotesAppBar(
-                selectedNotes: selectedNotes,
-                clearNotes: clearNotes,
-                deleteNotes: deleteNotes,
-              ))
-          : null,
-      body: Container(
-        padding: EdgeInsets.only(
-            top: kIsWeb ? Theme.of(context).custom.kDefaultPadding : 0),
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: SafeArea(
-          right: false,
-          child: Column(
-            children: [
-              // This is our Search bar
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: Theme.of(context).custom.kDefaultPadding,
-                    vertical: Theme.of(context).custom.kDefaultPadding / 2),
-                child: Row(
+    ref.listen<SearchQuery?>(searchProvider, (_, sq) {
+      if (sq == null) {
+        queryController.text = '';
+        searchFocusNode.unfocus();
+      } else if (queryController.text != sq.query) {
+        queryController.text = sq.query;
+      }
+      loadNotes();
+    });
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: selectedNotes.isEmpty
+              ? Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: db.openDrawer,
-                    ),
-                    const SizedBox(width: 5),
                     Expanded(
-                      child: TextField(
-                        focusNode: widget.searchFocusNode,
-                        controller: queryController,
-                        onChanged: loadNotes,
-                        onTap: () {},
-                        decoration: InputDecoration(
-                          hintText: 'Search',
-                          fillColor: Theme.of(context).dialogBackgroundColor,
-                          filled: true,
-                          suffixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: SearchBar(
+                          onMenu: db.openDrawer,
+                          controller: queryController,
+                          focusNode: widget.searchFocusNode,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(height: Theme.of(context).custom.kDefaultPadding),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: Theme.of(context).custom.kDefaultPadding),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 200),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            isExpanded: true,
-                            value: sortBy,
-                            iconSize: 16,
-                            style: Theme.of(context).textTheme.bodyText1,
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                sortBy = newValue!;
-                              });
-                              loadNotes(queryController.text);
-                            },
-                            items: sortOptionMap.keys
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
+                    if (!Responsive.isMobile(context))
+                      Padding(
+                        padding: const EdgeInsets.only(left: 32),
+                        child: FilledButton(
+                          onPressed: addNote,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              children: const [
+                                Icon(Icons.add),
+                                SizedBox(width: 8),
+                                Text('New note'),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    Tooltip(
-                      message: 'Search by',
-                      child: MaterialButton(
-                        minWidth: 20,
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) {
-                              return SearchDialog(
-                                searchFilter: searchFilter,
-                                onFilterChange: (type, val) {
-                                  setState(() {
-                                    searchFilter[type] = val;
-                                  });
-                                  loadNotes(queryController.text);
-                                },
-                              );
-                            },
-                          );
-                        },
-                        child: const Icon(Icons.filter_list, size: 16),
-                      ),
-                    ),
+                      )
                   ],
+                )
+              : ModifyNotesAppBar(
+                  selectedNotes: selectedNotes,
+                  clearNotes: clearNotes,
+                  deleteNotes: deleteNotes,
                 ),
-              ),
-              SizedBox(height: Theme.of(context).custom.kDefaultPadding),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _pullRefreshNotes,
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    key: const PageStorageKey('ListOfNotes'),
-                    controller: scrollController,
-                    itemCount: notes.length,
-                    itemBuilder: (context, index) => NoteCard(
-                      sQuery: SearchQuery(
-                          query: queryController.text,
-                          searchByTitle: searchFilter['title'],
-                          searchByContent: searchFilter['content'],
-                          searchBySource: searchFilter['source'],
-                          sortBy: sortOptionMap[sortBy]!),
-                      note: notes[index],
-                      isActive: Responsive.isMobile(context)
-                          ? false
-                          : notes[index].id == activeNoteId,
-                      isSelected: selectedNotes.contains(notes[index]),
-                      onLongPress: () {
-                        _longPressNote(context, notes[index]);
-                      },
-                      onTap: () {
-                        _pressNote(context, notes[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
-      ),
-    );
-  }
-}
-
-class ModifyNotesAppBar extends StatelessWidget {
-  const ModifyNotesAppBar({
-    Key? key,
-    required this.selectedNotes,
-    required this.clearNotes,
-    required this.deleteNotes,
-  }) : super(key: key);
-
-  final List<Note> selectedNotes;
-  final Function() clearNotes;
-  final Function(BuildContext) deleteNotes;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.close),
-        onPressed: clearNotes,
-      ),
-      title: Text('${selectedNotes.length} notes selected'),
-      actions: <Widget>[
-        // action button
-        IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () => deleteNotes(context),
-        )
+        Expanded(child: getSearchList()),
       ],
     );
   }
 }
 
-class SearchScreenNavigator extends ConsumerWidget {
-  const SearchScreenNavigator({
-    Key? key,
-    this.hasInitNote = false,
-  }) : super(key: key);
+class NoteGrid extends StatelessWidget {
+  const NoteGrid({
+    super.key,
+    required this.notes,
+    this.selectedNotes = const [],
+    this.searchQuery,
+    this.crossAxisCount = 1,
+    this.childAspectRatio,
+    this.maxLines,
+    this.padding,
+    this.onRefresh,
+    this.onSelect,
+    this.onTap,
+    this.controller,
+  });
 
-  final bool hasInitNote;
+  final List<Note> notes;
+  final List<Note> selectedNotes;
+  final SearchQuery? searchQuery;
+  final int crossAxisCount;
+  final double? childAspectRatio;
+  final int? maxLines;
+  final EdgeInsetsGeometry? padding;
+  final Future<void> Function()? onRefresh;
+  final Function(BuildContext, Note)? onSelect;
+  final Function(BuildContext, Note)? onTap;
+  final ScrollController? controller;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final db = ref.watch(dbProvider);
-    var history = db.noteHistory.entries.toList();
-    db.navigatorKey = GlobalKey<NavigatorState>();
-    return Navigator(
-      key: db.navigatorKey,
-      onGenerateRoute: (route) => PageRouteBuilder(
-          settings: route,
-          pageBuilder: (context, _, __) {
-            if (history.isEmpty || history.first.key.isEmpty()) {
-              return SearchScreen(
-                key: db.searchKey,
-              );
-            } else {
-              return NoteEditor(
-                key: history.first.value,
-                note: history.first.key,
-                isShared: hasInitNote,
-              );
-            }
-          }),
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        onRefresh?.call();
+      },
+      child: (crossAxisCount == 1 && childAspectRatio == null)
+          ? ListView.builder(
+              key: const PageStorageKey('ListOfNotes'),
+              padding: padding,
+              controller: controller,
+              itemCount: notes.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) => NoteCard(
+                sQuery: searchQuery,
+                note: notes[index],
+                isSelected: selectedNotes.contains(notes[index]),
+                onSelect: (onSelect == null)
+                    ? null
+                    : () => onSelect?.call(context, notes[index]),
+                onTap: () => onTap?.call(context, notes[index]),
+                maxLines: maxLines,
+              ),
+            )
+          : GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              key: const PageStorageKey('ListOfNotes'),
+              padding: padding,
+              controller: controller,
+              itemCount: notes.length,
+              itemBuilder: (context, index) => NoteCard(
+                sQuery: searchQuery,
+                note: notes[index],
+                expanded: true,
+                isSelected: selectedNotes.contains(notes[index]),
+                onSelect: (onSelect == null)
+                    ? null
+                    : () => onSelect?.call(context, notes[index]),
+                onTap: () => onTap?.call(context, notes[index]),
+                maxLines: maxLines,
+              ),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: childAspectRatio ?? 1,
+              ),
+            ),
     );
   }
 }

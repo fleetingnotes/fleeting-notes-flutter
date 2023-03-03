@@ -21,10 +21,12 @@ class ContentField extends ConsumerStatefulWidget {
     required this.controller,
     this.autofocus = false,
     this.onChanged,
+    this.onPop,
   }) : super(key: key);
 
   final TextEditingController controller;
   final VoidCallback? onChanged;
+  final VoidCallback? onPop;
   final bool autofocus;
 
   @override
@@ -58,11 +60,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     });
     // NOTE: onKeyEvent doesn't ignore enter key press
     contentFocusNode = FocusNode(onKey: onKeyEvent);
-    contentFocusNode.addListener(() {
-      if (!contentFocusNode.hasFocus) {
-        removeOverlay();
-      }
-    });
     shortcuts = ShortcutActions(
       controller: widget.controller,
       bringEditorToFocus: contentFocusNode.requestFocus,
@@ -115,9 +112,10 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
   @override
   void dispose() {
-    super.dispose();
+    removeOverlay();
     contentFocusNode.dispose();
     pasteListener?.cancel();
+    super.dispose();
   }
 
   KeyEventResult onKeyEvent(node, e) {
@@ -140,6 +138,10 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     if (filteredMatches.isNotEmpty) {
       String? title = filteredMatches.first.group(1);
       if (title != null) {
+        bool keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+        if (!keyboardVisible) {
+          contentFocusNode.unfocus();
+        }
         showFollowLinkOverlay(context, title, size);
       }
     }
@@ -191,7 +193,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   }
 
   Offset getCaretOffset(TextEditingController textController,
-      TextStyle textStyle, BoxConstraints size) {
+      TextStyle? textStyle, BoxConstraints size) {
     String beforeCaretText =
         textController.text.substring(0, textController.selection.baseOffset);
 
@@ -222,13 +224,14 @@ class _ContentFieldState extends ConsumerState<ContentField> {
           t.substring(caretI, t.length).replaceFirst(RegExp(r"^\]\]"), "");
       widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: linkIndex + link.length + 4));
+      widget.onChanged?.call();
       removeOverlay();
     }
 
     removeOverlay();
     Offset caretOffset = getCaretOffset(
       widget.controller,
-      Theme.of(context).textTheme.bodyText2!,
+      Theme.of(context).textTheme.bodyMedium,
       size,
     );
 
@@ -261,27 +264,32 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
 
     void _onFollowLinkTap(Note note) async {
-      final db = ref.read(dbProvider);
-      db.navigateToNote(note); // TODO: Deprecate
+      final notifier = ref.read(searchProvider.notifier);
+      final noteHistory = ref.read(noteHistoryProvider.notifier);
+      contentFocusNode.unfocus();
       removeOverlay();
+      widget.onPop?.call();
+      noteHistory.addNote(context, note);
+      notifier.updateSearch(null);
     }
 
     // init overlay entry
     removeOverlay();
     Offset caretOffset = getCaretOffset(
       widget.controller,
-      Theme.of(context).textTheme.bodyText2!,
+      Theme.of(context).textTheme.bodyMedium,
       size,
     );
     Widget builder(context) {
       return FutureBuilder<Note>(
           future: getFollowLinkNote(),
           builder: (BuildContext context, AsyncSnapshot<Note> snapshot) {
-            if (snapshot.hasData && snapshot.data != null) {
+            var note = snapshot.data;
+            if (note != null) {
               return LinkPreview(
-                note: snapshot.data!,
+                note: note,
                 caretOffset: caretOffset,
-                onTap: () => _onFollowLinkTap(snapshot.data!),
+                onTap: () => _onFollowLinkTap(note),
                 layerLink: layerLink,
               );
             } else {
@@ -297,14 +305,12 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     OverlayState? overlayState = Overlay.of(context);
     overlayEntry = OverlayEntry(builder: builder);
     // show overlay
-    if (overlayState != null) {
-      overlayState.insert(overlayEntry!);
-    }
+    overlayState.insert(overlayEntry ?? OverlayEntry(builder: builder));
   }
 
   void removeOverlay() {
-    if (overlayEntry != null && overlayEntry!.mounted) {
-      overlayEntry!.remove();
+    if (overlayEntry != null && overlayEntry?.mounted == true) {
+      overlayEntry?.remove();
       titleLinkQuery.value = '';
       overlayEntry = null;
     }
@@ -327,76 +333,82 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     return CompositedTransformTarget(
       link: layerLink,
       child: LayoutBuilder(builder: (context, size) {
-        return KeyboardActions(
-          enable: defaultTargetPlatform == TargetPlatform.android ||
-              defaultTargetPlatform == TargetPlatform.iOS,
-          disableScroll: true,
-          config: KeyboardActionsConfig(
-              keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
-              actions: [
-                KeyboardActionsItem(
-                  focusNode: contentFocusNode,
-                  displayArrows: false,
-                  displayDoneButton: false,
-                  toolbarAlignment: MainAxisAlignment.spaceAround,
-                  toolbarButtons: [
-                    (node) {
-                      return KeyboardButton(
-                        icon: '[]',
-                        onPressed: () {
-                          shortcuts.addLink();
-                          _onContentChanged(
-                              context, widget.controller.text, size);
-                        },
-                        tooltip: 'Add link',
-                      );
-                    },
-                    (node) {
-                      return KeyboardButton(
-                        icon: '#',
-                        onPressed: () {
-                          shortcuts.addTag();
-                          _onContentChanged(
-                              context, widget.controller.text, size);
-                        },
-                      );
-                    },
-                    (node) {
-                      return KeyboardButton(
-                        icon: Icons.checklist_outlined,
-                        onPressed: () {
-                          shortcuts.toggleCheckbox();
-                          _onContentChanged(
-                              context, widget.controller.text, size);
-                        },
-                      );
-                    },
-                    (node) {
-                      return const KeyboardButton(
-                        icon: 'Aa',
-                        disabled: true,
-                      );
-                    },
-                  ],
-                )
-              ]),
-          child: Actions(
-            actions: textfieldActions,
-            child: TextField(
-              focusNode: contentFocusNode,
-              textCapitalization: TextCapitalization.sentences,
-              autofocus: widget.autofocus,
-              controller: widget.controller,
-              keyboardType: TextInputType.multiline,
-              minLines: 5,
-              maxLines: null,
-              style: Theme.of(context).textTheme.bodyText2,
-              decoration: const InputDecoration(
-                hintText: "Note and links to other ideas",
-                border: InputBorder.none,
+        return WillPopScope(
+          onWillPop: () async {
+            removeOverlay();
+            return true;
+          },
+          child: KeyboardActions(
+            enable: defaultTargetPlatform == TargetPlatform.android ||
+                defaultTargetPlatform == TargetPlatform.iOS,
+            disableScroll: true,
+            config: KeyboardActionsConfig(
+                keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
+                actions: [
+                  KeyboardActionsItem(
+                    focusNode: contentFocusNode,
+                    displayArrows: false,
+                    displayDoneButton: false,
+                    toolbarAlignment: MainAxisAlignment.spaceAround,
+                    toolbarButtons: [
+                      (node) {
+                        return KeyboardButton(
+                          icon: '[]',
+                          onPressed: () {
+                            shortcuts.addLink();
+                            _onContentChanged(
+                                context, widget.controller.text, size);
+                          },
+                          tooltip: 'Add link',
+                        );
+                      },
+                      (node) {
+                        return KeyboardButton(
+                          icon: '#',
+                          onPressed: () {
+                            shortcuts.addTag();
+                            _onContentChanged(
+                                context, widget.controller.text, size);
+                          },
+                        );
+                      },
+                      (node) {
+                        return KeyboardButton(
+                          icon: Icons.checklist_outlined,
+                          onPressed: () {
+                            shortcuts.toggleCheckbox();
+                            _onContentChanged(
+                                context, widget.controller.text, size);
+                          },
+                        );
+                      },
+                      (node) {
+                        return const KeyboardButton(
+                          icon: 'Aa',
+                          disabled: true,
+                        );
+                      },
+                    ],
+                  )
+                ]),
+            child: Actions(
+              actions: textfieldActions,
+              child: TextField(
+                focusNode: contentFocusNode,
+                textCapitalization: TextCapitalization.sentences,
+                autofocus: widget.autofocus,
+                controller: widget.controller,
+                keyboardType: TextInputType.multiline,
+                minLines: 10,
+                maxLines: null,
+                style: Theme.of(context).textTheme.bodyMedium,
+                decoration: const InputDecoration(
+                  hintText: "Start writing your thoughts...",
+                  border: InputBorder.none,
+                ),
+                onChanged: (text) => _onContentChanged(context, text, size),
+                onTap: () => _onContentTap(context, size),
               ),
-              onChanged: (text) => _onContentChanged(context, text, size),
-              onTap: () => _onContentTap(context, size),
             ),
           ),
         );

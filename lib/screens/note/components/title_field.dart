@@ -15,13 +15,10 @@ class TitleField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-      ),
+      style: Theme.of(context).textTheme.titleLarge,
       controller: controller,
       decoration: const InputDecoration(
-        hintText: "Title of the idea",
+        hintText: "Title",
         border: InputBorder.none,
       ),
       onChanged: (text) {

@@ -1,5 +1,6 @@
 // ignore_for_file: file_names
 import 'dart:convert';
+import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,15 @@ import 'package:uuid/uuid.dart';
 import "package:yaml/yaml.dart";
 
 part 'Note.g.dart';
+
+bool isValidUuid(String uuid) {
+  try {
+    Uuid.parse(uuid);
+    return true;
+  } on FormatException {
+    return false;
+  }
+}
 
 @HiveType(typeId: 1)
 class Note {
@@ -26,6 +36,12 @@ class Note {
   bool isShareable;
   @HiveField(8, defaultValue: '2000-01-01')
   String modifiedAt;
+  @HiveField(9)
+  String? sourceTitle;
+  @HiveField(10)
+  String? sourceDescription;
+  @HiveField(12)
+  String? sourceImageUrl;
   final String partition;
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex =
@@ -48,20 +64,63 @@ ${content}''';
     this.partition = '',
     this.source = '',
     this.isDeleted = false,
-  }) : modifiedAt = createdAt;
+    this.sourceTitle,
+    this.sourceDescription,
+    this.sourceImageUrl,
+  })  : modifiedAt = createdAt,
+        assert(
+          isValidUuid(id),
+          'id must be a valid UUID',
+        );
+
+  DateTime get createdAtDate => DateTime.parse(createdAt);
+  DateTime get modifiedAtDate => DateTime.parse(modifiedAt);
+  UrlMetadata get sourceMetadata => UrlMetadata(
+        url: source,
+        title: sourceTitle,
+        description: sourceDescription,
+        imageUrl: sourceImageUrl,
+      );
+  set modifiedAtDate(DateTime d) {
+    modifiedAt = d.toUtc().toIso8601String();
+  }
 
   static Note empty(
-      {String title = '', String content = '', String source = ''}) {
+      {String? id,
+      String title = '',
+      String content = '',
+      String source = ''}) {
     Uuid uuid = const Uuid();
     String dateStr = DateTime.now().toUtc().toIso8601String();
     return Note(
-      id: uuid.v1(),
+      id: id ?? uuid.v4(),
       title: title,
       content: content,
       source: source,
       createdAt: dateStr,
       isDeleted: false,
     );
+  }
+
+  Note copyWith({
+    String? title,
+    String? content,
+    String? source,
+    bool? isShareable,
+    bool? isDeleted,
+  }) {
+    var copiedNote = Note(
+      id: id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      source: source ?? this.source,
+      isShareable: isShareable ?? this.isShareable,
+      createdAt: createdAt,
+      partition: partition,
+      isDeleted: isDeleted ?? this.isDeleted,
+    );
+    copiedNote.modifiedAt = modifiedAt;
+    return copiedNote;
   }
 
   toJson() {
@@ -136,30 +195,24 @@ ${content}''';
     return title == '' && content == '' && source == '';
   }
 
-  DateTime getDateTime() {
-    return DateTime.parse(createdAt);
-  }
-
-  String getShortDateTimeStr() {
+  String getShortDateTimeStr({DateTime? noteDateTime}) {
+    noteDateTime ??= createdAtDate;
     final now = DateTime.now().toUtc();
     final today = DateTime(now.year, now.month, now.day);
-    final noteDateTime = getDateTime();
     final noteDate =
         DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
 
     if (noteDate == today) {
       return DateFormat('jm').format(noteDateTime.toLocal());
-    } else if (today.year == noteDate.year) {
-      return DateFormat('MMM. d').format(noteDateTime.toLocal());
     } else {
-      return DateFormat('yyyy-M-d').format(noteDateTime.toLocal());
+      return DateFormat('MMM d, yyyy').format(noteDateTime.toLocal());
     }
   }
 
-  String getDateTimeStr() {
+  String getDateTimeStr({DateTime? noteDateTime}) {
+    noteDateTime ??= createdAtDate;
     final now = DateTime.now().toUtc();
     final today = DateTime(now.year, now.month, now.day);
-    final noteDateTime = getDateTime();
     final noteDate =
         DateTime(noteDateTime.year, noteDateTime.month, noteDateTime.day);
 

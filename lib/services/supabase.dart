@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:hive/hive.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,9 @@ class SupabaseDB {
     currUser = client.auth.currentUser;
     authSubscription?.cancel();
     authSubscription = client.auth.onAuthStateChange.listen((state) {
+      if (currUser == null) {
+        subTier = SubscriptionTier.freeSub;
+      }
       if (currUser?.id != state.session?.user.id) {
         authChangeController.add(state.session?.user);
       }
@@ -36,6 +40,7 @@ class SupabaseDB {
     });
   }
   User? currUser;
+  SubscriptionTier? subTier;
   String? get userId =>
       (currUser?.userMetadata ?? {})['firebaseUid'] ?? currUser?.id;
   bool get canSync => currUser != null;
@@ -86,20 +91,26 @@ class SupabaseDB {
 
   // TODO: use a join table to only make 1 request
   Future<SubscriptionTier> getSubscriptionTier() async {
+    var subscriptionTier = subTier;
+    if (subscriptionTier != null) return subscriptionTier;
     if (currUser == null) return SubscriptionTier.freeSub;
     try {
-      var subscriptionTier = await getSubscriptionTierFromTable('stripe');
-      if (subscriptionTier == 'free') {
-        subscriptionTier = await getSubscriptionTierFromTable('apple_iap');
+      var subscriptionTierStr = await getSubscriptionTierFromTable('stripe');
+      if (subscriptionTierStr == 'free') {
+        subscriptionTierStr = await getSubscriptionTierFromTable('apple_iap');
       }
-      switch (subscriptionTier) {
+      switch (subscriptionTierStr) {
         case 'basic':
-          return SubscriptionTier.basicSub;
+          subscriptionTier = SubscriptionTier.basicSub;
+          break;
         case 'premium':
-          return SubscriptionTier.premiumSub;
+          subscriptionTier = SubscriptionTier.premiumSub;
+          break;
         default:
-          return SubscriptionTier.freeSub;
+          subscriptionTier = SubscriptionTier.freeSub;
       }
+      subTier = subscriptionTier;
+      return subscriptionTier;
     } catch (e) {
       debugPrint(e.toString());
       return SubscriptionTier.unknownSub;
@@ -116,6 +127,25 @@ class SupabaseDB {
         (tableSubTier.firstOrNull ?? {})['subscription_tier'] as String? ??
             'free';
     return subscriptionTier.isEmpty ? 'free' : subscriptionTier;
+  }
+
+  Future<UrlMetadata?> getUrlMetadata(String url) async {
+    try {
+      final res =
+          await client.functions.invoke('get-metadata', body: {"url": url});
+      final status = res.status;
+      final ok = status != null && status >= 200 && status < 300;
+      if (!ok) return null;
+      Map<String, dynamic> json = res.data;
+      return UrlMetadata(
+        url: url,
+        title: json['ogTitle'],
+        description: json['ogDescription'],
+        imageUrl: (json['ogImage'] != null) ? json['ogImage']['url'] : null,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<void> refreshSession() async {
@@ -175,11 +205,11 @@ class SupabaseDB {
     if (notes.isEmpty) return true;
 
     // attempt to upsert notes to supabase
-    String? encryptionKey = await getEncryptionKey();
-    var supaNotes = notes
-        .map((note) => toSupabaseJson(note, encryptionKey: encryptionKey))
-        .toList();
     try {
+      String? encryptionKey = await getEncryptionKey();
+      var supaNotes = notes
+          .map((note) => toSupabaseJson(note, encryptionKey: encryptionKey))
+          .toList();
       var res = await client.from('notes').upsert(supaNotes);
       if (res?.error != null) {
         throw FleetingNotesException("Failed to upsert note");
@@ -300,6 +330,9 @@ class SupabaseDB {
     String title = supaNote['title'];
     String content = supaNote['content'];
     String source = supaNote['source'];
+    String? sourceTitle = supaNote['source_title'];
+    String? sourceDescription = supaNote['source_description'];
+    String? sourceImageUrl = supaNote['source_image_url'];
     if (isEncrypted) {
       if (encryptionKey == null) {
         throw FleetingNotesException(
@@ -314,6 +347,15 @@ class SupabaseDB {
       if (source.isNotEmpty) {
         source = decryptAESCryptoJS(source, encryptionKey);
       }
+      if (sourceTitle?.isNotEmpty == true) {
+        source = decryptAESCryptoJS(source, encryptionKey);
+      }
+      if (sourceDescription?.isNotEmpty == true) {
+        source = decryptAESCryptoJS(source, encryptionKey);
+      }
+      if (sourceImageUrl?.isNotEmpty == true) {
+        source = decryptAESCryptoJS(source, encryptionKey);
+      }
     }
     return Note(
       id: supaNote['id'],
@@ -324,6 +366,9 @@ class SupabaseDB {
       isDeleted: supaNote['deleted'],
       isShareable: supaNote['shared'],
       createdAt: dt.toIso8601String(),
+      sourceTitle: sourceTitle,
+      sourceDescription: sourceDescription,
+      sourceImageUrl: sourceImageUrl,
     );
   }
 
@@ -332,6 +377,9 @@ class SupabaseDB {
     String title = note.title;
     String content = note.content;
     String source = note.source;
+    String? sourceTitle = note.sourceTitle;
+    String? sourceDescription = note.sourceDescription;
+    String? sourceImageUrl = note.sourceImageUrl;
     if (isEncrypted) {
       if (note.title.isNotEmpty) {
         title = encryptAESCryptoJS(note.title, encryptionKey);
@@ -342,12 +390,24 @@ class SupabaseDB {
       if (note.source.isNotEmpty) {
         source = encryptAESCryptoJS(note.source, encryptionKey);
       }
+      if (sourceTitle != null && sourceTitle.isNotEmpty == true) {
+        sourceTitle = encryptAESCryptoJS(sourceTitle, encryptionKey);
+      }
+      if (sourceDescription != null && sourceDescription.isNotEmpty == true) {
+        sourceDescription = encryptAESCryptoJS(source, encryptionKey);
+      }
+      if (sourceImageUrl != null && sourceImageUrl.isNotEmpty == true) {
+        sourceImageUrl = encryptAESCryptoJS(source, encryptionKey);
+      }
     }
     return {
       'id': note.id,
       'title': title,
       'content': content,
       'source': source,
+      'source_title': sourceTitle,
+      'source_description': sourceDescription,
+      'source_image_url': sourceImageUrl,
       'created_at': note.createdAt,
       'modified_at': note.modifiedAt,
       'deleted': note.isDeleted,

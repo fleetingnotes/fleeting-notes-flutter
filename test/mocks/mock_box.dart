@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:hive/hive.dart';
 
 class MockBox implements Box {
   Map<dynamic, dynamic> box = {};
+  StreamController<BoxEvent> controller = StreamController.broadcast();
   @override
   bool get isEmpty => box.isEmpty;
   @override
@@ -14,6 +17,7 @@ class MockBox implements Box {
 
   @override
   put(dynamic key, dynamic value) async {
+    controller.add(BoxEvent(key, value, false));
     box[key] = value;
   }
 
@@ -25,11 +29,15 @@ class MockBox implements Box {
 
   @override
   Future<void> putAll(Map<dynamic, dynamic> other) async {
+    other.forEach((key, value) {
+      controller.add(BoxEvent(key, value, false));
+    });
     box.addAll(other);
   }
 
   @override
   Future<void> delete(key) async {
+    controller.add(BoxEvent(key, null, true));
     box.remove(key);
   }
 
@@ -148,7 +156,6 @@ class MockBox implements Box {
 
   @override
   Stream<BoxEvent> watch({key}) {
-    // TODO: implement watch
-    return const Stream.empty();
+    return controller.stream;
   }
 }

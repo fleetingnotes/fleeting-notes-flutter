@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
-import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/services/sync/sync_manager.dart';
 import 'package:fleeting_notes_flutter/services/text_similarity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:mime/mime.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -39,13 +39,7 @@ class Database {
       () async => getAllNotesLocal(await getBox()),
     );
   }
-  GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>(); // TODO: Find a way to move it out of here
-
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  GlobalKey searchKey = GlobalKey();
-  Map<Note, GlobalKey> noteHistory = {};
-  RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
   StreamController<NoteEvent> noteChangeController =
       StreamController.broadcast();
   String? shareUserId;
@@ -72,7 +66,8 @@ class Database {
     var notes = allNotes.where((note) {
       return (query.searchByTitle && r.hasMatch(note.title)) ||
           (query.searchByContent && r.hasMatch(note.content)) ||
-          (query.searchBySource && r.hasMatch(note.source));
+          (query.searchBySource &&
+              (r.hasMatch(note.source) || r.hasMatch(note.sourceTitle ?? '')));
     }).toList();
     notes.sort(sortMap[query.sortBy]);
     return notes.sublist(0, min(notes.length, query.limit));
@@ -211,6 +206,7 @@ class Database {
       box.clear();
     }
     await supabase.logout();
+    await initNotes();
   }
 
   Future<void> register(String email, String password) async {
@@ -219,6 +215,7 @@ class Database {
 
   Future<void> login(String email, String password) async {
     await supabase.login(email, password);
+    await initNotes();
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
@@ -231,6 +228,11 @@ class Database {
       return r.hasMatch(note.content);
     }).toList();
     return notes;
+  }
+
+  Future<void> initNotes() async {
+    var notes = await getAllNotes(forceSync: true);
+    noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
   }
 
   void handleSyncFromExternal(NoteEvent e) async {
@@ -253,65 +255,19 @@ class Database {
     }
   }
 
-  // TODO: Move this out of db
-  void navigateToSearch(String query) {
-    navigatorKey.currentState?.push(
-      PageRouteBuilder(
-        pageBuilder: (context, _, __) => const SearchScreen(),
-        transitionsBuilder: _transitionBuilder,
-      ),
-    );
-  }
-
-  // TODO: Move this out of db
-  SlideTransition _transitionBuilder(
-      context, animation, secondaryAnimation, child) {
-    const begin = Offset(0.0, 1.0);
-    const end = Offset.zero;
-    const curve = Curves.ease;
-
-    final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-    final offsetAnimation = animation.drive(tween);
-    return SlideTransition(
-      position: offsetAnimation,
-      child: child,
-    );
-  }
-
-  // TODO: Move this out of db
-  void navigateToNote(Note note, {bool isShared = false}) {
-    GlobalKey noteKey = GlobalKey();
-    noteHistory[note] = noteKey;
-    navigatorKey.currentState?.push(PageRouteBuilder(
-      pageBuilder: (context, _, __) =>
-          NoteEditor(key: noteKey, note: note, isShared: isShared),
-      transitionsBuilder: _transitionBuilder,
-    ));
-  }
-
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
   }
 
-  Future<StreamSubscription> listenNoteChange(Function callback) async {
+  void closeDrawer() {
+    scaffoldKey.currentState?.closeDrawer();
+  }
+
+  Future<StreamSubscription> listenNoteChange(
+      Function(NoteEvent) callback) async {
     return noteChangeController.stream.listen((event) {
       callback(event);
     });
-  }
-
-  void popAllRoutes() {
-    if (navigatorKey.currentState != null) {
-      noteHistory.clear();
-      navigatorKey.currentState?.popUntil((route) => false);
-    }
-  }
-
-  bool canPop() {
-    var nState = navigatorKey.currentState;
-    if (nState != null) {
-      return nState.canPop();
-    }
-    return false;
   }
 
   Future<void> setAnalyticsEnabled(enabled) async {
@@ -368,11 +324,9 @@ class Database {
         TextSelection.fromPosition(TextPosition(offset: start + text.length));
   }
 
-  void refreshApp() {
+  void refreshApp(WidgetRef ref) {
+    final search = ref.read(searchProvider.notifier);
     shareUserId = null;
-    popAllRoutes();
-    searchKey = GlobalKey();
-    noteHistory = {Note.empty(): GlobalKey()};
-    navigateToSearch('');
+    search.updateSearch(null);
   }
 }

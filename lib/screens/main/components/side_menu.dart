@@ -1,56 +1,78 @@
-import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-class SideMenu extends ConsumerWidget {
+class SideMenu extends StatelessWidget {
   const SideMenu({
     Key? key,
+    this.addNote,
+    this.closeDrawer,
+    this.width,
   }) : super(key: key);
 
+  final VoidCallback? addNote;
+  final VoidCallback? closeDrawer;
+  final double? width;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
-    bool darkMode = settings.get('dark-mode', defaultValue: false);
-    return Container(
-      height: double.infinity,
-      padding: EdgeInsets.only(
-          top: kIsWeb ? Theme.of(context).custom.kDefaultPadding : 0),
-      color: Theme.of(context).dialogBackgroundColor,
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: Theme.of(context).custom.kDefaultPadding),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  const Expanded(
-                    child: Text(
-                      "Fleeting Notes",
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(darkMode ? Icons.dark_mode : Icons.light_mode),
-                    onPressed: () {
-                      settings.set('dark-mode', !darkMode);
-                    },
-                    tooltip: 'Toggle Theme',
-                  )
-                ],
-              ),
-              const Spacer(),
-              ListTile(
-                title: const Text("Settings"),
-                leading: const Icon(Icons.settings),
-                onTap: () {
-                  context.push('/settings');
-                },
-              ),
-            ],
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      child: Drawer(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                        child: Text(
+                      'Fleeting Notes',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    )),
+                    IconButton(
+                      onPressed: closeDrawer,
+                      icon: const Icon(Icons.menu_open),
+                    )
+                  ],
+                ),
+                const Spacer(),
+                NavigationButton(
+                  icon: const Icon(Icons.settings),
+                  label: Text('Settings',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  onTap: () => onSetting(context),
+                )
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class NavigationButton extends StatelessWidget {
+  const NavigationButton(
+      {super.key, required this.icon, required this.label, this.onTap});
+  final Icon icon;
+  final Widget label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(30),
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            icon,
+            const SizedBox(width: 12),
+            label,
+          ],
         ),
       ),
     );

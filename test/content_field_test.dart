@@ -5,11 +5,10 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -22,23 +21,36 @@ void main() {
   });
 
   testWidgets('LinkPreview appears on link tap', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester);
     await clickLinkInContentField(tester);
     expect(find.byType(LinkPreview), findsOneWidget);
   });
 
+  // TODO: make this test pass
+  testWidgets('LinkPreview disappears when pressing title field',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester);
+    await clickLinkInContentField(tester);
+    await tester.tap(find.bySemanticsLabel('Title'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LinkPreview), findsNothing);
+  }, skip: true);
+
   testWidgets('TitleLinks list appears on `[[` type',
       (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester);
     await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), '[[');
+        find.bySemanticsLabel('Start writing your thoughts...'), '[[');
     await tester.pump();
     expect(find.byType(LinkSuggestions), findsOneWidget);
   });
 
   testWidgets('Key navigation works in TitleLinks',
       (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
     await setupLinkSuggestions(tester);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
@@ -53,7 +65,7 @@ void main() {
 
   testWidgets('Key navigation doesnt break on left key navigation',
       (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
     await setupLinkSuggestions(tester);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
@@ -64,19 +76,13 @@ void main() {
 
 Future<void> setupLinkSuggestions(WidgetTester tester) async {
   // add notes
-  await addNote(tester, title: 'hello');
-  await addNote(tester, content: '[[world]]');
-  // refresh note editor
-  await tester.tap(find.byIcon(Icons.arrow_back));
-  await tester.pumpAndSettle();
-  await tester.tap(find.byIcon(Icons.arrow_back));
-  await tester.pumpAndSettle();
-  await tester.tap(find.byIcon(Icons.add));
-  await tester.pumpAndSettle();
+  await addNote(tester, title: 'hello', closeDialog: true);
+  await addNote(tester, content: '[[world]]', closeDialog: true);
+  await addNote(tester);
 
   // trigger link suggestion
-  await tester.tap(find.bySemanticsLabel('Note and links to other ideas'));
+  await tester.tap(find.bySemanticsLabel('Start writing your thoughts...'));
   await tester.enterText(
-      find.bySemanticsLabel('Note and links to other ideas'), '[[');
+      find.bySemanticsLabel('Start writing your thoughts...'), '[[');
   await tester.pump();
 }

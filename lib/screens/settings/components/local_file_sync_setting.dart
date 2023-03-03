@@ -144,72 +144,64 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
   Widget build(BuildContext context) {
     return Card(
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: ExpansionTile(title: const Text('Local File Sync'), children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: SettingItem(
-              title: 'Enabled',
-              description: 'Enable local file sync (Disabled on web)',
-              widget: Switch(
+      child: ExpansionTile(
+        title: const Text('Local File Sync'),
+        childrenPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        children: [
+          SettingsItem(
+            name: 'Enabled',
+            description: 'Enable local file sync (Disabled on web)',
+            actions: [
+              Switch(
                 value: enabled,
                 onChanged: (kIsWeb) ? null : onSwitchChange,
-              )),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: SettingItem(
-            title: 'Sync folder location',
-            description: '$syncDir',
-            widget: IconButton(
-              padding: EdgeInsets.zero,
-              onPressed: (kIsWeb) ? null : onFolderSelect,
-              icon: const Icon(Icons.folder_open),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            children: [
-              SettingItem(
-                  title: 'Sync Type',
-                  description: 'How notes are synced',
-                  widget: DropdownButton<String>(
-                      value: syncType,
-                      items: const [
-                        DropdownMenuItem<String>(
-                            child: Text('Two-way sync'), value: 'two-way'),
-                        DropdownMenuItem<String>(
-                            child: Text('One-way sync'), value: 'one-way'),
-                      ],
-                      onChanged: onSyncTypeChange)),
+              )
             ],
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            children: [
-              SettingItem(
-                title: 'Note template',
-                description:
-                    'I don\'t recommend changing this for two-way sync',
-                widget: IconButton(
+          SettingsItem(
+              name: 'Sync folder location',
+              description: '$syncDir',
+              actions: [
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: (kIsWeb) ? null : onFolderSelect,
+                  icon: const Icon(Icons.folder_open),
+                ),
+              ]),
+          SettingsItem(
+              name: 'Sync Type',
+              description: 'How notes are synced',
+              actions: [
+                DropdownButton<String>(
+                    borderRadius: BorderRadius.circular(4),
+                    value: syncType,
+                    items: const [
+                      DropdownMenuItem<String>(
+                          child: Text('Two-way sync'), value: 'two-way'),
+                      DropdownMenuItem<String>(
+                          child: Text('One-way sync'), value: 'one-way'),
+                    ],
+                    onChanged: onSyncTypeChange),
+              ]),
+          SettingsItem(
+              name: 'Note template',
+              description: 'I don\'t recommend changing this for two-way sync',
+              actions: [
+                IconButton(
                   padding: EdgeInsets.zero,
                   onPressed: (kIsWeb) ? null : onRefreshNoteTemplate,
                   icon: const Icon(Icons.refresh),
                 ),
-              ),
-              TextField(
-                controller: controller,
-                onChanged: onNoteTemplateChange,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-                maxLines: null,
-              )
-            ],
+              ]),
+          TextField(
+            controller: controller,
+            onChanged: onNoteTemplateChange,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+            maxLines: null,
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }

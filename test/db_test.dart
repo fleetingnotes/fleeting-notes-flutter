@@ -1,5 +1,6 @@
 import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:test/test.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
@@ -10,6 +11,7 @@ import 'mocks/mock_supabase.dart';
 
 var settings = MockSettings();
 var mockBox = MockBox();
+String uuid = "07666b8a-2a65-4556-8696-b81505829910";
 
 class MockDatabaseTests extends Database {
   MockDatabaseTests()
@@ -18,10 +20,13 @@ class MockDatabaseTests extends Database {
             settings: settings,
             localFileSync: LocalFileSync(settings: settings));
 
-  Note newNote(id, title, content, source) {
-    String t = DateTime.now().toUtc().toIso8601String();
-    var note = Note(
-        id: id, title: title, content: content, createdAt: t, source: source);
+  Note newNote(String id, title, content, source) {
+    var note = Note.empty(
+      id: uuid.replaceFirst('0', id),
+      title: title,
+      content: content,
+      source: source,
+    );
     return note;
   }
 
@@ -54,8 +59,10 @@ void main() {
     inputsToExpected.forEach((query, noteIds) {
       test('query: $query -> note_ids: $noteIds', () async {
         final db = MockDatabaseTests();
-        List searchedNotes = await db.getSearchNotes(SearchQuery(query: query));
-        List searchedIds = searchedNotes.map((e) => e.id).toList();
+        List<Note> searchedNotes =
+            await db.getSearchNotes(SearchQuery(query: query));
+        List searchedIds =
+            searchedNotes.map((n) => n.id.characters.first).toList();
         expect(searchedIds.length, noteIds.length);
         expect(searchedIds.toSet(), noteIds.toSet());
       });
@@ -71,7 +78,7 @@ void main() {
       test('query: $query -> note_id: $noteId', () async {
         final db = MockDatabaseTests();
         Note? note = await db.getNoteByTitle(query);
-        expect(note?.id, noteId);
+        expect(note?.id.characters.first, noteId);
       });
     });
   });
@@ -82,9 +89,10 @@ void main() {
       ['69', 'link']: false,
     };
     inputsToExpected.forEach((params, isExists) {
-      test('query: $params -> note_id: $isExists', () async {
+      test('params: $params -> isExists: $isExists', () async {
+        var noteId = uuid.replaceFirst('0', params[0]);
         final db = MockDatabaseTests();
-        bool? actualIsExists = await db.titleExists(params[0], params[1]);
+        bool? actualIsExists = await db.titleExists(noteId, params[1]);
         expect(actualIsExists, isExists);
       });
     });

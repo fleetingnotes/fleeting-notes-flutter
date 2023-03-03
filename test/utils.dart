@@ -1,6 +1,10 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
+import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
@@ -11,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'mocks/mock_database.dart';
 import 'mocks/mock_local_file_sync.dart';
@@ -71,25 +76,47 @@ Future<void> resizeToMobile(WidgetTester tester) async {
 }
 
 // screen interactions
+Future<void> searchNotes(WidgetTester tester, String query) async {
+  await tester.enterText(
+      find.descendant(
+          of: find.byType(SearchScreen), matching: find.byType(TextField)),
+      query);
+}
+
+Future<void> goToNewNote(WidgetTester tester,
+    {String title = '', String content = '', String source = ''}) async {
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  final newNote = Note.empty(title: title, content: content, source: source);
+  context.goNamed('note', params: {'id': newNote.id}, extra: newNote);
+  await tester.pumpAndSettle();
+}
+
 Future<void> addNote(WidgetTester tester,
-    {String title = "", String content = "note"}) async {
+    {String title = "",
+    String content = "note",
+    bool closeDialog = false}) async {
   await tester.tap(find.byIcon(Icons.add));
   await tester.pumpAndSettle();
-  await modifyCurrentNote(tester, title: title, content: content);
+  await modifyCurrentNote(tester,
+      title: title, content: content, closeDialog: closeDialog);
 }
 
 Future<void> modifyCurrentNote(WidgetTester tester,
-    {String? title, String? content}) async {
+    {String? title, String? content, bool closeDialog = false}) async {
   if (title != null) {
-    await tester.enterText(find.bySemanticsLabel('Title of the idea'), title);
+    await tester.enterText(find.bySemanticsLabel('Title'), title);
   }
   if (content != null) {
     await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), content);
+        find.bySemanticsLabel('Start writing your thoughts...'), content);
   }
-  await tester.tap(find.text('Save'));
+  await tester.tap(find.byIcon(Icons.save));
   await tester.pumpAndSettle(
       const Duration(seconds: 1)); // Wait for animation to finish
+  if (closeDialog) {
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+  }
 }
 
 Future<void> saveCurrentNote(WidgetTester tester) async {
@@ -101,9 +128,36 @@ Future<void> saveCurrentNote(WidgetTester tester) async {
 Future<void> deleteCurrentNote(WidgetTester tester) async {
   await tester.tap(find.byIcon(Icons.more_vert));
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Delete'));
+  await tester.tap(find.byIcon(Icons.delete));
   await tester.pumpAndSettle();
   await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+}
+
+Future<void> seeCurrNoteBacklinks(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.more_vert));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byIcon(Icons.link));
+  await tester.pumpAndSettle();
+}
+
+Future<void> clearNoteHistory(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.more_vert));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byIcon(Icons.close));
+  await tester.pumpAndSettle();
+}
+
+Finder findSearchbar(WidgetTester tester) {
+  return find.descendant(
+      of: find.byType(SearchScreen), matching: find.byType(TextField));
+}
+
+IconButton findIconButtonByIcon(WidgetTester tester, IconData icon) {
+  return tester.widget<IconButton>(
+    find.ancestor(
+        of: find.byIcon(icon),
+        matching: find.byWidgetPredicate((widget) => widget is IconButton)),
+  );
 }
 
 Future<void> createNoteWithBacklink(WidgetTester tester) async {
@@ -117,8 +171,6 @@ Future<void> createNoteWithBacklink(WidgetTester tester) async {
 }
 
 Future<void> navigateToSettings(WidgetTester tester) async {
-  await tester.tap(find.byIcon(Icons.menu));
-  await tester.pumpAndSettle();
   await tester.tap(find.byIcon(Icons.settings));
   await tester.pumpAndSettle();
 }
@@ -133,23 +185,35 @@ Future<void> attemptLogin(WidgetTester tester) async {
   await tester.pump(); // pumpAndSettle doesnt work with circular progress
 }
 
-Future<void> clickLinkInContentField(WidgetTester tester) async {
-  await tester.enterText(find.bySemanticsLabel('Note and links to other ideas'),
-      '[[hello world]]');
+Future<void> clickLinkInContentField(WidgetTester tester,
+    {String linkName = "hello world"}) async {
+  await tester.enterText(
+      find.bySemanticsLabel('Start writing your thoughts...'), '[[$linkName]]');
   await tester.pump();
+  await tester.tap(find.byIcon(Icons.save));
+  await tester.pumpAndSettle();
   await tester.tapAt(tester
-      .getTopLeft(find.bySemanticsLabel('Note and links to other ideas'))
+      .getTopLeft(find.bySemanticsLabel('Start writing your thoughts...'))
       .translate(20, 10));
   await tester.pumpAndSettle();
 }
 
-Future<void> sortBy(WidgetTester tester, sortByText) async {
-  await tester.tap(find.byType(DropdownButton<String>));
+Future<void> sortBy(WidgetTester tester, String sortByText,
+    {bool asc = true}) async {
+  await tester.tap(find.descendant(
+      of: find.byType(SearchScreen), matching: find.byType(TextField)));
   await tester.pumpAndSettle();
-  await tester
-      .tap(find.widgetWithText(DropdownMenuItem<String>, sortByText).last);
+  await tester.tap(find.byIcon(Icons.tune));
   await tester.pumpAndSettle();
-  await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+  await tester.tap(find.byType(DropdownSortMenu));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(sortByText, findRichText: true).last);
+
+  await tester.pumpAndSettle();
+  if (asc) {
+    await tester.tap(find.byIcon(Icons.arrow_downward));
+  }
+  await tester.pumpAndSettle();
 }
 
 List<String> getContentNoteCardList(WidgetTester tester) {

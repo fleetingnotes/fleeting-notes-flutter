@@ -1,163 +1,209 @@
 import 'dart:math';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/Note.dart';
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
-class NoteCard extends StatelessWidget {
+class NoteCard extends StatefulWidget {
   const NoteCard({
     Key? key,
     required this.note,
-    required this.onLongPress,
-    required this.onTap,
+    this.onSelect,
+    this.onTap,
     this.sQuery,
     this.isActive = false,
     this.isSelected = false,
+    this.expanded = false,
+    this.maxLines,
   }) : super(key: key);
 
   final bool isActive;
   final bool isSelected;
-  final VoidCallback onLongPress; 
-  final VoidCallback onTap;
+  final bool expanded;
+  final VoidCallback? onSelect;
+  final VoidCallback? onTap;
   final Note note;
   final SearchQuery? sQuery;
+  final int? maxLines;
 
-  List<TextSpan> highlightString(
-      String query, String text, TextStyle defaultStyle) {
+  @override
+  State<NoteCard> createState() => _NoteCardState();
+}
+
+class _NoteCardState extends State<NoteCard> {
+  bool hovering = false;
+
+  onSelect(bool? value) {
+    if (value == true) {
+      widget.onSelect?.call();
+    }
+    if (value == false && widget.isSelected) {
+      widget.onTap?.call();
+    }
+  }
+
+  void onPressedPreview(String url) {
+    Uri uri = Uri.parse(url);
+    launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var sourceMetadata = widget.note.sourceMetadata;
+    double elevation = (widget.isSelected) ? 1 : 0;
+    return GestureDetector(
+      onLongPress: widget.onSelect,
+      onTap: widget.onTap,
+      child: MouseRegion(
+        onEnter: (_) => setState(() {
+          hovering = true;
+        }),
+        onExit: (_) => setState(() {
+          hovering = false;
+        }),
+        child: Card(
+          clipBehavior: Clip.hardEdge,
+          elevation: elevation,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+          ),
+          child: Stack(
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (widget.note.title.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: CustomRichText(
+                                text: widget.note.title,
+                                style: Theme.of(context).textTheme.titleMedium,
+                                sQuery: widget.sQuery,
+                                maxLines: 1,
+                              ),
+                            ),
+                          if (widget.note.content.isNotEmpty)
+                            Flexible(
+                              fit: (widget.expanded)
+                                  ? FlexFit.tight
+                                  : FlexFit.loose,
+                              child: CustomRichText(
+                                text: widget.note.content,
+                                style: Theme.of(context).textTheme.bodySmall,
+                                sQuery: widget.sQuery,
+                                maxLines: widget.maxLines,
+                              ),
+                            ),
+                          if (widget.expanded && widget.note.content.isEmpty)
+                            const Spacer(),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (!sourceMetadata.isEmpty)
+                    SourcePreview(
+                      height: 75,
+                      metadata: sourceMetadata,
+                      onPressed: () => onPressedPreview(sourceMetadata.url),
+                    )
+                ],
+              ),
+              if (widget.onSelect != null && (hovering || widget.isSelected))
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Card(
+                    elevation: elevation,
+                    margin: EdgeInsets.zero,
+                    shadowColor: Colors.transparent,
+                    child: Checkbox(
+                      onChanged: onSelect,
+                      value: widget.isSelected,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomRichText extends StatelessWidget {
+  const CustomRichText({
+    Key? key,
+    required this.text,
+    this.style,
+    this.highlightStyle,
+    this.sQuery,
+    this.maxLines,
+  }) : super(key: key);
+
+  final String text;
+  final SearchQuery? sQuery;
+  final TextStyle? style;
+  final TextStyle? highlightStyle;
+  final int? maxLines;
+
+  List<TextSpan> highlightString(BuildContext context, String query,
+      String text, TextStyle? highlightStyle, TextStyle? defaultStyle) {
     RegExp r = getQueryRegex(query);
-    TextStyle highlight = defaultStyle.copyWith(backgroundColor: Colors.orange);
-    int placeHolder = 0;
+    defaultStyle ??= const TextStyle();
+    highlightStyle ??= defaultStyle.copyWith(
+      backgroundColor: Theme.of(context).highlightColor,
+    );
     List<TextSpan> textSpanner = [];
     final element = r.firstMatch(text);
     if (element != null) {
-      if (textSpanner.isNotEmpty) {
-        textSpanner.add(TextSpan(
-            text: text.substring(placeHolder, element.start),
-            style: defaultStyle));
-      } else {
-        int prev = max(element.start - 10, 0);
-        if (prev > 0) {
-          textSpanner.add(TextSpan(text: "...", style: defaultStyle));
-        }
-        textSpanner.add(TextSpan(
-            text: text.substring(prev, element.start), style: defaultStyle));
+      // clip part before highlight
+      int prev = max(element.start - 10, 0);
+      String preHighlightText =
+          '${(prev > 0) ? "..." : ""}${text.substring(prev, element.start)}';
+      if (preHighlightText.isNotEmpty) {
+        textSpanner.add(TextSpan(text: preHighlightText, style: defaultStyle));
       }
-      textSpanner.add(TextSpan(
-          text: text.substring(element.start, element.end), style: highlight));
-      placeHolder = element.end;
+
+      String highlightText = text.substring(element.start, element.end);
+      if (highlightText.isNotEmpty) {
+        textSpanner.add(TextSpan(text: highlightText, style: highlightStyle));
+      }
+
+      String postHighlightText = text.substring(element.end, text.length);
+      if (postHighlightText.isNotEmpty) {
+        textSpanner.add(TextSpan(text: postHighlightText, style: defaultStyle));
+      }
+    } else {
+      textSpanner.add(TextSpan(text: text, style: defaultStyle));
     }
-    textSpanner.add(TextSpan(
-        text: text.substring(placeHolder, text.length), style: defaultStyle));
     return textSpanner;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: Theme.of(context).custom.kDefaultPadding,
-            vertical: Theme.of(context).custom.kDefaultPadding / 2),
-        child: GestureDetector(
-            onLongPress: onLongPress,
-            child: NeumorphicButton(
-              padding: const EdgeInsets.all(0),
-              style: NeumorphicStyle(
-                depth: (isActive) ? 0 : 2,
-                color: isActive
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).scaffoldBackgroundColor,
-                shadowLightColor: Theme.of(context).custom.lightShadow,
-                shadowDarkColor: Theme.of(context).custom.darkShadow,
-              ),
-              onPressed: onTap,
-              child: Container(
-                padding:
-                    EdgeInsets.all(Theme.of(context).custom.kDefaultPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (note.title != '')
-                                  RichText(
-                                      text: TextSpan(
-                                          children: highlightString(
-                                              (sQuery != null &&
-                                                      sQuery!.searchByTitle)
-                                                  ? sQuery!.query
-                                                  : '',
-                                              note.title,
-                                              Theme.of(context)
-                                                  .textTheme
-                                                  .bodyText1!
-                                                  .copyWith(
-                                                    color: isActive
-                                                        ? Colors.white
-                                                        : null,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w600,
-                                                  ))),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis),
-                                if (note.content != '')
-                                  RichText(
-                                      text: TextSpan(
-                                          children: highlightString(
-                                              (sQuery != null &&
-                                                      sQuery!.searchByContent)
-                                                  ? sQuery!.query
-                                                  : '',
-                                              note.content,
-                                              Theme.of(context)
-                                                  .textTheme
-                                                  .bodyText2!
-                                                  .copyWith(
-                                                    color: isActive
-                                                        ? Colors.white
-                                                        : null,
-                                                  ))),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis),
-                              ]),
-                        ),
-                        SizedBox(
-                            width: Theme.of(context).custom.kDefaultPadding),
-                        Column(
-                          children: [
-                            Text(
-                              note.getShortDateTimeStr(),
-                              style:
-                                  Theme.of(context).textTheme.caption!.copyWith(
-                                        color: isActive ? Colors.white70 : null,
-                                      ),
-                            ),
-                            const SizedBox(height: 5),
-                            // if (note.hasAttachment) // TODO: Add attachment
-                            //   Icon(
-                            //     Icons.attachment,
-                            //     size: 15,
-                            //     color: isActive
-                            //         ? Colors.white70
-                            //         : Theme.of(context).custom.kGrayColor,
-                            //   ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-                decoration: isSelected
-                    ? BoxDecoration(
-                        border: Border.all(color: Colors.blue,
-                            width: 4),
-                        borderRadius: BorderRadius.circular(8))
-                    : null,
-              ),
-            )));
-    // Add GestureDetector
+    return RichText(
+      text: TextSpan(
+          children: highlightString(
+        context,
+        (sQuery != null && sQuery!.searchByTitle) ? sQuery!.query : '',
+        text,
+        highlightStyle,
+        style,
+      )),
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 }

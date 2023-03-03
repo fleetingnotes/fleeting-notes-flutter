@@ -7,36 +7,29 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_menu.dart';
 import 'package:fleeting_notes_flutter/utils/responsive.dart';
-import 'package:fleeting_notes_flutter/screens/note/note_screen_navigator.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'components/analytics_dialog.dart';
+import 'components/note_fab.dart';
+import 'components/side_rail.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
-  const MainScreen({Key? key, this.initNote}) : super(key: key);
+  const MainScreen({Key? key}) : super(key: key);
 
-  final Note? initNote;
   @override
   ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
   FocusNode searchFocusNode = FocusNode();
-  late bool hasInitNote;
+  Widget? desktopSideWidget;
   bool bannerExists = false;
   @override
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    if (widget.initNote == null) {
-      hasInitNote = false;
-      db.noteHistory = {Note.empty(): GlobalKey()};
-    } else {
-      hasInitNote = true;
-      db.noteHistory = {widget.initNote!: GlobalKey()};
-    }
     var isSharedNotes = db.isSharedNotes;
     if (!kDebugMode) analyticsDialogWorkflow();
     if (!db.isLoggedIn() && !isSharedNotes && db.settings.isFirstTimeOpen()) {
@@ -45,17 +38,22 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             context: context,
             builder: (_) => AlertDialog(
                 title: const Text('Register / Sign In'),
-                content: Auth(
-                  onLogin: (_) async {
-                    await db.getAllNotes(forceSync: true);
-                    Navigator.pop(context);
-                    // wait to make sure the user is logged in
-                    Future.delayed(const Duration(milliseconds: 500), () {
-                      setState(() {
-                        db.refreshApp();
-                      });
-                    });
-                  },
+                content: SizedBox(
+                  width: mobileLimit,
+                  child: SingleChildScrollView(
+                    child: Auth(
+                      onLogin: (_) async {
+                        await db.getAllNotes(forceSync: true);
+                        Navigator.pop(context);
+                        // wait to make sure the user is logged in
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          setState(() {
+                            db.refreshApp(ref);
+                          });
+                        });
+                      },
+                    ),
+                  ),
                 )));
       });
     }
@@ -70,11 +68,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 onPressed: () {
                   ScaffoldMessenger.of(context).removeCurrentMaterialBanner();
                   setState(() {
-                    hasInitNote = false;
                     bannerExists = false;
-                    db.refreshApp();
+                    db.refreshApp(ref);
                   });
-                  context.go('/');
+                  context.goNamed('home');
                 },
                 child: const Text('Your Notes'),
               );
@@ -119,72 +116,66 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
+  void addNote() {
+    final nh = ref.read(noteHistoryProvider.notifier);
+    final db = ref.read(dbProvider);
+    db.closeDrawer();
+    final note = Note.empty();
+    nh.addNote(context, note);
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    return WillPopScope(
-      onWillPop: () async {
-        return !db.canPop();
-      },
-      child: Shortcuts(
-        shortcuts: shortcutMapping,
-        child: Actions(
-          actions: <Type, Action<Intent>>{
-            NewNoteIntent: CallbackAction(
-                onInvoke: (Intent intent) => db.navigateToNote(Note.empty())),
-            SearchIntent: CallbackAction(
-                onInvoke: (intent) => searchFocusNode.requestFocus())
-          },
-          child: Scaffold(
-            key: db.scaffoldKey,
-            resizeToAvoidBottomInset: false,
-            drawer: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 250),
-              child: const SideMenu(),
-            ),
-            floatingActionButton: FloatingActionButton(
-              child: const Icon(Icons.add),
-              tooltip: 'Add note',
-              onPressed: () {
-                // This is bugged because floating action button isn't part of
-                // any route...
-                // Provider.of<NoteStackModel>(context, listen: false)
-                //     .pushNote(Note.empty());
-                db.navigateToNote(Note.empty()); // TODO: Deprecate
-              },
-            ),
-            body: Responsive(
-              mobile: SearchScreenNavigator(hasInitNote: hasInitNote),
-              tablet: Row(
-                children: [
-                  Expanded(
-                    flex: 6,
-                    child: SearchScreen(
-                      key: db.searchKey,
-                      searchFocusNode: searchFocusNode,
+    return Shortcuts(
+      shortcuts: shortcutMapping,
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          NewNoteIntent: CallbackAction(onInvoke: (Intent intent) => addNote()),
+          SearchIntent: CallbackAction(
+              onInvoke: (intent) => searchFocusNode.requestFocus())
+        },
+        child: Scaffold(
+          key: db.scaffoldKey,
+          resizeToAvoidBottomInset: false,
+          drawer: SideMenu(
+            addNote: addNote,
+            closeDrawer: db.closeDrawer,
+          ),
+          floatingActionButton: (Responsive.isMobile(context))
+              ? NoteFAB(onPressed: addNote)
+              : null,
+          body: Responsive(
+            mobile: SearchScreen(searchFocusNode: searchFocusNode),
+            tablet: Row(
+              children: [
+                SideRail(addNote: addNote, onMenu: db.openDrawer),
+                Flexible(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: mobileLimit),
+                      child: SearchScreen(
+                        searchFocusNode: searchFocusNode,
+                      ),
                     ),
                   ),
-                  Expanded(
-                    flex: 9,
-                    child: NoteScreenNavigator(hasInitNote: hasInitNote),
-                  ),
-                ],
-              ),
-              desktop: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: SearchScreen(
-                      key: db.searchKey,
-                      searchFocusNode: searchFocusNode,
+                ),
+              ],
+            ),
+            desktop: Row(
+              children: [
+                SideRail(addNote: addNote, onMenu: db.openDrawer),
+                Flexible(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: tabletLimit),
+                      child: SearchScreen(
+                        searchFocusNode: searchFocusNode,
+                      ),
                     ),
                   ),
-                  Expanded(
-                    flex: 9,
-                    child: NoteScreenNavigator(hasInitNote: hasInitNote),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

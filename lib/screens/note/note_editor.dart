@@ -2,250 +2,185 @@ import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:collection/collection.dart';
+import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
-import 'package:fleeting_notes_flutter/widgets/note_card.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as p;
-import 'package:fleeting_notes_flutter/screens/note/components/header.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart'
-    if (dart.library.js) 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container_web.dart';
-import 'package:flutter/services.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart';
 
 class NoteEditor extends ConsumerStatefulWidget {
   const NoteEditor({
     Key? key,
     required this.note,
-    this.isShared = false,
+    this.titleController,
+    this.contentController,
+    this.sourceController,
+    this.autofocus = false,
+    this.padding,
   }) : super(key: key);
 
   final Note note;
-  final bool isShared;
+  final bool autofocus;
+  final TextEditingController? titleController;
+  final TextEditingController? contentController;
+  final TextEditingController? sourceController;
+  final EdgeInsetsGeometry? padding;
+
   @override
   _NoteEditorState createState() => _NoteEditorState();
 }
 
-class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
-  List<Note> backlinkNotes = [];
+class _NoteEditorState extends ConsumerState<NoteEditor> {
   List<String> linkSuggestions = [];
   bool hasNewChanges = false;
   bool isNoteShareable = false;
   Timer? saveTimer;
   DateTime modifiedAt = DateTime(2000);
-  RouteObserver? routeObserver;
+  DateTime? savedAt;
   StreamSubscription<NoteEvent>? noteChangeStream;
+  StreamSubscription? authChangeStream;
+  UrlMetadata? sourceMetadata;
 
-  late bool autofocus;
-  late TextEditingController titleController;
-  late TextEditingController contentController;
-  late TextEditingController sourceController;
+  TextEditingController titleController = TextEditingController();
+  TextEditingController contentController = StyleableTextFieldController(
+    styles: TextPartStyleDefinitions(definitionList: [
+      TextPartStyleDefinition(
+          pattern: Note.linkRegex,
+          style: const TextStyle(
+            color: Color.fromARGB(255, 138, 180, 248),
+            decoration: TextDecoration.underline,
+          ))
+    ]),
+  );
+  TextEditingController sourceController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    routeObserver = db.routeObserver;
-    hasNewChanges = widget.isShared;
+    hasNewChanges = widget.autofocus;
     isNoteShareable = widget.note.isShareable;
-    autofocus = widget.note.isEmpty() || widget.isShared;
-    titleController = TextEditingController(text: widget.note.title);
-    sourceController = TextEditingController(text: widget.note.source);
-    contentController = StyleableTextFieldController(
-      styles: TextPartStyleDefinitions(definitionList: [
-        TextPartStyleDefinition(
-            pattern: Note.linkRegex,
-            style: const TextStyle(
-              color: Color.fromARGB(255, 138, 180, 248),
-              decoration: TextDecoration.underline,
-            ))
-      ]),
-    );
-    contentController.text = widget.note.content;
+
+    // update controllers
+    titleController = widget.titleController ?? titleController;
+    contentController = widget.contentController ?? contentController;
+    sourceController = widget.sourceController ?? sourceController;
+
     noteChangeStream = db.noteChangeController.stream.listen(handleNoteEvent);
-    db.getBacklinkNotes(widget.note).then((notes) {
-      setState(() {
-        backlinkNotes = notes;
+    authChangeStream =
+        db.supabase.authChangeController.stream.listen(handleAuthChange);
+    modifiedAt = DateTime.parse(widget.note.modifiedAt);
+    initSourceMetadata(widget.note.sourceMetadata);
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      ref.watch(noteHistoryProvider.notifier).addListener((nh) {
+        var currNote = nh.currNote;
+        if (currNote != null) {
+          saveTimer?.cancel();
+          sourceMetadata = null;
+          initSourceMetadata(currNote.sourceMetadata);
+        }
       });
     });
-    modifiedAt = DateTime.parse(widget.note.modifiedAt);
+  }
+
+  void initSourceMetadata(UrlMetadata metadata) {
+    if (metadata.url.isNotEmpty) {
+      if (!metadata.isEmpty) {
+        if (!mounted) return;
+        setState(() {
+          sourceMetadata = metadata;
+        });
+      } else {
+        updateSourceMetadata(widget.note.source);
+      }
+    }
   }
 
   void resetSaveTimer() {
     final settings = ref.read(settingsProvider);
     var saveMs = settings.get('save-delay-ms');
     saveTimer?.cancel();
-    saveTimer = Timer(Duration(milliseconds: saveMs), () {
-      if (hasNewChanges) {
-        _saveNote();
-      }
+    saveTimer = Timer(Duration(milliseconds: saveMs), () async {
+      await _saveNote();
+      await updateSourceMetadata(sourceController.text);
     });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    routeObserver?.subscribe(this, ModalRoute.of(context) as PageRoute);
   }
 
   @override
   void dispose() {
     super.dispose();
     saveTimer?.cancel();
-    routeObserver?.unsubscribe(this);
     noteChangeStream?.cancel();
+    authChangeStream?.cancel();
   }
 
-  @override
-  void didPopNext() {
-    final db = ref.read(dbProvider);
-    // Refresh note if we traverse back
-    db.getNote(widget.note.id).then((note) {
-      if (note != null) {
-        titleController.text = note.title;
-        contentController.text = note.content;
-        sourceController.text = note.source;
-      }
-    });
-  }
-
-  @override
-  void didPushNext() {
-    // Autosave if the note was previously saved
-    // If we autosave every note, we would pollute pretty fast.
-    if (hasNewChanges) {
-      _saveNote();
+  Future<void> _saveNote() async {
+    final noteUtils = ref.read(noteUtilsProvider);
+    Note updatedNote = widget.note.copyWith(
+      title: titleController.text,
+      content: contentController.text,
+      source: sourceController.text,
+    );
+    // populate source metadata!
+    if (sourceMetadata != null) {
+      updatedNote.sourceTitle = sourceMetadata?.title;
+      updatedNote.sourceDescription = sourceMetadata?.description;
+      updatedNote.sourceImageUrl = sourceMetadata?.imageUrl;
     }
-  }
 
-  // Helper functions
-  Future<void> checkTitle(id, title) async {
-    final db = ref.read(dbProvider);
-    if (title == '') return;
-
-    RegExp r = RegExp('[${Note.invalidChars}]');
-    final invalidMatch = r.firstMatch(titleController.text);
-    final titleExists =
-        await db.titleExists(widget.note.id, titleController.text);
-
-    if (invalidMatch != null) {
-      titleController.text = widget.note.title;
-      throw FleetingNotesException(
-          r'Title cannot contain [, ], #, *, :, ^, \, /');
-    } else if (titleExists) {
-      titleController.text = widget.note.title;
-      throw FleetingNotesException(
-          'Title `${widget.note.title}` already exists');
-    }
-  }
-
-  void _deleteNote() async {
-    final db = ref.read(dbProvider);
-    Note deletedNote = widget.note;
-    deletedNote.isDeleted = true;
-    bool isSuccessDelete = await db.deleteNotes([widget.note]);
-    if (isSuccessDelete) {
-      Navigator.pop(context);
-      db.noteHistory.remove(widget.note);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Fail to delete note'),
-        duration: Duration(seconds: 2),
-      ));
-    }
-  }
-
-  Future<void> _saveNote({updateState = true}) async {
-    final db = ref.read(dbProvider);
-    Note updatedNote = widget.note;
-    String prevTitle = widget.note.title;
-    updatedNote.title = titleController.text;
-    updatedNote.content = contentController.text;
-    updatedNote.source = sourceController.text;
-    updatedNote.isShareable = isNoteShareable;
     try {
-      try {
-        await checkTitle(updatedNote.id, updatedNote.title);
-      } on FleetingNotesException catch (_) {
-        titleController.text = prevTitle;
-        rethrow;
-      }
-      if (updateState) {
-        setState(() {
-          hasNewChanges = false;
-        });
-      }
-      bool isSaveSuccess =
-          await db.upsertNotes([updatedNote], setModifiedAt: true);
-      if (!isSaveSuccess) {
-        if (updateState) onChanged();
-        throw FleetingNotesException('Failed to save note');
-      } else {
-        db.settings.delete('unsaved-note');
-        await updateBacklinks(prevTitle, updatedNote.title);
-      }
-    } on FleetingNotesException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.message),
-        duration: const Duration(seconds: 2),
-      ));
+      setState(() {
+        hasNewChanges = false;
+      });
+      await noteUtils.handleSaveNote(context, updatedNote);
+      setState(() {
+        savedAt = DateTime.now();
+      });
+    } on FleetingNotesException {
+      onChanged();
     }
   }
 
-  void storeUnsavedNote() {
-    final db = ref.read(dbProvider);
-    Note unsavedNote = Note(
+  Note getNote() {
+    Note note = Note(
       id: widget.note.id,
       title: titleController.text,
       content: contentController.text,
       source: sourceController.text,
       createdAt: widget.note.createdAt,
     );
-    db.settings.set('unsaved-note', unsavedNote);
+    return note;
   }
 
-  Future<void> updateBacklinks(String prevTitle, String newTitle) async {
+  void storeUnsavedNote() {
     final db = ref.read(dbProvider);
-    if (backlinkNotes.isEmpty || prevTitle == newTitle) return;
-    // update backlinks
-    List<Note> updatedBacklinks = backlinkNotes.map((n) {
-      RegExp r = RegExp('\\[\\[$prevTitle\\]\\]', multiLine: true);
-      n.content = n.content.replaceAll(r, '[[${widget.note.title}]]');
-      return n;
-    }).toList();
-    if (await db.upsertNotes(updatedBacklinks, setModifiedAt: true)) {
-      setState(() {
-        backlinkNotes = updatedBacklinks;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('${backlinkNotes.length} Link(s) Updated'),
-        duration: const Duration(seconds: 2),
-      ));
-    } else {
-      throw FleetingNotesException('Failed to update backlinks');
-    }
+    db.settings.set('unsaved-note', getNote());
   }
 
   void onChanged() async {
+    final noteUtils = ref.read(noteUtilsProvider);
     modifiedAt = DateTime.now().toUtc();
-    bool isNoteDiff = widget.note.content != contentController.text ||
-        widget.note.title != titleController.text ||
-        widget.note.source != sourceController.text;
-    bool isNoteEmpty = contentController.text.isEmpty &&
-        titleController.text.isEmpty &&
-        sourceController.text.isEmpty;
-    if (isNoteDiff && !isNoteEmpty) {
-      if (titleController.text.isNotEmpty ||
-          contentController.text.isNotEmpty) {
-        storeUnsavedNote();
-      }
+    final db = ref.read(dbProvider);
+    Note unsavedNote = db.settings.get('unsaved-note') ?? widget.note;
+    bool isNoteDiff = unsavedNote.content != contentController.text ||
+        unsavedNote.title != titleController.text ||
+        unsavedNote.source != sourceController.text;
+    if (isNoteDiff) {
+      noteUtils.cachedNote = getNote();
+      storeUnsavedNote();
       setState(() {
         hasNewChanges = true;
       });
@@ -257,25 +192,10 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     }
   }
 
-  void onSearchNavigate(BuildContext context) {
-    final db = ref.read(dbProvider);
-    db.popAllRoutes();
-    db.navigateToSearch('');
-  }
-
-  void onCopyUrl() {
-    Clipboard.setData(ClipboardData(
-        text: p.join(
-            "https://my.fleetingnotes.app/", "?note=${widget.note.id}")));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('URL copied to clipboard'),
-      duration: Duration(seconds: 2),
-    ));
-  }
-
   void handleNoteEvent(NoteEvent e) {
     Note? n = e.notes.firstWhereOrNull((n) => n.id == widget.note.id);
     if (n == null) return;
+    isNoteShareable = n.isShareable;
     bool noteSimilar = titleController.text == n.title &&
         contentController.text == n.content &&
         sourceController.text == n.source;
@@ -286,6 +206,29 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     if (!noteSimilar && !n.isDeleted && isNewerNote) {
       updateFields(n);
     }
+  }
+
+  void handleAuthChange(user) {
+    updateFields(Note.empty());
+  }
+
+  void onClearSource() {
+    sourceMetadata = null;
+    sourceController.text = '';
+    onChanged();
+  }
+
+  Future<void> updateSourceMetadata(String url) async {
+    UrlMetadata? m = sourceMetadata;
+    if (url.isNotEmpty && m?.url != sourceController.text) {
+      final db = ref.read(dbProvider);
+      m = await db.supabase.getUrlMetadata(url);
+    }
+    if (!mounted) return;
+    setState(() {
+      sourceMetadata = (m?.isEmpty == true) ? null : m;
+    });
+    _saveNote();
   }
 
   void updateFields(Note n) {
@@ -315,28 +258,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
     }
   }
 
-  void onAddAttachment(String filename, Uint8List? bytes) async {
-    final db = ref.read(dbProvider);
-    try {
-      String newFileName = '${widget.note.id}/$filename';
-      Note? newNote = await db.addAttachmentToNewNote(
-          filename: newFileName, fileBytes: bytes);
-      if (mounted && newNote != null) {
-        db.insertTextAtSelection(contentController, "[[${newNote.title}]]");
-        onChanged();
-      }
-    } on FleetingNotesException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.message),
-        duration: const Duration(seconds: 2),
-      ));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final db = ref.watch(dbProvider);
-    var isSharedNotes = db.isSharedNotes;
+    final noteUtils = ref.watch(noteUtilsProvider);
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {
@@ -346,74 +270,36 @@ class _NoteEditorState extends ConsumerState<NoteEditor> with RouteAware {
           return null;
         }),
       },
-      child: Scaffold(
-        body: Container(
-          color: Theme.of(context).dialogBackgroundColor,
-          child: SafeArea(
-            child: Column(
-              children: [
-                Header(
-                  onSave: (hasNewChanges) ? _saveNote : null,
-                  onDelete: (isSharedNotes) ? null : _deleteNote,
-                  onSearch: () => onSearchNavigate(context),
-                  onAddAttachment: onAddAttachment,
-                  onCopyUrl:
-                      (db.isLoggedIn() || isSharedNotes) ? onCopyUrl : null,
-                  onShareChange: (bool isShareable) {
-                    setState(() {
-                      isNoteShareable = isShareable;
-                    });
-                    _saveNote();
-                  },
-                  isNoteShareable: isNoteShareable,
-                ),
-                const Divider(thickness: 1, height: 1),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: ScrollController(),
-                    padding: EdgeInsets.all(
-                        Theme.of(context).custom.kDefaultPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.note.getDateTimeStr(),
-                          style: Theme.of(context).textTheme.caption,
-                        ),
-                        TitleField(
-                          controller: titleController,
-                          onChanged: onChanged,
-                        ),
-                        ContentField(
-                          controller: contentController,
-                          onChanged: onChanged,
-                          autofocus: autofocus,
-                        ),
-                        SourceContainer(
-                          controller: sourceController,
-                          onChanged: onChanged,
-                          overrideSourceUrl: widget.note.isEmpty(),
-                        ),
-                        SizedBox(
-                            height: Theme.of(context).custom.kDefaultPadding),
-                        const Text("Backlinks", style: TextStyle(fontSize: 12)),
-                        const Divider(thickness: 1, height: 1),
-                        SizedBox(
-                            height:
-                                Theme.of(context).custom.kDefaultPadding / 2),
-                        ...backlinkNotes.map((note) => NoteCard(
-                              note: note,
-                              onLongPress: () => {},
-                              onTap: () {
-                                db.navigateToNote(note); // TODO: Deprecate
-                              },
-                            )),
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: widget.padding ?? EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.note.getShortDateTimeStr(),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+              TitleField(
+                controller: titleController,
+                onChanged: onChanged,
+              ),
+              SourceContainer(
+                controller: sourceController,
+                metadata: sourceMetadata,
+                onChanged: onChanged,
+                onClearSource: onClearSource,
+              ),
+              const Divider(),
+              ContentField(
+                controller: contentController,
+                onChanged: onChanged,
+                autofocus: widget.autofocus,
+                onPop: () => noteUtils.onPopNote(context, widget.note.id),
+              ),
+            ],
           ),
         ),
       ),

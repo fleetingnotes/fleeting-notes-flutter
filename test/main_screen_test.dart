@@ -1,10 +1,12 @@
+import 'package:fleeting_notes_flutter/my_app.dart';
+import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
-import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
+import 'package:go_router/go_router.dart';
 
 import 'utils.dart';
 
@@ -14,45 +16,42 @@ void main() {
   testWidgets('Render Main Screen (Desktop/Tablet)',
       (WidgetTester tester) async {
     resizeToDesktop(tester);
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    expect(find.byType(NoteEditor), findsOneWidget);
+    await fnPumpWidget(tester, const MyApp());
+    expect(find.byType(NoteEditor), findsNothing);
     expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byType(SideRail), findsOneWidget);
+    expect(find.byIcon(Icons.tune), findsOneWidget);
+    expect(find.byType(NoteCard), findsNothing);
+    final BuildContext context = tester.element(find.byType(MainScreen));
+    expect(GoRouter.of(context).location == '/', isTrue);
   });
 
   testWidgets('Press new note button adds new note',
       (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    expect(find.byType(NoteEditor), findsNWidgets(1));
+    await fnPumpWidget(tester, const MyApp());
     await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-    expect(find.byType(NoteEditor), findsNWidgets(2));
+    await tester.pumpAndSettle();
+    final BuildContext context = tester.element(find.byType(MainScreen));
+    expect(GoRouter.of(context).location.startsWith('/note/'), isTrue);
   });
 
-  testWidgets('Clicking NoteCard populates NoteScreen and sets active note',
+  testWidgets('Clicking NoteCard opens Note Editor',
       (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    await addNote(tester, content: 'Click me note!');
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'Click me note!', closeDialog: true);
     await tester.tap(find.descendant(
-        of: find.byType(SearchScreen),
-        matching: find.text(
-          'Click me note!',
-          findRichText: true,
-        )));
+        of: find.byType(SearchScreen), matching: find.byType(NoteCard)));
     await tester.pumpAndSettle(); // Wait for animation to finish
     expect(
-        tester
-            .widget<NeumorphicButton>(find.descendant(
-              of: find.byType(SearchScreen),
-              matching: find.byType(NeumorphicButton),
-            ))
-            .style!
-            .color,
-        Colors.blue);
+        find.descendant(
+            of: find.byType(NoteEditor),
+            matching: find.text('Click me note!', findRichText: true)),
+        findsOneWidget);
   });
 
   testWidgets('Save note updates list of notes', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    await addNote(tester, content: 'Test save note!');
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'Test save note!', closeDialog: true);
     expect(
         find.descendant(
             of: find.byType(NoteCard),
@@ -61,95 +60,97 @@ void main() {
   });
 
   testWidgets('Delete note updates list of notes', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
     await addNote(tester, content: 'Test delete note!');
     expect(find.byType(NoteCard), findsOneWidget);
     await deleteCurrentNote(tester);
     expect(find.byType(NoteCard), findsNothing);
   });
 
-  // // Mobile Tests
+  // // // Mobile Tests
   testWidgets('Render Main Screen (Mobile)', (WidgetTester tester) async {
     resizeToMobile(tester);
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    expect(find.byType(NoteEditor), findsNothing);
+    await fnPumpWidget(tester, const MyApp());
+    expect(find.text('New note'), findsNothing);
     expect(find.byType(SearchScreen), findsOneWidget);
   });
 
-  testWidgets('Clicking NoteCard navigates to NoteScreen (Mobile)',
+  testWidgets('Adding a note navigates to NoteEditor (Mobile)',
       (WidgetTester tester) async {
     resizeToMobile(tester);
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    expect(find.byType(SearchScreen), findsOneWidget);
+    await fnPumpWidget(tester, const MyApp());
     await addNote(tester, content: 'Click me note!');
-    await tester.tap(find.byIcon(Icons.search));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(NoteCard));
-    await tester.pumpAndSettle(); // Wait for animation to finish
     expect(find.widgetWithText(NoteEditor, 'Click me note!'), findsOneWidget);
-    expect(find.byType(SearchScreen), findsNothing);
   });
 
-  // // Responsive Tests
+  // // // Responsive Tests
+  testWidgets('Resize Desktop (note + search empty) -> Mobile (note)',
+      (WidgetTester tester) async {
+    resizeToDesktop(tester);
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'test');
+
+    // Change to mobile
+    resizeToMobile(tester);
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.tune), findsNothing);
+  });
+
   testWidgets('Resize Desktop (note + search) -> Mobile (search)',
       (WidgetTester tester) async {
     resizeToDesktop(tester);
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'test');
+    await searchNotes(tester, 'test');
 
     // Change to mobile
     resizeToMobile(tester);
     await tester.pumpAndSettle();
-    expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteEditor), findsNothing);
+    expect(find.byIcon(Icons.tune), findsOneWidget);
   });
 
-  testWidgets('Resize Desktop (note + empty) -> Mobile (search)',
+  testWidgets('Resize Desktop (search empty + note empty) -> Mobile (search)',
       (WidgetTester tester) async {
     resizeToDesktop(tester);
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-
-    // Delete screen
-    await deleteCurrentNote(tester);
-    expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteEditor), findsNothing);
+    await fnPumpWidget(tester, const MyApp());
 
     // Change to mobile
     resizeToMobile(tester);
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteEditor), findsNothing);
+    expect(find.text('New note'), findsNothing);
   });
 
-  testWidgets('Resize Mobile (search) -> Desktop (search + note)',
+  testWidgets('Resize Mobile (search empty) -> Desktop (search + note)',
       (WidgetTester tester) async {
     resizeToMobile(tester);
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteEditor), findsNothing);
+    expect(find.text('New note'), findsNothing);
 
     // Change to Desktop
     resizeToDesktop(tester);
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.text('New note'), findsOneWidget);
   });
 
   testWidgets('Resize Mobile (note) -> Desktop (search + note)',
       (WidgetTester tester) async {
     resizeToMobile(tester);
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
 
     // Mobile on Note Screen
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
-    expect(find.byType(SearchScreen), findsNothing);
-    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.text('New note'), findsNothing);
 
     // Change to Desktop
     resizeToDesktop(tester);
     await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
-    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.text('New note'), findsOneWidget);
   });
 
   testWidgets('When Mobile Size with initial note, Then see NoteEditor',
@@ -157,11 +158,11 @@ void main() {
     resizeToMobile(tester);
     await fnPumpWidget(
       tester,
-      MaterialApp(home: MainScreen(initNote: Note.empty(content: 'init note'))),
+      const MaterialApp(home: MyApp()),
     );
+    await goToNewNote(tester, content: 'init note');
 
     // Mobile on Note Screen
-    expect(find.byType(SearchScreen), findsNothing);
     expect(find.byType(NoteEditor), findsOneWidget);
     expect(find.text('init note'), findsOneWidget);
   });
@@ -171,12 +172,35 @@ void main() {
     resizeToDesktop(tester);
     await fnPumpWidget(
       tester,
-      MaterialApp(home: MainScreen(initNote: Note.empty(content: 'init note'))),
+      const MyApp(),
     );
-
-    // Mobile on Note Screen
-    expect(find.byType(SearchScreen), findsOneWidget);
+    await goToNewNote(tester, content: 'init note');
     expect(find.byType(NoteEditor), findsOneWidget);
     expect(find.text('init note'), findsOneWidget);
+  });
+  testWidgets('When Desktop Size with initial note from query params',
+      (WidgetTester tester) async {
+    resizeToDesktop(tester);
+    await fnPumpWidget(
+      tester,
+      const MyApp(),
+    );
+    final BuildContext context = tester.element(find.byType(MainScreen));
+    context.goNamed('home', queryParams: {'content': 'init note'});
+    await tester.pumpAndSettle();
+    expect(find.text('init note'), findsOneWidget);
+  });
+  testWidgets('When Mobile Size with initial note from query params',
+      (WidgetTester tester) async {
+    resizeToMobile(tester);
+    await fnPumpWidget(
+      tester,
+      const MyApp(),
+    );
+    final BuildContext context = tester.element(find.byType(MainScreen));
+    context.goNamed('home', queryParams: {'content': 'init note'});
+    await tester.pumpAndSettle();
+    expect(find.text('init note'), findsOneWidget);
+    expect(find.byType(NoteEditor), findsOneWidget);
   });
 }

@@ -1,13 +1,17 @@
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
-import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/models/url_metadata.dart';
+import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor_app_bar.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
+import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'mocks/mock_supabase.dart';
 import 'utils.dart';
 
 void main() {
@@ -15,117 +19,58 @@ void main() {
     registerFallbackValue(Note.empty());
   });
   testWidgets('Render Note Screen', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    expect(find.bySemanticsLabel('Title of the idea'), findsOneWidget);
-    expect(
-        find.bySemanticsLabel('Note and links to other ideas'), findsOneWidget);
-  });
-
-  testWidgets('Backlinks are populated', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    await createNoteWithBacklink(tester);
-    expect(
-        find.descendant(
-          of: find.byType(NoteEditor),
-          matching: find.text('[[link]]', findRichText: true),
-        ),
-        findsOneWidget);
-  });
-
-  testWidgets('Save note button is enabled when note is changed',
-      (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), 'new note');
-    await tester.pump();
-
-    expect(findSaveButton(tester).enabled, isTrue);
-  });
-
-  testWidgets('Save note button is disabled when pressed',
-      (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), 'new note');
-    await saveCurrentNote(tester);
-
-    expect(findSaveButton(tester).enabled, isFalse);
-  });
-
-  testWidgets('Save note button shows snackbar if save failed',
-      (WidgetTester tester) async {
-    // mock supabase to fail on upsert
-    var mockSupabase = getSupabaseMockThrowOnUpsert();
-
-    // test for snackbar failure
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()),
-        supabase: mockSupabase);
-    await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), 'new note');
-    await saveCurrentNote(tester);
-    expect(find.byType(SnackBar), findsOneWidget);
-  });
-
-  testWidgets('Delete note shows snackbar if delete failed',
-      (WidgetTester tester) async {
-    // mock supabase to fail on upsert
-    var mockSupabase = getSupabaseMockThrowOnUpsert();
-    // test for snackbar failure
-    await fnPumpWidget(
-      tester,
-      const MaterialApp(home: MainScreen()),
-      supabase: mockSupabase,
-    );
-    await deleteCurrentNote(tester);
-    expect(find.byType(SnackBar), findsOneWidget);
+    await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
+    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.byType(NoteEditorAppBar), findsOneWidget);
+    expect(find.byType(NoteEditorBottomAppBar), findsNothing);
   });
 
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
-    await createNoteWithBacklink(tester);
-    await tester.enterText(
-        find.bySemanticsLabel('Title of the idea'), 'hello world');
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, title: 'link', content: '[[link]]');
+    await tester.enterText(find.bySemanticsLabel('Title'), 'hello world');
     await saveCurrentNote(tester);
-    await tester.pump(const Duration(seconds: 1)); // wait for notes to update
+    await tester.pumpAndSettle(); // wait for notes to update
     expect(
         find.descendant(
-          of: find.byType(NoteEditor),
+          of: find.byType(NoteCard),
           matching: find.text('[[hello world]]', findRichText: true),
         ),
         findsOneWidget);
   });
-  testWidgets('Clicking TitleField removes LinkPreview overlay',
+
+  testWidgets('Clicking outside of ContentField removes LinkPreview overlay',
       (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     await clickLinkInContentField(tester);
-    await tester.tap(find.byType(TitleField));
+    await tester.tapAt(tester
+        .getTopRight(find.bySemanticsLabel('Start writing your thoughts...'))
+        .translate(-20, 10));
     await tester.pumpAndSettle();
     expect(find.byType(LinkPreview), findsNothing);
   });
 
   testWidgets('Autosave works', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     // auto save
     await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), 'save');
-    await tester.pump();
-    expect(findSaveButton(tester).enabled, isTrue);
-    await tester.pump(const Duration(seconds: 1));
-    expect(findSaveButton(tester).enabled, isFalse);
-
-    // empty notes are not saved
-    await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), '');
-    await tester.pump();
-    expect(findSaveButton(tester).enabled, isFalse);
+        find.bySemanticsLabel('Start writing your thoughts...'), 'save');
+    await tester.pumpAndSettle();
+    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNull);
   });
+
   testWidgets('Cursor location doesnt change when handling note event',
       (WidgetTester tester) async {
     // setup
-    var mocks =
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), 'save');
+        find.bySemanticsLabel('Start writing your thoughts...'), 'save');
     await tester.tap(find.byIcon(Icons.save));
     await tester.pumpAndSettle(const Duration(seconds: 1));
     var prevController =
@@ -144,13 +89,14 @@ void main() {
         tester.widget<ContentField>(find.byType(ContentField)).controller;
     expect(prevController.selection == nextController.selection, isTrue);
   });
+
   testWidgets('Cursor location set to end of text if too short',
       (WidgetTester tester) async {
     // setup
-    var mocks =
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), 'save');
+        find.bySemanticsLabel('Start writing your thoughts...'), 'save');
     await tester.tap(find.byIcon(Icons.save));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
@@ -172,10 +118,10 @@ void main() {
       'NoteEvents that have a modified time within 5 seconds dont update fields',
       (WidgetTester tester) async {
     // setup
-    var mocks =
-        await fnPumpWidget(tester, const MaterialApp(home: MainScreen()));
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
     await tester.enterText(
-        find.bySemanticsLabel('Note and links to other ideas'), 'save');
+        find.bySemanticsLabel('Start writing your thoughts...'), 'save');
     await tester.tap(find.byIcon(Icons.save));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
@@ -191,12 +137,61 @@ void main() {
         tester.widget<ContentField>(find.byType(ContentField)).controller;
     expect(nextController.text == 'save', isTrue);
   });
+
+  testWidgets('Title field doesnt lose focus when typing',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
+    await tester.enterText(find.bySemanticsLabel('Title'), 'test');
+    await tester.pumpAndSettle();
+
+    expect(contentFieldHasFocus(tester), isFalse);
+  });
+
+  testWidgets('New note has focus on content field',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
+    await tester.pumpAndSettle();
+    expect(contentFieldHasFocus(tester), isTrue);
+  });
+
+  testWidgets('New note with source preview has focus on content field',
+      (WidgetTester tester) async {
+    var mockSupabase = getBaseMockSupabaseDB();
+    when(() => mockSupabase.getUrlMetadata(any())).thenAnswer((_) =>
+        Future.value(UrlMetadata(
+            url: 'https://test.test',
+            title: 'Test',
+            description: 'Test',
+            imageUrl: 'https://test.image/')));
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    await goToNewNote(tester);
+    await tester.enterText(
+        find.bySemanticsLabel('Source'), 'https://test.test');
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    expect(contentFieldHasFocus(tester), isTrue);
+  });
+
+  testWidgets('auth change refreshes current note',
+      (WidgetTester tester) async {
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
+    await modifyCurrentNote(tester, content: 'init note');
+    mocks.supabase.authChangeController.add(null);
+    await tester.pumpAndSettle();
+    expect(
+        find.descendant(
+            of: find.byType(ContentField), matching: find.text('init note')),
+        findsNothing);
+  });
 }
 
-OutlinedButton findSaveButton(WidgetTester tester) {
-  return tester.widget<OutlinedButton>(
-    find.ancestor(
-        of: find.text('Save'),
-        matching: find.byWidgetPredicate((widget) => widget is OutlinedButton)),
-  );
+bool? contentFieldHasFocus(WidgetTester tester) {
+  return tester
+      .widget<TextField>(find.ancestor(
+          of: find.bySemanticsLabel('Start writing your thoughts...'),
+          matching: find.byType(TextField)))
+      .focusNode
+      ?.hasFocus;
 }

@@ -19,15 +19,6 @@ class MDFile {
   MDFile(this.frontmatter, this.content);
 }
 
-bool isValidUuid(String uuid) {
-  try {
-    Uuid.parse(uuid);
-    return true;
-  } on FormatException {
-    return false;
-  }
-}
-
 class LocalFileSync extends SyncTerface {
   LocalFileSync({
     required this.settings,

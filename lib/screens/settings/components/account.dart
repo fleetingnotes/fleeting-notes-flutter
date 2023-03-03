@@ -24,39 +24,45 @@ class Account extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SettingItem(
-            title: 'Email',
+          SettingsItem(
+            name: 'Email',
             description: email,
-            widget: ElevatedButton(
-                onPressed: onLogout, child: const Text('Logout')),
+            actions: [
+              ElevatedButton(onPressed: onLogout, child: const Text('Logout'))
+            ],
           ),
-          SettingItem(
-            title: 'Force Sync',
+          SettingsItem(
+            name: 'Force Sync',
             description: 'Sync notes from the cloud to the device',
-            widget: ElevatedButton(
-                onPressed: onForceSync, child: const Text('Force sync')),
+            actions: [
+              ElevatedButton(
+                  onPressed: onForceSync, child: const Text('Force sync'))
+            ],
           ),
-          SettingItem(
-            title: 'End-to-end Encryption',
+          SettingsItem(
+            name: 'End-to-end Encryption',
             description: 'Encrypt notes with end-to-end encryption',
-            widget: ElevatedButton(
-                onPressed: onEnableEncryption,
-                child:
-                    Text((onEnableEncryption == null) ? 'Enabled' : 'Enable')),
+            actions: [
+              ElevatedButton(
+                  onPressed: onEnableEncryption,
+                  child:
+                      Text((onEnableEncryption == null) ? 'Enabled' : 'Enable'))
+            ],
           ),
-          SettingItem(
-            title: 'Delete Account',
-            description: 'Delete your account and all your notes',
-            widget: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) =>
-                        DeleteAccountWidget(onDelete: onDeleteAccount),
-                  );
-                },
-                child: const Text('Delete')),
-          )
+          SettingsItem(
+              name: 'Delete Account',
+              description: 'Delete your account and all your notes',
+              actions: [
+                ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            DeleteAccountWidget(onDelete: onDeleteAccount),
+                      );
+                    },
+                    child: const Text('Delete')),
+              ])
         ],
       ),
     );

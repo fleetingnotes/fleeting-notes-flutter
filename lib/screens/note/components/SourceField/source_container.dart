@@ -1,64 +1,89 @@
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/material.dart';
+import 'dart:async';
 
-class SourceContainer extends StatefulWidget {
+import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../models/url_metadata.dart';
+
+class SourceContainer extends ConsumerStatefulWidget {
   const SourceContainer({
     Key? key,
-    required this.controller,
+    this.controller,
+    this.text,
+    this.metadata,
     this.onChanged,
-    this.overrideSourceUrl = false,
+    this.onClearSource,
+    this.readOnly = false,
   }) : super(key: key);
 
-  final TextEditingController controller;
+  final String? text;
+  final UrlMetadata? metadata;
+  final TextEditingController? controller;
   final VoidCallback? onChanged;
-  final bool overrideSourceUrl;
+  final VoidCallback? onClearSource;
+  final bool readOnly;
 
   @override
-  State<SourceContainer> createState() => _SourceContainerState();
+  ConsumerState<SourceContainer> createState() => _SourceContainerState();
 }
 
-class _SourceContainerState extends State<SourceContainer> {
-  void launchURLBrowser(String url, BuildContext context) async {
-    void _failUrlSnackbar(String message) {
-      var snackBar = SnackBar(
-        content: Text(message),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
+class _SourceContainerState extends ConsumerState<SourceContainer> {
+  TextEditingController controller = TextEditingController();
+  Timer? saveTimer;
 
-    Uri? uri = Uri.tryParse(url);
-    if (uri == null) {
-      String errText = 'Could not launch `$url`';
-      _failUrlSnackbar(errText);
-      return;
-    }
-    try {
-      await launchUrl(uri);
-    } catch (e) {
-      String errText = 'Could not launch `$url`';
-      _failUrlSnackbar(errText);
-    }
+  @override
+  void initState() {
+    super.initState();
+    controller = widget.controller ?? controller;
+    final sourceUrl = widget.text ?? controller.text;
+    controller.text = sourceUrl;
+  }
+
+  void onPressedPreview(String url) {
+    Uri uri = Uri.parse(url);
+    launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
   Widget build(BuildContext context) {
+    final m = widget.metadata;
+    if (m != null) {
+      return SourcePreview(
+        metadata: m,
+        onPressed: () => onPressedPreview(m.url),
+        onClear: widget.onClearSource,
+      );
+    }
     return TextField(
-      style: Theme.of(context).textTheme.bodyText2,
-      controller: widget.controller,
-      onChanged: (text) {
-        widget.onChanged?.call();
-      },
-      decoration: InputDecoration(
-        hintText: "Source",
-        border: InputBorder.none,
-        suffixIcon: IconButton(
-          tooltip: 'Open URL',
-          icon: const Icon(Icons.open_in_new),
-          onPressed: (widget.controller.text == '')
-              ? null
-              : () => launchURLBrowser(widget.controller.text, context),
-        ),
-      ),
-    );
+        contextMenuBuilder: (context, editableTextState) {
+          SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+            controller.selection = TextSelection(
+                baseOffset: 0, extentOffset: controller.value.text.length);
+          });
+          Uri? uri = Uri.tryParse(controller.text);
+          return AdaptiveTextSelectionToolbar.buttonItems(
+            anchors: editableTextState.contextMenuAnchors,
+            buttonItems: [
+              if (controller.text.isNotEmpty && uri != null)
+                ContextMenuButtonItem(
+                  onPressed: () =>
+                      launchUrl(uri, mode: LaunchMode.externalApplication),
+                  label: 'Open Source',
+                ),
+              ...editableTextState.contextMenuButtonItems,
+            ],
+          );
+        },
+        readOnly: widget.readOnly,
+        style: Theme.of(context).textTheme.bodySmall,
+        controller: controller,
+        onChanged: (text) => widget.onChanged?.call(),
+        decoration: const InputDecoration(
+          isDense: true,
+          hintText: "Source",
+          border: InputBorder.none,
+        ));
   }
 }

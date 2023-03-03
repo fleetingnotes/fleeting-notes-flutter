@@ -1,5 +1,5 @@
+import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
 import 'package:flutter/material.dart';
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
 
 class Backup extends StatelessWidget {
   const Backup({
@@ -17,31 +17,29 @@ class Backup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(Theme.of(context).custom.kDefaultPadding / 2),
-      child: Row(children: [
-        DropdownButton(
-          underline: const SizedBox(),
-          value: backupOption,
-          onChanged: onBackupOptionChange,
-          items: const [
-            DropdownMenuItem(
-              child: Text('Markdown'),
-              value: 'Markdown',
-            ),
-            DropdownMenuItem(
-              child: Text('JSON'),
-              value: 'JSON',
-            ),
-          ],
-        ),
-        const Spacer(),
+    return SettingsItem(
+      leading: DropdownButton(
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        underline: const SizedBox(),
+        value: backupOption,
+        onChanged: onBackupOptionChange,
+        items: const [
+          DropdownMenuItem(
+            child: Text('Markdown'),
+            value: 'Markdown',
+          ),
+          DropdownMenuItem(
+            child: Text('JSON'),
+            value: 'JSON',
+          ),
+        ],
+      ),
+      actions: [
         ElevatedButton(
             onPressed: (backupOption) == 'Markdown' ? onImportPress : null,
             child: const Text('Import')),
-        const SizedBox(width: 5),
         ElevatedButton(onPressed: onExportPress, child: const Text('Export')),
-      ]),
+      ],
     );
   }
 }

@@ -1,9 +1,14 @@
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
+import 'package:fleeting_notes_flutter/services/note_utils.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/services/database.dart';
+
+import '../models/note_history.dart';
+import '../models/search_query.dart';
+import 'notifier.dart';
 
 // init providers
 final supabaseProvider = Provider<SupabaseDB>((_) => SupabaseDB());
@@ -23,4 +28,13 @@ final dbProvider = Provider<Database>((ref) {
     supabase: supabase,
     localFileSync: localFileSync,
   );
+});
+
+final searchProvider = StateNotifierProvider<SearchNotifier, SearchQuery?>(
+    (ref) => SearchNotifier());
+final noteHistoryProvider =
+    StateNotifierProvider<NoteHistoryNotifier, NoteHistory>(
+        (ref) => NoteHistoryNotifier());
+final noteUtilsProvider = Provider<NoteUtils>((ref) {
+  return NoteUtils(ref);
 });

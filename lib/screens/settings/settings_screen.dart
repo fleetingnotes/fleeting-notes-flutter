@@ -2,7 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/utils/theme_data.dart';
+import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:file_saver/file_saver.dart';
@@ -10,12 +10,14 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../utils/responsive.dart';
 import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
 import 'components/local_file_sync_setting.dart';
+import 'components/setting_item.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -79,12 +81,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     var bytes = utf8.encode(json);
     FileSaver.instance.saveFile(
         'fleeting_notes_export.json', Uint8List.fromList(bytes), 'json');
-  }
-
-  void autoFilledToggled(bool value) async {
-    final db = ref.read(dbProvider);
-    await db.settings.set('auto-fill-source', value);
-    setState(() {}); // refresh settings screen
   }
 
   void onExportPress() async {
@@ -173,7 +169,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         return EncryptionDialog(setEncryptionKey: (key) async {
           await db.supabase.setEncryptionKey(key);
           getEncryptionKey();
-          db.refreshApp();
+          db.refreshApp(ref);
         });
       },
     );
@@ -188,105 +184,123 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(
-                    Theme.of(context).custom.kDefaultPadding / 3),
-                child: Row(children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      context.go('/');
-                    },
-                  ),
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        'Settings',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
+    return SafeArea(
+      child: Center(
+        child: Column(
+          children: [
+            AppBar(
+              elevation:
+                  (Responsive.isMobile(context)) ? null : dialogElevation,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: Navigator.of(context).pop,
+              ),
+              title: const Text('Settings'),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                  controller: ScrollController(),
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SettingsTitle(title: "Account"),
+                      (isLoggedIn)
+                          ? Account(
+                              email: email,
+                              onLogout: onLogoutPress,
+                              onForceSync: onForceSyncPress,
+                              onDeleteAccount: onDeleteAccountPress,
+                              onEnableEncryption: (encryptionEnabled)
+                                  ? null
+                                  : onEnableEncryptionPress,
+                            )
+                          : Auth(onLogin: (e) {
+                              getEncryptionKey();
+                              setState(() {
+                                isLoggedIn = true;
+                                email = e;
+                              });
+                            }),
+                      const SizedBox(height: 16),
+                      const SettingsTitle(title: "Backup"),
+                      Backup(
+                        backupOption: backupOption,
+                        onImportPress: onImportPress,
+                        onExportPress: onExportPress,
+                        onBackupOptionChange: onBackupDropdownChange,
                       ),
-                    ),
-                  ),
-                ]),
-              ),
-              const Divider(
-                thickness: 1,
-                height: 1,
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                    controller: ScrollController(),
-                    padding: EdgeInsets.all(
-                        Theme.of(context).custom.kDefaultPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Account", style: TextStyle(fontSize: 12)),
-                        const Divider(thickness: 1, height: 1),
-                        (isLoggedIn)
-                            ? Account(
-                                email: email,
-                                onLogout: onLogoutPress,
-                                onForceSync: onForceSyncPress,
-                                onDeleteAccount: onDeleteAccountPress,
-                                onEnableEncryption: (encryptionEnabled)
-                                    ? null
-                                    : onEnableEncryptionPress,
-                              )
-                            : Auth(onLogin: (e) {
-                                getEncryptionKey();
-                                setState(() {
-                                  isLoggedIn = true;
-                                  email = e;
-                                });
-                              }),
-                        SizedBox(
-                            height: Theme.of(context).custom.kDefaultPadding),
-                        const Text("Backup", style: TextStyle(fontSize: 12)),
-                        const Divider(thickness: 1, height: 1),
-                        Backup(
-                          backupOption: backupOption,
-                          onImportPress: onImportPress,
-                          onExportPress: onExportPress,
-                          onBackupOptionChange: onBackupDropdownChange,
-                        ),
-                        SizedBox(
-                            height: Theme.of(context).custom.kDefaultPadding),
-                        const Text("Sync", style: TextStyle(fontSize: 12)),
-                        const Divider(thickness: 1, height: 1),
-                        LocalSyncSetting(
-                          settings: db.settings,
-                          getAllNotes: db.getAllNotes,
-                        ),
-                        SizedBox(
-                            height: Theme.of(context).custom.kDefaultPadding),
-                        const Text("Other Settings",
-                            style: TextStyle(fontSize: 12)),
-                        const Divider(thickness: 1, height: 1),
-                        Row(children: [
-                          const Text("Auto Fill Source",
-                              style: TextStyle(fontSize: 12)),
-                          Switch(
-                              value: db.settings
-                                  .get('auto-fill-source', defaultValue: false),
-                              onChanged: autoFilledToggled)
-                        ]),
-                        SizedBox(
-                            height: Theme.of(context).custom.kDefaultPadding),
-                        const LegalLinks(),
-                      ],
-                    )),
-              )
-            ],
-          ),
+                      const SizedBox(height: 8),
+                      const SettingsTitle(title: "Sync"),
+                      LocalSyncSetting(
+                        settings: db.settings,
+                        getAllNotes: db.getAllNotes,
+                      ),
+                      const SizedBox(height: 8),
+                      const SettingsTitle(title: "Other Settings"),
+                      const SettingsItemSwitch(
+                          settingsKey: 'dark-mode', name: "Dark mode"),
+                      const SizedBox(height: 24),
+                      const LegalLinks(),
+                    ],
+                  )),
+            )
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class SettingsItemSwitch extends ConsumerWidget {
+  const SettingsItemSwitch({
+    super.key,
+    required this.settingsKey,
+    this.name = '',
+    this.description = '',
+    this.defaultValue = false,
+  });
+
+  final String settingsKey;
+  final String name;
+  final String description;
+  final bool defaultValue;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    return ValueListenableBuilder(
+      valueListenable: settings.box.listenable(keys: [settingsKey]),
+      builder: (context, Box box, _) {
+        return SettingsItem(
+          name: name,
+          description: description,
+          actions: [
+            Switch(
+                value: settings.get(settingsKey, defaultValue: defaultValue),
+                onChanged: (v) => settings.set(settingsKey, v))
+          ],
+        );
+      },
+    );
+  }
+}
+
+class SettingsTitle extends StatelessWidget {
+  final String title;
+
+  const SettingsTitle({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
       ),
     );
   }
@@ -303,28 +317,28 @@ class LegalLinks extends StatelessWidget {
       RichText(
         text: TextSpan(
           text: 'Privacy Policy',
-          style: Theme.of(context).textTheme.bodyText1!.copyWith(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.blue,
               ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               Uri pricingUrl =
                   Uri.parse("https://fleetingnotes.app/privacy-policy");
-              launchUrl(pricingUrl);
+              launchUrl(pricingUrl, mode: LaunchMode.externalApplication);
             },
         ),
       ),
       RichText(
         text: TextSpan(
           text: 'Terms and Conditions',
-          style: Theme.of(context).textTheme.bodyText1!.copyWith(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.blue,
               ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
               Uri pricingUrl =
                   Uri.parse("https://fleetingnotes.app/terms-and-conditions");
-              launchUrl(pricingUrl);
+              launchUrl(pricingUrl, mode: LaunchMode.externalApplication);
             },
         ),
       ),
