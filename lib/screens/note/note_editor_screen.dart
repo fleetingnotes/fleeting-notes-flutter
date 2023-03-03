@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/note_editor_botto
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -159,6 +160,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       child: ScaffoldMessenger(
         child: Scaffold(
           key: scaffoldKey,
+          resizeToAvoidBottomInset: false,
           drawerScrimColor: Colors.transparent,
           endDrawer: BacklinksDrawer(
             closeDrawer: scaffoldKey.currentState?.closeEndDrawer,
@@ -193,12 +195,16 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                       ),
               ),
               if (bottomAppBarVisible)
-                NoteEditorBottomAppBar(
-                  onBack: (noteHistory.backNoteHistory.isEmpty) ? null : onBack,
-                  onForward: (noteHistory.forwardNoteHistory.isEmpty)
-                      ? null
-                      : onForward,
-                )
+                KeyboardVisibilityBuilder(builder: (context, isVisible) {
+                  if (isVisible) return const SizedBox.shrink();
+                  return NoteEditorBottomAppBar(
+                    onBack:
+                        (noteHistory.backNoteHistory.isEmpty) ? null : onBack,
+                    onForward: (noteHistory.forwardNoteHistory.isEmpty)
+                        ? null
+                        : onForward,
+                  );
+                })
             ],
           ),
         ),

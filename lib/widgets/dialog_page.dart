@@ -19,6 +19,7 @@ class DialogPage<T> extends Page<T> {
       context: context,
       settings: this,
       builder: (context) => DynamicDialog(child: child),
+      useSafeArea: false,
     );
   }
 }
