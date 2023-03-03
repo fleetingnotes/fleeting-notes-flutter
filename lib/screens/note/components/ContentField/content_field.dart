@@ -70,6 +70,11 @@ class _ContentFieldState extends ConsumerState<ContentField> {
         allLinks = links;
       });
     });
+    contentFocusNode.addListener(() {
+      if (!contentFocusNode.hasFocus) {
+        removeOverlay();
+      }
+    });
   }
 
   void handlePaste({Uint8List? pasteImage}) async {
@@ -281,7 +286,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
           builder: (BuildContext context, AsyncSnapshot<Note> snapshot) {
             var note = snapshot.data;
             if (note != null) {
-              contentFocusNode.unfocus();
               return LinkPreview(
                 note: note,
                 caretOffset: caretOffset,

@@ -27,6 +27,16 @@ void main() {
     expect(find.byType(LinkPreview), findsOneWidget);
   });
 
+  testWidgets('LinkPreview disappears when pressing title field',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester);
+    await clickLinkInContentField(tester);
+    await tester.tap(find.bySemanticsLabel('Title'));
+    await tester.pumpAndSettle();
+    expect(find.byType(LinkPreview), findsNothing);
+  });
+
   testWidgets('TitleLinks list appears on `[[` type',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
