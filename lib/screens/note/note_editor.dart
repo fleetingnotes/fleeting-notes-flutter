@@ -78,6 +78,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     authChangeStream =
         db.supabase.authChangeController.stream.listen(handleAuthChange);
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
+    contentController.addListener(onChanged);
   }
 
   void initSourceMetadata(UrlMetadata metadata) {
@@ -114,6 +115,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     saveTimer?.cancel();
     noteChangeStream?.cancel();
     authChangeStream?.cancel();
+    contentController.removeListener(onChanged);
   }
 
   Future<void> _saveNote() async {
