@@ -6,13 +6,13 @@ import FlutterMacOS
 import Foundation
 
 import app_links
-import device_info_plus_macos
+import device_info_plus
 import file_saver
 import flutter_secure_storage_macos
 import in_app_purchase_storekit
-import package_info_plus_macos
+import package_info_plus
 import pasteboard
-import path_provider_macos
+import path_provider_foundation
 import sentry_flutter
 import sqflite
 import url_launcher_macos
