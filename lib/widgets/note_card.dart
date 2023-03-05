@@ -65,6 +65,7 @@ class _NoteCardState extends State<NoteCard> {
         child: Card(
           clipBehavior: Clip.hardEdge,
           elevation: elevation,
+          shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             side: BorderSide(
               color: Theme.of(context).colorScheme.outlineVariant,
