@@ -58,21 +58,17 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     // get backlinks (async)
     if (tempNote.title.isNotEmpty) {
       backlinksSq = SearchQuery(query: "[[${tempNote.title}]]");
+      setState(() {
+        note = tempNote;
+      });
       db.getSearchNotes(backlinksSq).then((notes) {
         setState(() {
-          note = tempNote;
-          titleController.text = tempNote.title;
-          contentController.text = tempNote.content;
-          sourceController.text = tempNote.source;
           backlinks = notes;
         });
       });
     } else {
       setState(() {
         note = tempNote;
-        titleController.text = tempNote.title;
-        contentController.text = tempNote.content;
-        sourceController.text = tempNote.source;
         backlinks = [];
       });
     }

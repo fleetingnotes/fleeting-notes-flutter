@@ -347,14 +347,15 @@ class SupabaseDB {
       if (source.isNotEmpty) {
         source = decryptAESCryptoJS(source, encryptionKey);
       }
-      if (sourceTitle?.isNotEmpty == true) {
-        source = decryptAESCryptoJS(source, encryptionKey);
+      if (sourceTitle != null && sourceTitle.isNotEmpty) {
+        sourceTitle = decryptAESCryptoJS(sourceTitle, encryptionKey);
       }
-      if (sourceDescription?.isNotEmpty == true) {
-        source = decryptAESCryptoJS(source, encryptionKey);
+      if (sourceDescription != null && sourceDescription.isNotEmpty) {
+        sourceDescription =
+            decryptAESCryptoJS(sourceDescription, encryptionKey);
       }
-      if (sourceImageUrl?.isNotEmpty == true) {
-        source = decryptAESCryptoJS(source, encryptionKey);
+      if (sourceImageUrl != null && sourceImageUrl.isNotEmpty) {
+        sourceImageUrl = decryptAESCryptoJS(sourceImageUrl, encryptionKey);
       }
     }
     return Note(
@@ -394,10 +395,11 @@ class SupabaseDB {
         sourceTitle = encryptAESCryptoJS(sourceTitle, encryptionKey);
       }
       if (sourceDescription != null && sourceDescription.isNotEmpty == true) {
-        sourceDescription = encryptAESCryptoJS(source, encryptionKey);
+        sourceDescription =
+            encryptAESCryptoJS(sourceDescription, encryptionKey);
       }
       if (sourceImageUrl != null && sourceImageUrl.isNotEmpty == true) {
-        sourceImageUrl = encryptAESCryptoJS(source, encryptionKey);
+        sourceImageUrl = encryptAESCryptoJS(sourceImageUrl, encryptionKey);
       }
     }
     return {

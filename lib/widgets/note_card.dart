@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/Note.dart';
-import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
 class NoteCard extends StatefulWidget {
   const NoteCard({
@@ -67,7 +67,7 @@ class _NoteCardState extends State<NoteCard> {
           elevation: elevation,
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: Theme.of(context).colorScheme.outline,
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
             borderRadius: const BorderRadius.all(Radius.circular(12)),
           ),
