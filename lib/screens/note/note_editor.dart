@@ -40,6 +40,7 @@ class NoteEditor extends ConsumerStatefulWidget {
 
 class _NoteEditorState extends ConsumerState<NoteEditor> {
   List<String> linkSuggestions = [];
+  Note currNote = Note.empty();
   bool hasNewChanges = false;
   bool isNoteShareable = false;
   Timer? saveTimer;
@@ -78,17 +79,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     authChangeStream =
         db.supabase.authChangeController.stream.listen(handleAuthChange);
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
-    initSourceMetadata(widget.note.sourceMetadata);
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      ref.watch(noteHistoryProvider.notifier).addListener((nh) {
-        var currNote = nh.currNote;
-        if (currNote != null) {
-          saveTimer?.cancel();
-          sourceMetadata = null;
-          initSourceMetadata(currNote.sourceMetadata);
-        }
-      });
-    });
   }
 
   void initSourceMetadata(UrlMetadata metadata) {
@@ -258,9 +248,23 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     }
   }
 
+  void initCurrNote() {
+    if (currNote.id == widget.note.id) return;
+    saveTimer?.cancel();
+    sourceMetadata = null;
+    currNote = widget.note;
+
+    titleController.text = currNote.title;
+    contentController.text = currNote.content;
+    sourceController.text = currNote.source;
+
+    initSourceMetadata(currNote.sourceMetadata);
+  }
+
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
+    initCurrNote();
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {

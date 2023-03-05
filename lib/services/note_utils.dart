@@ -115,7 +115,7 @@ class NoteUtils {
           var dbNote = await db.getNoteById(note.id);
           if (dbNote != null) {
             dbNote.content += '\n[[${newNote.title}]]';
-            db.upsertNotes([dbNote], setModifiedAt: true);
+            await handleSaveNote(context, dbNote);
           }
         }
       }
