@@ -71,6 +71,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
         height: 72,
         duration: const Duration(milliseconds: 100),
         child: Card(
+          shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
               borderRadius: (hasSearchFocus)
                   ? BorderRadius.zero
