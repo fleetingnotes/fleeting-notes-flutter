@@ -36,10 +36,10 @@ class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
     return SizedBox(
       width: widget.width,
       child: Drawer(
-        child: Column(
-          children: [
-            SafeArea(
-              child: Padding(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
                 padding: const EdgeInsets.only(top: 8, right: 16, left: 16),
                 child: Row(
                   children: [
@@ -55,18 +55,18 @@ class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
                   ],
                 ),
               ),
-            ),
-            const Divider(),
-            Expanded(
-              child: NoteGrid(
-                crossAxisCount: 1,
-                maxLines: 2,
-                searchQuery: widget.searchQuery,
-                notes: widget.backlinks,
-                onTap: onNoteTap,
+              const Divider(),
+              Expanded(
+                child: NoteGrid(
+                  crossAxisCount: 1,
+                  maxLines: 2,
+                  searchQuery: widget.searchQuery,
+                  notes: widget.backlinks,
+                  onTap: onNoteTap,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
