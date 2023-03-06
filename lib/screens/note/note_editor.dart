@@ -78,7 +78,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     authChangeStream =
         db.supabase.authChangeController.stream.listen(handleAuthChange);
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
-    contentController.addListener(() => onChanged(storeNote: false));
   }
 
   void initSourceMetadata(UrlMetadata metadata) {
@@ -153,6 +152,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       source: sourceController.text,
       createdAt: widget.note.createdAt,
     );
+    if (sourceMetadata?.url == sourceController.text) {
+      note.sourceTitle = sourceMetadata?.title;
+      note.sourceDescription = sourceMetadata?.description;
+      note.sourceImageUrl = sourceMetadata?.imageUrl;
+    }
     return note;
   }
 
@@ -253,6 +257,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   void initCurrNote() {
     if (currNote.id == widget.note.id) return;
+    contentController.removeListener(onChanged);
     saveTimer?.cancel();
     sourceMetadata = null;
     currNote = widget.note;
@@ -261,6 +266,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     contentController.text = currNote.content;
     sourceController.text = currNote.source;
 
+    contentController.addListener(onChanged);
     initSourceMetadata(currNote.sourceMetadata);
   }
 
