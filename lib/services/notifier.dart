@@ -19,10 +19,11 @@ class NoteHistoryNotifier extends StateNotifier<NoteHistory> {
 
   Note? get currNote => state.currNote;
 
-  void addNote(BuildContext context, Note note) {
+  void addNote(BuildContext context, Note note, {GoRouter? router}) {
+    router ??= GoRouter.of(context);
     NoteHistory nh = state.copy();
     Note? prevNote = nh.currNote;
-    if (GoRouter.of(context).location == '/') {
+    if (router.location == '/') {
       nh.backNoteHistory = [];
     }
     if (prevNote != null) {
@@ -30,7 +31,7 @@ class NoteHistoryNotifier extends StateNotifier<NoteHistory> {
     }
     nh.forwardNoteHistory = [];
     nh.currNote = note;
-    context.goNamed('note', params: {'id': note.id}, extra: note);
+    router.goNamed('note', params: {'id': note.id}, extra: note);
     state = nh;
   }
 

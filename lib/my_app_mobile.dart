@@ -5,6 +5,7 @@ import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:receive_intent/receive_intent.dart' as ri;
@@ -85,6 +86,13 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   @override
   void initState() {
     super.initState();
+    void goToNote(Note note) {
+      final noteHistory = ref.read(noteHistoryProvider.notifier);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        noteHistory.addNote(context, note, router: router);
+      });
+    }
+
     Note getNoteFromShareText({String title = '', String body = ''}) {
       var ph = findAndroidHighlight(body);
       if (ph != null) {
@@ -107,7 +115,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       String type = (intent.extra?['type'] ?? '').toString();
       if (type != 'DigitalDocument' && body.isEmpty) return;
       var note = getNoteFromShareText(title: title, body: body);
-      router.goNamed('note', params: {'id': note.id}, extra: note);
+      goToNote(note);
     }
 
     if (Platform.isAndroid) {
@@ -123,7 +131,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       receiveShareSub =
           ReceiveSharingIntent.getTextStream().listen((String sharedText) {
         var note = getNoteFromShareText(body: sharedText);
-        router.goNamed('note', params: {'id': note.id}, extra: note);
+        goToNote(note);
       }, onError: (err) {
         // ignore: avoid_print
         print("getLinkStream error: $err");
@@ -133,7 +141,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       ReceiveSharingIntent.getInitialText().then((String? sharedText) {
         if (sharedText != null) {
           var note = getNoteFromShareText(body: sharedText);
-          router.goNamed('note', params: {'id': note.id}, extra: note);
+          goToNote(note);
         }
       });
 
@@ -142,7 +150,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
         if (uri != null) {
           getNoteFromWidgetUri(uri).then((note) {
-            router.goNamed('note', params: {'id': note.id}, extra: note);
+            goToNote(note);
           });
         }
       });
@@ -150,7 +158,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       homeWidgetSub = HomeWidget.widgetClicked.listen((uri) {
         if (uri != null) {
           getNoteFromWidgetUri(uri).then((note) {
-            router.goNamed('note', params: {'id': note.id}, extra: note);
+            goToNote(note);
           });
         }
       }, onError: (err) {
