@@ -1,5 +1,6 @@
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
+import 'package:fleeting_notes_flutter/screens/search/components/search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
@@ -100,13 +101,16 @@ void main() {
       (WidgetTester tester) async {
     resizeToDesktop(tester);
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester, content: 'test');
+    await addNote(tester, content: 'note', closeDialog: true);
     await searchNotes(tester, 'test');
 
     // Change to mobile
     resizeToMobile(tester);
     await tester.pumpAndSettle();
+    await tester.tap(find.byType(SearchBar));
+    await tester.pumpAndSettle();
     expect(find.byIcon(Icons.tune), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
   });
 
   testWidgets('Resize Desktop (search empty + note empty) -> Mobile (search)',

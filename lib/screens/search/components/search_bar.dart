@@ -71,6 +71,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    bool searchFocusMobile = hasSearchFocus && Responsive.isMobile(context);
     return SafeArea(
       child: AnimatedContainer(
         height: 72,
@@ -78,20 +79,25 @@ class _SearchBarState extends ConsumerState<SearchBar> {
         child: Card(
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-              borderRadius: (hasSearchFocus)
+              borderRadius: (searchFocusMobile)
                   ? BorderRadius.zero
                   : BorderRadius.circular(30)),
-          elevation: (hasSearchFocus) ? 0 : 3,
+          elevation: (searchFocusMobile) ? 0 : 3,
           child: Row(
             children: [
               LeadingIcon(
-                hasFocus: hasSearchFocus,
+                hasFocus: searchFocusMobile,
                 onBack: onBack,
                 onMenu: widget.onMenu,
               ),
               Expanded(
                 child: TextField(
                   focusNode: focusNode,
+                  onTap: () {
+                    setState(() {
+                      hasSearchFocus = true;
+                    });
+                  },
                   controller: widget.controller,
                   onChanged: onQueryChange,
                   style: Theme.of(context).textTheme.bodyLarge,
@@ -103,7 +109,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
                   ),
                 ),
               ),
-              (hasSearchFocus || !Responsive.isMobile(context))
+              (searchFocusMobile || !Responsive.isMobile(context))
                   ? Padding(
                       padding: const EdgeInsets.only(right: 16),
                       child: MenuAnchor(
