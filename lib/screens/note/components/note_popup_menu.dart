@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
-import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,15 +44,6 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
       String filename = file.name;
       widget.onAddAttachment?.call(filename, fileBytes);
     }
-  }
-
-  void onSeeBacklinks(Note note) {
-    final searchQuery = ref.read(searchProvider) ?? SearchQuery();
-    final notifier = ref.read(searchProvider.notifier);
-    notifier.updateSearch(searchQuery.copyWith(
-      query: "[[${note.title}]]",
-      searchByContent: true,
-    ));
   }
 
   @override

@@ -9,6 +9,7 @@ import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -71,6 +72,19 @@ void main() {
     await tester.pump();
 
     expect(find.byType(LinkSuggestions), findsNothing);
+  });
+
+  testWidgets('setting content controller text enables save button',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester);
+    var contentController =
+        tester.widget<ContentField>(find.byType(ContentField)).controller;
+    contentController.text = 'set text';
+
+    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNull);
+    await tester.pump();
+    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
   });
 }
 

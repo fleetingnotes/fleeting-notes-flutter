@@ -24,6 +24,7 @@ class SearchBar extends ConsumerStatefulWidget {
 
 class _SearchBarState extends ConsumerState<SearchBar> {
   bool maintainFocus = false;
+  bool hasSearchFocus = false;
   MenuController menuController = MenuController();
   FocusNode focusNode = FocusNode();
   FocusNode menuFocusNode = FocusNode();
@@ -43,6 +44,11 @@ class _SearchBarState extends ConsumerState<SearchBar> {
 
   onQueryFocusChange() {
     final searchQuery = ref.read(searchProvider);
+    if (focusNode.hasFocus) {
+      setState(() {
+        hasSearchFocus = true;
+      });
+    }
     if (searchQuery == null && focusNode.hasFocus) {
       onQueryChange('');
     }
@@ -57,15 +63,15 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   }
 
   onBack() {
-    final notifier = ref.read(searchProvider.notifier);
-    notifier.updateSearch(null);
-    focusNode.unfocus();
+    setState(() {
+      focusNode.unfocus();
+      hasSearchFocus = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final searchQuery = ref.watch(searchProvider);
-    bool hasSearchFocus = searchQuery != null && Responsive.isMobile(context);
+    bool searchFocusMobile = hasSearchFocus && Responsive.isMobile(context);
     return SafeArea(
       child: AnimatedContainer(
         height: 72,
@@ -73,20 +79,25 @@ class _SearchBarState extends ConsumerState<SearchBar> {
         child: Card(
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-              borderRadius: (hasSearchFocus)
+              borderRadius: (searchFocusMobile)
                   ? BorderRadius.zero
                   : BorderRadius.circular(30)),
-          elevation: (hasSearchFocus) ? 0 : 3,
+          elevation: (searchFocusMobile) ? 0 : 3,
           child: Row(
             children: [
               LeadingIcon(
-                hasFocus: hasSearchFocus,
+                hasFocus: searchFocusMobile,
                 onBack: onBack,
                 onMenu: widget.onMenu,
               ),
               Expanded(
                 child: TextField(
                   focusNode: focusNode,
+                  onTap: () {
+                    setState(() {
+                      hasSearchFocus = true;
+                    });
+                  },
                   controller: widget.controller,
                   onChanged: onQueryChange,
                   style: Theme.of(context).textTheme.bodyLarge,
@@ -98,7 +109,7 @@ class _SearchBarState extends ConsumerState<SearchBar> {
                   ),
                 ),
               ),
-              (hasSearchFocus || !Responsive.isMobile(context))
+              (searchFocusMobile || !Responsive.isMobile(context))
                   ? Padding(
                       padding: const EdgeInsets.only(right: 16),
                       child: MenuAnchor(

@@ -82,11 +82,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   void _pressNote(BuildContext context, Note note) {
     final noteHistory = ref.read(noteHistoryProvider.notifier);
-    final sqNotifier = ref.read(searchProvider.notifier);
     if (selectedNotes.isEmpty) {
-      if (Responsive.isMobile(context)) {
-        sqNotifier.updateSearch(null);
-      }
       noteHistory.addNote(context, note);
     } else {
       setState(() {

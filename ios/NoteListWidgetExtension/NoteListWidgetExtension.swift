@@ -101,7 +101,7 @@ struct NoteListWidgetExtensionEntryView : View {
             .padding(5)
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
             .background(Color(UIColor.systemBackground))
-            Link(destination: URL(string: "fleetingNotesWidget://note&homeWidget")!) {
+            Link(destination: URL(string: "fleetingNotesWidget://note?homeWidget")!) {
                 Button(action: {
                     // action here
                 }) {
