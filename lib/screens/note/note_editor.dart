@@ -78,7 +78,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     authChangeStream =
         db.supabase.authChangeController.stream.listen(handleAuthChange);
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
-    contentController.addListener(onChanged);
+    contentController.addListener(() => onChanged(storeNote: false));
   }
 
   void initSourceMetadata(UrlMetadata metadata) {
@@ -161,7 +161,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     db.settings.set('unsaved-note', getNote());
   }
 
-  void onChanged() async {
+  void onChanged({bool storeNote = true}) async {
     final noteUtils = ref.read(noteUtilsProvider);
     modifiedAt = DateTime.now().toUtc();
     final db = ref.read(dbProvider);
@@ -170,8 +170,10 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         unsavedNote.title != titleController.text ||
         unsavedNote.source != sourceController.text;
     if (isNoteDiff) {
-      noteUtils.cachedNote = getNote();
-      storeUnsavedNote();
+      if (storeNote) {
+        noteUtils.cachedNote = getNote();
+        storeUnsavedNote();
+      }
       setState(() {
         hasNewChanges = true;
       });
