@@ -12,8 +12,8 @@ else
   sed -i '' "s/^version.*+/version: $1+/g" pubspec.yaml
   sed -i '' 's|\(.*"version"\): "\(.*\)",.*|\1: '"\"$1\",|" web/manifest2.json
   sed -i '' 's|\(.*"version"\): "\(.*\)",.*|\1: '"\"$1\",|" web/manifest3.json
+  perl -i -pe 's/(CURRENT_PROJECT_VERSION = )(\d+)/$1.($2+1)/ge' safari/Fleeting\ Notes.xcodeproj/project.pbxproj
   sed -i '' -e "s/MARKETING_VERSION \\= [^\\;]*\\;/MARKETING_VERSION = $1;/" safari/Fleeting\ Notes.xcodeproj/project.pbxproj
-  sed -i '' -e "s/CURRENT_PROJECT_VERSION \\= [^\\;]*\\;/CURRENT_PROJECT_VERSION = $1;/" safari/Fleeting\ Notes.xcodeproj/project.pbxproj
   version=$1
   git commit -m "Bump version to $version" pubspec.yaml web/manifest2.json web/manifest3.json safari/Fleeting\ Notes.xcodeproj/project.pbxproj 
   git tag v$version
