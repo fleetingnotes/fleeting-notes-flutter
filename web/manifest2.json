@@ -6,7 +6,7 @@
     "48": "/icons/48.png",
     "128": "/icons/128.png"
   },
-  "version": "0.7.10",
+  "version": "0.8.0",
   "browser_action": {
     "default_icon": "/icons/196.png"
   },
