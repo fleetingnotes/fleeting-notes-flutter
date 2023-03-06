@@ -165,7 +165,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     db.settings.set('unsaved-note', getNote());
   }
 
-  void onChanged({bool storeNote = true}) async {
+  void onChanged() async {
     final noteUtils = ref.read(noteUtilsProvider);
     modifiedAt = DateTime.now().toUtc();
     final db = ref.read(dbProvider);
@@ -174,10 +174,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         unsavedNote.title != titleController.text ||
         unsavedNote.source != sourceController.text;
     if (isNoteDiff) {
-      if (storeNote) {
-        noteUtils.cachedNote = getNote();
-        storeUnsavedNote();
-      }
+      noteUtils.cachedNote = getNote();
+      storeUnsavedNote();
       setState(() {
         hasNewChanges = true;
       });
