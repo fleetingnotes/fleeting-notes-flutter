@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
-import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
