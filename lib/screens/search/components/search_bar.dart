@@ -24,6 +24,7 @@ class SearchBar extends ConsumerStatefulWidget {
 
 class _SearchBarState extends ConsumerState<SearchBar> {
   bool maintainFocus = false;
+  bool hasSearchFocus = false;
   MenuController menuController = MenuController();
   FocusNode focusNode = FocusNode();
   FocusNode menuFocusNode = FocusNode();
@@ -43,6 +44,11 @@ class _SearchBarState extends ConsumerState<SearchBar> {
 
   onQueryFocusChange() {
     final searchQuery = ref.read(searchProvider);
+    if (focusNode.hasFocus) {
+      setState(() {
+        hasSearchFocus = true;
+      });
+    }
     if (searchQuery == null && focusNode.hasFocus) {
       onQueryChange('');
     }
@@ -57,15 +63,14 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   }
 
   onBack() {
-    final notifier = ref.read(searchProvider.notifier);
-    notifier.updateSearch(null);
-    focusNode.unfocus();
+    setState(() {
+      focusNode.unfocus();
+      hasSearchFocus = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final searchQuery = ref.watch(searchProvider);
-    bool hasSearchFocus = searchQuery != null && Responsive.isMobile(context);
     return SafeArea(
       child: AnimatedContainer(
         height: 72,
