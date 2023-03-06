@@ -65,7 +65,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   void homeWidgetRefresh(event) async {
     final db = ref.read(dbProvider);
     debugPrint("homeWidgetRefresh");
-    var q = SearchQuery(query: '', sortBy: SortOptions.createdASC, limit: 25);
+    var q = SearchQuery(query: '', sortBy: SortOptions.createdDESC, limit: 25);
     var notes = await db.getSearchNotes(q);
     await HomeWidget.saveWidgetData('notes', jsonEncode(notes));
     await HomeWidget.updateWidget(
@@ -156,6 +156,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       });
 
       homeWidgetSub = HomeWidget.widgetClicked.listen((uri) {
+        print('homewidget clicked');
         if (uri != null) {
           getNoteFromWidgetUri(uri).then((note) {
             goToNote(note);
