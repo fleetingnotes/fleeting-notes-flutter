@@ -187,8 +187,10 @@ const toggleSidebar = (src) => {
     sidebar?.style.setProperty("right", "8px");
     closeBtn?.style.setProperty("right", "8px")
     resizer?.style.setProperty("display", "block")
+    sidebar.contentWindow.focus();
   } else if (src) {
     sidebar.src = src;
+    sidebar.contentWindow.focus();
   } else {
     sidebar?.style.setProperty("right", `-${sidebarWidth}px`);
     closeBtn?.style.setProperty("right", `-${sidebarWidth}px`)
