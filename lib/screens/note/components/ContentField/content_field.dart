@@ -264,13 +264,11 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
 
     void _onFollowLinkTap(Note note) async {
-      final notifier = ref.read(searchProvider.notifier);
       final noteHistory = ref.read(noteHistoryProvider.notifier);
       contentFocusNode.unfocus();
       removeOverlay();
       widget.onPop?.call();
       noteHistory.addNote(context, note);
-      notifier.updateSearch(null);
     }
 
     // init overlay entry
