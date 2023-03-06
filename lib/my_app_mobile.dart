@@ -156,7 +156,6 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       });
 
       homeWidgetSub = HomeWidget.widgetClicked.listen((uri) {
-        print('homewidget clicked');
         if (uri != null) {
           getNoteFromWidgetUri(uri).then((note) {
             goToNote(note);
