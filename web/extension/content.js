@@ -88,7 +88,7 @@ const createSidebar = () => {
         cursor: nesw-resize;
       }
     </style>
-    <iframe frameborder="0" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox" class="${className}" src="${url}"></iframe>
+    <iframe frameborder="0" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-storage-access-by-user-activation" class="${className}" src="${url}"></iframe>
     <div id='resizer'></div>
     <button id='close-fab'>Close</button>
   `;
@@ -187,8 +187,10 @@ const toggleSidebar = (src) => {
     sidebar?.style.setProperty("right", "8px");
     closeBtn?.style.setProperty("right", "8px")
     resizer?.style.setProperty("display", "block")
+    sidebar.contentWindow.focus();
   } else if (src) {
     sidebar.src = src;
+    sidebar.contentWindow.focus();
   } else {
     sidebar?.style.setProperty("right", `-${sidebarWidth}px`);
     closeBtn?.style.setProperty("right", `-${sidebarWidth}px`)
