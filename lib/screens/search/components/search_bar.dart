@@ -63,6 +63,8 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   }
 
   onBack() {
+    final notifier = ref.read(searchProvider.notifier);
+    notifier.updateSearch(null);
     setState(() {
       focusNode.unfocus();
       hasSearchFocus = false;

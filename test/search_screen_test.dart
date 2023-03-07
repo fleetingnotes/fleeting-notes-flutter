@@ -79,22 +79,26 @@ void main() {
       (WidgetTester tester) async {
     resizeToMobile(tester);
     await fnPumpWidget(tester, const MyApp());
-    await tester.tap(find.bySemanticsLabel('Search Notes'));
+    await tester.enterText(
+        find.bySemanticsLabel('Search Notes'), 'hello world');
     await tester.pump();
     expect(find.byIcon(Icons.tune), findsOneWidget);
     expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    expect(find.text('hello world'), findsOneWidget);
   });
 
   testWidgets('Mobile searchbar back works', (WidgetTester tester) async {
     resizeToMobile(tester);
     await fnPumpWidget(tester, const MyApp());
-    await tester.tap(find.bySemanticsLabel('Search Notes'));
+    await tester.enterText(
+        find.bySemanticsLabel('Search Notes'), 'hello world');
     await tester.pump();
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pump();
 
     expect(find.byIcon(Icons.tune), findsNothing);
     expect(find.byIcon(Icons.arrow_back), findsNothing);
+    expect(find.text('hello world'), findsNothing);
   });
 
   testWidgets('When search by dialog has all unchecked boxes, then no notes',
