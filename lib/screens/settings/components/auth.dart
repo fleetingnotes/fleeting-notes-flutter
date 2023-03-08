@@ -35,10 +35,9 @@ class _AuthState extends ConsumerState<Auth> {
   Future<void> onLoginPress(String email, String password) async {
     final db = ref.read(dbProvider);
     try {
-      await db.login(email, password);
+      var user = await db.login(email, password);
       var subTier = await db.supabase.getSubscriptionTier();
-      if (subTier == SubscriptionTier.freeSub) {
-        var uid = db.supabase.currUser!.id;
+      if (user != null && subTier == SubscriptionTier.freeSub) {
         await db.supabase.logout();
         await showDialog(
           context: context,
@@ -47,7 +46,7 @@ class _AuthState extends ConsumerState<Auth> {
             return LoginDialog(
               onContinue: () => onDialogContinue(email, password),
               onSeePricing: onSeePricing,
-              userId: uid,
+              userId: user.id,
             );
           },
         );

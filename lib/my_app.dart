@@ -27,17 +27,22 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   Note? initNote;
 
   Iterable<StreamController> allControllers = [];
-  StreamController<User?>? authChangeController;
+  StreamController<AuthChangeEvent?>? authChangeController;
   StreamSubscription? authSubscription;
   StreamController<Uint8List?>? pasteController;
   StreamController? blurController;
   StreamController<NoteEvent>? noteChangeController;
   StreamController<NoteEvent>? localFileSyncController;
 
-  void refreshApp(User? user) {
+  void refreshApp(AuthChangeEvent? event) async {
     final db = ref.read(dbProvider);
-    db.refreshApp(ref);
-    router.goNamed('home');
+    await db.refreshApp(ref);
+    // means that they are logged out
+    Map<String, dynamic> queryParams = {};
+    if (event == null) {
+      queryParams['tokenExpired'] = true;
+    }
+    router.goNamed('home', queryParams: queryParams);
   }
 
   @override

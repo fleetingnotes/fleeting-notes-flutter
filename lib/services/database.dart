@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:mime/mime.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/syncterface.dart';
 import 'settings.dart';
 import '../models/Note.dart';
@@ -206,16 +207,14 @@ class Database {
       box.clear();
     }
     await supabase.logout();
-    await initNotes();
   }
 
   Future<void> register(String email, String password) async {
     await supabase.register(email, password);
   }
 
-  Future<void> login(String email, String password) async {
-    await supabase.login(email, password);
-    await initNotes();
+  Future<User?> login(String email, String password) async {
+    return await supabase.login(email, password);
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
@@ -324,8 +323,9 @@ class Database {
         TextSelection.fromPosition(TextPosition(offset: start + text.length));
   }
 
-  void refreshApp(WidgetRef ref) {
+  Future<void> refreshApp(WidgetRef ref) async {
     final search = ref.read(searchProvider.notifier);
+    await initNotes();
     shareUserId = null;
     search.updateSearch(null);
   }

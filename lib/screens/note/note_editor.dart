@@ -203,7 +203,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     }
   }
 
-  void handleAuthChange(user) {
+  void handleAuthChange(_) {
     updateFields(Note.empty());
   }
 

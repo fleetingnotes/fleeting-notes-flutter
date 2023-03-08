@@ -11,6 +11,7 @@ import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'mocks/mock_supabase.dart';
 import 'utils.dart';
 
@@ -178,7 +179,7 @@ void main() {
     var mocks = await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
     await modifyCurrentNote(tester, content: 'init note');
-    mocks.supabase.authChangeController.add(null);
+    mocks.supabase.authChangeController.add(AuthChangeEvent.signedIn);
     await tester.pumpAndSettle();
     expect(
         find.descendant(
