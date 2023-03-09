@@ -44,7 +44,6 @@ class SupabaseDB {
   // auth stuff
   Future<void> handleAuthStateChange(AuthState state) async {
     Session? session = state.session;
-    // only update if authState is not null
     if (prevUser?.id != session?.user.id) {
       authChangeController.add(state.event);
       if (session != null) {
