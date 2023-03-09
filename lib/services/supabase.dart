@@ -12,13 +12,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/crypt.dart';
 import 'package:collection/collection.dart';
 
-enum MigrationStatus {
-  supaFireLogin,
-  supaLoginOnly,
-  fireLoginOnly,
-  noLogin,
-}
-
 enum SubscriptionTier { freeSub, basicSub, premiumSub, unknownSub }
 
 enum RecoveredSessionEvent { noStoredSession, failed, succeeded }
@@ -36,13 +29,13 @@ class SupabaseDB {
   StreamController<AuthChangeEvent?> authChangeController =
       StreamController<AuthChangeEvent?>.broadcast();
   SupabaseDB() {
-    currUser = client.auth.currentUser;
-    recoverSession();
+    prevUser = client.auth.currentUser;
     authSubscription?.cancel();
     authSubscription =
         client.auth.onAuthStateChange.listen(handleAuthStateChange);
   }
-  User? currUser;
+  User? get currUser => client.auth.currentUser;
+  User? prevUser; // used for authStateChange
   SubscriptionTier? subTier;
   String? get userId =>
       (currUser?.userMetadata ?? {})['firebaseUid'] ?? currUser?.id;
@@ -51,18 +44,11 @@ class SupabaseDB {
   // auth stuff
   Future<void> handleAuthStateChange(AuthState state) async {
     Session? session = state.session;
-    AuthChangeEvent? event = state.event;
-    if (session == null) {
-      RecoveredSessionEvent? recoveredSessEvent = await recoverSession();
-      // if event is null then signed out by token expire!
-      event =
-          (recoveredSessEvent == RecoveredSessionEvent.failed) ? null : event;
-    }
     // only update if authState is not null
-    if (currUser?.id != session?.user.id) {
-      authChangeController.add(event);
+    if (prevUser?.id != session?.user.id) {
+      authChangeController.add(state.event);
     }
-    currUser = session?.user;
+    prevUser = session?.user;
   }
 
   Future<User?> login(String email, String password) async {
@@ -310,15 +296,8 @@ class SupabaseDB {
   }
 
   // attempt to recover session from secure storage
-  Future<RecoveredSessionEvent> recoverSession() async {
-    var storedSession = await getStoredSession();
-    Session? session = storedSession?.session;
-    if (session == null) return RecoveredSessionEvent.noStoredSession;
+  Future<RecoveredSessionEvent> recoverSession(Session session) async {
     try {
-      if (storedSession?.subscriptionTier == 'free') {
-        throw const AuthException('Free tier cant recover session');
-      }
-      // dont recoverSession for free subscriptions
       var res = await client.auth.recoverSession(session.persistSessionString);
       if (res.session != null) return RecoveredSessionEvent.succeeded;
     } on AuthException catch (e) {

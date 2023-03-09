@@ -37,12 +37,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   void refreshApp(AuthChangeEvent? event) async {
     final db = ref.read(dbProvider);
     await db.refreshApp(ref);
-    // means that they are logged out
-    Map<String, dynamic> queryParams = {};
-    if (event == null) {
-      queryParams['tokenExpired'] = true;
-    }
-    router.goNamed('home', queryParams: queryParams);
+    router.goNamed('home');
   }
 
   @override
