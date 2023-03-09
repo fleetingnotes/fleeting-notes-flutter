@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'utils.dart';
 
 void main() {
@@ -99,6 +100,18 @@ void main() {
     expect(find.byIcon(Icons.tune), findsNothing);
     expect(find.byIcon(Icons.arrow_back), findsNothing);
     expect(find.text('hello world'), findsNothing);
+  });
+
+  testWidgets('authchangeevent updates notes', (tester) async {
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    var box = await mocks.db.getBox();
+    await box.put('local', Note.empty(content: 'authchangeevent'));
+
+    await tester.pumpAndSettle();
+    expect(find.text('authchangeevent', findRichText: true), findsNothing);
+    mocks.supabase.authChangeController.add(AuthChangeEvent.signedIn);
+    await tester.pumpAndSettle();
+    expect(find.text('authchangeevent', findRichText: true), findsOneWidget);
   });
 
   testWidgets('When search by dialog has all unchecked boxes, then no notes',

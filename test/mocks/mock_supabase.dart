@@ -18,6 +18,10 @@ User getUser({String id = ''}) {
   );
 }
 
+Session emptySession() {
+  return Session(accessToken: '', tokenType: '', user: getUser());
+}
+
 class MockSupabaseDB extends Mock implements SupabaseDB {
   @override
   User? currUser;
@@ -46,5 +50,7 @@ MockSupabaseDB getBaseMockSupabaseDB() {
   });
   when(() => mockSupabase.getSubscriptionTier())
       .thenAnswer((_) => Future.value(SubscriptionTier.unknownSub));
+  when(() => mockSupabase.getStoredSession())
+      .thenAnswer((_) => Future.value(null));
   return mockSupabase;
 }
