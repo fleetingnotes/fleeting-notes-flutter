@@ -8,8 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:permission_handler/permission_handler.dart';
-
 import '../../../models/Note.dart';
 
 class LocalSyncSetting extends ConsumerStatefulWidget {
@@ -95,12 +93,9 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
       await updateHiveDb(init: true);
       return;
     }
-    bool storagePerms = await Permission.storage.request().isGranted;
-    if (storagePerms) {
-      setState(() {
-        enabled = val;
-      });
-    }
+    setState(() {
+      enabled = val;
+    });
     await updateHiveDb(init: true);
   }
 
