@@ -13,7 +13,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'mocks/mock_supabase.dart';
-import 'supabase_test.dart';
 import 'utils.dart';
 
 // Currently Only Testing Web

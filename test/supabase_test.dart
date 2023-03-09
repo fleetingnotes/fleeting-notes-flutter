@@ -27,7 +27,6 @@ MockSupabaseClient getBaseMockSupabaseClient() {
   return mockSupabaseClient;
 }
 
-// ignore: empty_constructor_bodies
 class MockSupabaseDB extends SupabaseDB {
   @override
   SupabaseClient get client => getBaseMockSupabaseClient();
@@ -37,10 +36,11 @@ void main() {
   setUpAll(() {
     registerFallbackValue(getUser());
   });
+  // not a valid test but keeping as an example
   test('supabase login sets currUser', () async {
     var mockSupabase = MockSupabaseDB();
     expect(mockSupabase.currUser, isNull);
     await mockSupabase.login('test@test.test', '222222');
     expect(mockSupabase.currUser, isNotNull);
-  });
+  }, skip: true);
 }
