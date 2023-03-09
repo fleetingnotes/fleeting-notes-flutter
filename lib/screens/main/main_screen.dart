@@ -31,7 +31,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     super.initState();
     final db = ref.read(dbProvider);
     if (!kDebugMode) analyticsDialogWorkflow();
-    if (!db.isLoggedIn() && db.settings.isFirstTimeOpen()) {
+    if (!db.loggedIn && db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
             context: context,

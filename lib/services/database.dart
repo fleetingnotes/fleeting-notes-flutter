@@ -53,9 +53,7 @@ class Database {
     return _currBox as Box;
   }
 
-  bool isLoggedIn() {
-    return supabase.currUser != null;
-  }
+  bool get loggedIn => supabase.currUser != null;
 
   Future<List<Note>> getSearchNotes(SearchQuery query,
       {forceSync = false}) async {
@@ -74,7 +72,7 @@ class Database {
   Future<List<Note>> getAllNotes({forceSync = false}) async {
     var box = await getBox();
     try {
-      if ((box.isEmpty || forceSync) && isLoggedIn()) {
+      if ((box.isEmpty || forceSync) && loggedIn) {
         List<Note> notes = await supabase.getAllNotes(partition: shareUserId);
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         await box.clear();
@@ -156,7 +154,7 @@ class Database {
   Future<bool> upsertNotes(List<Note> notes,
       {bool setModifiedAt = false}) async {
     try {
-      if (isLoggedIn()) {
+      if (loggedIn) {
         bool isSuccess = await supabase.upsertNotes(notes);
         if (!isSuccess) return false;
       }
@@ -179,7 +177,7 @@ class Database {
 
   Future<bool> deleteNotes(List<Note> notes) async {
     try {
-      if (isLoggedIn()) {
+      if (loggedIn) {
         bool isSuccess = await supabase.deleteNotes(notes);
         if (!isSuccess) return false;
       }
