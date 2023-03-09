@@ -100,7 +100,7 @@ class SupabaseDB {
   // TODO: use a join table to only make 1 request
   Future<SubscriptionTier> getSubscriptionTier() async {
     SubscriptionTier? subscriptionTier = subTier;
-    if (client.auth.currentUser == null) return SubscriptionTier.freeSub;
+    if (currUser == null) return SubscriptionTier.freeSub;
     if (subscriptionTier != null) return subscriptionTier;
     try {
       var subscriptionTierStr = await getSubscriptionTierFromTable('stripe');
