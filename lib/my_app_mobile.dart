@@ -74,8 +74,12 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
 
   @override
   void refreshApp(user) {
-    final db = ref.read(dbProvider);
     super.refreshApp(user);
+    initHomeWidget();
+  }
+
+  void initHomeWidget() {
+    final db = ref.read(dbProvider);
     homeWidgetRefresh(null);
     noteChangeStream?.cancel();
     db.listenNoteChange(homeWidgetRefresh).then((stream) {
@@ -86,6 +90,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   @override
   void initState() {
     super.initState();
+    initHomeWidget();
     void goToNote(Note note) {
       final noteHistory = ref.read(noteHistoryProvider.notifier);
       SchedulerBinding.instance.addPostFrameCallback((_) {
