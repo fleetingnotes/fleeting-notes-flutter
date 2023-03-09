@@ -47,6 +47,9 @@ class SupabaseDB {
     // only update if authState is not null
     if (prevUser?.id != session?.user.id) {
       authChangeController.add(state.event);
+      if (session != null) {
+        setSession();
+      }
     }
     prevUser = session?.user;
   }
@@ -57,7 +60,6 @@ class SupabaseDB {
         email: email,
         password: password,
       );
-      setSession();
       return res.user;
     } on AuthException catch (e) {
       throw FleetingNotesException(e.message);
@@ -86,7 +88,7 @@ class SupabaseDB {
   }
 
   Future<bool> logout() async {
-    await secureStorage.write(key: 'session', value: null);
+    await clearSession();
     await client.auth.signOut();
     return true;
   }
@@ -151,19 +153,6 @@ class SupabaseDB {
       );
     } catch (e) {
       return null;
-    }
-  }
-
-  Future<void> refreshSession() async {
-    if (currUser == null) return;
-    try {
-      int fiveDaySec = 432000;
-      int? tokenExpiresIn = client.auth.currentSession?.expiresIn;
-      if (tokenExpiresIn != null && tokenExpiresIn < fiveDaySec) {
-        await client.auth.refreshSession();
-      }
-    } on AuthException catch (e) {
-      debugPrint("${e.statusCode} ${e.message}");
     }
   }
 
@@ -296,6 +285,23 @@ class SupabaseDB {
   }
 
   // attempt to recover session from secure storage
+  Future<void> clearSession() async {
+    await secureStorage.write(key: 'session', value: null);
+  }
+
+  Future<void> refreshSession() async {
+    if (currUser == null) return;
+    try {
+      int fiveDaySec = 432000;
+      int? tokenExpiresIn = client.auth.currentSession?.expiresIn;
+      if (tokenExpiresIn != null && tokenExpiresIn < fiveDaySec) {
+        await client.auth.refreshSession();
+      }
+    } on AuthException catch (e) {
+      debugPrint("${e.statusCode} ${e.message}");
+    }
+  }
+
   Future<RecoveredSessionEvent> recoverSession(Session session) async {
     try {
       var res = await client.auth.recoverSession(session.persistSessionString);

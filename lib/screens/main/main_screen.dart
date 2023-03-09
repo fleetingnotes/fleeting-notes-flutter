@@ -1,4 +1,3 @@
-import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
@@ -10,9 +9,10 @@ import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'components/analytics_dialog.dart';
+import 'components/auth_dialog.dart';
 import 'components/note_fab.dart';
+import 'components/recover_session_dialog.dart';
 import 'components/side_rail.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -34,18 +34,26 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     if (!db.loggedIn && db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-                title: const Text('Register / Sign In'),
-                content: SizedBox(
-                  width: mobileLimit,
-                  child: SingleChildScrollView(
-                    child: Auth(
-                      onLogin: (_) => Navigator.pop(context),
-                    ),
-                  ),
-                )));
+          context: context,
+          builder: (c) => AuthDialog(context: c, width: mobileLimit),
+        );
       });
+    }
+    attemptRecoverSession();
+  }
+
+  void attemptRecoverSession() async {
+    final db = ref.read(dbProvider);
+    if (db.loggedIn) return; // dont attempt restore if logged in
+    var storedSession = await db.supabase.getStoredSession();
+    var session = storedSession?.session;
+    if (session != null) {
+      if (storedSession?.subscriptionTier == 'free') {
+        showDialog(
+            context: context, builder: (c) => const RecoverSessionDialog());
+      } else {
+        db.supabase.recoverSession(session);
+      }
     }
   }
 
