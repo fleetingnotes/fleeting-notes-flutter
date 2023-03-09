@@ -38,7 +38,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final db = ref.read(dbProvider);
     getEncryptionKey();
     setState(() {
-      isLoggedIn = db.isLoggedIn();
+      isLoggedIn = db.loggedIn;
       if (db.supabase.currUser != null) {
         email = db.supabase.currUser!.email ?? '';
       }

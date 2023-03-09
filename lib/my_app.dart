@@ -27,16 +27,16 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   Note? initNote;
 
   Iterable<StreamController> allControllers = [];
-  StreamController<User?>? authChangeController;
+  StreamController<AuthChangeEvent?>? authChangeController;
   StreamSubscription? authSubscription;
   StreamController<Uint8List?>? pasteController;
   StreamController? blurController;
   StreamController<NoteEvent>? noteChangeController;
   StreamController<NoteEvent>? localFileSyncController;
 
-  void refreshApp(User? user) {
+  void refreshApp(AuthChangeEvent? event) async {
     final db = ref.read(dbProvider);
-    db.refreshApp(ref);
+    await db.refreshApp(ref);
     router.goNamed('home');
   }
 

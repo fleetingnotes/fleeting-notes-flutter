@@ -1,6 +1,8 @@
 import 'package:fleeting_notes_flutter/my_app.dart';
+import 'package:fleeting_notes_flutter/screens/main/components/recover_session_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_bar.dart';
+import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
@@ -8,7 +10,9 @@ import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mocktail/mocktail.dart';
 
+import 'mocks/mock_supabase.dart';
 import 'utils.dart';
 
 // Currently Only Testing Web
@@ -203,5 +207,30 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('init note'), findsOneWidget);
     expect(find.byType(NoteEditor), findsOneWidget);
+  });
+
+  // recovery dialog tests
+  testWidgets('If no session dont see RecoverSessionDialog', (tester) async {
+    var mockSupabase = getBaseMockSupabaseDB();
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    expect(find.byType(RecoverSessionDialog), findsNothing);
+  });
+  testWidgets('If session and free tier, see RecoverSessionDialog',
+      (tester) async {
+    var mockSupabase = getBaseMockSupabaseDB();
+    when(() => mockSupabase.getStoredSession())
+        .thenAnswer((_) => Future.value(StoredSession(emptySession(), 'free')));
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    expect(find.byType(RecoverSessionDialog), findsOneWidget);
+  });
+  testWidgets('If session and not free tier, attempt', (tester) async {
+    var mockSupabase = getBaseMockSupabaseDB();
+    var session = emptySession();
+    when(() => mockSupabase.getStoredSession())
+        .thenAnswer((_) => Future.value(StoredSession(session, null)));
+    when(() => mockSupabase.recoverSession(session))
+        .thenAnswer((_) => Future.value(RecoveredSessionEvent.succeeded));
+    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    expect(find.byType(RecoverSessionDialog), findsNothing);
   });
 }

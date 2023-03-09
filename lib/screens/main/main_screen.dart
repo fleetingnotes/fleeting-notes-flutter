@@ -1,4 +1,3 @@
-import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
@@ -10,9 +9,10 @@ import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'components/analytics_dialog.dart';
+import 'components/auth_dialog.dart';
 import 'components/note_fab.dart';
+import 'components/recover_session_dialog.dart';
 import 'components/side_rail.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -30,57 +30,30 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    var isSharedNotes = db.isSharedNotes;
     if (!kDebugMode) analyticsDialogWorkflow();
-    if (!db.isLoggedIn() && !isSharedNotes && db.settings.isFirstTimeOpen()) {
+    if (!db.loggedIn && db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-                title: const Text('Register / Sign In'),
-                content: SizedBox(
-                  width: mobileLimit,
-                  child: SingleChildScrollView(
-                    child: Auth(
-                      onLogin: (_) async {
-                        await db.getAllNotes(forceSync: true);
-                        Navigator.pop(context);
-                        // wait to make sure the user is logged in
-                        Future.delayed(const Duration(milliseconds: 500), () {
-                          setState(() {
-                            db.refreshApp(ref);
-                          });
-                        });
-                      },
-                    ),
-                  ),
-                )));
+          context: context,
+          builder: (c) => AuthDialog(context: c, width: mobileLimit),
+        );
       });
     }
-    if (isSharedNotes && !bannerExists) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        MaterialBanner sharedNotesBanner = MaterialBanner(
-          content:
-              const Text('These are shared notes, edits will not be saved'),
-          actions: [
-            Builder(builder: (context) {
-              return TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).removeCurrentMaterialBanner();
-                  setState(() {
-                    bannerExists = false;
-                    db.refreshApp(ref);
-                  });
-                  context.goNamed('home');
-                },
-                child: const Text('Your Notes'),
-              );
-            })
-          ],
-        );
-        ScaffoldMessenger.of(context).showMaterialBanner(sharedNotesBanner);
-        bannerExists = true;
-      });
+    attemptRecoverSession();
+  }
+
+  void attemptRecoverSession() async {
+    final db = ref.read(dbProvider);
+    if (db.loggedIn) return; // dont attempt restore if logged in
+    var storedSession = await db.supabase.getStoredSession();
+    var session = storedSession?.session;
+    if (session != null) {
+      if (storedSession?.subscriptionTier == 'free') {
+        showDialog(
+            context: context, builder: (c) => const RecoverSessionDialog());
+      } else {
+        db.supabase.recoverSession(session);
+      }
     }
   }
 

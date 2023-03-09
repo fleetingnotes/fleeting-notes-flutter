@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:hive/hive.dart';
@@ -11,48 +12,53 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/crypt.dart';
 import 'package:collection/collection.dart';
 
-enum MigrationStatus {
-  supaFireLogin,
-  supaLoginOnly,
-  fireLoginOnly,
-  noLogin,
-}
-
 enum SubscriptionTier { freeSub, basicSub, premiumSub, unknownSub }
+
+enum RecoveredSessionEvent { noStoredSession, failed, succeeded }
+
+class StoredSession {
+  Session? session;
+  String? subscriptionTier;
+  StoredSession(this.session, this.subscriptionTier);
+}
 
 class SupabaseDB {
   SupabaseClient get client => Supabase.instance.client;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   StreamSubscription<AuthState>? authSubscription;
-  StreamController<User?> authChangeController =
-      StreamController<User?>.broadcast();
+  StreamController<AuthChangeEvent?> authChangeController =
+      StreamController<AuthChangeEvent?>.broadcast();
   SupabaseDB() {
-    currUser = client.auth.currentUser;
+    prevUser = client.auth.currentUser;
     authSubscription?.cancel();
-    authSubscription = client.auth.onAuthStateChange.listen((state) {
-      if (currUser == null) {
-        subTier = SubscriptionTier.freeSub;
-      }
-      if (currUser?.id != state.session?.user.id) {
-        authChangeController.add(state.session?.user);
-      }
-      currUser = state.session?.user;
-    });
+    authSubscription =
+        client.auth.onAuthStateChange.listen(handleAuthStateChange);
   }
-  User? currUser;
+  User? get currUser => client.auth.currentUser;
+  User? prevUser; // used for authStateChange
   SubscriptionTier? subTier;
   String? get userId =>
       (currUser?.userMetadata ?? {})['firebaseUid'] ?? currUser?.id;
   bool get canSync => currUser != null;
 
   // auth stuff
+  Future<void> handleAuthStateChange(AuthState state) async {
+    Session? session = state.session;
+    if (prevUser?.id != session?.user.id) {
+      authChangeController.add(state.event);
+      if (session != null) {
+        setSession();
+      }
+    }
+    prevUser = session?.user;
+  }
+
   Future<User?> login(String email, String password) async {
     try {
       final res = await client.auth.signInWithPassword(
         email: email,
         password: password,
       );
-      currUser = res.user ?? currUser;
       return res.user;
     } on AuthException catch (e) {
       throw FleetingNotesException(e.message);
@@ -81,6 +87,7 @@ class SupabaseDB {
   }
 
   Future<bool> logout() async {
+    await clearSession();
     await client.auth.signOut();
     return true;
   }
@@ -91,9 +98,9 @@ class SupabaseDB {
 
   // TODO: use a join table to only make 1 request
   Future<SubscriptionTier> getSubscriptionTier() async {
-    var subscriptionTier = subTier;
-    if (subscriptionTier != null) return subscriptionTier;
+    SubscriptionTier? subscriptionTier = subTier;
     if (currUser == null) return SubscriptionTier.freeSub;
+    if (subscriptionTier != null) return subscriptionTier;
     try {
       var subscriptionTierStr = await getSubscriptionTierFromTable('stripe');
       if (subscriptionTierStr == 'free') {
@@ -117,11 +124,11 @@ class SupabaseDB {
     }
   }
 
-  Future<String> getSubscriptionTierFromTable(String table) async {
-    List<dynamic> tableSubTier = await client
-        .from(table)
-        .select('subscription_tier')
-        .eq('id', currUser?.id);
+  Future<String> getSubscriptionTierFromTable(String table,
+      {String? userId}) async {
+    userId ??= currUser?.id;
+    List<dynamic> tableSubTier =
+        await client.from(table).select('subscription_tier').eq('id', userId);
 
     var subscriptionTier =
         (tableSubTier.firstOrNull ?? {})['subscription_tier'] as String? ??
@@ -145,19 +152,6 @@ class SupabaseDB {
       );
     } catch (e) {
       return null;
-    }
-  }
-
-  Future<void> refreshSession() async {
-    if (currUser == null) return;
-    try {
-      int threeDaySec = 259200;
-      int? tokenExpiresIn = client.auth.currentSession?.expiresIn;
-      if (tokenExpiresIn != null && tokenExpiresIn < threeDaySec) {
-        await client.auth.refreshSession();
-      }
-    } on AuthException catch (e) {
-      debugPrint("${e.statusCode} ${e.message}");
     }
   }
 
@@ -287,6 +281,67 @@ class SupabaseDB {
       return await secureStorage.read(key: 'encryption-key-$userId');
     }
     return null;
+  }
+
+  // attempt to recover session from secure storage
+  Future<void> clearSession() async {
+    await secureStorage.write(key: 'session', value: null);
+  }
+
+  Future<void> refreshSession() async {
+    if (currUser == null) return;
+    try {
+      int fiveDaySec = 432000;
+      int? tokenExpiresIn = client.auth.currentSession?.expiresIn;
+      if (tokenExpiresIn != null && tokenExpiresIn < fiveDaySec) {
+        await client.auth.refreshSession();
+      }
+    } on AuthException catch (e) {
+      debugPrint("${e.statusCode} ${e.message}");
+    }
+  }
+
+  Future<RecoveredSessionEvent> recoverSession(Session session) async {
+    try {
+      var res = await client.auth.recoverSession(session.persistSessionString);
+      if (res.session != null) return RecoveredSessionEvent.succeeded;
+    } on AuthException catch (e) {
+      debugPrint("${e.statusCode} ${e.message}");
+    }
+    await secureStorage.write(key: 'session', value: null);
+    return RecoveredSessionEvent.failed;
+  }
+
+  Future<StoredSession?> getStoredSession() async {
+    try {
+      var sessionStr = await secureStorage.read(key: 'session');
+      if (sessionStr == null) return null;
+      Map<String, dynamic> json = jsonDecode(sessionStr);
+
+      return StoredSession(
+        Session.fromJson(json['currentSession']),
+        json['subscriptionTier'],
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+      return null;
+    }
+  }
+
+  Future<void> setSession() async {
+    try {
+      var session = client.auth.currentSession;
+      if (session == null) {
+        return await secureStorage.write(key: 'session', value: null);
+      }
+      Map<String, dynamic> json = jsonDecode(session.persistSessionString);
+      var subscriptionTier = await getSubscriptionTier();
+      json['subscriptionTier'] =
+          (subscriptionTier == SubscriptionTier.freeSub) ? 'free' : null;
+      await secureStorage.write(key: 'session', value: jsonEncode(json));
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   Future<void> setEncryptionKey(String key) async {

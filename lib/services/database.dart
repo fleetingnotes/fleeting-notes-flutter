@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:mime/mime.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/syncterface.dart';
 import 'settings.dart';
 import '../models/Note.dart';
@@ -44,9 +45,6 @@ class Database {
       StreamController.broadcast();
   String? shareUserId;
   Box? _currBox;
-  bool get isSharedNotes =>
-      shareUserId != null &&
-      !(shareUserId == supabase.userId || shareUserId == supabase.currUser?.id);
   Future<Box> getBox() async {
     var boxName = shareUserId ?? supabase.userId ?? 'local';
     if (_currBox?.name != boxName) {
@@ -55,9 +53,7 @@ class Database {
     return _currBox as Box;
   }
 
-  bool isLoggedIn() {
-    return supabase.currUser != null;
-  }
+  bool get loggedIn => supabase.currUser != null;
 
   Future<List<Note>> getSearchNotes(SearchQuery query,
       {forceSync = false}) async {
@@ -76,7 +72,7 @@ class Database {
   Future<List<Note>> getAllNotes({forceSync = false}) async {
     var box = await getBox();
     try {
-      if ((box.isEmpty || forceSync) && (isLoggedIn() || isSharedNotes)) {
+      if ((box.isEmpty || forceSync) && loggedIn) {
         List<Note> notes = await supabase.getAllNotes(partition: shareUserId);
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         await box.clear();
@@ -158,7 +154,7 @@ class Database {
   Future<bool> upsertNotes(List<Note> notes,
       {bool setModifiedAt = false}) async {
     try {
-      if (isLoggedIn()) {
+      if (loggedIn) {
         bool isSuccess = await supabase.upsertNotes(notes);
         if (!isSuccess) return false;
       }
@@ -181,7 +177,7 @@ class Database {
 
   Future<bool> deleteNotes(List<Note> notes) async {
     try {
-      if (isLoggedIn()) {
+      if (loggedIn) {
         bool isSuccess = await supabase.deleteNotes(notes);
         if (!isSuccess) return false;
       }
@@ -206,16 +202,14 @@ class Database {
       box.clear();
     }
     await supabase.logout();
-    await initNotes();
   }
 
   Future<void> register(String email, String password) async {
     await supabase.register(email, password);
   }
 
-  Future<void> login(String email, String password) async {
-    await supabase.login(email, password);
-    await initNotes();
+  Future<User?> login(String email, String password) async {
+    return await supabase.login(email, password);
   }
 
   Future<List<Note>> getBacklinkNotes(Note note) async {
@@ -324,8 +318,9 @@ class Database {
         TextSelection.fromPosition(TextPosition(offset: start + text.length));
   }
 
-  void refreshApp(WidgetRef ref) {
+  Future<void> refreshApp(WidgetRef ref) async {
     final search = ref.read(searchProvider.notifier);
+    await initNotes();
     shareUserId = null;
     search.updateSearch(null);
   }
