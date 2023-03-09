@@ -30,9 +30,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    var isSharedNotes = db.isSharedNotes;
     if (!kDebugMode) analyticsDialogWorkflow();
-    if (!db.isLoggedIn() && !isSharedNotes && db.settings.isFirstTimeOpen()) {
+    if (!db.isLoggedIn() && db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
             context: context,
@@ -42,44 +41,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                   width: mobileLimit,
                   child: SingleChildScrollView(
                     child: Auth(
-                      onLogin: (_) async {
-                        await db.getAllNotes(forceSync: true);
-                        Navigator.pop(context);
-                        // wait to make sure the user is logged in
-                        Future.delayed(const Duration(milliseconds: 500), () {
-                          setState(() {
-                            db.refreshApp(ref);
-                          });
-                        });
-                      },
+                      onLogin: (_) => Navigator.pop(context),
                     ),
                   ),
                 )));
-      });
-    }
-    if (isSharedNotes && !bannerExists) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        MaterialBanner sharedNotesBanner = MaterialBanner(
-          content:
-              const Text('These are shared notes, edits will not be saved'),
-          actions: [
-            Builder(builder: (context) {
-              return TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).removeCurrentMaterialBanner();
-                  setState(() {
-                    bannerExists = false;
-                    db.refreshApp(ref);
-                  });
-                  context.goNamed('home');
-                },
-                child: const Text('Your Notes'),
-              );
-            })
-          ],
-        );
-        ScaffoldMessenger.of(context).showMaterialBanner(sharedNotesBanner);
-        bannerExists = true;
       });
     }
   }
