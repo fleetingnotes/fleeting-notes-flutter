@@ -89,6 +89,7 @@ class SupabaseDB {
   Future<bool> logout() async {
     await clearSession();
     await client.auth.signOut();
+    subTier = null;
     return true;
   }
 
