@@ -184,69 +184,66 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    return SafeArea(
-      child: Center(
-        child: Column(
-          children: [
-            AppBar(
-              elevation:
-                  (Responsive.isMobile(context)) ? null : dialogElevation,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: Navigator.of(context).pop,
-              ),
-              title: const Text('Settings'),
+    return Center(
+      child: Column(
+        children: [
+          AppBar(
+            elevation: (Responsive.isMobile(context)) ? null : dialogElevation,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: Navigator.of(context).pop,
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                  controller: ScrollController(),
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SettingsTitle(title: "Account"),
-                      (isLoggedIn)
-                          ? Account(
-                              email: email,
-                              onLogout: onLogoutPress,
-                              onForceSync: onForceSyncPress,
-                              onDeleteAccount: onDeleteAccountPress,
-                              onEnableEncryption: (encryptionEnabled)
-                                  ? null
-                                  : onEnableEncryptionPress,
-                            )
-                          : Auth(onLogin: (e) {
-                              getEncryptionKey();
-                              setState(() {
-                                isLoggedIn = true;
-                                email = e;
-                              });
-                            }),
-                      const SizedBox(height: 16),
-                      const SettingsTitle(title: "Backup"),
-                      Backup(
-                        backupOption: backupOption,
-                        onImportPress: onImportPress,
-                        onExportPress: onExportPress,
-                        onBackupOptionChange: onBackupDropdownChange,
-                      ),
-                      const SizedBox(height: 8),
-                      const SettingsTitle(title: "Sync"),
-                      LocalSyncSetting(
-                        settings: db.settings,
-                        getAllNotes: db.getAllNotes,
-                      ),
-                      const SizedBox(height: 8),
-                      const SettingsTitle(title: "Other Settings"),
-                      const SettingsItemSwitch(
-                          settingsKey: 'dark-mode', name: "Dark mode"),
-                      const SizedBox(height: 24),
-                      const LegalLinks(),
-                    ],
-                  )),
-            )
-          ],
-        ),
+            title: const Text('Settings'),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+                controller: ScrollController(),
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SettingsTitle(title: "Account"),
+                    (isLoggedIn)
+                        ? Account(
+                            email: email,
+                            onLogout: onLogoutPress,
+                            onForceSync: onForceSyncPress,
+                            onDeleteAccount: onDeleteAccountPress,
+                            onEnableEncryption: (encryptionEnabled)
+                                ? null
+                                : onEnableEncryptionPress,
+                          )
+                        : Auth(onLogin: (e) {
+                            getEncryptionKey();
+                            setState(() {
+                              isLoggedIn = true;
+                              email = e;
+                            });
+                          }),
+                    const SizedBox(height: 16),
+                    const SettingsTitle(title: "Backup"),
+                    Backup(
+                      backupOption: backupOption,
+                      onImportPress: onImportPress,
+                      onExportPress: onExportPress,
+                      onBackupOptionChange: onBackupDropdownChange,
+                    ),
+                    const SizedBox(height: 8),
+                    const SettingsTitle(title: "Sync"),
+                    LocalSyncSetting(
+                      settings: db.settings,
+                      getAllNotes: db.getAllNotes,
+                    ),
+                    const SizedBox(height: 8),
+                    const SettingsTitle(title: "Other Settings"),
+                    const SettingsItemSwitch(
+                        settingsKey: 'dark-mode', name: "Dark mode"),
+                    const SizedBox(height: 24),
+                    const LegalLinks(),
+                  ],
+                )),
+          )
+        ],
       ),
     );
   }

@@ -118,37 +118,41 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           floatingActionButton: (Responsive.isMobile(context))
               ? NoteFAB(onPressed: addNote)
               : null,
-          body: Responsive(
-            mobile: SearchScreen(searchFocusNode: searchFocusNode),
-            tablet: Row(
-              children: [
-                SideRail(addNote: addNote, onMenu: db.openDrawer),
-                Flexible(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: mobileLimit),
-                      child: SearchScreen(
-                        searchFocusNode: searchFocusNode,
+          body: SafeArea(
+            child: Responsive(
+              mobile: SearchScreen(searchFocusNode: searchFocusNode),
+              tablet: Row(
+                children: [
+                  SideRail(addNote: addNote, onMenu: db.openDrawer),
+                  Flexible(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints:
+                            const BoxConstraints(maxWidth: mobileLimit),
+                        child: SearchScreen(
+                          searchFocusNode: searchFocusNode,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            desktop: Row(
-              children: [
-                SideRail(addNote: addNote, onMenu: db.openDrawer),
-                Flexible(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: tabletLimit),
-                      child: SearchScreen(
-                        searchFocusNode: searchFocusNode,
+                ],
+              ),
+              desktop: Row(
+                children: [
+                  SideRail(addNote: addNote, onMenu: db.openDrawer),
+                  Flexible(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints:
+                            const BoxConstraints(maxWidth: tabletLimit),
+                        child: SearchScreen(
+                          searchFocusNode: searchFocusNode,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

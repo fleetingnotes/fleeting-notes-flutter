@@ -184,7 +184,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ),
                     if (!Responsive.isMobile(context))
                       Padding(
-                        padding: const EdgeInsets.only(left: 32),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: FilledButton(
                           onPressed: addNote,
                           child: Padding(

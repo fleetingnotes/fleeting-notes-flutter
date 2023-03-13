@@ -74,69 +74,67 @@ class _SearchBarState extends ConsumerState<SearchBar> {
   @override
   Widget build(BuildContext context) {
     bool searchFocusMobile = hasSearchFocus && Responsive.isMobile(context);
-    return SafeArea(
-      child: AnimatedContainer(
-        height: 72,
-        duration: const Duration(milliseconds: 100),
-        child: Card(
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-              borderRadius: (searchFocusMobile)
-                  ? BorderRadius.zero
-                  : BorderRadius.circular(30)),
-          elevation: (searchFocusMobile) ? 0 : 3,
-          child: Row(
-            children: [
-              LeadingIcon(
-                hasFocus: searchFocusMobile,
-                onBack: onBack,
-                onMenu: widget.onMenu,
-              ),
-              Expanded(
-                child: TextField(
-                  focusNode: focusNode,
-                  onTap: () {
-                    setState(() {
-                      hasSearchFocus = true;
-                    });
-                  },
-                  controller: widget.controller,
-                  onChanged: onQueryChange,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
-                    hintText: 'Search Notes',
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
+    return AnimatedContainer(
+      height: 72,
+      duration: const Duration(milliseconds: 100),
+      child: Card(
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+            borderRadius: (searchFocusMobile)
+                ? BorderRadius.zero
+                : BorderRadius.circular(30)),
+        elevation: (searchFocusMobile) ? 0 : 3,
+        child: Row(
+          children: [
+            LeadingIcon(
+              hasFocus: searchFocusMobile,
+              onBack: onBack,
+              onMenu: widget.onMenu,
+            ),
+            Expanded(
+              child: TextField(
+                focusNode: focusNode,
+                onTap: () {
+                  setState(() {
+                    hasSearchFocus = true;
+                  });
+                },
+                controller: widget.controller,
+                onChanged: onQueryChange,
+                style: Theme.of(context).textTheme.bodyLarge,
+                decoration: const InputDecoration(
+                  hintText: 'Search Notes',
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
                   ),
                 ),
               ),
-              (searchFocusMobile || !Responsive.isMobile(context))
-                  ? Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: MenuAnchor(
-                        childFocusNode: menuFocusNode,
-                        style: const MenuStyle(
-                          padding: MaterialStatePropertyAll(EdgeInsets.zero),
-                        ),
-                        controller: menuController,
-                        menuChildren: [
-                          SearchDialog(onClose: menuController.close),
-                        ],
-                        child: IconButton(
-                          padding: const EdgeInsets.all(0),
-                          tooltip: "Sort and Filter",
-                          onPressed: menuController.open,
-                          icon: const Icon(Icons.tune),
-                        ),
+            ),
+            (searchFocusMobile || !Responsive.isMobile(context))
+                ? Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: MenuAnchor(
+                      childFocusNode: menuFocusNode,
+                      style: const MenuStyle(
+                        padding: MaterialStatePropertyAll(EdgeInsets.zero),
                       ),
-                    )
-                  : const Padding(
-                      padding: EdgeInsets.only(right: 16),
-                      child: (Icon(Icons.search)),
+                      controller: menuController,
+                      menuChildren: [
+                        SearchDialog(onClose: menuController.close),
+                      ],
+                      child: IconButton(
+                        padding: const EdgeInsets.all(0),
+                        tooltip: "Sort and Filter",
+                        onPressed: menuController.open,
+                        icon: const Icon(Icons.tune),
+                      ),
                     ),
-            ],
-          ),
+                  )
+                : const Padding(
+                    padding: EdgeInsets.only(right: 16),
+                    child: (Icon(Icons.search)),
+                  ),
+          ],
         ),
       ),
     );
