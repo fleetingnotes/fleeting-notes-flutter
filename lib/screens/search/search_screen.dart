@@ -165,50 +165,53 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
       loadNotes();
     });
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: selectedNotes.isEmpty
-              ? Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: SearchBar(
-                          onMenu: db.openDrawer,
-                          controller: queryController,
-                          focusNode: widget.searchFocusNode,
-                        ),
-                      ),
-                    ),
-                    if (!Responsive.isMobile(context))
-                      Padding(
-                        padding: const EdgeInsets.only(left: 32),
-                        child: FilledButton(
-                          onPressed: addNote,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              children: const [
-                                Icon(Icons.add),
-                                SizedBox(width: 8),
-                                Text('New note'),
-                              ],
-                            ),
+    return SafeArea(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: selectedNotes.isEmpty
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: SearchBar(
+                            onMenu: db.openDrawer,
+                            controller: queryController,
+                            focusNode: widget.searchFocusNode,
                           ),
                         ),
-                      )
-                  ],
-                )
-              : ModifyNotesAppBar(
-                  selectedNotes: selectedNotes,
-                  clearNotes: clearNotes,
-                  deleteNotes: deleteNotes,
-                ),
-        ),
-        Expanded(child: getSearchList()),
-      ],
+                      ),
+                      if (!Responsive.isMobile(context))
+                        Padding(
+                          padding: const EdgeInsets.only(left: 32),
+                          child: FilledButton(
+                            onPressed: addNote,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: const [
+                                  Icon(Icons.add),
+                                  SizedBox(width: 8),
+                                  Text('New note'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                    ],
+                  )
+                : ModifyNotesAppBar(
+                    selectedNotes: selectedNotes,
+                    clearNotes: clearNotes,
+                    deleteNotes: deleteNotes,
+                  ),
+          ),
+          Expanded(child: getSearchList()),
+        ],
+      ),
     );
   }
 }
