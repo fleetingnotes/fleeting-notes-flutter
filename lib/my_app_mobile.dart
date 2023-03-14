@@ -119,7 +119,11 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       // but keep in mind it could be `null` or "empty"(`receivedIntent.isNull`).
       String title = (intent.extra?['name'] ?? '').toString();
       String body = (intent.extra?['articleBody'] ?? '').toString();
+      String type = (intent.extra?['type'] ?? '').toString();
       var note = getNoteFromShareText(title: title, body: body);
+
+      // ignore: unused_local_variable
+      bool enableSpeech2Text = type == 'DigitalDocument' && note.isEmpty();
       goToNote(note);
     }
 
