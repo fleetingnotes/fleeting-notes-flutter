@@ -5,4 +5,6 @@
     <item>add fleeting note $articleBody</item>
     <item>write fleeting note $articleBody</item>
   </string-array>
+  <string name="create_note">Create Note</string>
+  <string name="record_note">Record Note</string>
 </resources>

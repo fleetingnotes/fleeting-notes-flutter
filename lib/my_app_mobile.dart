@@ -112,13 +112,13 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
     }
 
     void handleAndroidIntent(ri.Intent? intent) {
-      if (intent == null || intent.isNull) return;
+      if (intent == null ||
+          intent.isNull ||
+          intent.action != 'android.intent.action.EDIT') return;
       // Validate receivedIntent and warn the user, if it is not correct,
       // but keep in mind it could be `null` or "empty"(`receivedIntent.isNull`).
       String title = (intent.extra?['name'] ?? '').toString();
       String body = (intent.extra?['articleBody'] ?? '').toString();
-      String type = (intent.extra?['type'] ?? '').toString();
-      if (type != 'DigitalDocument' && body.isEmpty) return;
       var note = getNoteFromShareText(title: title, body: body);
       goToNote(note);
     }
