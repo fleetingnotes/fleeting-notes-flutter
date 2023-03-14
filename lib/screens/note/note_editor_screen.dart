@@ -163,45 +163,47 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             backlinks: backlinks,
             searchQuery: backlinksSq,
           ),
-          body: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              NoteEditorAppBar(
-                note: renderNote,
-                onClose: onClose,
-                onBacklinks: (backlinks.isEmpty)
-                    ? null
-                    : scaffoldKey.currentState?.openEndDrawer,
-                contentController: contentController,
-              ),
-              Flexible(
-                fit: FlexFit.tight,
-                child: (renderNote == null)
-                    ? const SizedBox(
-                        height: 100,
-                        child: Center(child: CircularProgressIndicator()))
-                    : NoteEditor(
-                        note: renderNote,
-                        titleController: titleController,
-                        contentController: contentController,
-                        sourceController: sourceController,
-                        autofocus: nonExistantNote,
-                        padding: const EdgeInsets.only(
-                            left: 24, right: 24, bottom: 16),
-                      ),
-              ),
-              if (bottomAppBarVisible)
-                KeyboardVisibilityBuilder(builder: (context, isVisible) {
-                  if (isVisible) return const SizedBox.shrink();
-                  return NoteEditorBottomAppBar(
-                    onBack:
-                        (noteHistory.backNoteHistory.isEmpty) ? null : onBack,
-                    onForward: (noteHistory.forwardNoteHistory.isEmpty)
-                        ? null
-                        : onForward,
-                  );
-                })
-            ],
+          body: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                NoteEditorAppBar(
+                  note: renderNote,
+                  onClose: onClose,
+                  onBacklinks: (backlinks.isEmpty)
+                      ? null
+                      : scaffoldKey.currentState?.openEndDrawer,
+                  contentController: contentController,
+                ),
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: (renderNote == null)
+                      ? const SizedBox(
+                          height: 100,
+                          child: Center(child: CircularProgressIndicator()))
+                      : NoteEditor(
+                          note: renderNote,
+                          titleController: titleController,
+                          contentController: contentController,
+                          sourceController: sourceController,
+                          autofocus: nonExistantNote,
+                          padding: const EdgeInsets.only(
+                              left: 24, right: 24, bottom: 16),
+                        ),
+                ),
+                if (bottomAppBarVisible)
+                  KeyboardVisibilityBuilder(builder: (context, isVisible) {
+                    if (isVisible) return const SizedBox.shrink();
+                    return NoteEditorBottomAppBar(
+                      onBack:
+                          (noteHistory.backNoteHistory.isEmpty) ? null : onBack,
+                      onForward: (noteHistory.forwardNoteHistory.isEmpty)
+                          ? null
+                          : onForward,
+                    );
+                  })
+              ],
+            ),
           ),
         ),
       ),
