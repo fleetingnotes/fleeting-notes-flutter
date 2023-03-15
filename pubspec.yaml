@@ -69,6 +69,7 @@ dependencies:
   receive_intent: ^0.2.3
   cached_network_image: ^3.2.3
   flutter_keyboard_visibility: ^5.4.0
+  flutter_siri_suggestions: ^2.1.0
 
 
 dev_dependencies:
