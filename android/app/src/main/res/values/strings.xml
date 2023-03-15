@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string-array name="CreateNoteQueries">
-    <item>create fleeting note $articleBody</item>
-    <item>add fleeting note $articleBody</item>
-    <item>write fleeting note $articleBody</item>
-  </string-array>
+  <string name="create_note">Create Note</string>
+  <string name="record_note">Record Note</string>
 </resources>

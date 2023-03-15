@@ -3,7 +3,7 @@
   xmlns:app="http://schemas.android.com/apk/res-auto">
   <capability android:name="actions.intent.CREATE_DIGITAL_DOCUMENT">
     <intent
-      android:action="android.intent.action.VIEW"
+      android:action="android.intent.action.EDIT"
       android:targetPackage="com.fleetingnotes"
       android:targetClass="com.fleetingnotes.MainActivity">
       <parameter
@@ -17,17 +17,26 @@
         android:key="type"/>
     </intent>
   </capability>
-  <capability
-    android:name="custom.actions.intent.CREATE_FLEETING_NOTE"
-    app:queryPatterns="@array/CreateNoteQueries">
+  <shortcut
+    android:shortcutId="create_note"
+    android:enabled="true"
+    android:icon="@drawable/ic_baseline_note_add_24"
+    android:shortcutShortLabel="@string/create_note"
+    >
     <intent
-      android:action="android.intent.action.VIEW"
+      android:action="android.intent.action.EDIT"
       android:targetPackage="com.fleetingnotes"
-      android:targetClass="com.fleetingnotes.MainActivity">
-      <parameter
-          android:name="articleBody"
-          android:key="articleBody"
-          android:mimeType="https://schema.org/Text" />
-    </intent>
-  </capability>
+      android:targetClass="com.fleetingnotes.MainActivity" />
+  </shortcut>
+  <shortcut
+    android:shortcutId="record_note"
+    android:enabled="false"
+    android:icon="@drawable/ic_baseline_mic_24"
+    android:shortcutShortLabel="@string/record_note"
+    >
+    <intent
+      android:action="android.intent.action.VOICE_COMMAND"
+      android:targetPackage="com.fleetingnotes"
+      android:targetClass="com.fleetingnotes.MainActivity" />
+  </shortcut>
 </shortcuts>
