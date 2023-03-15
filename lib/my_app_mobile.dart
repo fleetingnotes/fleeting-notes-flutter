@@ -129,7 +129,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
           const FlutterSiriActivity("Create New Note", "createActivity",
               isEligibleForSearch: true,
               isEligibleForPrediction: true,
-              contentDescription: "Creates a new note in Fleeting Notes",
+              contentDescription:
+                  "Launches Fleeting Notes app and creates a new note",
               suggestedInvocationPhrase: "Create fleeting note"));
       // TODO: update eligible for search & prediction
       await FlutterSiriSuggestions.instance.registerActivity(
@@ -137,7 +138,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
               isEligibleForSearch: false,
               isEligibleForPrediction: false,
               contentDescription:
-                  "Creates a new note in Fleeting Notes and opens a dialog to record",
+                  "Launches Fleeting Notes app and opens a dialog to record a new note",
               suggestedInvocationPhrase: "Record fleeting note"));
     }
 
