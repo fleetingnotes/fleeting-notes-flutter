@@ -6,9 +6,8 @@ import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 class RecordDialog extends StatefulWidget {
-  final bool listenOnInit;
   final Function(String)? onFinish;
-  const RecordDialog({super.key, this.onFinish, this.listenOnInit = true});
+  const RecordDialog({super.key, this.onFinish});
 
   @override
   State<RecordDialog> createState() => _RecordDialogState();
@@ -25,23 +24,28 @@ class _RecordDialogState extends State<RecordDialog> {
 
   @override
   void initState() {
+    slowlySetAmplitude(0);
     initSpeechToText();
     super.initState();
   }
 
   @override
   void dispose() {
-    speech.cancel();
-    amplitudeTimer?.cancel();
+    onCancel();
     super.dispose();
+  }
+
+  void onCancel() {
+    waveController.setAmplitude(0);
+    amplitudeTimer?.cancel();
+    speech.cancel();
+    isListening = false;
   }
 
   void onStatus(String status) {
     setState(() {
       if (status == 'notListening') {
-        slowlySetAmplitude(0);
-        speech.cancel();
-        isListening = false;
+        onCancel();
         if (listenedText.isNotEmpty) {
           widget.onFinish?.call(listenedText);
         }
@@ -53,9 +57,7 @@ class _RecordDialogState extends State<RecordDialog> {
   }
 
   void onError(SpeechRecognitionError? e) {
-    slowlySetAmplitude(0);
-    speech.cancel();
-    amplitudeTimer?.cancel();
+    onCancel();
     setState(() {
       if (e != null) {
         errMsg = 'Failed with error message: $e';
@@ -89,7 +91,7 @@ class _RecordDialogState extends State<RecordDialog> {
   void initSpeechToText() async {
     bool isReady =
         await speech.initialize(onStatus: onStatus, onError: onError);
-    if (isReady && widget.listenOnInit) {
+    if (isReady) {
       initListen();
     } else {
       onError(null);
