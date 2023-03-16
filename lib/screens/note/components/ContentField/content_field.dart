@@ -393,6 +393,8 @@ class _ContentFieldState extends ConsumerState<ContentField> {
               actions: textfieldActions,
               child: TextField(
                 focusNode: contentFocusNode,
+                scrollPadding: const EdgeInsets.only(
+                    bottom: 60, top: 20, left: 20, right: 20),
                 textCapitalization: TextCapitalization.sentences,
                 autofocus: widget.autofocus,
                 controller: widget.controller,
