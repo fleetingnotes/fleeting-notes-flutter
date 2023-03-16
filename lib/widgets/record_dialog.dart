@@ -1,19 +1,22 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:siri_wave/siri_wave.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-class RecordDialog extends StatefulWidget {
-  final Function(String)? onFinish;
+import '../models/Note.dart';
+
+class RecordDialog extends ConsumerStatefulWidget {
+  final void Function(String)? onFinish;
   const RecordDialog({super.key, this.onFinish});
 
   @override
-  State<RecordDialog> createState() => _RecordDialogState();
+  ConsumerState<RecordDialog> createState() => _RecordDialogState();
 }
 
-class _RecordDialogState extends State<RecordDialog> {
+class _RecordDialogState extends ConsumerState<RecordDialog> {
   SiriWaveController waveController =
       SiriWaveController(amplitude: 0.2, speed: 0.1);
   SpeechToText speech = SpeechToText();
@@ -45,14 +48,25 @@ class _RecordDialogState extends State<RecordDialog> {
     setState(() {
       if (status == 'notListening') {
         onCancel();
-        if (listenedText.isNotEmpty) {
-          widget.onFinish?.call(listenedText);
-        }
       } else if (status == 'listening') {
         slowlySetAmplitude(0.2);
         isListening = true;
       }
     });
+  }
+
+  void finishRecording(String resultText) async {
+    if (resultText.isNotEmpty) {
+      final onFinish = widget.onFinish;
+      if (onFinish != null) {
+        onFinish(resultText);
+      } else {
+        var note = Note.empty(content: resultText);
+        final noteUtils = ref.read(noteUtilsProvider);
+        await noteUtils.handleSaveNote(context, note);
+        Navigator.pop(context);
+      }
+    }
   }
 
   void onError(SpeechRecognitionError? e) {
@@ -99,10 +113,6 @@ class _RecordDialogState extends State<RecordDialog> {
   }
 
   Future<void> initListen() async {
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      // wait for siri to be done
-      await Future.delayed(const Duration(seconds: 1));
-    }
     await speech.listen(
       cancelOnError: true,
       pauseFor: const Duration(seconds: 5),
@@ -110,8 +120,9 @@ class _RecordDialogState extends State<RecordDialog> {
         setState(() {
           listenedText = result.recognizedWords;
         });
-        if (result.finalResult || speech.isNotListening) {
+        if (result.finalResult) {
           slowlySetAmplitude(0);
+          finishRecording(listenedText);
         } else {
           slowlySetAmplitude(1);
         }
