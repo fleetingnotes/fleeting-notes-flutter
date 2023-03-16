@@ -70,6 +70,8 @@ dependencies:
   cached_network_image: ^3.2.3
   flutter_keyboard_visibility: ^5.4.0
   flutter_siri_suggestions: ^2.1.0
+  siri_wave: ^0.3.0
+  speech_to_text: ^6.1.1
 
 
 dev_dependencies:

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
+import 'package:fleeting_notes_flutter/widgets/record_dialog.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -85,6 +86,12 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
           builder: (context, state) => const MainScreen(),
           routes: [
             GoRoute(
+                name: 'record',
+                path: 'note/record',
+                pageBuilder: (context, state) {
+                  return const DialogPage(child: RecordDialog());
+                }),
+            GoRoute(
               name: 'note',
               path: 'note/:id',
               redirect: (context, state) {
@@ -108,9 +115,11 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                 );
 
                 return DialogPage(
-                  child: NoteEditorScreen(
-                    noteId: noteId,
-                    extraNote: note,
+                  child: DynamicDialog(
+                    child: NoteEditorScreen(
+                      noteId: noteId,
+                      extraNote: note,
+                    ),
                   ),
                 );
               },
