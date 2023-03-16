@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:siri_wave/siri_wave.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -19,12 +19,11 @@ class _RecordDialogState extends State<RecordDialog> {
   SpeechToText speech = SpeechToText();
   String listenedText = '';
   String errMsg = '';
-  bool isListening = false;
+  bool isListening = true;
   Timer? amplitudeTimer;
 
   @override
   void initState() {
-    slowlySetAmplitude(0);
     initSpeechToText();
     super.initState();
   }
@@ -91,6 +90,7 @@ class _RecordDialogState extends State<RecordDialog> {
   void initSpeechToText() async {
     bool isReady =
         await speech.initialize(onStatus: onStatus, onError: onError);
+    slowlySetAmplitude(0);
     if (isReady) {
       initListen();
     } else {
@@ -99,20 +99,37 @@ class _RecordDialogState extends State<RecordDialog> {
   }
 
   Future<void> initListen() async {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // wait for siri to be done
+      await Future.delayed(const Duration(seconds: 1));
+    }
     await speech.listen(
       cancelOnError: true,
-      pauseFor: const Duration(seconds: 3),
+      pauseFor: const Duration(seconds: 5),
       onResult: (result) {
         setState(() {
           listenedText = result.recognizedWords;
         });
-        if (result.finalResult) {
+        if (result.finalResult || speech.isNotListening) {
           slowlySetAmplitude(0);
         } else {
           slowlySetAmplitude(1);
         }
       },
     );
+  }
+
+  List<Widget> getActions() {
+    return [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      TextButton(
+        onPressed: (isListening) ? null : initListen,
+        child: const Text('Record Again'),
+      )
+    ];
   }
 
   @override
@@ -123,39 +140,33 @@ class _RecordDialogState extends State<RecordDialog> {
     return AlertDialog(
       title: const Text('Record New Note'),
       icon: const Icon(Icons.mic),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+      actions: getActions(),
+      content: SizedBox(
+        width: 360,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+                padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+                child: (errMsg.isEmpty)
+                    ? Text(
+                        listenedText,
+                        style: textStyle,
+                        textAlign: TextAlign.center,
+                      )
+                    : Text(
+                        errMsg,
+                        style: textStyle?.copyWith(
+                            color: Theme.of(context).colorScheme.error),
+                        textAlign: TextAlign.center,
+                      )),
+            SiriWave(
+              controller: waveController,
+              style: SiriWaveStyle.ios_7,
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: (isListening) ? null : initListen,
-          child: const Text('Record'),
-        )
-      ],
-      content: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-              padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-              child: (errMsg.isEmpty)
-                  ? Text(
-                      listenedText,
-                      style: textStyle,
-                      textAlign: TextAlign.center,
-                    )
-                  : Text(
-                      errMsg,
-                      style: textStyle?.copyWith(
-                          color: Theme.of(context).colorScheme.error),
-                      textAlign: TextAlign.center,
-                    )),
-          SiriWave(
-            controller: waveController,
-            style: SiriWaveStyle.ios_7,
-          ),
-        ],
       ),
     );
   }
