@@ -92,10 +92,14 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   void initState() {
     super.initState();
     initHomeWidget();
-    void goToNote(Note note) {
-      final noteHistory = ref.read(noteHistoryProvider.notifier);
+    void goToNote(Note note, {bool recordNote = false}) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        noteHistory.addNote(context, note, router: router);
+        if (recordNote) {
+          router.goNamed('record');
+        } else {
+          final noteHistory = ref.read(noteHistoryProvider.notifier);
+          noteHistory.addNote(context, note, router: router);
+        }
       });
     }
 
@@ -121,7 +125,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
             goToNote(Note.empty());
             break;
           case "recordActivity":
-            goToNote(Note.empty());
+            goToNote(Note.empty(), recordNote: true);
             break;
         }
       });
@@ -135,17 +139,21 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       // TODO: update eligible for search & prediction
       await FlutterSiriSuggestions.instance.registerActivity(
           const FlutterSiriActivity("Record New Note", "recordActivity",
-              isEligibleForSearch: false,
-              isEligibleForPrediction: false,
+              isEligibleForSearch: true,
+              isEligibleForPrediction: true,
               contentDescription:
                   "Launches Fleeting Notes app and opens a dialog to record a new note",
               suggestedInvocationPhrase: "Record fleeting note"));
     }
 
     void handleAndroidIntent(ri.Intent? intent) {
+      List<String> acceptedIntents = [
+        'android.intent.action.VOICE_COMMAND',
+        'android.intent.action.EDIT',
+      ];
       if (intent == null ||
           intent.isNull ||
-          intent.action != 'android.intent.action.EDIT') return;
+          !acceptedIntents.contains(intent.action)) return;
       // Validate receivedIntent and warn the user, if it is not correct,
       // but keep in mind it could be `null` or "empty"(`receivedIntent.isNull`).
       String title = (intent.extra?['name'] ?? '').toString();
@@ -154,8 +162,10 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       var note = getNoteFromShareText(title: title, body: body);
 
       // ignore: unused_local_variable
-      bool enableSpeech2Text = type == 'DigitalDocument' && note.isEmpty();
-      goToNote(note);
+      bool openRecordDialog = (type == 'DigitalDocument' ||
+              intent.action == 'android.intent.action.VOICE_COMMAND') &&
+          note.isEmpty();
+      goToNote(note, recordNote: openRecordDialog);
     }
 
     if (Platform.isAndroid) {

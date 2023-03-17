@@ -70,6 +70,8 @@ dependencies:
   cached_network_image: ^3.2.3
   flutter_keyboard_visibility: ^5.4.0
   flutter_siri_suggestions: ^2.1.0
+  siri_wave: ^0.3.0
+  speech_to_text: ^6.1.1
 
 
 dev_dependencies:
@@ -110,9 +112,10 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/sounds/speech_to_text_listening.m4r
+    - assets/sounds/speech_to_text_cancel.m4r
+    - assets/sounds/speech_to_text_stop.m4r
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

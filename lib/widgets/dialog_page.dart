@@ -18,7 +18,7 @@ class DialogPage<T> extends Page<T> {
     return DialogRoute<T>(
       context: context,
       settings: this,
-      builder: (context) => DynamicDialog(child: child),
+      builder: (context) => child,
       useSafeArea: false,
     );
   }

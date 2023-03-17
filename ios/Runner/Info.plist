@@ -46,6 +46,10 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>To upload photos, please allow permission to access your photo library.</string>
+  <key>NSSpeechRecognitionUsageDescription</key>
+  <string>Recognizing speech to be transcribed to a note</string>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>To record speech to be transcibed to a note</string>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
