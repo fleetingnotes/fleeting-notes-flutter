@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:receive_intent/receive_intent.dart' as ri;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -116,36 +115,6 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       }
     }
 
-    void handleSiriSuggestions() async {
-      FlutterSiriSuggestions.instance.configure(
-          onLaunch: (Map<String, dynamic> message) async {
-        debugPrint("called by ${message['key']} suggestion.");
-        switch (message['key']) {
-          case "createActivity":
-            goToNote(Note.empty());
-            break;
-          case "recordActivity":
-            goToNote(Note.empty(), recordNote: true);
-            break;
-        }
-      });
-      await FlutterSiriSuggestions.instance.registerActivity(
-          const FlutterSiriActivity("Create New Note", "createActivity",
-              isEligibleForSearch: true,
-              isEligibleForPrediction: true,
-              contentDescription:
-                  "Launches Fleeting Notes app and creates a new note",
-              suggestedInvocationPhrase: "Create fleeting note"));
-      // TODO: update eligible for search & prediction
-      await FlutterSiriSuggestions.instance.registerActivity(
-          const FlutterSiriActivity("Record New Note", "recordActivity",
-              isEligibleForSearch: true,
-              isEligibleForPrediction: true,
-              contentDescription:
-                  "Launches Fleeting Notes app and opens a dialog to record a new note",
-              suggestedInvocationPhrase: "Record fleeting note"));
-    }
-
     void handleAndroidIntent(ri.Intent? intent) {
       List<String> acceptedIntents = [
         'android.intent.action.VOICE_COMMAND',
@@ -177,9 +146,6 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       });
     }
     // flutter siri suggestions
-    if (Platform.isIOS) {
-      handleSiriSuggestions();
-    }
     if (Platform.isIOS || Platform.isAndroid) {
       // For sharing or opening urls/text coming from outside the app while the app is in the memory
       receiveShareSub =

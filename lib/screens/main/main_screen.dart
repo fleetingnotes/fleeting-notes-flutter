@@ -9,6 +9,8 @@ import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
+import '../../widgets/record_dialog.dart';
 import 'components/analytics_dialog.dart';
 import 'components/auth_dialog.dart';
 import 'components/note_fab.dart';
@@ -40,6 +42,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       });
     }
     attemptRecoverSession();
+    handleSiriSuggestions();
   }
 
   void attemptRecoverSession() async {
@@ -55,6 +58,38 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         db.supabase.recoverSession(session);
       }
     }
+  }
+
+  void handleSiriSuggestions() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS || kIsWeb) return;
+    FlutterSiriSuggestions.instance.configure(
+        onLaunch: (Map<String, dynamic> message) async {
+      debugPrint("called by ${message['key']} suggestion.");
+      switch (message['key']) {
+        case "createActivity":
+          addNote();
+          break;
+        case "recordActivity":
+          showDialog(
+              context: context, builder: (context) => const RecordDialog());
+          break;
+      }
+    });
+    await FlutterSiriSuggestions.instance.registerActivity(
+        const FlutterSiriActivity("Create New Note", "createActivity",
+            isEligibleForSearch: true,
+            isEligibleForPrediction: true,
+            contentDescription:
+                "Launches Fleeting Notes app and creates a new note",
+            suggestedInvocationPhrase: "Create fleeting note"));
+    // TODO: update eligible for search & prediction
+    await FlutterSiriSuggestions.instance.registerActivity(
+        const FlutterSiriActivity("Record New Note", "recordActivity",
+            isEligibleForSearch: true,
+            isEligibleForPrediction: true,
+            contentDescription:
+                "Launches Fleeting Notes app and opens a dialog to record a new note",
+            suggestedInvocationPhrase: "Record fleeting note"));
   }
 
   void analyticsDialogWorkflow() {
