@@ -374,9 +374,10 @@ class SupabaseDB {
   }
 
   Future<void> deleteAccount() async {
-    List<Note> allNotes = await getAllNotes();
-    await deleteNotes(allNotes);
-    // TODO: add option to delete account (rather than just logging out)
+    var res = await client.functions.invoke('delete-user');
+    if (res.status != 200) {
+      throw FleetingNotesException('Failed to delete account');
+    }
     await logout();
   }
 
