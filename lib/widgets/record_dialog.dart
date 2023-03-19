@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:siri_wave/siri_wave.dart';
@@ -64,9 +65,9 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
         var note = Note.empty(content: resultText);
         final noteUtils = ref.read(noteUtilsProvider);
         await noteUtils.handleSaveNote(context, note);
-        Navigator.pop(context);
       }
     }
+    Navigator.pop(context);
   }
 
   void onError(SpeechRecognitionError? e) {
@@ -106,6 +107,9 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
         await speech.initialize(onStatus: onStatus, onError: onError);
     slowlySetAmplitude(0);
     if (isReady) {
+      if (TargetPlatform.iOS == defaultTargetPlatform) {
+        await Future.delayed(const Duration(seconds: 1));
+      }
       initListen();
     } else {
       onError(null);
@@ -137,8 +141,10 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
         child: const Text('Cancel'),
       ),
       TextButton(
-        onPressed: (isListening) ? null : initListen,
-        child: const Text('Record Again'),
+        onPressed:
+            (isListening) ? () => finishRecording(listenedText) : initListen,
+        child:
+            (isListening) ? const Text('Finish') : const Text('Record Again'),
       )
     ];
   }
@@ -148,35 +154,41 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
     waveController.setColor(Theme.of(context).colorScheme.onSurface);
     var textStyle = Theme.of(context).textTheme.bodyMedium;
     // update wave
-    return AlertDialog(
-      title: const Text('Record New Note'),
-      icon: const Icon(Icons.mic),
-      actions: getActions(),
-      content: SizedBox(
-        width: 360,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-                padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-                child: (errMsg.isEmpty)
-                    ? Text(
-                        listenedText,
-                        style: textStyle,
-                        textAlign: TextAlign.center,
-                      )
-                    : Text(
-                        errMsg,
-                        style: textStyle?.copyWith(
-                            color: Theme.of(context).colorScheme.error),
-                        textAlign: TextAlign.center,
-                      )),
-            SiriWave(
-              controller: waveController,
-              style: SiriWaveStyle.ios_7,
-            ),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        onCancel();
+        return true;
+      },
+      child: AlertDialog(
+        title: const Text('Record New Note'),
+        icon: const Icon(Icons.mic),
+        actions: getActions(),
+        content: SizedBox(
+          width: 360,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                  padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+                  child: (errMsg.isEmpty)
+                      ? Text(
+                          listenedText,
+                          style: textStyle,
+                          textAlign: TextAlign.center,
+                        )
+                      : Text(
+                          errMsg,
+                          style: textStyle?.copyWith(
+                              color: Theme.of(context).colorScheme.error),
+                          textAlign: TextAlign.center,
+                        )),
+              SiriWave(
+                controller: waveController,
+                style: SiriWaveStyle.ios_7,
+              ),
+            ],
+          ),
         ),
       ),
     );
