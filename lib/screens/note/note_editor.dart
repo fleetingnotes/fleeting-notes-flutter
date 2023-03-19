@@ -10,6 +10,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
 import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
@@ -281,39 +282,45 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
           return null;
         }),
       },
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: widget.padding ?? EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.note.getShortDateTimeStr(),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant),
+      child: KeyboardVisibilityBuilder(builder: (context, kbVisible) {
+        return Padding(
+          padding:
+              (kbVisible) ? const EdgeInsets.only(bottom: 24) : EdgeInsets.zero,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: widget.padding ?? EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.note.getShortDateTimeStr(),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
+                  TitleField(
+                    controller: titleController,
+                    onChanged: onChanged,
+                  ),
+                  SourceContainer(
+                    controller: sourceController,
+                    metadata: sourceMetadata,
+                    onChanged: onChanged,
+                    onClearSource: onClearSource,
+                  ),
+                  const Divider(),
+                  ContentField(
+                    controller: contentController,
+                    onChanged: onChanged,
+                    autofocus: widget.autofocus,
+                    onPop: () => noteUtils.onPopNote(context, widget.note.id),
+                  ),
+                ],
               ),
-              TitleField(
-                controller: titleController,
-                onChanged: onChanged,
-              ),
-              SourceContainer(
-                controller: sourceController,
-                metadata: sourceMetadata,
-                onChanged: onChanged,
-                onClearSource: onClearSource,
-              ),
-              const Divider(),
-              ContentField(
-                controller: contentController,
-                onChanged: onChanged,
-                autofocus: widget.autofocus,
-                onPop: () => noteUtils.onPopNote(context, widget.note.id),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
