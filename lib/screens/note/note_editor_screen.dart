@@ -86,7 +86,34 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     final noteId = currNote?.id ?? widget.noteId;
     Note? note = await db.getNoteById(noteId);
     if (note == null) {
-      note = currNote ?? widget.extraNote ?? Note.empty(id: noteId);
+      var extraNote = widget.extraNote;
+      note = currNote;
+      bool appendSameSource =
+          db.settings.get('append-same-source', defaultValue: true);
+
+      // find note with same source and append content
+      if (extraNote != null &&
+          extraNote.source.isNotEmpty &&
+          extraNote.title.isEmpty &&
+          appendSameSource &&
+          note == null) {
+        final query = SearchQuery(
+            searchByContent: false,
+            searchByTitle: false,
+            sortBy: SortOptions.modifiedDESC,
+            query: extraNote.source,
+            limit: 1);
+        List<Note> notes = await db.getSearchNotes(query);
+        if (notes.isNotEmpty) {
+          note = notes.first;
+          if (extraNote.content.isNotEmpty) {
+            note.content += "\n${extraNote.content}";
+            extraNote.content = '';
+          }
+        }
+      }
+
+      note = note ?? extraNote ?? Note.empty(id: noteId);
       if (!note.isEmpty()) {
         db.settings.set('unsaved-note', note);
       }

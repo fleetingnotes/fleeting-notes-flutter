@@ -238,6 +238,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SettingsTitle(title: "Other Settings"),
                     const SettingsItemSwitch(
                         settingsKey: 'dark-mode', name: "Dark mode"),
+                    const SettingsItemSwitch(
+                        settingsKey: 'append-same-source',
+                        name: 'Append same source',
+                        description: "Append shared notes to matching source"),
                     const SizedBox(height: 24),
                     const LegalLinks(),
                   ],

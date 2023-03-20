@@ -20,6 +20,7 @@ class Settings {
     'dark-mode': bool,
     'first-time-open': bool,
     'unsaved-note': Note,
+    'append-same-source': bool,
     // local sync settings
     'local-sync-enabled': bool,
     'local-sync-dir': String,
