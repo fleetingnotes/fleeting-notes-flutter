@@ -43,7 +43,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     super.initState();
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      await initNoteScreen(null);
       ref.read(noteHistoryProvider.notifier).addListener((noteHistory) {
         initNoteScreen(noteHistory);
       });
@@ -90,13 +89,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       note = currNote;
       bool appendSameSource =
           db.settings.get('append-same-source', defaultValue: true);
-
       // find note with same source and append content
       if (extraNote != null &&
           extraNote.source.isNotEmpty &&
           extraNote.title.isEmpty &&
-          appendSameSource &&
-          note == null) {
+          appendSameSource) {
         final query = SearchQuery(
             searchByContent: false,
             searchByTitle: false,

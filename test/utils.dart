@@ -94,21 +94,30 @@ Future<void> goToNewNote(WidgetTester tester,
 Future<void> addNote(WidgetTester tester,
     {String title = "",
     String content = "note",
+    String source = "",
     bool closeDialog = false}) async {
   await tester.tap(find.byIcon(Icons.add));
   await tester.pumpAndSettle();
   await modifyCurrentNote(tester,
-      title: title, content: content, closeDialog: closeDialog);
+      title: title, content: content, source: source, closeDialog: closeDialog);
 }
 
-Future<void> modifyCurrentNote(WidgetTester tester,
-    {String? title, String? content, bool closeDialog = false}) async {
+Future<void> modifyCurrentNote(
+  WidgetTester tester, {
+  String? title,
+  String? content,
+  String? source,
+  bool closeDialog = false,
+}) async {
   if (title != null) {
     await tester.enterText(find.bySemanticsLabel('Title'), title);
   }
   if (content != null) {
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), content);
+  }
+  if (source != null) {
+    await tester.enterText(find.bySemanticsLabel('Source'), source);
   }
   await tester.tap(find.byIcon(Icons.save));
   await tester.pumpAndSettle(

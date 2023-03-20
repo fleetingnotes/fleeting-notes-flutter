@@ -1,4 +1,5 @@
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
@@ -18,6 +19,7 @@ import 'utils.dart';
 void main() {
   setUpAll(() {
     registerFallbackValue(Note.empty());
+    registerFallbackValue(SearchQuery());
   });
   testWidgets('Render Note Screen', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
@@ -185,6 +187,31 @@ void main() {
         find.descendant(
             of: find.byType(ContentField), matching: find.text('init note')),
         findsNothing);
+  });
+  group("Sharing note with same source", () {
+    testWidgets('Opens prev note', (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester,
+          content: 'hello world', source: 'source', closeDialog: true);
+      await goToNewNote(tester, source: 'source', content: '');
+      expect(
+          find.descendant(
+              of: find.bySemanticsLabel('Start writing your thoughts...'),
+              matching: find.text('hello world', findRichText: true)),
+          findsOneWidget);
+    });
+
+    testWidgets('Appends content', (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester,
+          content: 'hello world', source: 'source', closeDialog: true);
+      await goToNewNote(tester, source: 'source', content: 'pp');
+      expect(
+          find.descendant(
+              of: find.bySemanticsLabel('Start writing your thoughts...'),
+              matching: find.text('hello world\npp', findRichText: true)),
+          findsOneWidget);
+    });
   });
 }
 

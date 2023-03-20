@@ -52,5 +52,7 @@ MockSupabaseDB getBaseMockSupabaseDB() {
       .thenAnswer((_) => Future.value(SubscriptionTier.unknownSub));
   when(() => mockSupabase.getStoredSession())
       .thenAnswer((_) => Future.value(null));
+  when(() => mockSupabase.getUrlMetadata(any()))
+      .thenAnswer((_) => Future.value(null));
   return mockSupabase;
 }

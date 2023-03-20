@@ -241,7 +241,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SettingsItemSwitch(
                         settingsKey: 'append-same-source',
                         name: 'Append same source',
-                        description: "Append shared notes to matching source"),
+                        description:
+                            "Append shared notes with the same source"),
                     const SizedBox(height: 24),
                     const LegalLinks(),
                   ],
