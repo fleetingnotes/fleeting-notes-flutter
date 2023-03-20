@@ -43,6 +43,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     super.initState();
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      await initNoteScreen(null);
       ref.read(noteHistoryProvider.notifier).addListener((noteHistory) {
         initNoteScreen(noteHistory);
       });
