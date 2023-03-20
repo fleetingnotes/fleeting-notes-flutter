@@ -139,7 +139,7 @@ const initPopup = () => {
 }
 
 const onActionPressed = async (tab, src) => {
-  if (src == null) {
+  if (typeof src != 'string') {
     src = getIframeUrl();
     try {
       const currWinSrc = await chrome.tabs.sendMessage(tab.id, { msg: "get-src" });
