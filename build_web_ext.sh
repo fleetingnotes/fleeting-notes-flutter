@@ -12,10 +12,17 @@ echo "Finished building flutter app"
 cd build/web-ext
 #ZIP chrome 
 cp manifest3.json manifest.json
+cp extension/background.js extension/background3.js
 zip -q -x 'manifest\d.json' -r ../web-ext-3.zip .
 
 #ZIP firefox
 cp manifest2.json manifest.json
+cp extension/background.js extension/background2.js
+## Transform background.js & generate background2.js
+sed -i '' 's/chrome\./browser\./g' extension/background2.js
+sed -i '' 's/browser\.action/browser\.browserAction/g' extension/background2.js
+sed -i '' "s/\'action\'/\'page_action\'/g" extension/background2.js
+
 zip -q -x 'manifest\d.json' -r ../web-ext-2.zip . 
 
 rm -rf ../web-ext-3

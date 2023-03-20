@@ -15,6 +15,7 @@
   },
   "permissions": [
     "activeTab",
+    "storage",
     "contextMenus"
   ],
   "background": {
