@@ -19,9 +19,9 @@ zip -q -x 'manifest\d.json' -r ../web-ext-3.zip .
 cp manifest2.json manifest.json
 cp extension/background.js extension/background2.js
 ## Transform background.js & generate background2.js
-sed -i '' 's/chrome\./browser\./g' extension/background2.js
-sed -i '' 's/browser\.action/browser\.browserAction/g' extension/background2.js
-sed -i '' "s/\'action\'/\'page_action\'/g" extension/background2.js
+sed -i'' -e 's/chrome\./browser\./g' extension/background2.js
+sed -i'' -e 's/browser\.action/browser\.browserAction/g' extension/background2.js
+sed -i'' -e "s/\'action\'/\'page_action\'/g" extension/background2.js
 
 zip -q -x 'manifest\d.json' -r ../web-ext-2.zip . 
 
