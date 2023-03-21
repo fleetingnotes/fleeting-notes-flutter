@@ -72,7 +72,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     final db = ref.read(dbProvider);
     final nh = ref.read(noteHistoryProvider);
     Note? currNote = nh.currNote;
-    final noteId = currNote?.id ?? widget.noteId;
+    String noteId = currNote?.id ?? widget.noteId;
+    String pathNoteId = currentLoc?.pathSegments.last ?? '';
+    if (isValidUuid(pathNoteId)) {
+      noteId = pathNoteId;
+    }
     Note? newNote = await db.getNoteById(noteId);
     if (newNote == null) {
       var extraNote = widget.extraNote;
@@ -158,7 +162,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     final noteHistory = ref.watch(noteHistoryProvider);
     final renderNote = note;
     bool bottomAppBarVisible = !noteHistory.isHistoryEmpty;
-    if (currentLoc?.path != GoRouter.of(context).location) {
+    if (currentLoc?.toString() != GoRouter.of(context).location) {
       currentLoc = Uri.parse(GoRouter.of(context).location);
       initNoteScreen(noteHistory);
     }

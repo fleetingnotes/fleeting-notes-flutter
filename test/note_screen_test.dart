@@ -193,19 +193,38 @@ void main() {
       await fnPumpWidget(tester, const MyApp());
       await addNote(tester,
           content: 'hello world', source: 'source', closeDialog: true);
-      await goToNewNote(tester, source: 'source', content: '');
+      await goToNewNote(tester,
+          source: 'source', content: '', addQueryParams: true);
+      expect(find.byType(NoteEditor), findsOneWidget);
       expect(
           find.descendant(
               of: find.bySemanticsLabel('Start writing your thoughts...'),
               matching: find.text('hello world', findRichText: true)),
           findsOneWidget);
     });
-
     testWidgets('Appends content', (WidgetTester tester) async {
       await fnPumpWidget(tester, const MyApp());
       await addNote(tester,
           content: 'hello world', source: 'source', closeDialog: true);
-      await goToNewNote(tester, source: 'source', content: 'pp');
+      await goToNewNote(tester,
+          source: 'source', content: 'pp', addQueryParams: true);
+      expect(find.byType(NoteEditor), findsOneWidget);
+      expect(
+          find.descendant(
+              of: find.bySemanticsLabel('Start writing your thoughts...'),
+              matching: find.text('hello world\npp', findRichText: true)),
+          findsOneWidget);
+    });
+    testWidgets('Appends content with other note open',
+        (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester,
+          content: 'hello world', source: 'source', closeDialog: true);
+      await addNote(tester,
+          content: 'open note', source: 'smthin else', closeDialog: false);
+      await goToNewNote(tester,
+          source: 'source', content: 'pp', addQueryParams: true);
+      expect(find.byType(NoteEditor), findsOneWidget);
       expect(
           find.descendant(
               of: find.bySemanticsLabel('Start writing your thoughts...'),

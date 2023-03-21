@@ -84,10 +84,17 @@ Future<void> searchNotes(WidgetTester tester, String query) async {
 }
 
 Future<void> goToNewNote(WidgetTester tester,
-    {String title = '', String content = '', String source = ''}) async {
+    {String title = '',
+    String content = '',
+    String source = '',
+    bool addQueryParams = false}) async {
   final BuildContext context = tester.element(find.byType(MainScreen));
   final newNote = Note.empty(title: title, content: content, source: source);
-  context.goNamed('note', params: {'id': newNote.id}, extra: newNote);
+  Map<String, String> qp = (addQueryParams)
+      ? {'title': title, 'content': content, 'source': source}
+      : {};
+  context.goNamed('note',
+      params: {'id': newNote.id}, extra: newNote, queryParams: qp);
   await tester.pumpAndSettle();
 }
 
