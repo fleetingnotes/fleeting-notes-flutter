@@ -2,7 +2,6 @@ import 'package:fleeting_notes_flutter/models/note_history.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,12 +20,10 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
     super.key,
     required this.noteId,
     this.extraNote,
-    this.appbarElevation,
   });
 
   final String noteId;
   final Note? extraNote;
-  final double? appbarElevation;
 
   @override
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
@@ -35,25 +32,15 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool nonExistantNote = false;
   Note? note;
+  Uri? currentLoc;
   List<Note> backlinks = [];
   SearchQuery backlinksSq = SearchQuery();
-
-  @override
-  void initState() {
-    super.initState();
-
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      await initNoteScreen(null);
-      ref.read(noteHistoryProvider.notifier).addListener((noteHistory) {
-        initNoteScreen(noteHistory);
-      });
-    });
-  }
 
   Future<void> initNoteScreen(NoteHistory? noteHistory) async {
     if (!mounted || !GoRouter.of(context).location.startsWith('/note/')) return;
     final db = ref.read(dbProvider);
-    var tempNote = await getNote(noteHistory?.currNote);
+    var tempNote = await getNote();
+    noteHistory?.currNote = tempNote;
 
     // get backlinks (async)
     if (tempNote.title.isNotEmpty) {
@@ -80,45 +67,45 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
   }
 
-  Future<Note> getNote(Note? currNote) async {
+  Future<Note> getNote() async {
     // initialize shared
     final db = ref.read(dbProvider);
+    final nh = ref.read(noteHistoryProvider);
+    Note? currNote = nh.currNote;
     final noteId = currNote?.id ?? widget.noteId;
-    Note? note = await db.getNoteById(noteId);
-    if (note == null) {
+    Note? newNote = await db.getNoteById(noteId);
+    if (newNote == null) {
       var extraNote = widget.extraNote;
-      note = currNote;
+      newNote = currNote;
       bool appendSameSource =
           db.settings.get('append-same-source', defaultValue: true);
       // find note with same source and append content
-      if (extraNote != null &&
-          extraNote.source.isNotEmpty &&
-          extraNote.title.isEmpty &&
-          appendSameSource) {
+      String qpSource = currentLoc?.queryParameters['source'] ?? '';
+      String qpContent = currentLoc?.queryParameters['content'] ?? '';
+      if (qpSource.isNotEmpty && appendSameSource) {
         final query = SearchQuery(
             searchByContent: false,
             searchByTitle: false,
             sortBy: SortOptions.modifiedDESC,
-            query: extraNote.source,
+            query: qpSource,
             limit: 1);
         List<Note> notes = await db.getSearchNotes(query);
         if (notes.isNotEmpty) {
-          note = notes.first;
-          if (extraNote.content.isNotEmpty) {
-            note.content += "\n${extraNote.content}";
-            extraNote.content = '';
+          newNote = notes.first;
+          if (qpContent.isNotEmpty) {
+            newNote.content += "\n$qpContent";
+            return newNote;
           }
         }
       }
-
-      note = note ?? extraNote ?? Note.empty(id: noteId);
-      if (!note.isEmpty()) {
-        db.settings.set('unsaved-note', note);
+      newNote = newNote ?? extraNote ?? Note.empty(id: noteId);
+      if (!newNote.isEmpty()) {
+        db.settings.set('unsaved-note', newNote);
       }
       nonExistantNote = true;
     }
 
-    return note;
+    return newNote;
   }
 
   void onBack() async {
@@ -170,8 +157,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Widget build(BuildContext context) {
     final noteHistory = ref.watch(noteHistoryProvider);
     final renderNote = note;
-    bool bottomAppBarVisible = !(noteHistory.backNoteHistory.isEmpty &&
-        noteHistory.forwardNoteHistory.isEmpty);
+    bool bottomAppBarVisible = !noteHistory.isHistoryEmpty;
+    if (currentLoc?.path != GoRouter.of(context).location) {
+      currentLoc = Uri.parse(GoRouter.of(context).location);
+      initNoteScreen(noteHistory);
+    }
     return WillPopScope(
       onWillPop: () async {
         if (renderNote == null) return true;
