@@ -15,11 +15,15 @@ class SearchScreen extends ConsumerStatefulWidget {
     Key? key,
     this.searchFocusNode,
     this.hasSearchFocus = false,
+    this.addNote,
+    this.recordNote,
     // keep track of notes selected
   }) : super(key: key);
 
   final FocusNode? searchFocusNode;
   final bool hasSearchFocus;
+  final VoidCallback? addNote;
+  final VoidCallback? recordNote;
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -123,14 +127,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  void addNote() {
-    final nh = ref.read(noteHistoryProvider.notifier);
-    final db = ref.read(dbProvider);
-    db.closeDrawer();
-    final note = Note.empty();
-    nh.addNote(context, note);
-  }
-
   Widget getSearchList() {
     final searchQuery = ref.read(searchProvider);
     int crossAxisCount = 2;
@@ -182,11 +178,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         ),
                       ),
                     ),
-                    if (!Responsive.isMobile(context))
+                    if (widget.addNote != null)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: FilledButton(
-                          onPressed: addNote,
+                          onPressed: widget.addNote,
+                          onLongPress: widget.recordNote,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Row(
