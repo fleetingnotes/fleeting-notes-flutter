@@ -70,8 +70,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           addNote();
           break;
         case "recordActivity":
-          showDialog(
-              context: context, builder: (context) => const RecordDialog());
+          recordNote();
           break;
       }
     });
@@ -132,6 +131,15 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     nh.addNote(context, note);
   }
 
+  void recordNote() async {
+    if (kIsWeb ||
+        [TargetPlatform.iOS, TargetPlatform.android]
+            .contains(defaultTargetPlatform)) {
+      await showDialog(
+          context: context, builder: (context) => const RecordDialog());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
@@ -151,7 +159,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             closeDrawer: db.closeDrawer,
           ),
           floatingActionButton: (Responsive.isMobile(context))
-              ? NoteFAB(onPressed: addNote)
+              ? NoteFAB(onPressed: addNote, onLongPress: recordNote)
               : null,
           body: SafeArea(
             child: Responsive(
@@ -166,6 +174,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                             const BoxConstraints(maxWidth: mobileLimit),
                         child: SearchScreen(
                           searchFocusNode: searchFocusNode,
+                          addNote: addNote,
+                          recordNote: recordNote,
                         ),
                       ),
                     ),
@@ -182,6 +192,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                             const BoxConstraints(maxWidth: tabletLimit),
                         child: SearchScreen(
                           searchFocusNode: searchFocusNode,
+                          addNote: addNote,
+                          recordNote: recordNote,
                         ),
                       ),
                     ),
