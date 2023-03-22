@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:collection/collection.dart';
 
 import '../../models/Note.dart';
 import '../../models/search_query.dart';
@@ -94,12 +95,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             query: qpSource,
             limit: 1);
         List<Note> notes = await db.getSearchNotes(query);
-        if (notes.isNotEmpty) {
-          newNote = notes.first;
+        Note? queriedNote = notes.firstWhereOrNull((n) => n.source == qpSource);
+        if (queriedNote != null) {
           if (qpContent.isNotEmpty) {
-            newNote.content += "\n$qpContent";
-            return newNote;
+            queriedNote.content += "\n$qpContent";
           }
+          return queriedNote;
         }
       }
       newNote = newNote ?? extraNote ?? Note.empty(id: noteId);
