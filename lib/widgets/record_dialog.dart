@@ -163,31 +163,34 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
         title: const Text('Record New Note'),
         icon: const Icon(Icons.mic),
         actions: getActions(),
-        content: SizedBox(
-          width: 360,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                  padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-                  child: (errMsg.isEmpty)
-                      ? Text(
-                          listenedText,
-                          style: textStyle,
-                          textAlign: TextAlign.center,
-                        )
-                      : Text(
-                          errMsg,
-                          style: textStyle?.copyWith(
-                              color: Theme.of(context).colorScheme.error),
-                          textAlign: TextAlign.center,
-                        )),
-              SiriWave(
-                controller: waveController,
-                style: SiriWaveStyle.ios_7,
-              ),
-            ],
+        content: SingleChildScrollView(
+          child: SizedBox(
+            width: 360,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                    padding:
+                        const EdgeInsets.only(top: 16, left: 16, right: 16),
+                    child: (errMsg.isEmpty)
+                        ? Text(
+                            listenedText,
+                            style: textStyle,
+                            textAlign: TextAlign.center,
+                          )
+                        : Text(
+                            errMsg,
+                            style: textStyle?.copyWith(
+                                color: Theme.of(context).colorScheme.error),
+                            textAlign: TextAlign.center,
+                          )),
+                SiriWave(
+                  controller: waveController,
+                  style: SiriWaveStyle.ios_7,
+                ),
+              ],
+            ),
           ),
         ),
       ),

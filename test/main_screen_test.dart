@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/screens/main/components/recover_session_d
 import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_bar.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
+import 'package:fleeting_notes_flutter/widgets/record_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
@@ -232,5 +233,21 @@ void main() {
         .thenAnswer((_) => Future.value(RecoveredSessionEvent.succeeded));
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
     expect(find.byType(RecoverSessionDialog), findsNothing);
+  });
+
+  // long pressing opens record note dialog
+  testWidgets('Long press opens record note dialog mobile', (tester) async {
+    resizeToMobile(tester);
+    await fnPumpWidget(tester, const MyApp());
+    await tester.longPress(find.byIcon(Icons.add));
+    await tester.pump();
+    expect(find.byType(RecordDialog), findsOneWidget);
+  });
+  testWidgets('Long press opens record note dialog desktop', (tester) async {
+    resizeToDesktop(tester);
+    await fnPumpWidget(tester, const MyApp());
+    await tester.longPress(find.byIcon(Icons.add));
+    await tester.pump();
+    expect(find.byType(RecordDialog), findsOneWidget);
   });
 }
