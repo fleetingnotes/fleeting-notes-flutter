@@ -9,6 +9,8 @@ class NoteHistory {
 
   bool get isEmpty =>
       currNote == null && backNoteHistory.isEmpty && forwardNoteHistory.isEmpty;
+  bool get isHistoryEmpty =>
+      backNoteHistory.isEmpty && forwardNoteHistory.isEmpty;
   Note? currNote;
   List<Note> backNoteHistory;
   List<Note> forwardNoteHistory;

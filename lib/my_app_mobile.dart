@@ -91,13 +91,15 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   void initState() {
     super.initState();
     initHomeWidget();
-    void goToNote(Note note, {bool recordNote = false}) {
+    void goToNote(Note note,
+        {bool recordNote = false, bool addQueryParams = false}) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (recordNote) {
           router.goNamed('record');
         } else {
           final noteHistory = ref.read(noteHistoryProvider.notifier);
-          noteHistory.addNote(context, note, router: router);
+          noteHistory.addNote(context, note,
+              router: router, addQueryParams: addQueryParams);
         }
       });
     }
@@ -145,13 +147,12 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
         print(err);
       });
     }
-    // flutter siri suggestions
     if (Platform.isIOS || Platform.isAndroid) {
       // For sharing or opening urls/text coming from outside the app while the app is in the memory
       receiveShareSub =
           ReceiveSharingIntent.getTextStream().listen((String sharedText) {
         var note = getNoteFromShareText(body: sharedText);
-        goToNote(note);
+        goToNote(note, addQueryParams: true);
       }, onError: (err) {
         // ignore: avoid_print
         print("getLinkStream error: $err");
@@ -161,7 +162,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       ReceiveSharingIntent.getInitialText().then((String? sharedText) {
         if (sharedText != null) {
           var note = getNoteFromShareText(body: sharedText);
-          goToNote(note);
+          goToNote(note, addQueryParams: true);
         }
       });
 

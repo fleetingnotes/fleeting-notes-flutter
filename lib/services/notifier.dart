@@ -19,10 +19,24 @@ class NoteHistoryNotifier extends StateNotifier<NoteHistory> {
 
   Note? get currNote => state.currNote;
 
-  void addNote(BuildContext context, Note note, {GoRouter? router}) {
+  void addNote(
+    BuildContext context,
+    Note note, {
+    GoRouter? router,
+    bool addQueryParams = false,
+    bool refreshHistory = false,
+  }) {
     router ??= GoRouter.of(context);
-    NoteHistory nh = state.copy();
+    NoteHistory nh = (refreshHistory) ? NoteHistory() : state.copy();
     Note? prevNote = nh.currNote;
+    // NOTE: query params are used to tell if note is shared from external source
+    Map<String, String> qp = (addQueryParams)
+        ? {
+            'title': note.title,
+            'content': note.content,
+            'source': note.source,
+          }
+        : {};
     if (router.location == '/') {
       nh.backNoteHistory = [];
     }
@@ -31,7 +45,8 @@ class NoteHistoryNotifier extends StateNotifier<NoteHistory> {
     }
     nh.forwardNoteHistory = [];
     nh.currNote = note;
-    router.goNamed('note', params: {'id': note.id}, extra: note);
+    router.goNamed('note',
+        params: {'id': note.id}, extra: note, queryParams: qp);
     state = nh;
   }
 
