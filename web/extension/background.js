@@ -5,6 +5,10 @@ const onClicked = async({ menuItemId, linkUrl, pageUrl, srcUrl, selectionText, c
   let source = '';
   let url = getIframeUrl();
   switch(menuItemId) {
+    case 'create_new_note':
+      url += '?note'
+      openPopup(url, true);
+      return;
     case 'new_window':
       openPopup(url, false);
       return;
@@ -54,6 +58,11 @@ const initContextMenu = async () => {
   //create
   await Promise.all([
     chrome.contextMenus.create({
+      id: 'create_new_note',
+      title: 'Create new note',
+      contexts: ['action', 'browser_action']
+    }),
+    chrome.contextMenus.create({
       id: 'new_window',
       title: 'Open persistent window',
       contexts: ['action', 'browser_action']
@@ -61,7 +70,7 @@ const initContextMenu = async () => {
     chrome.contextMenus.create({
       id: 'save_page',
       title: 'Create new note',
-      contexts: ['page', 'browser_action']
+      contexts: ['page']
     }),
     chrome.contextMenus.create({
       id: 'save_link',
