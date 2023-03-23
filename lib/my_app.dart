@@ -78,7 +78,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                     queryParameters: state.queryParams
                         .map((key, value) => MapEntry(key, value.toString())))
                 .query;
-            if (!newNote.isEmpty() && !state.location.startsWith('/note/')) {
+            if ((!newNote.isEmpty() || state.queryParams.containsKey('note')) &&
+                !state.location.startsWith('/note/')) {
               return '/note/${newNote.id}?$_queryString';
             }
             return null;

@@ -32,6 +32,13 @@
         "mac": "Command+Shift+E"
       }
     },
+    "create-new-note": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Create new note"
+    },
     "open-persistent-window": {
       "suggested_key": {
         "default": "Ctrl+Shift+Y",

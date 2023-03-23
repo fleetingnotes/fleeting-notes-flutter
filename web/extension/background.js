@@ -5,6 +5,10 @@ const onClicked = async({ menuItemId, linkUrl, pageUrl, srcUrl, selectionText, c
   let source = '';
   let url = getIframeUrl();
   switch(menuItemId) {
+    case 'create_new_note':
+      url += '?note'
+      openPopup(url, true);
+      return;
     case 'new_window':
       openPopup(url, false);
       return;
@@ -32,9 +36,13 @@ const onClicked = async({ menuItemId, linkUrl, pageUrl, srcUrl, selectionText, c
   await onActionPressed(tab, url);
 }
 const onCommand = (command) => {
+  let url = chrome.runtime.getURL("web-ext.html");
   switch (command) {
+    case "create-new-note":
+      url += '?note'
+      openPopup(url, true);
+      break;
     case "open-persistent-window":
-      const url = chrome.runtime.getURL("web-ext.html");
       openPopup(url, false);
       break;
   }
@@ -49,6 +57,11 @@ const initContextMenu = async () => {
 
   //create
   await Promise.all([
+    chrome.contextMenus.create({
+      id: 'create_new_note',
+      title: 'Create new note',
+      contexts: ['action', 'browser_action']
+    }),
     chrome.contextMenus.create({
       id: 'new_window',
       title: 'Open persistent window',
