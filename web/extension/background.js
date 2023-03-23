@@ -61,7 +61,7 @@ const initContextMenu = async () => {
     chrome.contextMenus.create({
       id: 'save_page',
       title: 'Create new note',
-      contexts: ['page']
+      contexts: ['page', 'browser_action']
     }),
     chrome.contextMenus.create({
       id: 'save_link',
