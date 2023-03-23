@@ -351,7 +351,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                     toolbarButtons: [
                       (node) {
                         return KeyboardButton(
-                          icon: '[]',
+                          icon: Icons.add_link,
                           onPressed: () {
                             shortcuts.addLink();
                             _onContentChanged(
@@ -362,7 +362,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                       },
                       (node) {
                         return KeyboardButton(
-                          icon: '#',
+                          icon: Icons.tag,
                           onPressed: () {
                             shortcuts.addTag();
                             _onContentChanged(
@@ -381,9 +381,9 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                         );
                       },
                       (node) {
-                        return const KeyboardButton(
-                          icon: 'Aa',
-                          disabled: true,
+                        return KeyboardButton(
+                          icon: Icons.cancel_outlined,
+                          onPressed: contentFocusNode.unfocus,
                         );
                       },
                     ],
