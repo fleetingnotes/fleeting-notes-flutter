@@ -32,9 +32,13 @@ const onClicked = async({ menuItemId, linkUrl, pageUrl, srcUrl, selectionText, c
   await onActionPressed(tab, url);
 }
 const onCommand = (command) => {
+  let url = chrome.runtime.getURL("web-ext.html");
   switch (command) {
+    case "create-new-note":
+      url += '?note'
+      openPopup(url, true);
+      break;
     case "open-persistent-window":
-      const url = chrome.runtime.getURL("web-ext.html");
       openPopup(url, false);
       break;
   }
