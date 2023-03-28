@@ -12,7 +12,7 @@ AppDir:
     name: Fleeting Notes
     icon: "64"
     version: latest
-    exec: fleeting_notes
+    exec: fleeting_notes_flutter
     exec_args: $@
   apt:
     arch: amd64
