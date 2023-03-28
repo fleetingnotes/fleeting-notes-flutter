@@ -3,10 +3,11 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  app_links
+  app_links_windows
   file_saver
   flutter_secure_storage_windows
   pasteboard
+  permission_handler_windows
   sentry_flutter
   url_launcher_windows
 )
