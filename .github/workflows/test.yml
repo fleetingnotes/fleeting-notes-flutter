@@ -24,11 +24,17 @@ jobs:
     - run: flutter build linux --release -v
     - run: tree build
     - run: zip -r build/fn-linux.zip build/linux/x64/release/bundle 
+    - name: Build AppImage using appimage-builder
+      uses: docker://appimagecrafters/appimage-builder:1.1.0
+      with:
+        entrypoint: appimage-builder
+        args: --recipe ./linux/AppImageBuilder.yml --skip-test
     - uses: softprops/action-gh-release@v1 
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
           build/fn-*.zip
+          ./*.AppImage*
         draft: true
         fail_on_unmatched_files: true
 
