@@ -31,7 +31,7 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 }
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
-  bool nonExistantNote = false;
+  bool autofocus = false;
   Note? note;
   Uri? currentLoc;
   List<Note> backlinks = [];
@@ -100,6 +100,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           if (qpContent.isNotEmpty) {
             queriedNote.content += "\n$qpContent";
           }
+          autofocus = true;
           return queriedNote;
         }
       }
@@ -107,7 +108,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       if (!newNote.isEmpty()) {
         db.settings.set('unsaved-note', newNote);
       }
-      nonExistantNote = true;
+      autofocus = true;
     }
 
     return newNote;
@@ -206,7 +207,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                           titleController: titleController,
                           contentController: contentController,
                           sourceController: sourceController,
-                          autofocus: nonExistantNote,
+                          autofocus: autofocus,
                           padding: const EdgeInsets.only(
                               left: 24, right: 24, bottom: 16),
                         ),
