@@ -60,3 +60,30 @@ jobs:
           build/fn-*.zip
         draft: true
         fail_on_unmatched_files: true
+
+  release-macos:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Checkout create-dmg repository
+      uses: actions/checkout@v3
+      with:
+        repository: 'create-dmg/create-dmg'
+        path: 'create-dmg'
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.7.6'
+        cache: true
+        channel: 'stable'
+    - run: flutter doctor -v
+    - run: flutter pub get
+    - run: flutter build macos --release
+    - run: create-dmg/create-dmg --app-drop-link 400 30 --icon-size 128  build/fn-macos.dmg build/macos/Build/Products/Release/Fleeting\ Notes.app
+    - uses: softprops/action-gh-release@v1 
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          build/*.dmg
+        draft: true
+        fail_on_unmatched_files: true
