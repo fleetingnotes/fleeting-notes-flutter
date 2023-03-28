@@ -51,6 +51,7 @@ jobs:
     - run: flutter doctor -v
     - run: flutter pub get
     - run: flutter build windows --release -v
+    - run: dart windows/build.dart
     - run: tree build
     - run: tar -cvzf build/fn-windows.zip build/windows/runner/Release
     - uses: softprops/action-gh-release@v1 
