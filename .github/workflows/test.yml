@@ -44,22 +44,22 @@ jobs:
     - run: flutter doctor -v
     - run: flutter pub get
     # install vs_buildtools.exe https://git.openprivacy.ca/openprivacy/flutter-desktop/src/branch/main/windows/Dockerfile
-    - name: Install vs_buildtools
-      run: | 
-        curl -SL --output VisualStudio.chman.exe https://aka.ms/vs/16/release/channel 
-        curl -SL --output vs_buildtools.exe https://aka.ms/vs/16/release/vs_buildtools.exe 
-        .\vs_buildtools.exe --quiet --wait --norestart --nocache \
-          --channelUri VisualStudio.chman \
-          --installChannelUri VisualStudio.chman \
-          --add Microsoft.VisualStudio.Component.Windows10SDK.19041 \
-          --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
-          --add Microsoft.VisualStudio.Component.VC.CMake.Project \
-          --add Microsoft.VisualStudio.Workload.NativeDesktop \
-          --add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools \
-          --add Microsoft.VisualStudio.Workload.VCTools \
-          --add Microsoft.VisualStudio.Component.VC.CLI.Support \
-          --installPath C:\BuildTools \
-          || IF "%ERRORLEVEL%"=="3010" EXIT 0
+    # - name: Install vs_buildtools
+    #   run: | 
+    #     curl -SL --output VisualStudio.chman.exe https://aka.ms/vs/16/release/channel 
+    #     curl -SL --output vs_buildtools.exe https://aka.ms/vs/16/release/vs_buildtools.exe 
+    #     .\vs_buildtools.exe --quiet --wait --norestart --nocache \
+    #       --channelUri VisualStudio.chman \
+    #       --installChannelUri VisualStudio.chman \
+    #       --add Microsoft.VisualStudio.Component.Windows10SDK.19041 \
+    #       --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
+    #       --add Microsoft.VisualStudio.Component.VC.CMake.Project \
+    #       --add Microsoft.VisualStudio.Workload.NativeDesktop \
+    #       --add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools \
+    #       --add Microsoft.VisualStudio.Workload.VCTools \
+    #       --add Microsoft.VisualStudio.Component.VC.CLI.Support \
+    #       --installPath C:\BuildTools \
+    #       || IF "%ERRORLEVEL%"=="3010" EXIT 0
     - run: flutter build windows --release -v
     - run: tree build
 
