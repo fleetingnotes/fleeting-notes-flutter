@@ -200,6 +200,3 @@ jobs:
     - run: flutter doctor -v
     - run: flutter pub get
     - run: flutter build windows --release
-
-    
-
