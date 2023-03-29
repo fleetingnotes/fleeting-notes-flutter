@@ -34,7 +34,7 @@ jobs:
       with:
         files: |
           build/fn-*.zip
-          ./*.AppImage*
+          ./*.AppImage
         draft: true
         fail_on_unmatched_files: true
 
@@ -59,6 +59,7 @@ jobs:
       with:
         files: |
           build/fn-*.zip
+          build/*.exe
         draft: true
         fail_on_unmatched_files: true
 
