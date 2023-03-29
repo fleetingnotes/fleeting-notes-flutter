@@ -26,7 +26,7 @@ void main() {
       Directory('build'),
     ),
     icon: InnoSetupIcon(
-      File('icons/64.png'),
+      File('assets/favicon.ico'),
     ),
   ).make();
 }
