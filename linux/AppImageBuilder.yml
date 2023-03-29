@@ -29,7 +29,7 @@ AppDir:
     include:
     - libgtk-3-0
     - libsecret-1-0
-    - libjsoncpp1
+    - libjsoncpp-dev
     exclude:
     - humanity-icon-theme
     - hicolor-icon-theme
