@@ -28,13 +28,14 @@ jobs:
       with:
         entrypoint: appimage-builder
         args: --recipe ./linux/AppImageBuilder.yml --skip-test
+    - run: mv ./*.AppImage* build
     - run: tree -F build 
     - uses: softprops/action-gh-release@v1 
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
           build/fn-*.zip
-          ./*.AppImage
+          build/*.AppImage
         draft: true
         fail_on_unmatched_files: true
 
