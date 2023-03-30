@@ -77,8 +77,6 @@ jobs:
           flutter-version: '3.7.6'
           cache: true
           channel: 'stable'
-      - name: Build macOS app
-        run: flutter build macos --release
       - name: Codesign executable
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
@@ -101,6 +99,8 @@ jobs:
           security find-identity
           echo "Sign the app"
           /usr/bin/codesign --force --deep -s $IDENTITY_ID ./$MACOS_APP_RELEASE_PATH/$APPNAME.app
+      - name: Build macOS app
+        run: flutter build macos --release
       - name: Create a dmg
         run: |
           echo "Install create-dmg"
