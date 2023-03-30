@@ -80,7 +80,7 @@ jobs:
       - name: Codesign executable
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.APPSTORE_CERT_PASSWORD }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           IDENTITY_ID: 4MLDMH9QYL
         run: |
