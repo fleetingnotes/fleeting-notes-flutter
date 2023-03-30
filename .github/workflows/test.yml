@@ -88,6 +88,9 @@ jobs:
           # import certificate and provisioning profile from secrets
           echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
           echo $MACOS_PROVISION_PROFILE_BASE64 | base64 --decode > mac.provisionprofile
+
+          # apply provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp mac.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles
 
           echo "Create Keychain"
