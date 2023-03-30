@@ -42,7 +42,7 @@ PODS:
   - Flutter (1.0.0)
   - flutter_keyboard_visibility (0.0.1):
     - Flutter
-  - flutter_secure_storage (3.3.1):
+  - flutter_secure_storage (6.0.0):
     - Flutter
   - flutter_siri_suggestions (0.0.1):
     - Flutter
@@ -159,7 +159,7 @@ SPEC CHECKSUMS:
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
-  flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
+  flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   flutter_siri_suggestions: 226fb7ef33d25d3fe0d4aa2a8bcf4b72730c466f
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   home_widget: 2829415127ee92e876f816cbbe44c0b6601b8a37
