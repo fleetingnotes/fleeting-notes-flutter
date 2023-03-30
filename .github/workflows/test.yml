@@ -65,28 +65,63 @@ jobs:
         fail_on_unmatched_files: true
 
   release-macos:
+    # https://medium.com/flutter-community/build-sign-and-deliver-flutter-macos-desktop-applications-on-github-actions-5d9b69b0469c
     runs-on: macos-latest
+    env:
+      MACOS_APP_RELEASE_PATH: build/macos/Build/Products/Release
+      APPNAME: FleetingNotesMac
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    - name: Checkout create-dmg repository
-      uses: actions/checkout@v3
-      with:
-        repository: 'create-dmg/create-dmg'
-        path: 'create-dmg'
-    - uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.7.6'
-        cache: true
-        channel: 'stable'
-    - run: flutter doctor -v
-    - run: flutter pub get
-    - run: flutter build macos --release
-    - run: create-dmg/create-dmg --app-drop-link 400 30 --icon-size 128  build/fn-macos.dmg build/macos/Build/Products/Release/Fleeting\ Notes.app
-    - uses: softprops/action-gh-release@v1 
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: |
-          build/*.dmg
-        draft: true
-        fail_on_unmatched_files: true
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.7.6'
+          cache: true
+          channel: 'stable'
+      - name: Build macOS app
+        run: flutter build macos --release
+      - name: Codesign executable
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.APPSTORE_CERT_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          IDENTITY_ID: 4MLDMH9QYL
+        run: |
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          echo "Create Keychain"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          echo "Assign to Login Keychain"
+          security default-keychain -s build.keychain
+          echo "Unlock the Login Keychain"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          echo "Import certificate"
+          security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          echo "Set Key Partition"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          echo "Find Identity"
+          security find-identity
+          echo "Sign the app"
+          /usr/bin/codesign --force --deep -s $IDENTITY_ID ./$MACOS_APP_RELEASE_PATH/$APPNAME.app
+      - name: Create a dmg
+        run: |
+          echo "Install create-dmg"
+          brew install create-dmg
+          cd $MACOS_APP_RELEASE_PATH
+          create-dmg \
+            --volname "$APPNAME" \
+            --window-pos 200 120 \
+            --window-size 800 529 \
+            --icon-size 130 \
+            --text-size 14 \
+            --icon "$APPNAME.app" 260 250 \
+            --hide-extension "$APPNAME.app" \
+            --app-drop-link 540 250 \
+            --hdiutil-quiet \
+            "$APPNAME.dmg" \
+            "$APPNAME.app"
+      - uses: softprops/action-gh-release@v1 
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            $MACOS_APP_RELEASE_PATH/$APPNAME.dmg
+          draft: true
+          fail_on_unmatched_files: true
