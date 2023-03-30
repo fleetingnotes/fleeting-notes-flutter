@@ -69,7 +69,7 @@ jobs:
     runs-on: macos-latest
     env:
       MACOS_APP_RELEASE_PATH: build/macos/Build/Products/Release
-      APPNAME: FleetingNotesMac
+      APPNAME: "Fleeting Notes"
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v2
