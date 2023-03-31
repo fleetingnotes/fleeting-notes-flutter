@@ -72,7 +72,8 @@ jobs:
       APPNAME: "FleetingNotesMac"
       IDENTITY_ID: 4MLDMH9QYL
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.7.6'
