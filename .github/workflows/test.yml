@@ -122,12 +122,12 @@ jobs:
             --window-size 800 529 \
             --icon-size 130 \
             --text-size 14 \
-            --icon "$APPNAME.app" 260 250 \
-            --hide-extension "$APPNAME.app" \
+            --icon "Fleeting Notes.app" 260 250 \
+            --hide-extension "Fleeting Notes.app" \
             --app-drop-link 540 250 \
             --hdiutil-quiet \
             "$APPNAME.dmg" \
-            "$APPNAME.app"
+            "Fleeting Notes.app"
       - uses: softprops/action-gh-release@v1 
         if: startsWith(github.ref, 'refs/tags/')
         with:
