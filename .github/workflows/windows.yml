@@ -10,7 +10,7 @@ on:
     tags:
       - "v*.*.*"
 jobs:
-  release-linux:
+  release-windows:
     runs-on: windows-latest
     steps:
     - name: Checkout repository

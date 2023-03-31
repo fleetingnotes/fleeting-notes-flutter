@@ -5,8 +5,8 @@ on:
     branches: [ main ]
     paths:
       - 'macos/**'
-  # for release
   push:
+    # for release
     tags:
       - "v*.*.*"
       - "test"

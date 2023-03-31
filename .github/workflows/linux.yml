@@ -9,7 +9,7 @@ on:
     tags:
       - "v*.*.*"
 jobs:
-  release-linux:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
