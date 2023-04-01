@@ -5,6 +5,8 @@ on:
     branches: [ main ]
     paths:
       - 'ios/**'
+      - '.github/workflows/ios.yml'
+      - 'pubspec.yaml'
   push:
     # for release
     tags:

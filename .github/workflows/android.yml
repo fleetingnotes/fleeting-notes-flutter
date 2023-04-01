@@ -5,6 +5,8 @@ on:
     branches: [ main ]
     paths:
       - 'android/**'
+      - '.github/workflows/android.yml'
+      - 'pubspec.yaml'
   push:
     # for release
     tags:

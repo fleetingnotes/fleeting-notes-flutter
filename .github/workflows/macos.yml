@@ -5,6 +5,8 @@ on:
     branches: [ main ]
     paths:
       - 'macos/**'
+      - '.github/workflows/macos.yml'
+      - 'pubspec.yaml'
   push:
     # for release
     tags:
