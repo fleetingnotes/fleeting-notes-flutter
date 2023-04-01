@@ -35,6 +35,6 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
-          build/fn-*.zip
+          build/FleetingNotes*.zip
         draft: true
         fail_on_unmatched_files: true
