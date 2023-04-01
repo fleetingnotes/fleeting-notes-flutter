@@ -58,7 +58,6 @@ jobs:
         cp $RUNNER_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
         cp $SHARE_EXT_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
         cp $NOTE_LIST_WIDGET_EXT_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-    - uses: actions/checkout@v2
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.6'
