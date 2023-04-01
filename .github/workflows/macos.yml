@@ -68,7 +68,6 @@ jobs:
           max_attempts: 3
           retry_on: timeout
           command: flutter build macos --release -v
-      - run: ls -a $MACOS_APP_RELEASE_PATH
       - name: Sign the app
         run: /usr/bin/codesign --force --deep -s $IDENTITY_ID ./$MACOS_APP_RELEASE_PATH/Fleeting\ Notes.app
       - name: Create a dmg
@@ -88,6 +87,7 @@ jobs:
             --hdiutil-quiet \
             "$APPNAME.dmg" \
             "Fleeting Notes.app"
+      - run: ls -a $MACOS_APP_RELEASE_PATH
       - uses: softprops/action-gh-release@v1 
         if: startsWith(github.ref, 'refs/tags/')
         with:
