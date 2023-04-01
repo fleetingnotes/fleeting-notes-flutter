@@ -12,7 +12,7 @@ on:
     tags:
       - "v*.*.*"
 jobs:
-  release-windows:
+  build-windows:
     runs-on: windows-latest
     steps:
     - name: Checkout repository
