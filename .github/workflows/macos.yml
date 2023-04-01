@@ -61,8 +61,12 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           echo "Find Identity"
           security find-identity
-      - name: Build macOS app
-        run: flutter build macos --release -v
+      - name: Build macOS app (sometimes fails so retry 3 times)
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 15
+          max_attempts: 3
+          command: flutter build macos --release -v
       - run: ls -a $MACOS_APP_RELEASE_PATH
       - name: Sign the app
         run: /usr/bin/codesign --force --deep -s $IDENTITY_ID ./$MACOS_APP_RELEASE_PATH/Fleeting\ Notes.app
