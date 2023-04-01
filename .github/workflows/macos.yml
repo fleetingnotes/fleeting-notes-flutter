@@ -92,6 +92,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            $MACOS_APP_RELEASE_PATH/*.dmg
+            build/macos/Build/Products/Release/*.dmg
           draft: true
           fail_on_unmatched_files: true
