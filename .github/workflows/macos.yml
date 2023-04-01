@@ -32,6 +32,8 @@ jobs:
           flutter-version: '3.7.6'
           cache: true
           channel: 'stable'
+      - run: flutter doctor -v
+      - run: flutter pub get
       - name: Codesign executable
         env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
