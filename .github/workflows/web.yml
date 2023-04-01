@@ -28,9 +28,9 @@ jobs:
     - run: ./build_web_ext.sh
     - name: Rename files
       run: |
-        mv build/web-ext-2.zip build/fn-web-ext-2.zip
-        mv build/web-ext-3.zip build/fn-web-ext-3.zip
-        mv build/web-app.zip build/fn-web-app.zip
+        mv build/web-ext-2.zip build/FleetingNotesWebExt2.zip
+        mv build/web-ext-3.zip build/FleetingNotesWebExt3.zip
+        mv build/web-app.zip build/FleetingNotesWebApp.zip
     - uses: softprops/action-gh-release@v1 
       if: startsWith(github.ref, 'refs/tags/')
       with:

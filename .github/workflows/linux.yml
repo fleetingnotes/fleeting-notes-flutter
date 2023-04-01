@@ -1,13 +1,14 @@
 name: linux
 on:
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'linux/**'
-  push:
-    # for release
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
+#   pull_request:
+#     branches: [ main ]
+#     paths:
+#       - 'linux/**'
+#   push:
+#     # for release
+#     tags:
+#       - "v*.*.*"
 jobs:
   build-linux:
     runs-on: ubuntu-latest
