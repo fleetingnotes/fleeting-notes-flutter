@@ -66,6 +66,7 @@ jobs:
         with:
           timeout_minutes: 15
           max_attempts: 3
+          retry_on: timeout
           command: flutter build macos --release -v
       - run: ls -a $MACOS_APP_RELEASE_PATH
       - name: Sign the app
