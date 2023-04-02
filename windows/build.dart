@@ -17,11 +17,10 @@ void main() {
       ),
     ),
     files: InnoSetupFiles(
-      executable:
-          File('build/windows/runner/Release/fleeting_notes_flutter.exe'),
+      executable: File('build/windows/runner/Release/Fleeting Notes.exe'),
       location: Directory('build/windows/runner/Release'),
     ),
-    name: const InnoSetupName('windows_installer'),
+    name: const InnoSetupName('FleetingNotesWindowsInstaller'),
     location: InnoSetupInstallerDirectory(
       Directory('build'),
     ),
