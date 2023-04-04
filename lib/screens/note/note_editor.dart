@@ -94,8 +94,13 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     }
   }
 
-  void resetSaveTimer() {
+  void resetSaveTimer() async {
+    final db = ref.read(dbProvider);
     final settings = ref.read(settingsProvider);
+    // if note has not been created don't save
+    if ((await db.getNoteById(widget.note.id)) == null) {
+      return;
+    }
     var saveMs = settings.get('save-delay-ms');
     saveTimer?.cancel();
     saveTimer = Timer(Duration(milliseconds: saveMs), () async {
