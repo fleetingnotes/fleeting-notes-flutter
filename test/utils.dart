@@ -126,6 +126,7 @@ Future<void> modifyCurrentNote(
   if (source != null) {
     await tester.enterText(find.bySemanticsLabel('Source'), source);
   }
+  await tester.pumpAndSettle();
   await tester.tap(find.byIcon(Icons.save));
   await tester.pumpAndSettle(
       const Duration(seconds: 1)); // Wait for animation to finish
