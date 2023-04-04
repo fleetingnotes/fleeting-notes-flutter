@@ -98,7 +98,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     final db = ref.read(dbProvider);
     final settings = ref.read(settingsProvider);
     // if note has not been created don't save
-    if ((await db.getNoteById(widget.note.id)) == null) {
+    final dbNote = await db.getNoteById(widget.note.id);
+    if (dbNote == null) {
       return;
     }
     var saveMs = settings.get('save-delay-ms');

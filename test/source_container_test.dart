@@ -49,9 +49,7 @@ void main() {
             description: 'Test',
             imageUrl: 'https://test.image/')));
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
-    await goToNewNote(tester);
-    await tester.enterText(
-        find.bySemanticsLabel('Source'), 'https://test.test');
+    await goToNewNote(tester, source: 'https://test.test');
     await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(
         find.descendant(

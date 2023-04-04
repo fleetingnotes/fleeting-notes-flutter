@@ -55,12 +55,24 @@ void main() {
     expect(find.byType(LinkPreview), findsNothing);
   });
 
-  testWidgets('Autosave works', (WidgetTester tester) async {
+  testWidgets('Note is not auto saved if new', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
     // auto save
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), 'save');
+    await tester.pumpAndSettle();
+    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
+  });
+
+  testWidgets('Note is autosaved if exists in db', (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'save');
+    await tester.enterText(
+        find.bySemanticsLabel('Start writing your thoughts...'), 'save asdf');
+    // auto save
     await tester.pumpAndSettle();
     expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
     await tester.pumpAndSettle(const Duration(seconds: 3));
@@ -72,10 +84,7 @@ void main() {
     // setup
     var mocks = await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
-    await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), 'save');
-    await tester.tap(find.byIcon(Icons.save));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await modifyCurrentNote(tester, content: 'save');
     var prevController =
         tester.widget<ContentField>(find.byType(ContentField)).controller;
 
@@ -98,10 +107,7 @@ void main() {
     // setup
     var mocks = await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
-    await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), 'save');
-    await tester.tap(find.byIcon(Icons.save));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await modifyCurrentNote(tester, content: 'save');
 
     // trigger handleNoteEvent
     var note = (await mocks.db.getAllNotes()).first;
@@ -123,10 +129,7 @@ void main() {
     // setup
     var mocks = await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
-    await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), 'save');
-    await tester.tap(find.byIcon(Icons.save));
-    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await modifyCurrentNote(tester, content: 'save');
 
     // note updated within 5 seconds of previous note saved
     var note = (await mocks.db.getAllNotes()).first;
@@ -169,9 +172,7 @@ void main() {
             description: 'Test',
             imageUrl: 'https://test.image/')));
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
-    await goToNewNote(tester);
-    await tester.enterText(
-        find.bySemanticsLabel('Source'), 'https://test.test');
+    await goToNewNote(tester, source: 'https://test.test');
     await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(contentFieldHasFocus(tester), isTrue);
   });
