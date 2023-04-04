@@ -6,7 +6,7 @@ class SearchQuery {
   bool searchByContent;
   bool searchBySource;
   SortOptions sortBy;
-  int limit;
+  int? limit;
 
   SearchQuery({
     this.query = '',
