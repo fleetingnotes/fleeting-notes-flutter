@@ -19,29 +19,22 @@ class MyApp extends base_app.MyApp {
   ConsumerState<base_app.MyApp> createState() => _MyAppState();
 }
 
-class ParsedHighlight {
-  String content = '';
-  String source = '';
-
-  ParsedHighlight(this.content, this.source);
-}
-
 class _MyAppState extends base_app.MyAppState<MyApp> {
   StreamSubscription? noteChangeStream;
   StreamSubscription? homeWidgetSub;
   StreamSubscription? receiveShareSub;
   StreamSubscription? androidIntentSub;
 
-  ParsedHighlight? findAndroidHighlight(String sharedText) {
-    if (!Platform.isAndroid) return null;
-    var r = RegExp(r'^"(.+)"[\n\r\s]+(.+)', multiLine: true);
+  String? findUrlInText(String sharedText) {
+    var r = RegExp(
+        r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=,]*)',
+        multiLine: true);
     var m = r.firstMatch(sharedText);
     if (m != null) {
-      String content = m.group(1) ?? '';
-      String source = m.group(2)?.trim() ?? '';
+      String source = m.group(0)?.trim() ?? '';
       bool validSource = Uri.tryParse(source)?.hasAbsolutePath ?? false;
       if (validSource) {
-        return ParsedHighlight(content, source);
+        return source;
       }
     }
     return null;
@@ -97,22 +90,24 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
         if (recordNote) {
           router.goNamed('record');
         } else {
-          final noteHistory = ref.read(noteHistoryProvider.notifier);
-          noteHistory.addNote(context, note,
-              router: router, addQueryParams: addQueryParams);
+          router.goNamed('home', queryParams: {
+            'title': note.title,
+            'content': note.content,
+            'source': note.source,
+          });
         }
       });
     }
 
     Note getNoteFromShareText({String title = '', String body = ''}) {
-      var ph = findAndroidHighlight(body);
-      if (ph != null) {
-        return Note.empty(title: title, content: ph.content, source: ph.source);
-      }
       bool _validURL = Uri.tryParse(body)?.hasAbsolutePath ?? false;
       if (_validURL) {
         return Note.empty(title: title, source: body);
       } else {
+        String? source = findUrlInText(body);
+        if (source != null) {
+          return Note.empty(title: title, content: body, source: source);
+        }
         return Note.empty(title: title, content: body);
       }
     }
