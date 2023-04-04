@@ -189,6 +189,7 @@ void main() {
             of: find.byType(ContentField), matching: find.text('init note')),
         findsNothing);
   });
+
   group("Sharing note with same source", () {
     testWidgets('Opens prev note', (WidgetTester tester) async {
       await fnPumpWidget(tester, const MyApp());
@@ -223,6 +224,20 @@ void main() {
           content: 'hello world', source: 'source', closeDialog: true);
       await addNote(tester,
           content: 'open note', source: 'smthin else', closeDialog: false);
+      await goToNewNote(tester,
+          source: 'source', content: 'pp', addQueryParams: true);
+      expect(find.byType(NoteEditor), findsOneWidget);
+      expect(
+          find.descendant(
+              of: find.bySemanticsLabel('Start writing your thoughts...'),
+              matching: find.text('hello world\npp', findRichText: true)),
+          findsOneWidget);
+    });
+    testWidgets('Appends content with same note open',
+        (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester,
+          content: 'hello world', source: 'source', closeDialog: false);
       await goToNewNote(tester,
           source: 'source', content: 'pp', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);

@@ -66,7 +66,7 @@ class Database {
               (r.hasMatch(note.source) || r.hasMatch(note.sourceTitle ?? '')));
     }).toList();
     notes.sort(sortMap[query.sortBy]);
-    return notes.sublist(0, min(notes.length, query.limit));
+    return notes.sublist(0, min(notes.length, query.limit ?? notes.length));
   }
 
   Future<List<Note>> getAllNotes({forceSync = false}) async {

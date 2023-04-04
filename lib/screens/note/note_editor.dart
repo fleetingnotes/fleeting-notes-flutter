@@ -94,7 +94,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     }
   }
 
-  void resetSaveTimer() async {
+  void resetSaveTimer({int? defaultSaveMs, bool updateMetadata = true}) async {
     final db = ref.read(dbProvider);
     final settings = ref.read(settingsProvider);
     // if note has not been created don't save
@@ -102,11 +102,13 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     if (dbNote == null) {
       return;
     }
-    var saveMs = settings.get('save-delay-ms');
+    int saveMs = defaultSaveMs ?? settings.get('save-delay-ms');
     saveTimer?.cancel();
     saveTimer = Timer(Duration(milliseconds: saveMs), () async {
       await _saveNote();
-      await updateSourceMetadata(sourceController.text);
+      if (updateMetadata) {
+        await updateSourceMetadata(sourceController.text);
+      }
     });
   }
 
@@ -230,7 +232,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     setState(() {
       sourceMetadata = (m?.isEmpty == true) ? null : m;
     });
-    _saveNote();
+    resetSaveTimer(defaultSaveMs: 0, updateMetadata: false);
   }
 
   void updateFields(Note n) {

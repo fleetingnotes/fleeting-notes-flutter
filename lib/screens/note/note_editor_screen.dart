@@ -93,11 +93,14 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             searchByTitle: false,
             sortBy: SortOptions.modifiedDESC,
             query: qpSource,
-            limit: 1);
+            limit: null);
         List<Note> notes = await db.getSearchNotes(query);
         Note? queriedNote = notes.firstWhereOrNull((n) => n.source == qpSource);
         if (queriedNote != null) {
           if (qpContent.isNotEmpty) {
+            if (note?.id == queriedNote.id) {
+              contentController.text += '\n$qpContent';
+            }
             queriedNote.content += "\n$qpContent";
           }
           autofocus = true;
