@@ -98,6 +98,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         Note? queriedNote = notes.firstWhereOrNull((n) => n.source == qpSource);
         if (queriedNote != null) {
           if (qpContent.isNotEmpty) {
+            if (note?.id == queriedNote.id) {
+              contentController.text += '\n$qpContent';
+            }
             queriedNote.content += "\n$qpContent";
           }
           autofocus = true;
