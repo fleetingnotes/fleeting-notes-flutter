@@ -41,7 +41,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Future<void> loadNotes({forceSync = false}) async {
     final db = ref.read(dbProvider);
     final searchQuery = ref.read(searchProvider) ?? SearchQuery();
-    searchQuery.limit = 36; // divisible by more numbers
+    searchQuery.limit = null;
     try {
       var tempNotes = await db.getSearchNotes(
         searchQuery,
