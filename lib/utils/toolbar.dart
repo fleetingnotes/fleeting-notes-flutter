@@ -45,7 +45,7 @@ class Toolbar {
     // sets previous line
     Match? prevLineMatch;
     for (var match in allMatches) {
-      if (match.start < selection.start) {
+      if (match.end + 1 == selection.start) {
         prevLineMatch = match;
       }
     }
