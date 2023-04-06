@@ -46,7 +46,8 @@ class ShortcutActions {
         controller.text.substring(selection.start - 1, selection.start);
     switch (pressedKey) {
       case '\n':
-        _toolbar.listOnEnter(RegExp(r'^(- \[[ |x]\] |- |\* )'));
+        // match lists and checkboxes
+        _toolbar.listOnEnter();
         break;
       default:
         break;
