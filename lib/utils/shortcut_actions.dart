@@ -14,20 +14,39 @@ class ShortcutActions {
     controller.addListener(addListener);
   }
 
-  void addLink() {
-    _toolbar.action('[[', ']]');
+  void action(String left, String right, {TextSelection? textSelection}) {
+    _toolbar.action(left, right, textSelection: textSelection);
+    controller.selection = controller.selection.copyWith(
+      baseOffset: controller.selection.extentOffset + left.length,
+      extentOffset: controller.selection.extentOffset - right.length,
+    );
   }
 
-  void addTag() {
-    _toolbar.insertTextAtCursor('#');
+  void addLink() {
+    _toolbar.action('[', ']()');
+    if (_toolbar.hasSelection) {
+      controller.selection = controller.selection.copyWith(
+        baseOffset: controller.selection.extentOffset - 1,
+        extentOffset: controller.selection.extentOffset - 1,
+      );
+    }
+  }
+
+  void toggleList() {
+    _toolbar.startLineAction('- ', replaceLine: (String line) {
+      if (line.startsWith('- ')) {
+        return line.replaceFirst('- ', '');
+      }
+      return '- ' + line;
+    });
   }
 
   void toggleCheckbox() {
     _toolbar.startLineAction('- [ ] ', replaceLine: (String line) {
-      if (line.startsWith('- [ ]')) {
+      if (line.startsWith('- [ ] ')) {
         return line.replaceFirst('- [ ] ', '- [x] ');
       } else if (line.startsWith('- [x] ')) {
-        return line.replaceFirst('- [x] ', '- [ ] ');
+        return line.replaceFirst('- [x] ', '');
       }
       return '- [ ] ' + line;
     });
@@ -35,6 +54,7 @@ class ShortcutActions {
 
   void addListener() {
     TextSelection selection = controller.selection;
+    print(selection);
     if (prevText == controller.text ||
         controller.text.length < prevText.length ||
         selection.start < 1) {
@@ -46,7 +66,6 @@ class ShortcutActions {
         controller.text.substring(selection.start - 1, selection.start);
     switch (pressedKey) {
       case '\n':
-        // match lists and checkboxes
         _toolbar.listOnEnter();
         break;
       default:

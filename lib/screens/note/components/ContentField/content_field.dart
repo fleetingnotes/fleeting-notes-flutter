@@ -43,7 +43,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   );
   bool titleLinksVisible = false;
   bool isPasting = false;
-  Map<Type, Action<Intent>> textfieldActions = {};
   StreamSubscription<Uint8List?>? pasteListener;
 
   late ShortcutActions shortcuts;
@@ -314,16 +313,96 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
   }
 
-  Future<Map<Type, Action<Intent>>> getTextFieldActions() async {
-    if (!kIsWeb) {
-      return {
-        PasteIntent: CallbackAction(onInvoke: (Intent intent) async {
-          if (!isPasting) handlePaste();
-          return null;
-        }),
-      };
-    }
-    return {};
+  List<Widget Function(FocusNode)> toolbarButtons(BoxConstraints size) {
+    return [
+      (node) {
+        return KeyboardButton(
+          icon: Icons.data_array,
+          onPressed: () {
+            shortcuts.action('[[', ']]');
+            _onContentChanged(context, widget.controller.text, size);
+          },
+          tooltip: 'Add link',
+        );
+      },
+      (node) {
+        return KeyboardButton(
+          icon: Icons.tag,
+          onPressed: () {
+            shortcuts.action('#', '');
+            _onContentChanged(context, widget.controller.text, size);
+          },
+        );
+      },
+      (node) {
+        return KeyboardButton(
+          icon: Icons.format_bold,
+          onPressed: () {
+            shortcuts.action('**', '**');
+            _onContentChanged(context, widget.controller.text, size);
+          },
+        );
+      },
+      (node) {
+        return KeyboardButton(
+          icon: Icons.format_italic,
+          onPressed: () {
+            shortcuts.action('*', '*');
+            _onContentChanged(context, widget.controller.text, size);
+          },
+        );
+      },
+      (node) {
+        return KeyboardButton(
+          icon: Icons.add_link,
+          onPressed: () {
+            shortcuts.addLink();
+            _onContentChanged(context, widget.controller.text, size);
+          },
+        );
+      },
+      (node) {
+        return KeyboardButton(
+          icon: Icons.list,
+          onPressed: () {
+            shortcuts.toggleList();
+            _onContentChanged(context, widget.controller.text, size);
+          },
+        );
+      },
+      (node) {
+        return KeyboardButton(
+          icon: Icons.checklist_outlined,
+          onPressed: () {
+            shortcuts.toggleCheckbox();
+            _onContentChanged(context, widget.controller.text, size);
+          },
+        );
+      },
+      (node) {
+        return KeyboardButton(
+          icon: Icons.cancel_outlined,
+          onPressed: contentFocusNode.unfocus,
+        );
+      },
+    ];
+  }
+
+  Map<Type, Action<Intent>> getTextFieldActions(BoxConstraints size) {
+    return {
+      BoldIntent: CallbackAction(onInvoke: (Intent intent) {
+        shortcuts.action('**', '**');
+        return _onContentChanged(context, widget.controller.text, size);
+      }),
+      ItalicIntent: CallbackAction(onInvoke: (Intent intent) {
+        shortcuts.action('*', '*');
+        return _onContentChanged(context, widget.controller.text, size);
+      }),
+      AddLinkIntent: CallbackAction(onInvoke: (Intent intent) {
+        shortcuts.addLink();
+        return _onContentChanged(context, widget.controller.text, size);
+      }),
+    };
   }
 
   @override
@@ -337,60 +416,24 @@ class _ContentFieldState extends ConsumerState<ContentField> {
             return true;
           },
           child: KeyboardActions(
-            enable: defaultTargetPlatform == TargetPlatform.android ||
-                defaultTargetPlatform == TargetPlatform.iOS,
+            enable: [TargetPlatform.iOS, TargetPlatform.android]
+                .contains(defaultTargetPlatform),
             disableScroll: true,
+            isDialog: true,
             config: KeyboardActionsConfig(
                 keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
+                defaultDoneWidget: Icon(Icons.close),
                 actions: [
                   KeyboardActionsItem(
                     focusNode: contentFocusNode,
                     displayArrows: false,
                     displayDoneButton: false,
                     toolbarAlignment: MainAxisAlignment.spaceAround,
-                    toolbarButtons: [
-                      (node) {
-                        return KeyboardButton(
-                          icon: Icons.add_link,
-                          onPressed: () {
-                            shortcuts.addLink();
-                            _onContentChanged(
-                                context, widget.controller.text, size);
-                          },
-                          tooltip: 'Add link',
-                        );
-                      },
-                      (node) {
-                        return KeyboardButton(
-                          icon: Icons.tag,
-                          onPressed: () {
-                            shortcuts.addTag();
-                            _onContentChanged(
-                                context, widget.controller.text, size);
-                          },
-                        );
-                      },
-                      (node) {
-                        return KeyboardButton(
-                          icon: Icons.checklist_outlined,
-                          onPressed: () {
-                            shortcuts.toggleCheckbox();
-                            _onContentChanged(
-                                context, widget.controller.text, size);
-                          },
-                        );
-                      },
-                      (node) {
-                        return KeyboardButton(
-                          icon: Icons.cancel_outlined,
-                          onPressed: contentFocusNode.unfocus,
-                        );
-                      },
-                    ],
-                  )
+                    toolbarButtons: toolbarButtons(size),
+                  ),
                 ]),
             child: Actions(
-              actions: textfieldActions,
+              actions: getTextFieldActions(size),
               child: TextField(
                 focusNode: contentFocusNode,
                 textCapitalization: TextCapitalization.sentences,

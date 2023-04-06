@@ -64,7 +64,9 @@ class Toolbar {
           matchStr =
               matchStr.replaceFirst(num.toString(), (num + 1).toString());
         }
-
+        if (matchStr == '- [x] ') {
+          matchStr = '- [ ] ';
+        }
         insertTextAtCursor(matchStr);
       }
     }
@@ -132,17 +134,15 @@ class Toolbar {
       extentOffset += newLine.length - prevLine.length;
       return newLine;
     });
-    controller.value = controller.value.copyWith(
-      text: newText,
-      selection: selection.start == selection.end
-          ? TextSelection.collapsed(
-              offset: baseOffset,
-            )
-          : TextSelection(
-              baseOffset: baseOffset,
-              extentOffset: extentOffset,
-            ),
-    );
+    controller.text = newText;
+    controller.selection = selection.start == selection.end
+        ? TextSelection.collapsed(
+            offset: baseOffset,
+          )
+        : TextSelection(
+            baseOffset: baseOffset,
+            extentOffset: extentOffset,
+          );
   }
 
   // toolbar action
