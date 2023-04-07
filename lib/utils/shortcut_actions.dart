@@ -16,10 +16,12 @@ class ShortcutActions {
 
   void action(String left, String right, {TextSelection? textSelection}) {
     _toolbar.action(left, right, textSelection: textSelection);
-    controller.selection = controller.selection.copyWith(
-      baseOffset: controller.selection.extentOffset + left.length,
-      extentOffset: controller.selection.extentOffset - right.length,
-    );
+    if (_toolbar.hasSelection) {
+      controller.selection = controller.selection.copyWith(
+        baseOffset: controller.selection.baseOffset + left.length,
+        extentOffset: controller.selection.extentOffset - right.length,
+      );
+    }
   }
 
   void addLink() {
