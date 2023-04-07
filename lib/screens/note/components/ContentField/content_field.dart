@@ -316,75 +316,70 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   List<Widget Function(FocusNode)> toolbarButtons(BoxConstraints size) {
     return [
       (node) {
-        return KeyboardButton(
-          icon: Icons.data_array,
-          onPressed: () {
-            shortcuts.action('[[', ']]');
-            _onContentChanged(context, widget.controller.text, size);
-          },
-          tooltip: 'Add link',
+        return SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: ListView(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            children: [
+              KeyboardButton(
+                icon: Icons.data_array,
+                onPressed: () {
+                  shortcuts.action('[[', ']]');
+                  _onContentChanged(context, widget.controller.text, size);
+                },
+                tooltip: 'Add link',
+              ),
+              KeyboardButton(
+                icon: Icons.tag,
+                onPressed: () {
+                  shortcuts.action('#', '');
+                  _onContentChanged(context, widget.controller.text, size);
+                },
+              ),
+              KeyboardButton(
+                icon: Icons.format_bold,
+                onPressed: () {
+                  shortcuts.action('**', '**');
+                  _onContentChanged(context, widget.controller.text, size);
+                },
+              ),
+              KeyboardButton(
+                icon: Icons.format_italic,
+                onPressed: () {
+                  shortcuts.action('*', '*');
+                  _onContentChanged(context, widget.controller.text, size);
+                },
+              ),
+              KeyboardButton(
+                icon: Icons.add_link,
+                onPressed: () {
+                  shortcuts.addLink();
+                  _onContentChanged(context, widget.controller.text, size);
+                },
+              ),
+              KeyboardButton(
+                icon: Icons.list,
+                onPressed: () {
+                  shortcuts.toggleList();
+                  _onContentChanged(context, widget.controller.text, size);
+                },
+              ),
+              KeyboardButton(
+                icon: Icons.checklist_outlined,
+                onPressed: () {
+                  shortcuts.toggleCheckbox();
+                  _onContentChanged(context, widget.controller.text, size);
+                },
+              ),
+              KeyboardButton(
+                icon: Icons.cancel_outlined,
+                onPressed: contentFocusNode.unfocus,
+              ),
+            ],
+          ),
         );
-      },
-      (node) {
-        return KeyboardButton(
-          icon: Icons.tag,
-          onPressed: () {
-            shortcuts.action('#', '');
-            _onContentChanged(context, widget.controller.text, size);
-          },
-        );
-      },
-      (node) {
-        return KeyboardButton(
-          icon: Icons.format_bold,
-          onPressed: () {
-            shortcuts.action('**', '**');
-            _onContentChanged(context, widget.controller.text, size);
-          },
-        );
-      },
-      (node) {
-        return KeyboardButton(
-          icon: Icons.format_italic,
-          onPressed: () {
-            shortcuts.action('*', '*');
-            _onContentChanged(context, widget.controller.text, size);
-          },
-        );
-      },
-      (node) {
-        return KeyboardButton(
-          icon: Icons.add_link,
-          onPressed: () {
-            shortcuts.addLink();
-            _onContentChanged(context, widget.controller.text, size);
-          },
-        );
-      },
-      (node) {
-        return KeyboardButton(
-          icon: Icons.list,
-          onPressed: () {
-            shortcuts.toggleList();
-            _onContentChanged(context, widget.controller.text, size);
-          },
-        );
-      },
-      (node) {
-        return KeyboardButton(
-          icon: Icons.checklist_outlined,
-          onPressed: () {
-            shortcuts.toggleCheckbox();
-            _onContentChanged(context, widget.controller.text, size);
-          },
-        );
-      },
-      (node) {
-        return KeyboardButton(
-          icon: Icons.cancel_outlined,
-          onPressed: contentFocusNode.unfocus,
-        );
-      },
+      }
     ];
   }
 
