@@ -1,10 +1,14 @@
 import 'dart:async';
 
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../models/exceptions.dart';
 import '../../../../models/url_metadata.dart';
 
 class SourceContainer extends ConsumerStatefulWidget {
@@ -32,6 +36,9 @@ class SourceContainer extends ConsumerStatefulWidget {
 class _SourceContainerState extends ConsumerState<SourceContainer> {
   TextEditingController controller = TextEditingController();
   Timer? saveTimer;
+  StreamSubscription<Uint8List?>? pasteListener;
+  FocusNode focusNode = FocusNode();
+  bool isPasting = false;
 
   @override
   void initState() {
@@ -39,6 +46,54 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
     controller = widget.controller ?? controller;
     final sourceUrl = widget.text ?? controller.text;
     controller.text = sourceUrl;
+    final be = ref.read(browserExtensionProvider);
+    pasteListener = be.pasteController.stream.listen((pasteImage) {
+      if (focusNode.hasFocus && !isPasting) {
+        handlePaste(pasteImage: pasteImage);
+      }
+    });
+  }
+
+  void handlePaste({Uint8List? pasteImage}) async {
+    setState(() {
+      isPasting = true;
+    });
+    final db = ref.read(dbProvider);
+    try {
+      pasteImage ??= await Pasteboard.image;
+      if (pasteImage != null) {
+        try {
+          var sourceUrl = await db.uploadAttachment(fileBytes: pasteImage);
+          controller.text = sourceUrl;
+          widget.onChanged?.call();
+        } on FleetingNotesException catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(e.message),
+            duration: const Duration(seconds: 2),
+          ));
+        }
+      } else {
+        throw FleetingNotesException('No Image to paste');
+      }
+    } catch (e) {
+      // perform regular paste
+      var clipboardData = await Clipboard.getData('text/plain');
+      String? clipboardText = clipboardData?.text;
+      if (clipboardText != null) {
+        db.insertTextAtSelection(controller, clipboardText);
+        widget.onChanged?.call();
+      }
+    }
+    setState(() {
+      isPasting = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    pasteListener?.cancel();
+    saveTimer?.cancel();
+    super.dispose();
   }
 
   void onPressedPreview(String url) {
@@ -57,6 +112,7 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
       );
     }
     return TextField(
+        focusNode: focusNode,
         contextMenuBuilder: (context, editableTextState) {
           SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
             controller.selection = TextSelection(
