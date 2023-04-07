@@ -12,6 +12,7 @@ import 'package:hive/hive.dart';
 import 'package:mime/mime.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../models/syncterface.dart';
 import 'settings.dart';
 import '../models/Note.dart';
@@ -280,12 +281,10 @@ class Database {
     await upsertNotes(initNotes);
   }
 
-  Future<Note?> addAttachmentToNewNote(
+  Future<String> uploadAttachment(
       {String? filename, Uint8List? fileBytes}) async {
-    Note newNote = Note.empty();
-
     // get filename with extension
-    filename = filename ?? newNote.id;
+    filename = filename ?? const Uuid().v4();
     final mimeType = lookupMimeType(filename, headerBytes: fileBytes);
     String ext = (mimeType != null) ? extensionFromMime(mimeType) : "";
     if (filename.split('.').length == 1 && ext.isNotEmpty) {
@@ -293,7 +292,17 @@ class Database {
     }
 
     // upload file & return note
-    String sourceUrl = await supabase.addAttachment(filename, fileBytes);
+    return await supabase.addAttachment(filename, fileBytes);
+  }
+
+  Future<Note?> addAttachmentToNewNote(
+      {String? filename, Uint8List? fileBytes}) async {
+    Note newNote = Note.empty();
+    // upload file & return note
+    String sourceUrl =
+        await uploadAttachment(filename: newNote.id, fileBytes: fileBytes);
+    final mimeType = lookupMimeType(newNote.id, headerBytes: fileBytes);
+    String ext = (mimeType != null) ? extensionFromMime(mimeType) : "";
     String dateInNum = DateTime.now().toString().replaceAll(RegExp(r'\D'), '');
     newNote.source = sourceUrl;
     newNote.title = "file-$dateInNum";
