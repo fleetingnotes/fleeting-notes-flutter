@@ -280,11 +280,13 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
+    final db = ref.watch(dbProvider);
     initCurrNote();
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {
-          if (hasNewChanges) {
+          if (db.settings.get('unsaved-note') != null) {
+            saveTimer?.cancel();
             _saveNote();
           }
           return null;

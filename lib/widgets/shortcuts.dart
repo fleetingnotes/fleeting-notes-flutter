@@ -13,10 +13,6 @@ class SaveIntent extends Intent {
   const SaveIntent();
 }
 
-class PasteIntent extends Intent {
-  const PasteIntent();
-}
-
 class BacklinkIntent extends Intent {
   const BacklinkIntent();
 }
@@ -45,31 +41,22 @@ class CheckboxIntent extends Intent {
   const CheckboxIntent();
 }
 
-Map<LogicalKeySet, Intent> shortcutMapping = <LogicalKeySet, Intent>{
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyO):
+Map<SingleActivator, Intent> mainShortcutMapping = <SingleActivator, Intent>{
+  SingleActivator(LogicalKeyboardKey.keyO, meta: true): const NewNoteIntent(),
+  SingleActivator(LogicalKeyboardKey.keyO, control: true):
       const NewNoteIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyO):
-      const NewNoteIntent(),
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyK):
-      const SearchIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyK):
-      const SearchIntent(),
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
-      const SaveIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyS):
-      const SaveIntent(),
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyV):
-      const PasteIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyB):
-      const BoldIntent(),
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyB):
-      const BoldIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyI):
-      const ItalicIntent(),
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyI):
-      const ItalicIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyK):
-      const AddLinkIntent(),
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyK):
+  SingleActivator(LogicalKeyboardKey.keyK, meta: true): const SearchIntent(),
+  SingleActivator(LogicalKeyboardKey.keyK, control: true): const SearchIntent(),
+};
+
+Map<SingleActivator, Intent> noteShortcutMapping = <SingleActivator, Intent>{
+  SingleActivator(LogicalKeyboardKey.keyS, meta: true): const SaveIntent(),
+  SingleActivator(LogicalKeyboardKey.keyS, control: true): const SaveIntent(),
+  SingleActivator(LogicalKeyboardKey.keyB, meta: true): const BoldIntent(),
+  SingleActivator(LogicalKeyboardKey.keyB, control: true): const BoldIntent(),
+  SingleActivator(LogicalKeyboardKey.keyI, meta: true): const ItalicIntent(),
+  SingleActivator(LogicalKeyboardKey.keyI, control: true): const ItalicIntent(),
+  SingleActivator(LogicalKeyboardKey.keyK, meta: true): const AddLinkIntent(),
+  SingleActivator(LogicalKeyboardKey.keyK, control: true):
       const AddLinkIntent(),
 };
