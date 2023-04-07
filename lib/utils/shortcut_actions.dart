@@ -56,7 +56,6 @@ class ShortcutActions {
 
   void addListener() {
     TextSelection selection = controller.selection;
-    print(selection);
     if (prevText == controller.text ||
         controller.text.length < prevText.length ||
         selection.start < 1) {

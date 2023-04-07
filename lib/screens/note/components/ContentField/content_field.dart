@@ -422,7 +422,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
             isDialog: true,
             config: KeyboardActionsConfig(
                 keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
-                defaultDoneWidget: Icon(Icons.close),
                 actions: [
                   KeyboardActionsItem(
                     focusNode: contentFocusNode,
