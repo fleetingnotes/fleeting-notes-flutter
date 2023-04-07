@@ -12,6 +12,7 @@ import '../../models/search_query.dart';
 import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
+import '../../widgets/shortcuts.dart';
 import 'components/backlinks_drawer.dart';
 import 'components/note_editor_app_bar.dart';
 import 'note_editor.dart';
@@ -171,62 +172,66 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       currentLoc = Uri.parse(GoRouter.of(context).location);
       initNoteScreen(noteHistory);
     }
-    return WillPopScope(
-      onWillPop: () async {
-        if (renderNote == null) return true;
-        onClose();
-        return true;
-      },
-      child: ScaffoldMessenger(
-        child: Scaffold(
-          key: scaffoldKey,
-          resizeToAvoidBottomInset: false,
-          drawerScrimColor: Colors.transparent,
-          endDrawer: BacklinksDrawer(
-            closeDrawer: scaffoldKey.currentState?.closeEndDrawer,
-            backlinks: backlinks,
-            searchQuery: backlinksSq,
-          ),
-          body: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                NoteEditorAppBar(
-                  note: renderNote,
-                  onClose: onClose,
-                  onBacklinks: (backlinks.isEmpty)
-                      ? null
-                      : scaffoldKey.currentState?.openEndDrawer,
-                  contentController: contentController,
-                ),
-                Flexible(
-                  fit: FlexFit.tight,
-                  child: (renderNote == null)
-                      ? const SizedBox(
-                          height: 100,
-                          child: Center(child: CircularProgressIndicator()))
-                      : NoteEditor(
-                          note: renderNote,
-                          titleController: titleController,
-                          contentController: contentController,
-                          sourceController: sourceController,
-                          autofocus: autofocus,
-                          padding: const EdgeInsets.only(
-                              left: 24, right: 24, bottom: 16),
-                        ),
-                ),
-                if (bottomAppBarVisible)
-                  KeyboardVisibilityBuilder(builder: (context, isVisible) {
-                    if (isVisible) return const SizedBox.shrink();
-                    return NoteEditorBottomAppBar(
-                      onBack:
-                          (noteHistory.backNoteHistory.isEmpty) ? null : onBack,
-                      onForward: (noteHistory.forwardNoteHistory.isEmpty)
-                          ? null
-                          : onForward,
-                    );
-                  })
-              ],
+    return Shortcuts(
+      shortcuts: noteShortcutMapping,
+      child: WillPopScope(
+        onWillPop: () async {
+          if (renderNote == null) return true;
+          onClose();
+          return true;
+        },
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            key: scaffoldKey,
+            resizeToAvoidBottomInset: false,
+            drawerScrimColor: Colors.transparent,
+            endDrawer: BacklinksDrawer(
+              closeDrawer: scaffoldKey.currentState?.closeEndDrawer,
+              backlinks: backlinks,
+              searchQuery: backlinksSq,
+            ),
+            body: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  NoteEditorAppBar(
+                    note: renderNote,
+                    onClose: onClose,
+                    onBacklinks: (backlinks.isEmpty)
+                        ? null
+                        : scaffoldKey.currentState?.openEndDrawer,
+                    contentController: contentController,
+                  ),
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: (renderNote == null)
+                        ? const SizedBox(
+                            height: 100,
+                            child: Center(child: CircularProgressIndicator()))
+                        : NoteEditor(
+                            note: renderNote,
+                            titleController: titleController,
+                            contentController: contentController,
+                            sourceController: sourceController,
+                            autofocus: autofocus,
+                            padding: const EdgeInsets.only(
+                                left: 24, right: 24, bottom: 16),
+                          ),
+                  ),
+                  if (bottomAppBarVisible)
+                    KeyboardVisibilityBuilder(builder: (context, isVisible) {
+                      if (isVisible) return const SizedBox.shrink();
+                      return NoteEditorBottomAppBar(
+                        onBack: (noteHistory.backNoteHistory.isEmpty)
+                            ? null
+                            : onBack,
+                        onForward: (noteHistory.forwardNoteHistory.isEmpty)
+                            ? null
+                            : onForward,
+                      );
+                    })
+                ],
+              ),
             ),
           ),
         ),

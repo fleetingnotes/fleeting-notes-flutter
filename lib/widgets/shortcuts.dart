@@ -13,25 +13,60 @@ class SaveIntent extends Intent {
   const SaveIntent();
 }
 
-class PasteIntent extends Intent {
-  const PasteIntent();
+class BacklinkIntent extends Intent {
+  const BacklinkIntent();
 }
 
-Map<LogicalKeySet, Intent> shortcutMapping = <LogicalKeySet, Intent>{
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyO):
+class TagIntent extends Intent {
+  const TagIntent();
+}
+
+class BoldIntent extends Intent {
+  const BoldIntent();
+}
+
+class ItalicIntent extends Intent {
+  const ItalicIntent();
+}
+
+class AddLinkIntent extends Intent {
+  const AddLinkIntent();
+}
+
+class ListIntent extends Intent {
+  const ListIntent();
+}
+
+class CheckboxIntent extends Intent {
+  const CheckboxIntent();
+}
+
+Map<SingleActivator, Intent> mainShortcutMapping = <SingleActivator, Intent>{
+  const SingleActivator(LogicalKeyboardKey.keyO, meta: true):
       const NewNoteIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyO):
+  const SingleActivator(LogicalKeyboardKey.keyO, control: true):
       const NewNoteIntent(),
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyK):
+  const SingleActivator(LogicalKeyboardKey.keyK, meta: true):
       const SearchIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyK):
+  const SingleActivator(LogicalKeyboardKey.keyK, control: true):
       const SearchIntent(),
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
+};
+
+Map<SingleActivator, Intent> noteShortcutMapping = <SingleActivator, Intent>{
+  const SingleActivator(LogicalKeyboardKey.keyS, meta: true):
       const SaveIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyS):
+  const SingleActivator(LogicalKeyboardKey.keyS, control: true):
       const SaveIntent(),
-  LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyV):
-      const PasteIntent(),
-  LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyV):
-      const PasteIntent(),
+  const SingleActivator(LogicalKeyboardKey.keyB, meta: true):
+      const BoldIntent(),
+  const SingleActivator(LogicalKeyboardKey.keyB, control: true):
+      const BoldIntent(),
+  const SingleActivator(LogicalKeyboardKey.keyI, meta: true):
+      const ItalicIntent(),
+  const SingleActivator(LogicalKeyboardKey.keyI, control: true):
+      const ItalicIntent(),
+  const SingleActivator(LogicalKeyboardKey.keyK, meta: true):
+      const AddLinkIntent(),
+  const SingleActivator(LogicalKeyboardKey.keyK, control: true):
+      const AddLinkIntent(),
 };

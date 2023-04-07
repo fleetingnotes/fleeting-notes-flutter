@@ -36,22 +36,54 @@ class Toolbar {
         : selection;
   }
 
-  void listOnEnter(RegExp listPattern) {
-    RegExp r = RegExp('^.*', multiLine: true);
-    String currText = controller.text;
+  void listOnEnter() {
+    RegExp listPattern =
+        RegExp(r'^([ \t]*(- \[[ |x]\] |- |\* |\d+\. ))(.*)$', multiLine: true);
     TextSelection selection = controller.selection;
-    Iterable<RegExpMatch> allMatches = r.allMatches(currText);
-    String prevLine = "";
+    Iterable<RegExpMatch> allMatches = listPattern.allMatches(controller.text);
+
+    // sets previous line
+    Match? prevLineMatch;
     for (var match in allMatches) {
-      if (match.start < selection.start) {
-        prevLine = match.group(0) ?? "";
+      if (match.end + 1 == selection.start) {
+        prevLineMatch = match;
       }
     }
-    RegExpMatch? m = listPattern.firstMatch(prevLine);
-    String? matchStr = m?.group(0);
-    if (m != null && matchStr != null) {
-      insertTextAtCursor(matchStr);
+    // puts new note into
+    String itemText = prevLineMatch?.group(3) ?? '';
+    String matchStr = prevLineMatch?.group(1) ?? '';
+    if (matchStr.isNotEmpty) {
+      if (itemText.isEmpty && prevLineMatch != null) {
+        removeControllerTextRange(prevLineMatch.start, prevLineMatch.end);
+      } else {
+        // iterate numbered list if match
+        var numListRe = RegExp(r'^[\t ]*(\d+)');
+        var numListMatch = numListRe.firstMatch(matchStr);
+        var num = int.tryParse(numListMatch?.group(1) ?? '');
+        if (numListMatch != null && num != null) {
+          matchStr =
+              matchStr.replaceFirst(num.toString(), (num + 1).toString());
+        }
+        if (matchStr == '- [x] ') {
+          matchStr = '- [ ] ';
+        }
+        insertTextAtCursor(matchStr);
+      }
     }
+  }
+
+  void removeControllerTextRange(int start, int end) {
+    TextSelection selection = controller.selection;
+    String oldText = controller.text;
+    String newText = oldText.substring(0, start) +
+        oldText.substring(end + 1, controller.text.length);
+    int textDelta = newText.length - oldText.length;
+
+    controller.value = TextEditingValue(
+      text: newText,
+      selection:
+          TextSelection.collapsed(offset: selection.baseOffset + textDelta),
+    );
   }
 
   void insertTextAtCursor(String text) {
@@ -102,17 +134,15 @@ class Toolbar {
       extentOffset += newLine.length - prevLine.length;
       return newLine;
     });
-    controller.value = controller.value.copyWith(
-      text: newText,
-      selection: selection.start == selection.end
-          ? TextSelection.collapsed(
-              offset: baseOffset,
-            )
-          : TextSelection(
-              baseOffset: baseOffset,
-              extentOffset: extentOffset,
-            ),
-    );
+    controller.text = newText;
+    controller.selection = selection.start == selection.end
+        ? TextSelection.collapsed(
+            offset: baseOffset,
+          )
+        : TextSelection(
+            baseOffset: baseOffset,
+            extentOffset: extentOffset,
+          );
   }
 
   // toolbar action

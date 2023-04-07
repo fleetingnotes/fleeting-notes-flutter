@@ -144,61 +144,64 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
     return Shortcuts(
-      shortcuts: shortcutMapping,
+      shortcuts: mainShortcutMapping,
       child: Actions(
         actions: <Type, Action<Intent>>{
           NewNoteIntent: CallbackAction(onInvoke: (Intent intent) => addNote()),
           SearchIntent: CallbackAction(
               onInvoke: (intent) => searchFocusNode.requestFocus())
         },
-        child: Scaffold(
-          key: db.scaffoldKey,
-          resizeToAvoidBottomInset: false,
-          drawer: SideMenu(
-            addNote: addNote,
-            closeDrawer: db.closeDrawer,
-          ),
-          floatingActionButton: (Responsive.isMobile(context))
-              ? NoteFAB(onPressed: addNote, onLongPress: recordNote)
-              : null,
-          body: SafeArea(
-            child: Responsive(
-              mobile: SearchScreen(searchFocusNode: searchFocusNode),
-              tablet: Row(
-                children: [
-                  SideRail(addNote: addNote, onMenu: db.openDrawer),
-                  Flexible(
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints:
-                            const BoxConstraints(maxWidth: mobileLimit),
-                        child: SearchScreen(
-                          searchFocusNode: searchFocusNode,
-                          addNote: addNote,
-                          recordNote: recordNote,
+        child: FocusScope(
+          autofocus: true,
+          child: Scaffold(
+            key: db.scaffoldKey,
+            resizeToAvoidBottomInset: false,
+            drawer: SideMenu(
+              addNote: addNote,
+              closeDrawer: db.closeDrawer,
+            ),
+            floatingActionButton: (Responsive.isMobile(context))
+                ? NoteFAB(onPressed: addNote, onLongPress: recordNote)
+                : null,
+            body: SafeArea(
+              child: Responsive(
+                mobile: SearchScreen(searchFocusNode: searchFocusNode),
+                tablet: Row(
+                  children: [
+                    SideRail(addNote: addNote, onMenu: db.openDrawer),
+                    Flexible(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints:
+                              const BoxConstraints(maxWidth: mobileLimit),
+                          child: SearchScreen(
+                            searchFocusNode: searchFocusNode,
+                            addNote: addNote,
+                            recordNote: recordNote,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              desktop: Row(
-                children: [
-                  SideRail(addNote: addNote, onMenu: db.openDrawer),
-                  Flexible(
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints:
-                            const BoxConstraints(maxWidth: tabletLimit),
-                        child: SearchScreen(
-                          searchFocusNode: searchFocusNode,
-                          addNote: addNote,
-                          recordNote: recordNote,
+                  ],
+                ),
+                desktop: Row(
+                  children: [
+                    SideRail(addNote: addNote, onMenu: db.openDrawer),
+                    Flexible(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints:
+                              const BoxConstraints(maxWidth: tabletLimit),
+                          child: SearchScreen(
+                            searchFocusNode: searchFocusNode,
+                            addNote: addNote,
+                            recordNote: recordNote,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

@@ -74,6 +74,62 @@ void main() {
     expect(find.byType(LinkSuggestions), findsNothing);
   });
 
+  group('List syntax tests', () {
+    testWidgets('empty bullet list removes itself on enter',
+        (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester, content: '- \n', closeDialog: false);
+      expect(
+          find.descendant(
+              of: find.byType(ContentField), matching: find.text('- \n')),
+          findsNothing);
+    });
+    testWidgets('nested bullet points popualte on enter',
+        (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester, content: '  - test\n', closeDialog: false);
+      expect(
+          find.descendant(
+              of: find.byType(ContentField),
+              matching: find.text('  - test\n  - ')),
+          findsOneWidget);
+    });
+    testWidgets('bullet list populate on enter', (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester, content: '- test\n', closeDialog: false);
+      expect(
+          find.descendant(
+              of: find.byType(ContentField), matching: find.text('- test\n- ')),
+          findsOneWidget);
+    });
+    testWidgets('checkbox populate on enter', (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester, content: '- [ ] test\n', closeDialog: false);
+      expect(
+          find.descendant(
+              of: find.byType(ContentField),
+              matching: find.text('- [ ] test\n- [ ] ')),
+          findsOneWidget);
+    });
+    testWidgets('numbered list populate on enter', (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester, content: '1. test\n', closeDialog: false);
+      expect(
+          find.descendant(
+              of: find.byType(ContentField),
+              matching: find.text('1. test\n2. ')),
+          findsOneWidget);
+    });
+    testWidgets('nested numbered list', (WidgetTester tester) async {
+      await fnPumpWidget(tester, const MyApp());
+      await addNote(tester, content: '  1. test\n', closeDialog: false);
+      expect(
+          find.descendant(
+              of: find.byType(ContentField),
+              matching: find.text('  1. test\n  2. ')),
+          findsOneWidget);
+    });
+  });
   testWidgets('setting content controller text enables save button',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
