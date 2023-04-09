@@ -5,7 +5,7 @@ PODS:
     - FlutterMacOS
   - file_saver (0.0.1):
     - FlutterMacOS
-  - flutter_secure_storage_macos (3.3.1):
+  - flutter_secure_storage_macos (6.1.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
   - FMDB (2.7.5):
@@ -86,7 +86,7 @@ SPEC CHECKSUMS:
   app_links: 4481ed4d71f384b0c3ae5016f4633aa73d32ff67
   device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
   file_saver: 44e6fbf666677faf097302460e214e977fdd977b
-  flutter_secure_storage_macos: 6ceee8fbc7f484553ad17f79361b556259df89aa
+  flutter_secure_storage_macos: d56e2d218c1130b262bef8b4a7d64f88d7f9c9ea
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   in_app_purchase_storekit: 4fb7ee9e824b1f09107fbfbbce8c4b276366dc43
@@ -99,6 +99,6 @@ SPEC CHECKSUMS:
   sqflite: a5789cceda41d54d23f31d6de539d65bb14100ea
   url_launcher_macos: 5335912b679c073563f29d89d33d10d459f95451
 
-PODFILE CHECKSUM: ce7dbe26c78bfc7ba46736094c1e2d25982870fa
+PODFILE CHECKSUM: 6b5339fc40e2a03ffedb695ff9009bb8a1ef8c3f
 
 COCOAPODS: 1.11.3

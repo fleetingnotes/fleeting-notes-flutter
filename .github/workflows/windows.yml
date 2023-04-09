@@ -1,0 +1,39 @@
+
+name: windows
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'windows/**'
+      - '.github/workflows/windows.yml'
+      - 'pubspec.yaml'
+  push:
+    # for release
+    tags:
+      - "v*.*.*"
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.7.6'
+        cache: true
+        channel: 'stable'
+    - run: flutter doctor -v
+    - run: flutter pub get
+    - run: flutter build windows --release -v
+    - run: mv "build/windows/runner/Release/*.exe" "build/windows/runner/Release/Fleeting Notes.exe"
+    - run: dart windows/build.dart
+    - run: tree build /f
+    - run: tar -cvzf build/fn-windows.zip build/windows/runner/Release
+    - run: mv build/*.exe build/FleetingNotesWindowsInstaller.exe
+    - uses: softprops/action-gh-release@v1 
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          build/*.exe
+        draft: true
+        fail_on_unmatched_files: true

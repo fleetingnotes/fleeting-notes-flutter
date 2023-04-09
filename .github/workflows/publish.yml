@@ -15,11 +15,6 @@ jobs:
             🎉 Fleeting Notes ${{ github.event.release.tag_name }} Release Announcement 🎉
 
             This update includes the following features and improvements:
-            ${{ github.event.release.html_url }}
-
             ${{ github.event.release.body }}
 
-            You can download the latest version of Obsidian at https://www.fleetingnotes.app/download. I hope you enjoy these new additions and please let me know if you have any feedback!
-
-            Thank you for your continued support!
-            - Matt
+            ${{ github.event.release.html_url }}

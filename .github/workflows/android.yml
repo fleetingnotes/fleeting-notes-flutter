@@ -5,6 +5,13 @@ on:
     branches: [ main ]
     paths:
       - 'android/**'
+      - '.github/workflows/android.yml'
+      - 'pubspec.yaml'
+  push:
+    # for release
+    tags:
+      - "v*.*.*"
+
   
   # Allows manual trigger from Actions tab
   workflow_dispatch:
@@ -13,14 +20,42 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions/setup-java@v2
       with:
         distribution: 'zulu'
         java-version: '11'
+    - name: Configure Keystore
+      working-directory: android
+      env:
+        PLAY_STORE_UPLOAD_KEY: ${{ secrets.PLAY_STORE_UPLOAD_KEY }}
+        KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+        KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+        KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
+      run: |
+        echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/fn-upload-key.keystore
+        echo "storeFile=fn-upload-key.keystore" >> key.properties
+        echo "keyAlias=$KEYSTORE_KEY_ALIAS" >> key.properties
+        echo "storePassword=$KEYSTORE_STORE_PASSWORD" >> key.properties
+        echo "keyPassword=$KEYSTORE_KEY_PASSWORD" >> key.properties
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.6'
+        cache: true
         channel: 'stable'
+    - run: flutter doctor -v
     - run: flutter pub get
-    - run: flutter build appbundle --debug
+    - run: flutter build apk --release -v
+    - run: flutter build appbundle --release -v
+    - name: Rename files
+      run: |
+        cp build/app/outputs/apk/release/app-release.apk build/FleetingNotesAndroid.apk
+        cp build/app/outputs/bundle/release/app-release.aab  build/FleetingNotesAndroid.aab
+    - uses: softprops/action-gh-release@v1 
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          build/*.apk
+          build/*.aab
+        draft: true
+        fail_on_unmatched_files: true

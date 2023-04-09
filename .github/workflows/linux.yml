@@ -1,0 +1,47 @@
+name: linux
+on:
+  workflow_dispatch:
+#   pull_request:
+#     branches: [ main ]
+#     paths:
+#       - 'linux/**'
+#       - '.github/workflows/linux.yml'
+#       - 'pubspec.yaml'
+#   push:
+#     # for release
+#     tags:
+#       - "v*.*.*"
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.7.6'
+        cache: true
+        channel: 'stable'
+    - run: |
+        sudo apt-get update -y
+        sudo apt-get install -y ninja-build libgtk-3-dev
+        sudo apt-get install -y libsecret-1-dev libjsoncpp-dev libsecret-1-0
+    - run: flutter doctor -v
+    - run: flutter pub get
+    - run: flutter build linux --release -v
+    - run: zip -r build/fn-linux.zip build/linux/x64/release/bundle 
+    - name: Build AppImage using appimage-builder
+      uses: docker://appimagecrafters/appimage-builder:1.1.0
+      with:
+        entrypoint: appimage-builder
+        args: --recipe ./linux/AppImageBuilder.yml --skip-test
+    - run: mv ./*.AppImage* build
+    - run: tree -F build 
+    - uses: softprops/action-gh-release@v1 
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          build/fn-*.zip
+          build/*.AppImage
+        draft: true
+        fail_on_unmatched_files: true
