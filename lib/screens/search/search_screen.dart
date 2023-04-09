@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
@@ -129,23 +130,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget getSearchList() {
     final searchQuery = ref.read(searchProvider);
+    final settings = ref.read(settingsProvider);
     int crossAxisCount = 2;
     if (Responsive.isTablet(context)) {
       crossAxisCount = 3;
     } else if (Responsive.isDesktop(context)) {
       crossAxisCount = 4;
     }
-    return NoteGrid(
-      notes: notes,
-      maxLines: 12,
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
-      selectedNotes: selectedNotes,
-      searchQuery: searchQuery,
-      crossAxisCount: crossAxisCount,
-      controller: scrollController,
-      onRefresh: _pullRefreshNotes,
-      onSelect: _longPressNote,
-      onTap: _pressNote,
+
+    return ValueListenableBuilder(
+      valueListenable: settings.box.listenable(keys: ['search-is-list-view']),
+      builder: (context, _, __) {
+        bool isListView =
+            settings.get('search-is-list-view', defaultValue: false) ?? false;
+        return NoteGrid(
+          notes: notes,
+          maxLines: 12,
+          padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+          selectedNotes: selectedNotes,
+          searchQuery: searchQuery,
+          crossAxisCount: (isListView) ? 1 : crossAxisCount,
+          controller: scrollController,
+          onRefresh: _pullRefreshNotes,
+          onSelect: _longPressNote,
+          onTap: _pressNote,
+        );
+      },
     );
   }
 

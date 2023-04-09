@@ -244,6 +244,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         defaultValue: true,
                         description:
                             "Append shared notes with the same source"),
+                    const SettingsItemSwitch(
+                        settingsKey: 'search-is-list-view',
+                        name: 'Enable list view',
+                        defaultValue: false,
+                        description:
+                            "Toggles the search screen between list and grid view"),
                     const SizedBox(height: 24),
                     const LegalLinks(),
                   ],

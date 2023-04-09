@@ -21,6 +21,7 @@ class Settings {
     'first-time-open': bool,
     'unsaved-note': Note,
     'append-same-source': bool,
+    'search-is-list-view': bool,
     // local sync settings
     'local-sync-enabled': bool,
     'local-sync-dir': String,
