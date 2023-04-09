@@ -56,7 +56,7 @@ jobs:
           echo "Unlock the Login Keychain"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           echo "Set key chain timeout to 3600 seconds"
-          security set-key-settings -t 3600 -u build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
           echo "Import certificate"
           security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
           echo "Set Key Partition"
