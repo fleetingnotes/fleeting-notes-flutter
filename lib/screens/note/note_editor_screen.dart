@@ -103,6 +103,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
               contentController.text += '\n$qpContent';
             }
             queriedNote.content += "\n$qpContent";
+            db.settings.set('unsaved-note', queriedNote);
           }
           autofocus = true;
           return queriedNote;

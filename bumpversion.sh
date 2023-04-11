@@ -16,6 +16,6 @@ else
   sed -i '' -e "s/MARKETING_VERSION \\= [^\\;]*\\;/MARKETING_VERSION = $1;/" safari/Fleeting\ Notes.xcodeproj/project.pbxproj
   sed -i '' -e "s/version: Version.parse.*,/version: Version.parse('$1'),/" windows/build.dart
   version=$1
-  git commit -m "Bump version to $version" pubspec.yaml web/manifest2.json web/manifest3.json safari/Fleeting\ Notes.xcodeproj/project.pbxproj 
+  git commit -m "Bump version to $version" pubspec.yaml web/manifest2.json web/manifest3.json safari/Fleeting\ Notes.xcodeproj/project.pbxproj windows/build.dart
   git tag v$version
 fi

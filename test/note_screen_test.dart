@@ -204,7 +204,8 @@ void main() {
               matching: find.text('hello world', findRichText: true)),
           findsOneWidget);
     });
-    testWidgets('Appends content', (WidgetTester tester) async {
+    testWidgets('Appends content with same source',
+        (WidgetTester tester) async {
       await fnPumpWidget(tester, const MyApp());
       await addNote(tester,
           content: 'hello world', source: 'source', closeDialog: true);
@@ -241,6 +242,7 @@ void main() {
       await goToNewNote(tester,
           source: 'source', content: 'pp', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
+      expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
       expect(
           find.descendant(
               of: find.bySemanticsLabel('Start writing your thoughts...'),
