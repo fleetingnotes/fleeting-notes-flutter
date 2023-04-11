@@ -84,16 +84,16 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   void initState() {
     super.initState();
     initHomeWidget();
-    void goToNote(Note note,
-        {bool recordNote = false, bool addQueryParams = false}) {
+    void goToNote(Note note, {bool noteExists = false}) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (recordNote) {
-          router.goNamed('record');
+        if (noteExists) {
+          router.goNamed('note', params: {'id': note.id}, extra: note);
         } else {
           router.goNamed('home', queryParams: {
             'title': note.title,
             'content': note.content,
             'source': note.source,
+            'note': '', // needed if note is empty
           });
         }
       });
@@ -131,7 +131,22 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       bool openRecordDialog = (type == 'DigitalDocument' ||
               intent.action == 'android.intent.action.VOICE_COMMAND') &&
           note.isEmpty();
-      goToNote(note, recordNote: openRecordDialog);
+      if (openRecordDialog) {
+        return router.goNamed('record');
+      }
+      return goToNote(note);
+    }
+
+    void handleHomeWidgetUri(Uri? uri) {
+      if (uri != null) {
+        getNoteFromWidgetUri(uri).then((note) {
+          if (note != null) {
+            goToNote(note, noteExists: true);
+          } else {
+            goToNote(Note.empty());
+          }
+        });
+      }
     }
 
     if (Platform.isAndroid) {
@@ -147,7 +162,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       receiveShareSub =
           ReceiveSharingIntent.getTextStream().listen((String sharedText) {
         var note = getNoteFromShareText(body: sharedText);
-        goToNote(note, addQueryParams: true);
+        goToNote(note);
       }, onError: (err) {
         // ignore: avoid_print
         print("getLinkStream error: $err");
@@ -157,27 +172,16 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       ReceiveSharingIntent.getInitialText().then((String? sharedText) {
         if (sharedText != null) {
           var note = getNoteFromShareText(body: sharedText);
-          goToNote(note, addQueryParams: true);
+          goToNote(note);
         }
       });
 
       // When app is started from widget
       HomeWidget.setAppGroupId('group.com.fleetingnotes');
-      HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
-        if (uri != null) {
-          getNoteFromWidgetUri(uri).then((note) {
-            goToNote(note);
-          });
-        }
-      });
+      HomeWidget.initiallyLaunchedFromHomeWidget().then(handleHomeWidgetUri);
 
-      homeWidgetSub = HomeWidget.widgetClicked.listen((uri) {
-        if (uri != null) {
-          getNoteFromWidgetUri(uri).then((note) {
-            goToNote(note);
-          });
-        }
-      }, onError: (err) {
+      homeWidgetSub =
+          HomeWidget.widgetClicked.listen(handleHomeWidgetUri, onError: (err) {
         // ignore: avoid_print
         print(err);
       });
