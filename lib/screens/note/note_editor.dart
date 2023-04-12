@@ -274,6 +274,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     sourceController.text = currNote.source;
 
     contentController.addListener(onChanged);
+    var db = ref.read(dbProvider);
+    if (db.settings.get('unsaved-note') != null &&
+        db.getNoteById(currNote.id) != null) {
+      resetSaveTimer();
+    }
     initSourceMetadata(currNote.sourceMetadata);
   }
 
