@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:file_saver/file_saver.dart';
@@ -228,12 +229,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onExportPress: onExportPress,
                       onBackupOptionChange: onBackupDropdownChange,
                     ),
-                    const SizedBox(height: 8),
-                    const SettingsTitle(title: "Sync"),
-                    LocalSyncSetting(
-                      settings: db.settings,
-                      getAllNotes: db.getAllNotes,
-                    ),
+                    (!kIsWeb)
+                        ? Column(
+                            children: [
+                              const SettingsTitle(title: "Sync"),
+                              LocalSyncSetting(
+                                settings: db.settings,
+                                getAllNotes: db.getAllNotes,
+                              ),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
                     const SizedBox(height: 8),
                     const SettingsTitle(title: "Other Settings"),
                     const SettingsItemSwitch(

@@ -108,16 +108,11 @@ class _LocalSyncSettingState extends ConsumerState<LocalSyncSetting> {
   }
 
   void onNoteTemplateChange(String val) {
-    setState(() {
-      controller.text = val;
-    });
     updateHiveDb();
   }
 
   void onRefreshNoteTemplate() {
-    setState(() {
-      controller.text = Note.defaultNoteTemplate;
-    });
+    controller.text = Note.defaultNoteTemplate;
     updateHiveDb();
   }
 
