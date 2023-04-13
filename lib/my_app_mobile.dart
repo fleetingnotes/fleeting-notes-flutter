@@ -40,19 +40,19 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
     return null;
   }
 
-  Future<Note> getNoteFromWidgetUri(Uri uri) async {
+  Future<Note?> getNoteFromWidgetUri(Uri uri) async {
     final db = ref.read(dbProvider);
     var noteId = uri.queryParameters['id'];
     if (noteId != null) {
       try {
         Note? note = await db.getNote(noteId);
-        return note ?? Note.empty();
+        return note;
       } catch (e) {
         debugPrint(e.toString());
-        return Note.empty();
+        return null;
       }
     }
-    return Note.empty();
+    return null;
   }
 
   void homeWidgetRefresh(event) async {

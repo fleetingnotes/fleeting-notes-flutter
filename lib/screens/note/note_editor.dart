@@ -262,7 +262,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     }
   }
 
-  void initCurrNote() {
+  void initCurrNote() async {
     if (currNote.id == widget.note.id) return;
     contentController.removeListener(onChanged);
     saveTimer?.cancel();
@@ -276,7 +276,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     contentController.addListener(onChanged);
     var db = ref.read(dbProvider);
     if (db.settings.get('unsaved-note') != null &&
-        db.getNoteById(currNote.id) != null) {
+        await db.getNoteById(currNote.id) != null) {
       resetSaveTimer();
     }
     initSourceMetadata(currNote.sourceMetadata);

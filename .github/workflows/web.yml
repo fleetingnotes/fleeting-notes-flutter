@@ -23,6 +23,7 @@ jobs:
         cache: true
         channel: 'stable'
     - run: flutter doctor -v
+    - run: flutter analyze
     - run: flutter pub get
     - run: ./build_web_app.sh
     - run: ./build_web_ext.sh
