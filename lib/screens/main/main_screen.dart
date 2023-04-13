@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
 import '../../widgets/record_dialog.dart';
 import 'components/analytics_dialog.dart';
-import 'components/auth_dialog.dart';
+import 'components/onboarding_dialog.dart';
 import 'components/note_fab.dart';
 import 'components/recover_session_dialog.dart';
 import 'components/side_rail.dart';
@@ -37,7 +37,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
           context: context,
-          builder: (c) => AuthDialog(context: c, width: mobileLimit),
+          builder: (c) => const OnboardingDialog(width: 300),
         );
       });
     }
