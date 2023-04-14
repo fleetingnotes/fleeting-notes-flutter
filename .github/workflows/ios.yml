@@ -22,7 +22,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     - name: Adds env.json
-      run: echo ${{ secrets.ENV_JSON }} > env.json
+      env:
+        ENV_JSON: ${{ secrets.ENV_JSON }}
+      run: echo $ENV_JSON > env.json
     - name: Install the Apple certificate and provisioning profile
       env:
         BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}

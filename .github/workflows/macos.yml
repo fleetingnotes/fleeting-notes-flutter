@@ -28,7 +28,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Adds env.json
-        run: echo ${{ secrets.ENV_JSON }} > env.json
+        env:
+          ENV_JSON: ${{ secrets.ENV_JSON }}
+        run: echo $ENV_JSON > env.json
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.7.10'
