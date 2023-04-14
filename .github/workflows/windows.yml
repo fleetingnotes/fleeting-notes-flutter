@@ -17,6 +17,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    - name: Adds env.json
+      run: echo ${{ secrets.ENV_JSON }} > env.json
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.10'
@@ -24,7 +26,7 @@ jobs:
         channel: 'stable'
     - run: flutter doctor -v
     - run: flutter pub get
-    - run: flutter build windows --release -v
+    - run: flutter build windows --release -v --dart-define-from-file=env.json
     - run: mv "build/windows/runner/Release/*.exe" "build/windows/runner/Release/Fleeting Notes.exe"
     - run: dart windows/build.dart
     - run: tree build /f

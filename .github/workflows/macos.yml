@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Adds env.json
+        run: echo ${{ secrets.ENV_JSON }} > env.json
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.7.10'
@@ -69,7 +71,7 @@ jobs:
           timeout_minutes: 15
           max_attempts: 3
           retry_on: timeout
-          command: flutter build macos --release -v
+          command: flutter build macos --release -v --dart-define-from-file=env.json
       - name: Sign the app
         run: /usr/bin/codesign --force --deep -s $IDENTITY_ID ./$MACOS_APP_RELEASE_PATH/Fleeting\ Notes.app
       - name: Create a dmg

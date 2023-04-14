@@ -1,4 +1,5 @@
 # Miscellaneous
+env.json
 *.class
 *.log
 *.pyc
