@@ -68,7 +68,7 @@ jobs:
     - run: flutter doctor -v
     - run: flutter pub get
     # build ios release
-    - run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist -v
+    - run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist -v --dart-define-from-file=env.json
     # build safari ext release
     # - run: |
     #     ./build_web_ext.sh
