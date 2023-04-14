@@ -7,11 +7,9 @@ import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_menu.dart';
 import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
 import '../../widgets/record_dialog.dart';
-import 'components/analytics_dialog.dart';
 import 'components/onboarding_dialog.dart';
 import 'components/note_fab.dart';
 import 'components/recover_session_dialog.dart';
@@ -32,7 +30,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    if (!kDebugMode) analyticsDialogWorkflow();
     if (!db.loggedIn && db.settings.isFirstTimeOpen()) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         showDialog(
@@ -89,38 +86,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             contentDescription:
                 "Launches Fleeting Notes app and opens a dialog to record a new note",
             suggestedInvocationPhrase: "Record fleeting note"));
-  }
-
-  void analyticsDialogWorkflow() {
-    final db = ref.read(dbProvider);
-    // Privacy Alert Dialog
-    if (!kIsWeb) {
-      db.setAnalyticsEnabled(true);
-      return;
-    }
-    DeviceInfoPlugin().webBrowserInfo.then((info) {
-      if (info.browserName != BrowserName.firefox) {
-        db.setAnalyticsEnabled(true);
-        return;
-      }
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        void onAnalyticsPress(analyticsEnabled) {
-          Navigator.pop(context);
-          db.setAnalyticsEnabled(analyticsEnabled);
-        }
-
-        bool? analyticsEnabled = db.settings.get('analytics-enabled');
-        if (analyticsEnabled == null) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              return AnalyticsDialog(onAnalyticsPress: onAnalyticsPress);
-            },
-          );
-        }
-      });
-    });
   }
 
   void addNote() {
