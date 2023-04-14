@@ -250,7 +250,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                           }));
                                 }),
                           )
-                        : SizedBox.shrink(),
+                        : const SizedBox.shrink(),
                     const SettingsTitle(title: "Account"),
                     (isLoggedIn)
                         ? Account(
