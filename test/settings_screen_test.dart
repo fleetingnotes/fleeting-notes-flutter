@@ -7,7 +7,7 @@
 
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
-import 'package:fleeting_notes_flutter/screens/settings/components/login_dialog.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/one_account_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/account.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,7 +54,7 @@ void main() {
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
     await navigateToSettings(tester);
     await attemptLogin(tester);
-    expect(find.byType(LoginDialog), findsNothing);
+    expect(find.byType(OneAccountDialog), findsNothing);
   });
 
   testWidgets('Free user sees login dialog', (WidgetTester tester) async {
@@ -64,7 +64,7 @@ void main() {
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
     await navigateToSettings(tester);
     await attemptLogin(tester);
-    expect(find.byType(LoginDialog), findsOneWidget);
+    expect(find.byType(OneAccountDialog), findsOneWidget);
   });
 
   testWidgets('Unknwn user sees no login dialog', (WidgetTester tester) async {
@@ -74,6 +74,6 @@ void main() {
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
     await navigateToSettings(tester);
     await attemptLogin(tester);
-    expect(find.byType(LoginDialog), findsNothing);
+    expect(find.byType(OneAccountDialog), findsNothing);
   });
 }
