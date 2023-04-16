@@ -49,7 +49,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     var storedSession = await db.supabase.getStoredSession();
     var session = storedSession?.session;
     if (session != null) {
-      if (storedSession?.subscriptionTier == 'free' || true) {
+      if (storedSession?.subscriptionTier == 'free') {
         showDialog(
             context: context,
             builder: (c) => OneAccountDialog(
