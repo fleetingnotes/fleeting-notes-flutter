@@ -20,7 +20,7 @@ jobs:
     - name: Adds env.json
       env:
         ENV_JSON: ${{ secrets.ENV_JSON }}
-      run: echo $ENV_JSON > env.json
+      run: echo $env:ENV_JSON > env.json
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.10'

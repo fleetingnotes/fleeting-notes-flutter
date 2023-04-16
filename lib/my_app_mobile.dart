@@ -68,7 +68,9 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   @override
   void refreshApp(user) {
     super.refreshApp(user);
-    initHomeWidget();
+    if (Platform.isAndroid || Platform.isIOS) {
+      initHomeWidget();
+    }
   }
 
   void initHomeWidget() {
