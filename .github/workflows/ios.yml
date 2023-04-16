@@ -21,6 +21,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    - name: Adds env.json
+      env:
+        ENV_JSON: ${{ secrets.ENV_JSON }}
+      run: echo $ENV_JSON > env.json
     - name: Install the Apple certificate and provisioning profile
       env:
         BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -66,7 +70,7 @@ jobs:
     - run: flutter doctor -v
     - run: flutter pub get
     # build ios release
-    - run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist -v
+    - run: flutter build ipa --release --export-options-plist=ios/Runner/ExportOptions.plist -v --dart-define-from-file=env.json
     # build safari ext release
     # - run: |
     #     ./build_web_ext.sh

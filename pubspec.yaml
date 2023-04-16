@@ -58,7 +58,6 @@ dependencies:
   tuple: ^2.0.0
   flutter_secure_storage: ^8.0.0
   keyboard_actions: ^4.0.1
-  sentry_flutter: ^6.18.2
   supabase_flutter: ^1.4.1
   in_app_purchase: ^3.0.8
   home_widget: ^0.1.6
@@ -72,6 +71,8 @@ dependencies:
   flutter_siri_suggestions: ^2.1.0
   siri_wave: ^0.3.0
   speech_to_text: ^6.1.1
+  wiredash: ^1.6.0
+  package_info_plus: ^3.1.0
 
 
 dev_dependencies:

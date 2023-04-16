@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../widgets/info_card.dart';
+
 class OnboardingDialog extends StatelessWidget {
   final double? width;
   const OnboardingDialog({super.key, this.width});
@@ -22,20 +24,22 @@ class OnboardingDialog extends StatelessWidget {
                 const Text("Below are some guides to help you get started:",
                     textAlign: TextAlign.start),
                 const SizedBox(height: 8),
-                GuideCard(
+                InfoCard(
                   title: 'Obsidian Sync (Recommended)',
                   description:
                       'Sync your notes with Obsidian directly. Requires an account & syncs notes through the cloud.',
+                  buttonText: 'Read Blog',
                   onPressed: () {
                     Uri url = Uri.parse(
                         "https://www.fleetingnotes.app/posts/sync-fleeting-notes-with-obsidian");
                     launchUrl(url, mode: LaunchMode.externalApplication);
                   },
                 ),
-                GuideCard(
+                InfoCard(
                   title: 'Local File Sync (Beta)',
                   description:
                       'Syncs your notes to markdown files on your file system',
+                  buttonText: 'Read Blog',
                   onPressed: () {
                     Uri url = Uri.parse(
                         "https://www.fleetingnotes.app/posts/how-to-setup-local-file-sync");
@@ -51,50 +55,5 @@ class OnboardingDialog extends StatelessWidget {
               child: const Text('OK Matt!'),
               onPressed: Navigator.of(context).pop),
         ]);
-  }
-}
-
-class GuideCard extends StatelessWidget {
-  final String title;
-  final String description;
-  final VoidCallback? onPressed;
-
-  const GuideCard({
-    super.key,
-    this.title = '',
-    this.description = '',
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  Text(title, style: textTheme.titleMedium),
-                  Text(description, style: textTheme.bodySmall, softWrap: true),
-                  const SizedBox(height: 8),
-                  SelectionContainer.disabled(
-                    child: FilledButton.icon(
-                      label: const Text('Read Blog'),
-                      icon: const Icon(Icons.open_in_new),
-                      onPressed: onPressed,
-                    ),
-                  ),
-                ],
-                crossAxisAlignment: CrossAxisAlignment.start,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

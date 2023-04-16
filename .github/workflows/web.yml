@@ -17,6 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Adds env.json
+      env:
+        ENV_JSON: ${{ secrets.ENV_JSON }}
+      run: echo $ENV_JSON > env.json
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.10'

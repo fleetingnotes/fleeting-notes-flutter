@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:mime/mime.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../models/syncterface.dart';
@@ -80,8 +79,8 @@ class Database {
         await box.putAll(noteIdMap);
         noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
       }
-    } catch (e, stack) {
-      Sentry.captureException(e, stackTrace: stack);
+    } catch (e) {
+      debugPrint(e.toString());
     }
     List<Note> notes = getAllNotesLocal(box);
     return notes;

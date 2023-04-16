@@ -17,6 +17,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    - name: Adds env.json
+      env:
+        ENV_JSON: ${{ secrets.ENV_JSON }}
+      run: echo $ENV_JSON > env.json
     - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.10'
@@ -28,7 +32,7 @@ jobs:
         sudo apt-get install -y libsecret-1-dev libjsoncpp-dev libsecret-1-0
     - run: flutter doctor -v
     - run: flutter pub get
-    - run: flutter build linux --release -v
+    - run: flutter build linux --release -v --dart-define-from-file=env.json
     - run: zip -r build/fn-linux.zip build/linux/x64/release/bundle 
     - name: Build AppImage using appimage-builder
       uses: docker://appimagecrafters/appimage-builder:1.1.0

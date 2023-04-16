@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
+import 'package:fleeting_notes_flutter/widgets/info_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,9 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wiredash/wiredash.dart';
 import '../../utils/responsive.dart';
 import 'components/account.dart';
 import 'components/back_up.dart';
@@ -184,6 +187,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    final currUser = db.supabase.currUser;
     return Center(
       child: Column(
         children: [
@@ -202,6 +206,51 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    (isLoggedIn && currUser != null)
+                        ? Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: InfoCard(
+                                title: 'Matt Wants Your Feedback!',
+                                description:
+                                    "Need Help? Bugs? Feature Requests? Feedback sent through here is directly forwarded to my email (matthew@fleetingnotes.app)",
+                                buttonText: "Send me your feedback",
+                                onPressed: () {
+                                  Wiredash.of(context).show(
+                                      inheritMaterialTheme: true,
+                                      options: WiredashFeedbackOptions(
+                                          labels: const [
+                                            // Take the label ids from your project console
+                                            // https://console.wiredash.io/ -> Settings -> Labels
+                                            Label(
+                                              id: 'lbl-r65egsdf',
+                                              title: 'Bug',
+                                            ),
+                                            Label(
+                                              id: 'lbl-6543df23s',
+                                              title: 'Feature Request',
+                                            ),
+                                            Label(
+                                              id: 'lbl-2r98yas4',
+                                              title: 'Praise',
+                                            ),
+                                          ],
+                                          collectMetaData: (metadata) async {
+                                            PackageInfo packageInfo =
+                                                await PackageInfo
+                                                    .fromPlatform();
+                                            return metadata
+                                              ..userEmail = currUser.email
+                                              ..userId = currUser.id
+                                              ..custom['supabaseEmail'] =
+                                                  currUser.email
+                                              ..buildNumber =
+                                                  packageInfo.buildNumber
+                                              ..buildVersion =
+                                                  packageInfo.version;
+                                          }));
+                                }),
+                          )
+                        : const SizedBox.shrink(),
                     const SettingsTitle(title: "Account"),
                     (isLoggedIn)
                         ? Account(
