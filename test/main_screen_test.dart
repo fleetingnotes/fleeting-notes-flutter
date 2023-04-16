@@ -1,7 +1,7 @@
 import 'package:fleeting_notes_flutter/my_app.dart';
-import 'package:fleeting_notes_flutter/screens/main/components/recover_session_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_bar.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/one_account_dialog.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/widgets/record_dialog.dart';
 import 'package:flutter/material.dart';
@@ -214,7 +214,7 @@ void main() {
   testWidgets('If no session dont see RecoverSessionDialog', (tester) async {
     var mockSupabase = getBaseMockSupabaseDB();
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
-    expect(find.byType(RecoverSessionDialog), findsNothing);
+    expect(find.byType(OneAccountDialog), findsNothing);
   });
   testWidgets('If session and free tier, see RecoverSessionDialog',
       (tester) async {
@@ -222,7 +222,7 @@ void main() {
     when(() => mockSupabase.getStoredSession())
         .thenAnswer((_) => Future.value(StoredSession(emptySession(), 'free')));
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
-    expect(find.byType(RecoverSessionDialog), findsOneWidget);
+    expect(find.byType(OneAccountDialog), findsOneWidget);
   });
   testWidgets('If session and not free tier, attempt', (tester) async {
     var mockSupabase = getBaseMockSupabaseDB();
@@ -232,7 +232,7 @@ void main() {
     when(() => mockSupabase.recoverSession(session))
         .thenAnswer((_) => Future.value(RecoveredSessionEvent.succeeded));
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
-    expect(find.byType(RecoverSessionDialog), findsNothing);
+    expect(find.byType(OneAccountDialog), findsNothing);
   });
 
   // long pressing opens record note dialog

@@ -3,17 +3,19 @@ import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-class LoginDialog extends StatelessWidget {
-  const LoginDialog({
+class OneAccountDialog extends StatelessWidget {
+  const OneAccountDialog({
     Key? key,
     required this.onContinue,
     required this.onSeePricing,
     required this.userId,
+    this.title = 'Logout of all other sessions',
   }) : super(key: key);
 
   final VoidCallback onContinue;
   final VoidCallback onSeePricing;
   final String userId;
+  final String title;
 
   void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
     // ignore: avoid_function_literals_in_foreach_calls
@@ -86,7 +88,7 @@ class LoginDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Logout of all other sessions'),
+      title: Text(title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,

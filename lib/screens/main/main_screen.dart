@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/settings/components/one_account_dialog.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
@@ -9,10 +10,10 @@ import 'package:fleeting_notes_flutter/utils/responsive.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/record_dialog.dart';
 import 'components/onboarding_dialog.dart';
 import 'components/note_fab.dart';
-import 'components/recover_session_dialog.dart';
 import 'components/side_rail.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -50,7 +51,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     if (session != null) {
       if (storedSession?.subscriptionTier == 'free') {
         showDialog(
-            context: context, builder: (c) => const RecoverSessionDialog());
+            context: context,
+            builder: (c) => OneAccountDialog(
+                  userId: session.user.id,
+                  title: "You've been logged out",
+                  onContinue: Navigator.of(context).pop,
+                  onSeePricing: () {
+                    Uri uri =
+                        Uri.parse("https://fleetingnotes.app/pricing?ref=app");
+                    launchUrl(uri, mode: LaunchMode.externalApplication);
+                  },
+                ));
       } else {
         db.supabase.recoverSession(session);
       }

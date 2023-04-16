@@ -5,7 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'login_dialog.dart';
+import 'one_account_dialog.dart';
 
 enum AuthAction { signIn, signUp }
 
@@ -43,7 +43,7 @@ class _AuthState extends ConsumerState<Auth> {
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) {
-            return LoginDialog(
+            return OneAccountDialog(
               onContinue: () => onDialogContinue(email, password),
               onSeePricing: onSeePricing,
               userId: user.id,
