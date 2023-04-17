@@ -179,7 +179,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         onWillPop: () async {
           if (renderNote == null) return true;
           onClose();
-          return true;
+          return false;
         },
         child: ScaffoldMessenger(
           child: Scaffold(
