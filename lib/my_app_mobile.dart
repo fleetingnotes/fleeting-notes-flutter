@@ -85,7 +85,6 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   @override
   void initState() {
     super.initState();
-    initHomeWidget();
     void goToNote(Note note, {bool noteExists = false}) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (noteExists) {
@@ -160,6 +159,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       });
     }
     if (Platform.isIOS || Platform.isAndroid) {
+      initHomeWidget();
       // For sharing or opening urls/text coming from outside the app while the app is in the memory
       receiveShareSub =
           ReceiveSharingIntent.getTextStream().listen((String sharedText) {
