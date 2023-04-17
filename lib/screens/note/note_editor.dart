@@ -170,8 +170,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   }
 
   void storeUnsavedNote() {
-    final db = ref.read(dbProvider);
-    db.settings.set('unsaved-note', getNote());
+    final noteUtils = ref.read(noteUtilsProvider);
+    noteUtils.setUnsavedNote(context, getNote());
   }
 
   void onChanged() async {

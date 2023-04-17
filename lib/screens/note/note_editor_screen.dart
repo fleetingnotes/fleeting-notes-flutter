@@ -72,6 +72,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Future<Note> getNote() async {
     // initialize shared
     final db = ref.read(dbProvider);
+    final noteUtils = ref.read(noteUtilsProvider);
     final nh = ref.read(noteHistoryProvider);
     Note? currNote = nh.currNote;
     String noteId = currNote?.id ?? widget.noteId;
@@ -103,7 +104,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
               contentController.text += '\n$qpContent';
             }
             queriedNote.content += "\n$qpContent";
-            db.settings.set('unsaved-note', queriedNote);
+            noteUtils.setUnsavedNote(context, queriedNote, saveUnsaved: true);
           }
           autofocus = true;
           return queriedNote;
@@ -111,7 +112,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       }
       newNote = newNote ?? extraNote ?? Note.empty(id: noteId);
       if (!newNote.isEmpty()) {
-        db.settings.set('unsaved-note', newNote);
+        noteUtils.setUnsavedNote(context, newNote, saveUnsaved: true);
       }
       autofocus = true;
     }
@@ -179,7 +180,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         onWillPop: () async {
           if (renderNote == null) return true;
           onClose();
-          return true;
+          return false;
         },
         child: ScaffoldMessenger(
           child: Scaffold(
