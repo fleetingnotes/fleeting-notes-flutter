@@ -80,7 +80,7 @@ class Database {
         noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
       }
     } catch (e) {
-      debugPrint(e.toString());
+      // catch errors with getAllNotes
     }
     List<Note> notes = getAllNotesLocal(box);
     return notes;
