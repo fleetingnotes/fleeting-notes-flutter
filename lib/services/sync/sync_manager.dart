@@ -80,6 +80,7 @@ class SyncManager {
     // gets mapping of local notes
     Iterable<Note?> localNotes =
         await getNotesByIds(incomingNotes.map((n) => n.id));
+    print(localNotes.first?.modifiedAt);
     Map<String, Note> noteIdMapping = {};
     for (var n in localNotes) {
       if (n != null) noteIdMapping[n.id] = n;
@@ -88,6 +89,8 @@ class SyncManager {
     for (var n in incomingNotes) {
       Note? localNote = noteIdMapping[n.id];
       if (localNote != null || shouldCreateNote) {
+        print(
+            'localNote: ${localNote?.modifiedAt} incomingNote: ${n.modifiedAt}');
         var newLocalNote = mergeIncomingNote(localNote, n);
         if (newLocalNote != null) {
           notesToUpdate.add(newLocalNote);

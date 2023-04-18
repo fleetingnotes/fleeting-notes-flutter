@@ -33,7 +33,7 @@ class Database {
     required this.settings,
   }) {
     syncManager = SyncManager(
-      [localFileSync],
+      [localFileSync, supabase],
       noteChangeController.stream,
       handleSyncFromExternal,
       settings,
@@ -148,6 +148,7 @@ class Database {
 
   Future<Iterable<Note?>> getNotesByIds(Iterable<String> ids) async {
     var box = await getBox();
+    print(box.get(ids.first).modifiedAt);
     return ids.map((id) => box.get(id));
   }
 
@@ -155,8 +156,7 @@ class Database {
       {bool setModifiedAt = false}) async {
     try {
       if (loggedIn) {
-        bool isSuccess = await supabase.upsertNotes(notes);
-        if (!isSuccess) return false;
+        // await supabase.upsertNotes(notes);
       }
       var box = await getBox();
       Map<String, Note> noteIdMap = {};
@@ -178,8 +178,7 @@ class Database {
   Future<bool> deleteNotes(List<Note> notes) async {
     try {
       if (loggedIn) {
-        bool isSuccess = await supabase.deleteNotes(notes);
-        if (!isSuccess) return false;
+        // await supabase.deleteNotes(notes.map((n) => n.id));
       }
       var box = await getBox();
       Map<String, Note> noteIdMap = {};
@@ -230,6 +229,7 @@ class Database {
   }
 
   void handleSyncFromExternal(NoteEvent e) async {
+    print('handleSyncFromExternal');
     switch (e.status) {
       case NoteEventStatus.init:
         List<Note> notesToUpdate =
@@ -240,6 +240,7 @@ class Database {
       case NoteEventStatus.upsert:
         List<Note> notesToUpdate =
             await SyncManager.getNotesToUpdate(e.notes, getNotesByIds);
+        print('$notesToUpdate and ${e.notes}');
         if (notesToUpdate.isEmpty) break;
         upsertNotes(notesToUpdate);
         break;
