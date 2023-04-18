@@ -250,6 +250,21 @@ void main() {
           findsOneWidget);
     });
   });
+
+  testWidgets('Sharing note w/ diff source saves overwritten note',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'hello world', closeDialog: false);
+    await goToNewNote(tester, content: 'pp', addQueryParams: true);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    expect(
+        find.descendant(
+          of: find.byType(NoteCard),
+          matching: find.text('hello world', findRichText: true),
+        ),
+        findsOneWidget);
+  });
 }
 
 bool? contentFieldHasFocus(WidgetTester tester) {
