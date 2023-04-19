@@ -32,6 +32,7 @@ class Settings {
     "save-delay-ms": int,
     "max-attachment-size-mb": int,
     "max-attachment-size-mb-premium": int,
+    "last-sync-time": DateTime,
   };
 
   Settings() {

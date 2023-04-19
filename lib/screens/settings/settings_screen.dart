@@ -161,6 +161,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void onForceSyncPress() async {
     final db = ref.read(dbProvider);
+    db.settings.delete('last-sync-time');
     db.getAllNotes(forceSync: true);
   }
 

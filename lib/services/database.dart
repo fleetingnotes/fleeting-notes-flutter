@@ -60,10 +60,12 @@ class Database {
     RegExp r = getQueryRegex(query.query);
     var allNotes = await getAllNotes(forceSync: forceSync);
     var notes = allNotes.where((note) {
-      return (query.searchByTitle && r.hasMatch(note.title)) ||
-          (query.searchByContent && r.hasMatch(note.content)) ||
-          (query.searchBySource &&
-              (r.hasMatch(note.source) || r.hasMatch(note.sourceTitle ?? '')));
+      return !note.isDeleted &&
+          ((query.searchByTitle && r.hasMatch(note.title)) ||
+              (query.searchByContent && r.hasMatch(note.content)) ||
+              (query.searchBySource &&
+                  (r.hasMatch(note.source) ||
+                      r.hasMatch(note.sourceTitle ?? ''))));
     }).toList();
     notes.sort(sortMap[query.sortBy]);
     return notes.sublist(0, min(notes.length, query.limit ?? notes.length));
@@ -73,9 +75,11 @@ class Database {
     var box = await getBox();
     try {
       if ((box.isEmpty || forceSync) && loggedIn) {
-        List<Note> notes = await supabase.getAllNotes(partition: shareUserId);
+        DateTime? lastSyncTime = settings.get('last-sync-time');
+        List<Note> notes = await supabase.getAllNotes(
+            partition: shareUserId, modifiedAfter: lastSyncTime);
+        settings.set('last-sync-time', DateTime.now());
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
-        await box.clear();
         await box.putAll(noteIdMap);
         noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
       }
@@ -326,6 +330,7 @@ class Database {
 
   Future<void> refreshApp(WidgetRef ref) async {
     final search = ref.read(searchProvider.notifier);
+    settings.delete('last-sync-time');
     await initNotes();
     shareUserId = null;
     search.updateSearch(null);

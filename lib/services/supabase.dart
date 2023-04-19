@@ -165,7 +165,7 @@ class SupabaseDB extends SyncTerface {
   // get, update, & delete notes
   Future<List<Note>> getAllNotes(
       {String? partition, DateTime? modifiedAfter}) async {
-    var baseFilter = client.from('notes').select().neq('deleted', true);
+    var baseFilter = client.from('notes').select();
     baseFilter = (partition == null)
         ? baseFilter.in_('_partition', [userId, currUser?.id])
         : baseFilter.eq('_partition', partition);
@@ -173,7 +173,8 @@ class SupabaseDB extends SyncTerface {
     await upsertNotes([]); // pushes cached notes if any
     List<dynamic> supaNotes = (modifiedAfter == null)
         ? (await baseFilter)
-        : (await baseFilter.gt('modified_at', modifiedAfter.toIso8601String()));
+        : (await baseFilter.gt(
+            'modified_at', modifiedAfter.toUtc().toIso8601String()));
     String? encryptionKey = await getEncryptionKey();
     List<Note> notes = supaNotes
         .map((supaNote) =>
