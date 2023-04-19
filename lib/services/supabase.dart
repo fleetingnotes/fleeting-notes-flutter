@@ -374,11 +374,14 @@ class SupabaseDB {
   }
 
   Future<void> deleteAccount() async {
-    var res = await client.functions.invoke('delete-user');
-    if (res.status != 200) {
-      throw FleetingNotesException('Failed to delete account');
-    }
-    await logout();
+    await Future.wait([
+      client.functions.invoke('delete-user').then((res) {
+        if (res.status != 200) {
+          throw FleetingNotesException('Failed to delete account');
+        }
+      }),
+      logout(),
+    ]);
   }
 
   Note fromSupabaseJson(dynamic supaNote, {String? encryptionKey}) {
