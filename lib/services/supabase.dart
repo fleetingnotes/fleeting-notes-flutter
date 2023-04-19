@@ -504,7 +504,6 @@ class SupabaseDB extends SyncTerface {
     // maybe look into moving that here?
 
     // setup stream here (will always be two way)
-    print('init realtime listener');
     await client.removeAllChannels();
     client.channel('public:notes').on(
       RealtimeListenTypes.postgresChanges,
@@ -512,7 +511,6 @@ class SupabaseDB extends SyncTerface {
       (payload, [ref]) async {
         String? encryptionKey = await getEncryptionKey();
         var eventType = payload['eventType'];
-        print('changes detected $eventType');
         Note note =
             fromSupabaseJson(payload['new'], encryptionKey: encryptionKey);
         if (eventType == 'UPDATE' || eventType == 'INSERT') {

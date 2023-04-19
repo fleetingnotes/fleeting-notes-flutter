@@ -148,7 +148,6 @@ class Database {
 
   Future<Iterable<Note?>> getNotesByIds(Iterable<String> ids) async {
     var box = await getBox();
-    print(box.get(ids.first).modifiedAt);
     return ids.map((id) => box.get(id));
   }
 
@@ -229,7 +228,6 @@ class Database {
   }
 
   void handleSyncFromExternal(NoteEvent e) async {
-    print('handleSyncFromExternal');
     switch (e.status) {
       case NoteEventStatus.init:
         List<Note> notesToUpdate =
@@ -240,7 +238,6 @@ class Database {
       case NoteEventStatus.upsert:
         List<Note> notesToUpdate =
             await SyncManager.getNotesToUpdate(e.notes, getNotesByIds);
-        print('$notesToUpdate and ${e.notes}');
         if (notesToUpdate.isEmpty) break;
         upsertNotes(notesToUpdate);
         break;
