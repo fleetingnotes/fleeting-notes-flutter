@@ -158,9 +158,6 @@ class Database {
   Future<bool> upsertNotes(List<Note> notes,
       {bool setModifiedAt = false}) async {
     try {
-      if (loggedIn) {
-        // await supabase.upsertNotes(notes);
-      }
       var box = await getBox();
       Map<String, Note> noteIdMap = {};
       for (var note in notes) {
@@ -180,9 +177,6 @@ class Database {
 
   Future<bool> deleteNotes(List<Note> notes) async {
     try {
-      if (loggedIn) {
-        // await supabase.deleteNotes(notes.map((n) => n.id));
-      }
       var box = await getBox();
       Map<String, Note> noteIdMap = {};
       for (var note in notes) {
