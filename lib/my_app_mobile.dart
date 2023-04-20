@@ -76,9 +76,11 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
   void initHomeWidget() {
     final db = ref.read(dbProvider);
     homeWidgetRefresh(null);
-    noteChangeStream?.cancel();
-    db.listenNoteChange(homeWidgetRefresh).then((stream) {
-      noteChangeStream = stream;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      noteChangeStream?.cancel();
+      db.listenNoteChange(homeWidgetRefresh).then((stream) {
+        noteChangeStream = stream;
+      });
     });
   }
 

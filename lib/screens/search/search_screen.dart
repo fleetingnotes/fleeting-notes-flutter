@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../models/search_query.dart';
@@ -73,8 +74,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final db = ref.read(dbProvider);
     final sq = ref.read(searchProvider);
     loadNotes();
-    db.listenNoteChange((e) => loadNotes()).then((stream) {
-      noteChangeStream = stream;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      noteChangeStream?.cancel();
+      db.listenNoteChange((e) => loadNotes()).then((stream) {
+        noteChangeStream = stream;
+      });
     });
     queryController.text = sq?.query ?? '';
   }
