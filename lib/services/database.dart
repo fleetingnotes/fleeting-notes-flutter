@@ -240,8 +240,9 @@ class Database {
         upsertNotes(notesToUpdate);
         break;
       case NoteEventStatus.upsert:
-        List<Note> notesToUpdate =
-            await SyncManager.getNotesToUpdate(e.notes, getNotesByIds);
+        List<Note> notesToUpdate = await SyncManager.getNotesToUpdate(
+            e.notes, getNotesByIds,
+            shouldCreateNote: true);
         if (notesToUpdate.isEmpty) break;
         upsertNotes(notesToUpdate);
         break;
