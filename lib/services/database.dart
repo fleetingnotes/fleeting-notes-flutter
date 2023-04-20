@@ -33,7 +33,7 @@ class Database {
     required this.settings,
   }) {
     syncManager = SyncManager(
-      [localFileSync, supabase],
+      [supabase, localFileSync],
       noteChangeController.stream,
       handleSyncFromExternal,
       settings,
