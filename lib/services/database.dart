@@ -324,8 +324,10 @@ class Database {
   }
 
   Future<void> refreshApp(WidgetRef ref) async {
+    if (!loggedIn) {
+      settings.delete('last-sync-time');
+    }
     final search = ref.read(searchProvider.notifier);
-    settings.delete('last-sync-time');
     await initNotes();
     shareUserId = null;
     search.updateSearch(null);
