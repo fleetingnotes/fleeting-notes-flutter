@@ -31,13 +31,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
-    if (!db.loggedIn && db.settings.isFirstTimeOpen()) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        showDialog(
-          context: context,
-          builder: (c) => const OnboardingDialog(width: 300),
-        );
-      });
+    if (!db.loggedIn) {
+      db.settings.delete('last-sync-time');
+      if (db.settings.isFirstTimeOpen()) {
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          showDialog(
+            context: context,
+            builder: (c) => const OnboardingDialog(width: 300),
+          );
+        });
+      }
     }
     attemptRecoverSession();
     handleSiriSuggestions();
