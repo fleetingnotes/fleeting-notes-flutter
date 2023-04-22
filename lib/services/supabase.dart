@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:hive/hive.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
@@ -22,12 +23,16 @@ class StoredSession {
   StoredSession(this.session, this.subscriptionTier);
 }
 
-class SupabaseDB {
+class SupabaseDB extends SyncTerface {
   SupabaseClient get client => Supabase.instance.client;
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   StreamSubscription<AuthState>? authSubscription;
   StreamController<AuthChangeEvent?> authChangeController =
       StreamController<AuthChangeEvent?>.broadcast();
+  final StreamController<NoteEvent> noteStreamController =
+      StreamController.broadcast();
+  @override
+  Stream<NoteEvent> get noteStream => noteStreamController.stream;
   SupabaseDB() {
     prevUser = client.auth.currentUser;
     authSubscription?.cancel();
@@ -39,6 +44,7 @@ class SupabaseDB {
   SubscriptionTier? subTier;
   String? get userId =>
       (currUser?.userMetadata ?? {})['firebaseUid'] ?? currUser?.id;
+  @override
   bool get canSync => currUser != null;
 
   // auth stuff
@@ -159,7 +165,7 @@ class SupabaseDB {
   // get, update, & delete notes
   Future<List<Note>> getAllNotes(
       {String? partition, DateTime? modifiedAfter}) async {
-    var baseFilter = client.from('notes').select().neq('deleted', true);
+    var baseFilter = client.from('notes').select();
     baseFilter = (partition == null)
         ? baseFilter.in_('_partition', [userId, currUser?.id])
         : baseFilter.eq('_partition', partition);
@@ -167,7 +173,8 @@ class SupabaseDB {
     await upsertNotes([]); // pushes cached notes if any
     List<dynamic> supaNotes = (modifiedAfter == null)
         ? (await baseFilter)
-        : (await baseFilter.gt('modified_at', modifiedAfter.toIso8601String()));
+        : (await baseFilter.gt(
+            'modified_at', modifiedAfter.toUtc().toIso8601String()));
     String? encryptionKey = await getEncryptionKey();
     List<Note> notes = supaNotes
         .map((supaNote) =>
@@ -180,24 +187,35 @@ class SupabaseDB {
 
   Future<Note?> getNoteById(String id) async {
     var supaNote = await client.from('notes').select().eq('id', id).single();
-    return fromSupabaseJson(supaNote);
+    var encryptionKey = await getEncryptionKey();
+    return fromSupabaseJson(supaNote, encryptionKey: encryptionKey);
   }
 
-  Future<bool> deleteNotes(List<Note> notes) async {
-    var deletedNotes = notes.map((note) {
-      note.modifiedAt = DateTime.now().toUtc().toIso8601String();
-      note.isDeleted = true;
-      return note;
-    }).toList();
-    return await upsertNotes(deletedNotes);
+  @override
+  Future<Iterable<Note?>> getNotesByIds(Iterable<String> ids) async {
+    List<dynamic> supaNotes =
+        await client.from('notes').select().in_('id', ids.toList());
+    String? encryptionKey = await getEncryptionKey();
+    Iterable<Note> notes =
+        supaNotes.map((n) => fromSupabaseJson(n, encryptionKey: encryptionKey));
+    return notes;
   }
 
-  Future<bool> upsertNotes(List<Note> notes) async {
+  @override
+  Future<void> deleteNotes(Iterable<String> ids) async {
+    await client.from('notes').update({
+      'modified_at': DateTime.now().toUtc().toIso8601String(),
+      'deleted': true,
+    }).in_('id', ids.toList());
+  }
+
+  @override
+  Future<void> upsertNotes(Iterable<Note> notes) async {
     // recent notes override unsaved cache notes
     var notesCache = await getNotesCache();
     notesCache.addAll({for (var note in notes) note.id: note});
     notes = notesCache.values.toList();
-    if (notes.isEmpty) return true;
+    if (notes.isEmpty) return;
 
     // attempt to upsert notes to supabase
     try {
@@ -217,7 +235,6 @@ class SupabaseDB {
       await saveNotesCache(notes);
       if (e is FleetingNotesException) rethrow;
     }
-    return true;
   }
 
   // cache for offline support
@@ -237,7 +254,7 @@ class SupabaseDB {
     return mapping;
   }
 
-  Future<void> saveNotesCache(List<Note> notes) async {
+  Future<void> saveNotesCache(Iterable<Note> notes) async {
     var box = await getNotesCacheBox();
     Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
     box?.putAll(noteIdMap);
@@ -386,7 +403,8 @@ class SupabaseDB {
 
   Note fromSupabaseJson(dynamic supaNote, {String? encryptionKey}) {
     bool isEncrypted = supaNote['encrypted'] ?? false;
-    DateTime dt = DateTime.parse(supaNote['created_at']);
+    DateTime createdDt = DateTime.parse(supaNote['created_at']);
+    DateTime modifiedDt = DateTime.parse(supaNote['modified_at']);
     String title = supaNote['title'];
     String content = supaNote['content'];
     String source = supaNote['source'];
@@ -418,7 +436,7 @@ class SupabaseDB {
         sourceImageUrl = decryptAESCryptoJS(sourceImageUrl, encryptionKey);
       }
     }
-    return Note(
+    var note = Note(
       id: supaNote['id'],
       title: title,
       content: content,
@@ -426,11 +444,13 @@ class SupabaseDB {
       partition: supaNote['_partition'],
       isDeleted: supaNote['deleted'],
       isShareable: supaNote['shared'],
-      createdAt: dt.toIso8601String(),
+      createdAt: createdDt.toIso8601String(),
       sourceTitle: sourceTitle,
       sourceDescription: sourceDescription,
       sourceImageUrl: sourceImageUrl,
     );
+    note.modifiedAt = modifiedDt.toIso8601String();
+    return note;
   }
 
   Map<String, dynamic> toSupabaseJson(Note note, {String? encryptionKey}) {
@@ -477,5 +497,31 @@ class SupabaseDB {
       'shared': note.isShareable,
       'encrypted': isEncrypted,
     };
+  }
+
+  @override
+  Future<void> init({Iterable<Note> notes = const Iterable.empty()}) async {
+    // Notes are initialized in database.dart `initNotes()` function
+    // maybe look into moving that here?
+
+    // setup stream here (will always be two way)
+    await client.removeAllChannels();
+    client.channel('public:notes').on(
+      RealtimeListenTypes.postgresChanges,
+      ChannelFilter(event: '*', schema: 'public', table: 'notes'),
+      (payload, [ref]) async {
+        String? encryptionKey = await getEncryptionKey();
+        var eventType = payload['eventType'];
+        Note note =
+            fromSupabaseJson(payload['new'], encryptionKey: encryptionKey);
+        if (eventType == 'UPDATE' || eventType == 'INSERT') {
+          if (note.isDeleted == true) {
+            noteStreamController.add(NoteEvent([note], NoteEventStatus.delete));
+          } else {
+            noteStreamController.add(NoteEvent([note], NoteEventStatus.upsert));
+          }
+        }
+      },
+    ).subscribe();
   }
 }
