@@ -164,7 +164,6 @@ const onActionPressed = async (tab, src) => {
     src = getIframeUrl();
     try {
       const srcInfo = await chrome.tabs.sendMessage(tab.id, { msg: "get-src" });
-      console.log(srcInfo);
       if (srcInfo.source) {
         src += `?source=${encodeURIComponent(srcInfo.source)}`;
         if (srcInfo.source_title) {

@@ -244,7 +244,6 @@ function listenMessages() {
       response(true);
     } else if (request.msg === "get-src") {
       const srcInfo = getSrcInfo();
-      console.log(srcInfo);
       response(srcInfo);
     }
     return true; // used to send response async
