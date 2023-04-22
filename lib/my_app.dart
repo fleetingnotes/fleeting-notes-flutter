@@ -75,6 +75,9 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
               content: params['content'] ?? '',
               source: params['source'] ?? '',
             );
+            newNote.sourceTitle = params['source_title'];
+            newNote.sourceDescription = params['source_description'];
+            newNote.sourceImageUrl = params['source_image_url'];
             final String _queryString = Uri(
                     queryParameters: state.queryParams
                         .map((key, value) => MapEntry(key, value.toString())))
@@ -115,6 +118,9 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                   content: params['content'] ?? '',
                   source: params['source'] ?? '',
                 );
+                note.sourceTitle = params['source_title'];
+                note.sourceDescription = params['source_description'];
+                note.sourceImageUrl = params['source_image_url'];
 
                 return DialogPage(
                   child: DynamicDialog(
