@@ -73,6 +73,8 @@ dependencies:
   speech_to_text: ^6.1.1
   wiredash: ^1.6.0
   package_info_plus: ^3.1.0
+  super_editor: ^0.2.3+1
+  super_editor_markdown: ^0.1.4+1
 
 
 dev_dependencies:

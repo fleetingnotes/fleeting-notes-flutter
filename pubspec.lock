@@ -57,6 +57,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.10.0"
+  attributed_text:
+    dependency: transitive
+    description:
+      name: attributed_text
+      sha256: "892b9517ba27f78ebee526424a91d1aba44d729e610f06a0dd9a3a43d3d81f6d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -513,6 +521,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_test_robots:
+    dependency: transitive
+    description:
+      name: flutter_test_robots
+      sha256: e43d82bce5c17813b1b47b8228a2369936cfe7d73981002bc919b510de350d08
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.18"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -726,6 +742,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
+  linkify:
+    dependency: transitive
+    description:
+      name: linkify
+      sha256: bdfbdafec6cdc9cd0ebb333a868cafc046714ad508e48be8095208c54691d959
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   lints:
     dependency: transitive
     description:
@@ -742,6 +766,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  markdown:
+    dependency: transitive
+    description:
+      name: markdown
+      sha256: "01512006c8429f604eb10f9848717baeaedf99e991d14a50d540d9beff08e5c6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.1"
   matcher:
     dependency: transitive
     description:
@@ -1259,6 +1291,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
+  super_editor:
+    dependency: "direct main"
+    description:
+      name: super_editor
+      sha256: dd121f775e846d91003931d645e4f4e2471817ab65a99f93e34016536bb65f67
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.3+1"
+  super_editor_markdown:
+    dependency: "direct main"
+    description:
+      name: super_editor_markdown
+      sha256: "916c81456bc29567464fd3dee6391edf3000c07fe95d757c6ba03d383879897d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.4+1"
+  super_text_layout:
+    dependency: transitive
+    description:
+      name: super_text_layout
+      sha256: bb81b2bb7aeef84922034f478b5aa20a44e662c363e68ac2b350c4dc190522f5
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.5"
   synchronized:
     dependency: transitive
     description:

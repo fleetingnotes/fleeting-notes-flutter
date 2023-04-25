@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/models/editor_data.dart';
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
 import 'package:fleeting_notes_flutter/services/note_utils.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
@@ -38,3 +39,4 @@ final noteHistoryProvider =
 final noteUtilsProvider = Provider<NoteUtils>((ref) {
   return NoteUtils(ref);
 });
+final editorProvider = Provider<EditorData>((ref) => EditorData(ref));
