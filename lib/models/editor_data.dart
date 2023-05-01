@@ -1,13 +1,9 @@
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_editor/super_editor.dart';
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:super_editor_markdown/super_editor_markdown.dart';
 import '../models/Note.dart';
-import '../models/exceptions.dart';
-import 'package:path/path.dart' as p;
 
 // utilities to help do things with notes
 class EditorData {
@@ -16,4 +12,16 @@ class EditorData {
   TextEditingController titleController = TextEditingController();
   MutableDocument contentDoc = MutableDocument();
   TextEditingController sourceController = TextEditingController();
+
+  void appendToDoc(String text) {
+    String md = serializeDocumentToMarkdown(contentDoc);
+    md += text;
+    contentDoc = deserializeMarkdownToDocument(md);
+  }
+
+  void updateFields(Note n) {
+    titleController.text = n.title;
+    sourceController.text = n.source;
+    contentDoc = deserializeMarkdownToDocument(n.content);
+  }
 }

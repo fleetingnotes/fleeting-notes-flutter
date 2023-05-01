@@ -1,6 +1,10 @@
 // Editor
 // TODO: make the note properly populate the fields & save work as intended
+// TODO: add checkboxes
+// TODO: make link suggestions and link previews work
 // TODO: make the save & ntoe hist
+import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +13,7 @@ import 'package:super_editor/super_editor.dart';
 class ContentEditor extends ConsumerStatefulWidget {
   const ContentEditor({
     super.key,
+    required this.doc,
     this.autofocus = false,
     this.onChanged,
     this.onPop,
@@ -17,21 +22,25 @@ class ContentEditor extends ConsumerStatefulWidget {
   final bool autofocus;
   final VoidCallback? onChanged;
   final VoidCallback? onPop;
+  final MutableDocument doc;
 
   @override
   ConsumerState<ContentEditor> createState() => _EditorState();
 }
 
 class _EditorState extends ConsumerState<ContentEditor> {
-  MutableDocument? doc;
+  final GlobalKey _docLayoutKey = GlobalKey();
+  final DocumentComposer _composer = DocumentComposer();
+  OverlayEntry? _overlayEntry;
+  final LayerLink layerLink = LayerLink();
+
   @override
   void initState() {
-    final editorData = ref.read(editorProvider);
+    _composer.selectionNotifier.addListener(_hideOrShowOverlay);
     var onChanged = widget.onChanged;
-    doc = editorData.contentDoc;
     if (onChanged != null) {
-      doc?.removeListener(onChanged);
-      doc?.addListener(onChanged);
+      widget.doc.removeListener(onChanged);
+      widget.doc.addListener(onChanged);
     }
     super.initState();
   }
@@ -40,26 +49,155 @@ class _EditorState extends ConsumerState<ContentEditor> {
   void dispose() {
     var onChanged = widget.onChanged;
     if (onChanged != null) {
-      doc?.removeListener(onChanged);
+      widget.doc.removeListener(onChanged);
     }
+    _composer.dispose();
+    removeOverlay();
     super.dispose();
+  }
+
+  void _hideOrShowOverlay() {
+    final selection = _composer.selection;
+    if (selection == null) {
+      removeOverlay();
+      return;
+    }
+    final editorData = ref.read(editorProvider);
+    final selectedNode =
+        editorData.contentDoc.getNodeById(selection.extent.nodeId);
+    if (selectedNode == null || !selection.isCollapsed) {
+      removeOverlay();
+      return;
+    }
+    if (selection.base.nodeId != selection.extent.nodeId) {
+      // More than one node is selected. We don't want to show
+      // a toolbar in this case.
+      removeOverlay();
+      return;
+    }
+    if (selectedNode is ParagraphNode) {
+      var allTextNode = selectedNode.computeSelection(
+          base: selectedNode.beginningPosition,
+          extent: selectedNode.endPosition);
+      var selectionTextNode = selectedNode.computeSelection(
+          base: selection.base.nodePosition,
+          extent: selection.extent.nodePosition);
+
+      String allText = selectedNode.copyContent(allTextNode);
+
+      var matches = RegExp(Note.linkRegex).allMatches(allText);
+      Iterable<RegExpMatch> filteredMatches = matches.where((m) =>
+          m.start < selectionTextNode.baseOffset &&
+          m.start < selectionTextNode.extentOffset &&
+          m.end > selectionTextNode.baseOffset &&
+          m.end > selectionTextNode.extentOffset);
+      if (filteredMatches.isNotEmpty) {
+        String? title = filteredMatches.first.group(1);
+        removeOverlay();
+        if (title != null) {
+          // bool keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+          // if (!keyboardVisible) {
+          //   contentFocusNode.unfocus();
+          // }
+          showFollowLinkOverlay(title);
+        }
+      } else {
+        removeOverlay();
+      }
+    }
+  }
+
+  void showFollowLinkOverlay(String title) async {
+    Future<Note> getFollowLinkNote() async {
+      final db = ref.read(dbProvider);
+      Note? note = await db.getNoteByTitle(title);
+      note ??= Note.empty(title: title);
+      return note;
+    }
+
+    void _onFollowLinkTap(Note note) async {
+      final noteHistory = ref.read(noteHistoryProvider.notifier);
+      removeOverlay();
+      widget.onPop?.call();
+      noteHistory.addNote(context, note);
+    }
+
+    // init overlay entry
+    removeOverlay();
+    Offset caretOffset = getOverlayBoundingBox().bottomLeft;
+    Widget builder(context) {
+      return FutureBuilder<Note>(
+          future: getFollowLinkNote(),
+          builder: (BuildContext context, AsyncSnapshot<Note> snapshot) {
+            var note = snapshot.data;
+            if (note != null) {
+              return LinkPreview(
+                note: note,
+                caretOffset: caretOffset,
+                onTap: () => _onFollowLinkTap(note),
+                layerLink: layerLink,
+              );
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          });
+    }
+
+    overlayContent(builder);
+  }
+
+  Rect getOverlayBoundingBox() {
+    final selection = _composer.selection;
+    var rect = const Rect.fromLTRB(0, 0, 0, 0);
+    if (selection == null) return rect;
+    rect = (_docLayoutKey.currentState as DocumentLayout)
+            .getRectForSelection(selection.base, selection.extent) ??
+        rect;
+    if (selection.isCollapsed) {
+      rect = rect.shift(Offset(0, 25)); // dependent on font size here
+    }
+    return rect;
+  }
+
+  void overlayContent(Widget Function(BuildContext) builder) {
+    OverlayState? overlayState = Overlay.of(context);
+    _overlayEntry = OverlayEntry(builder: builder);
+    // show overlay
+    overlayState.insert(_overlayEntry ?? OverlayEntry(builder: builder));
+  }
+
+  void removeOverlay() {
+    if (_overlayEntry != null && _overlayEntry?.mounted == true) {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final editorData = ref.read(editorProvider);
-    return SuperEditor(
-        editor: DocumentEditor(document: editorData.contentDoc),
-        autofocus: widget.autofocus,
-        stylesheet: Stylesheet(
-          rules: defaultStylesheet.rules,
-          inlineTextStyler: defaultStylesheet.inlineTextStyler,
-          documentPadding: EdgeInsets.zero,
-        ),
-        componentBuilders: [
-          const EmptyHintComponentBuilder(),
-          ...defaultComponentBuilders,
-        ]);
+    return WillPopScope(
+      onWillPop: () async {
+        removeOverlay();
+        return true;
+      },
+      child: CompositedTransformTarget(
+        link: layerLink,
+        child: SuperEditor(
+            documentLayoutKey: _docLayoutKey,
+            editor: DocumentEditor(document: widget.doc),
+            composer: _composer,
+            autofocus: widget.autofocus,
+            stylesheet: Stylesheet(
+              rules: defaultStylesheet.rules,
+              inlineTextStyler: defaultStylesheet.inlineTextStyler,
+              documentPadding: EdgeInsets.zero,
+            ),
+            componentBuilders: [
+              const EmptyHintComponentBuilder(),
+              ...defaultComponentBuilders,
+            ]),
+      ),
+    );
   }
 }
 

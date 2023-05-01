@@ -1292,7 +1292,7 @@ packages:
     source: hosted
     version: "1.5.0"
   super_editor:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: super_editor
       sha256: dd121f775e846d91003931d645e4f4e2471817ab65a99f93e34016536bb65f67
@@ -1302,10 +1302,11 @@ packages:
   super_editor_markdown:
     dependency: "direct main"
     description:
-      name: super_editor_markdown
-      sha256: "916c81456bc29567464fd3dee6391edf3000c07fe95d757c6ba03d383879897d"
-      url: "https://pub.dev"
-    source: hosted
+      path: super_editor_markdown
+      ref: "9deba063099852dd9159b96288f335027039b7aa"
+      resolved-ref: "9deba063099852dd9159b96288f335027039b7aa"
+      url: "https://github.com/superlistapp/super_editor.git"
+    source: git
     version: "0.1.4+1"
   super_text_layout:
     dependency: transitive

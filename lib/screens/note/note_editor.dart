@@ -8,33 +8,21 @@ import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
-import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
-import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
-import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart';
-import 'package:super_editor/super_editor.dart';
 import 'package:super_editor_markdown/super_editor_markdown.dart';
 
 class NoteEditor extends ConsumerStatefulWidget {
   const NoteEditor({
     Key? key,
     required this.note,
-    this.titleController,
-    this.contentController,
-    this.sourceController,
     this.autofocus = false,
     this.padding,
   }) : super(key: key);
 
   final Note note;
   final bool autofocus;
-  final TextEditingController? titleController;
-  final TextEditingController? contentController;
-  final TextEditingController? sourceController;
   final EdgeInsetsGeometry? padding;
 
   @override
@@ -51,29 +39,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   StreamSubscription? authChangeStream;
   UrlMetadata? sourceMetadata;
 
-  TextEditingController titleController = TextEditingController();
-  TextEditingController contentController = StyleableTextFieldController(
-    styles: TextPartStyleDefinitions(definitionList: [
-      TextPartStyleDefinition(
-          pattern: Note.linkRegex,
-          style: const TextStyle(
-            color: Color.fromARGB(255, 138, 180, 248),
-            decoration: TextDecoration.underline,
-          ))
-    ]),
-  );
-  TextEditingController sourceController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
     final db = ref.read(dbProvider);
     isNoteShareable = widget.note.isShareable;
-
-    // update controllers
-    titleController = widget.titleController ?? titleController;
-    contentController = widget.contentController ?? contentController;
-    sourceController = widget.sourceController ?? sourceController;
 
     noteChangeStream = db.noteChangeController.stream.listen(handleNoteEvent);
     authChangeStream =
@@ -97,6 +67,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   void resetSaveTimer({int? defaultSaveMs, bool updateMetadata = true}) async {
     final db = ref.read(dbProvider);
     final settings = ref.read(settingsProvider);
+    final ed = ref.read(editorProvider);
     // if note has not been created don't save
     final dbNote = await db.getNoteById(widget.note.id);
     if (dbNote == null) {
@@ -107,7 +78,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     saveTimer = Timer(Duration(milliseconds: saveMs), () async {
       await _saveNote();
       if (updateMetadata) {
-        await updateSourceMetadata(sourceController.text);
+        await updateSourceMetadata(ed.sourceController.text);
       }
     });
   }
@@ -123,7 +94,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     saveTimer?.cancel();
     noteChangeStream?.cancel();
     authChangeStream?.cancel();
-    contentController.removeListener(onChanged);
   }
 
   Future<void> _saveNote() async {
@@ -137,14 +107,14 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   }
 
   Note getNote() {
-    final editorData = ref.read(editorProvider);
+    final ed = ref.read(editorProvider);
     Note note = widget.note.copyWith(
-      title: titleController.text,
-      content: serializeDocumentToMarkdown(editorData.contentDoc),
-      source: sourceController.text,
+      title: ed.titleController.text,
+      content: serializeDocumentToMarkdown(ed.contentDoc),
+      source: ed.sourceController.text,
     );
     // populate source metadata!
-    if (sourceMetadata?.url == sourceController.text) {
+    if (sourceMetadata?.url == ed.sourceController.text) {
       note.sourceTitle = sourceMetadata?.title;
       note.sourceDescription = sourceMetadata?.description;
       note.sourceImageUrl = sourceMetadata?.imageUrl;
@@ -159,51 +129,55 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   void onChanged() async {
     final noteUtils = ref.read(noteUtilsProvider);
-    final editorData = ref.read(editorProvider);
+    final ed = ref.read(editorProvider);
     modifiedAt = DateTime.now().toUtc();
     final db = ref.read(dbProvider);
     Note unsavedNote = db.settings.get('unsaved-note') ?? widget.note;
-    bool isNoteDiff = unsavedNote.content !=
-            serializeDocumentToMarkdown(editorData.contentDoc) ||
-        unsavedNote.title != titleController.text ||
-        unsavedNote.source != sourceController.text;
+    bool isNoteDiff =
+        unsavedNote.content != serializeDocumentToMarkdown(ed.contentDoc) ||
+            unsavedNote.title != ed.titleController.text ||
+            unsavedNote.source != ed.sourceController.text;
     if (isNoteDiff) {
       noteUtils.cachedNote = getNote();
       storeUnsavedNote();
       resetSaveTimer(
-          updateMetadata: unsavedNote.source != sourceController.text);
+          updateMetadata: unsavedNote.source != ed.sourceController.text);
     }
   }
 
   void handleNoteEvent(NoteEvent e) {
+    final ed = ref.read(editorProvider);
     Note? n = e.notes.firstWhereOrNull((n) => n.id == widget.note.id);
     if (n == null) return;
     isNoteShareable = n.isShareable;
-    bool noteSimilar = titleController.text == n.title &&
-        contentController.text == n.content &&
-        sourceController.text == n.source;
+    bool noteSimilar = ed.titleController.text == n.title &&
+        serializeDocumentToMarkdown(ed.contentDoc) == n.content &&
+        ed.sourceController.text == n.source;
     bool isNewerNote = DateTime.parse(n.modifiedAt)
         // add 5 second buffer to prevent prevent notes updating as user types
         .subtract(const Duration(seconds: 5))
         .isAfter(modifiedAt);
     if (!noteSimilar && !n.isDeleted && isNewerNote) {
-      updateFields(n);
+      ed.updateFields(n);
     }
   }
 
   void handleAuthChange(_) {
-    updateFields(Note.empty());
+    final ed = ref.read(editorProvider);
+    ed.updateFields(Note.empty());
   }
 
   void onClearSource() {
+    final ed = ref.read(editorProvider);
     sourceMetadata = null;
-    sourceController.text = '';
+    ed.sourceController.text = '';
     onChanged();
   }
 
   Future<void> updateSourceMetadata(String url) async {
+    final ed = ref.read(editorProvider);
     UrlMetadata? m = sourceMetadata;
-    if (url.isNotEmpty && m?.url != sourceController.text) {
+    if (url.isNotEmpty && m?.url != ed.sourceController.text) {
       final db = ref.read(dbProvider);
       m = await db.supabase.getUrlMetadata(url);
     }
@@ -214,47 +188,14 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     resetSaveTimer(defaultSaveMs: 0, updateMetadata: false);
   }
 
-  void updateFields(Note n) {
-    var prevTitleSel = titleController.selection;
-    var prevContentSel = contentController.selection;
-    var prevSourceSel = sourceController.selection;
-    titleController.text = n.title;
-    contentController.text = n.content;
-    sourceController.text = n.source;
-    // attempt to reset selection
-    try {
-      titleController.selection = prevTitleSel;
-      contentController.selection = prevContentSel;
-      sourceController.selection = prevSourceSel;
-    } catch (e) {
-      debugPrint('Failed to set cursor position (${e.toString()})');
-      debugPrint('Putting cursor at end of string');
-      var titleLen = titleController.text.length;
-      var contentLen = contentController.text.length;
-      var sourceLen = sourceController.text.length;
-      titleController.selection =
-          TextSelection(baseOffset: titleLen, extentOffset: titleLen);
-      contentController.selection =
-          TextSelection(baseOffset: contentLen, extentOffset: contentLen);
-      sourceController.selection =
-          TextSelection(baseOffset: sourceLen, extentOffset: sourceLen);
-    }
-  }
-
   void initCurrNote() async {
-    final editorData = ref.read(editorProvider);
-    if (currNote.id == widget.note.id) return;
-    contentController.removeListener(onChanged);
+    if (currNote.id == widget.note.id || !mounted) return;
+    final ed = ref.read(editorProvider);
     saveTimer?.cancel();
     sourceMetadata = null;
     currNote = widget.note;
 
-    titleController.text = currNote.title;
-    contentController.text = currNote.content;
-    sourceController.text = currNote.source;
-
-    contentController.addListener(onChanged);
-    editorData.contentDoc = deserializeMarkdownToDocument(currNote.content);
+    ed.updateFields(currNote);
     var db = ref.read(dbProvider);
     if (db.settings.get('unsaved-note') != null &&
         await db.getNoteById(currNote.id) != null) {
@@ -266,6 +207,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    final ed = ref.watch(editorProvider);
     initCurrNote();
     return Actions(
       actions: <Type, Action<Intent>>{
@@ -277,49 +219,38 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
           return null;
         }),
       },
-      child: KeyboardVisibilityBuilder(builder: (context, kbVisible) {
-        return Padding(
-          padding:
-              (kbVisible) ? const EdgeInsets.only(bottom: 36) : EdgeInsets.zero,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: widget.padding ?? EdgeInsets.zero,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.note.getShortDateTimeStr(),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  ),
-                  // TitleField(
-                  //   controller: titleController,
-                  //   onChanged: onChanged,
-                  // ),
-                  // SourceContainer(
-                  //   controller: sourceController,
-                  //   metadata: sourceMetadata,
-                  //   onChanged: onChanged,
-                  //   onClearSource: onClearSource,
-                  // ),
-                  // const Divider(),
-                  // ContentField(
-                  //   controller: contentController,
-                  //   onChanged: onChanged,
-                  //   autofocus: widget.autofocus,
-                  //   onPop: () => noteUtils.onPopNote(context, widget.note.id),
-                  // ),
-                  ContentEditor(
-                    autofocus: widget.autofocus,
-                    onChanged: onChanged,
-                  ),
-                ],
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: widget.padding ?? EdgeInsets.zero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.note.getShortDateTimeStr(),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
-            ),
+              TitleField(
+                controller: ed.titleController,
+                onChanged: onChanged,
+              ),
+              SourceContainer(
+                controller: ed.sourceController,
+                metadata: sourceMetadata,
+                onChanged: onChanged,
+                onClearSource: onClearSource,
+              ),
+              const Divider(),
+              ContentEditor(
+                doc: ed.contentDoc,
+                autofocus: widget.autofocus,
+                onChanged: onChanged,
+              ),
+            ],
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }

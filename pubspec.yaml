@@ -73,8 +73,11 @@ dependencies:
   speech_to_text: ^6.1.1
   wiredash: ^1.6.0
   package_info_plus: ^3.1.0
-  super_editor: ^0.2.3+1
-  super_editor_markdown: ^0.1.4+1
+  super_editor_markdown:
+    git:
+      url: https://github.com/superlistapp/super_editor.git
+      ref: 9deba063099852dd9159b96288f335027039b7aa
+      path: super_editor_markdown
 
 
 dev_dependencies:

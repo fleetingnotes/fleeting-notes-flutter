@@ -1,6 +1,5 @@
 import 'package:fleeting_notes_flutter/models/note_history.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
-import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,8 +8,6 @@ import 'package:collection/collection.dart';
 
 import '../../models/Note.dart';
 import '../../models/search_query.dart';
-import '../../models/text_part_style_definition.dart';
-import '../../models/text_part_style_definitions.dart';
 import '../../services/providers.dart';
 import '../../widgets/shortcuts.dart';
 import 'components/backlinks_drawer.dart';
@@ -101,7 +98,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         if (queriedNote != null) {
           if (qpContent.isNotEmpty) {
             if (note?.id == queriedNote.id) {
-              contentController.text += '\n$qpContent';
+              final editorData = ref.read(editorProvider);
+              editorData.appendToDoc('\n$qpContent');
             }
             queriedNote.content += "\n$qpContent";
             noteUtils.setUnsavedNote(context, queriedNote, saveUnsaved: true);
@@ -151,19 +149,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
   }
 
-  TextEditingController titleController = TextEditingController();
-  TextEditingController contentController = StyleableTextFieldController(
-    styles: TextPartStyleDefinitions(definitionList: [
-      TextPartStyleDefinition(
-          pattern: Note.linkRegex,
-          style: const TextStyle(
-            color: Color.fromARGB(255, 138, 180, 248),
-            decoration: TextDecoration.underline,
-          ))
-    ]),
-  );
-  TextEditingController sourceController = TextEditingController();
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  var contentController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +159,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     bool bottomAppBarVisible = !noteHistory.isHistoryEmpty;
     if (currentLoc?.toString() != GoRouter.of(context).location) {
       currentLoc = Uri.parse(GoRouter.of(context).location);
+      scaffoldKey = GlobalKey<ScaffoldState>();
       initNoteScreen(noteHistory);
     }
     return Shortcuts(
@@ -212,9 +200,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                             child: Center(child: CircularProgressIndicator()))
                         : NoteEditor(
                             note: renderNote,
-                            titleController: titleController,
-                            contentController: contentController,
-                            sourceController: sourceController,
                             autofocus: autofocus,
                             padding: const EdgeInsets.only(
                                 left: 24, right: 24, bottom: 16),
