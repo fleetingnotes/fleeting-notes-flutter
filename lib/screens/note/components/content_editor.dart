@@ -49,8 +49,6 @@ class _EditorState extends ConsumerState<ContentEditor> {
     _composer.selectionNotifier.removeListener(onSelectionOverlay);
     _composer.selectionNotifier.addListener(onSelectionOverlay);
 
-    widget.doc.removeListener(onDocChange);
-    widget.doc.addListener(onDocChange);
     db.getAllLinks().then((links) {
       if (!mounted) return;
       allLinks = links;
@@ -68,61 +66,61 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
   void onDocChange() async {
     widget.onChanged?.call();
-    final selection = _composer.selection;
-    if (selection == null) {
-      removeOverlay();
-      return;
-    }
-    final editorData = ref.read(editorProvider);
-    final selectedNode =
-        editorData.contentDoc.getNodeById(selection.extent.nodeId);
-    if (selectedNode == null || !selection.isCollapsed) {
-      removeOverlay();
-      return;
-    }
-
-    // TODO: check that this works with lists & tasks
-    if (selectedNode is ParagraphNode) {
-      var allTextNode = selectedNode.computeSelection(
-          base: selectedNode.beginningPosition,
-          extent: selectedNode.endPosition);
-      var selectionTextNode = selectedNode.computeSelection(
-          base: selection.base.nodePosition,
-          extent: selection.extent.nodePosition);
-
-      String allText = selectedNode.copyContent(allTextNode);
-
-      var caretOffset = min(selectionTextNode.baseOffset + 1, allText.length);
-      bool isVisible = linkSuggestionsVisible(allText, caretOffset);
-      if (isVisible) {
-        if (linkSuggestionQuery.value == null) {
-          linkSuggestionQuery.value = '';
-          showLinkSuggestionsOverlay();
-        } else {
-          String beforeCaretText = allText.substring(0, caretOffset);
-          String query = beforeCaretText.substring(
-              beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
-          linkSuggestionQuery.value = query;
-        }
-      } else {
-        linkSuggestionQuery.value = null;
-        removeOverlay();
-      }
-      // TODO: replace below with PGVector stuff
-      final db = ref.read(dbProvider);
-      var isPremium = await db.supabase.getSubscriptionTier() ==
-          SubscriptionTier.premiumSub;
-      if (allText.length % 30 == 0 && allText.isNotEmpty && isPremium) {
-        db.textSimilarity
-            .orderListByRelevance(allText, allLinks)
-            .then((newLinkSuggestions) {
-          if (!mounted) return;
-          setState(() {
-            allLinks = newLinkSuggestions;
-          });
-        });
-      }
-    }
+    // final selection = _composer.selection;
+    // if (selection == null) {
+    //   removeOverlay();
+    //   return;
+    // }
+    // final editorData = ref.read(editorProvider);
+    // final selectedNode =
+    //     editorData.contentDoc.getNodeById(selection.extent.nodeId);
+    // if (selectedNode == null || !selection.isCollapsed) {
+    //   removeOverlay();
+    //   return;
+    // }
+    //
+    // // TODO: check that this works with lists & tasks
+    // if (selectedNode is ParagraphNode) {
+    //   var allTextNode = selectedNode.computeSelection(
+    //       base: selectedNode.beginningPosition,
+    //       extent: selectedNode.endPosition);
+    //   var selectionTextNode = selectedNode.computeSelection(
+    //       base: selection.base.nodePosition,
+    //       extent: selection.extent.nodePosition);
+    //
+    //   String allText = selectedNode.copyContent(allTextNode);
+    //
+    //   var caretOffset = min(selectionTextNode.baseOffset + 1, allText.length);
+    //   bool isVisible = linkSuggestionsVisible(allText, caretOffset);
+    //   if (isVisible) {
+    //     if (linkSuggestionQuery.value == null) {
+    //       linkSuggestionQuery.value = '';
+    //       showLinkSuggestionsOverlay();
+    //     } else {
+    //       String beforeCaretText = allText.substring(0, caretOffset);
+    //       String query = beforeCaretText.substring(
+    //           beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
+    //       linkSuggestionQuery.value = query;
+    //     }
+    //   } else {
+    //     linkSuggestionQuery.value = null;
+    //     removeOverlay();
+    //   }
+    //   // TODO: replace below with PGVector stuff
+    //   final db = ref.read(dbProvider);
+    //   var isPremium = await db.supabase.getSubscriptionTier() ==
+    //       SubscriptionTier.premiumSub;
+    //   if (allText.length % 30 == 0 && allText.isNotEmpty && isPremium) {
+    //     db.textSimilarity
+    //         .orderListByRelevance(allText, allLinks)
+    //         .then((newLinkSuggestions) {
+    //       if (!mounted) return;
+    //       setState(() {
+    //         allLinks = newLinkSuggestions;
+    //       });
+    //     });
+    //   }
+    // }
   }
 
   void onSelectionOverlay() {
@@ -145,7 +143,7 @@ class _EditorState extends ConsumerState<ContentEditor> {
       return;
     }
     // TODO: check that this works with lists & tasks
-    if (selectedNode is ParagraphNode) {
+    if (selectedNode is TextNode) {
       var allTextNode = selectedNode.computeSelection(
           base: selectedNode.beginningPosition,
           extent: selectedNode.endPosition);
@@ -155,6 +153,7 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
       String allText = selectedNode.copyContent(allTextNode);
 
+      // Link Preview Overlay
       var matches = RegExp(Note.linkRegex).allMatches(allText);
       Iterable<RegExpMatch> filteredMatches = matches.where((m) =>
           m.start < selectionTextNode.baseOffset &&
@@ -170,6 +169,24 @@ class _EditorState extends ConsumerState<ContentEditor> {
       } else if (linkSuggestionQuery.value == null) {
         removeOverlay();
       }
+
+      // Link Suggestion Overlay
+      // var caretOffset = min(selectionTextNode.baseOffset, allText.length);
+      // bool isVisible = linkSuggestionsVisible(allText, caretOffset);
+      // if (isVisible) {
+      //   if (linkSuggestionQuery.value == null) {
+      //     linkSuggestionQuery.value = '';
+      //     showLinkSuggestionsOverlay();
+      //   } else {
+      //     String beforeCaretText = allText.substring(0, caretOffset);
+      //     String query = beforeCaretText.substring(
+      //         beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
+      //     linkSuggestionQuery.value = query;
+      //   }
+      // } else {
+      //   linkSuggestionQuery.value = null;
+      //   removeOverlay();
+      // }
     }
   }
 
@@ -227,7 +244,7 @@ class _EditorState extends ConsumerState<ContentEditor> {
       removeOverlay();
       return;
     }
-    if (selectedNode is ParagraphNode) {
+    if (selectedNode is TextNode) {
       var allTextNode = selectedNode.computeSelection(
           base: selectedNode.beginningPosition,
           extent: selectedNode.endPosition);
@@ -323,6 +340,8 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
   @override
   Widget build(BuildContext context) {
+    widget.doc.removeListener(onDocChange);
+    widget.doc.addListener(onDocChange);
     final _docEditor = DocumentEditor(document: widget.doc);
     _docOps = CommonEditorOperations(
       editor: _docEditor,
@@ -472,6 +491,10 @@ class WikilinkComponentBuilder implements ComponentBuilder {
 
     if (attributedText == null) return null;
     var matches = RegExp(Note.linkRegex).allMatches(attributedText.text);
+    if (attributedText.text.isNotEmpty) {
+      attributedText.removeAttribution(wikilinkAttribution,
+          SpanRange(start: 0, end: attributedText.text.length - 1));
+    }
     for (var m in matches) {
       attributedText.addAttribution(
           wikilinkAttribution, SpanRange(start: m.start, end: m.end - 1));
