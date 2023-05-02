@@ -11,7 +11,6 @@ import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_editor/super_editor.dart';
 
@@ -346,21 +345,22 @@ class _EditorState extends ConsumerState<ContentEditor> {
             focusNode: contentFocusNode,
             stylesheet: Stylesheet(
               rules: defaultStylesheet.rules,
-              inlineTextStyler: defaultStylesheet.inlineTextStyler,
+              inlineTextStyler:
+                  (Set<Attribution> attributions, TextStyle existingStyle) {
+                return existingStyle.merge(
+                  _textStyleBuilder(attributions),
+                );
+              },
               documentPadding: EdgeInsets.zero,
             ),
             componentBuilders: [
+              const WikilinkComponentBuilder(),
               const EmptyHintComponentBuilder(),
               ...defaultComponentBuilders,
             ]),
       ),
     );
   }
-}
-
-TextStyle inlineStyleBuilder(Set<Attribution> attributions, TextStyle style) {
-  return style;
-  // StyleRule()
 }
 
 TextStyle _textStyleBuilder(Set<Attribution> attributions) {
@@ -375,12 +375,17 @@ TextStyle _textStyleBuilder(Set<Attribution> attributions) {
         color: const Color(0xFF444444),
         fontSize: 14,
       );
+    } else if (attribution == wikilinkAttribution) {
+      newStyle = newStyle.copyWith(
+        color: Color(Colors.lightBlue.value),
+      );
     }
   }
 
   return newStyle;
 }
 
+// https://github.com/superlistapp/super_editor/issues/861#issuecomment-1312222604
 class EmptyHintComponentBuilder implements ComponentBuilder {
   const EmptyHintComponentBuilder();
 
@@ -446,7 +451,37 @@ class EmptyHintComponentBuilder implements ComponentBuilder {
   }
 }
 
+class WikilinkComponentBuilder implements ComponentBuilder {
+  const WikilinkComponentBuilder();
+
+  @override
+  SingleColumnLayoutComponentViewModel? createViewModel(
+      Document document, DocumentNode node) {
+    return null;
+  }
+
+  @override
+  Widget? createComponent(SingleColumnDocumentComponentContext componentContext,
+      SingleColumnLayoutComponentViewModel componentViewModel) {
+    AttributedText? attributedText;
+    if (componentViewModel is ParagraphComponentViewModel) {
+      attributedText = componentViewModel.text;
+    } else if (componentViewModel is ListItemComponentViewModel) {
+      attributedText = componentViewModel.text;
+    }
+
+    if (attributedText == null) return null;
+    var matches = RegExp(Note.linkRegex).allMatches(attributedText.text);
+    for (var m in matches) {
+      attributedText.addAttribution(
+          wikilinkAttribution, SpanRange(start: m.start, end: m.end - 1));
+    }
+    return null;
+  }
+}
+
 const emptyAttribution = NamedAttribution('empty');
+const wikilinkAttribution = NamedAttribution('wikilink');
 bool linkSuggestionsVisible(String text, int caretIndex) {
   String lastLine = '';
   lastLine = text.substring(0, min(caretIndex, text.length)).split('\n').last;
