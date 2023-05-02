@@ -36,36 +36,25 @@ class ContentEditor extends ConsumerStatefulWidget {
 class _EditorState extends ConsumerState<ContentEditor> {
   final GlobalKey _docLayoutKey = GlobalKey();
   final DocumentComposer _composer = DocumentComposer();
-  late CommonEditorOperations _docOps;
-  late DocumentEditor _docEditor;
+  CommonEditorOperations? _docOps;
   OverlayEntry? _overlayEntry;
   final LayerLink layerLink = LayerLink();
   final ValueNotifier<String?> linkSuggestionQuery = ValueNotifier(null);
-  late final FocusNode contentFocusNode;
+  final FocusNode contentFocusNode = FocusNode();
 
   List<String> allLinks = [];
 
   @override
   void initState() {
     final db = ref.read(dbProvider);
-    contentFocusNode = FocusNode();
     _composer.selectionNotifier.removeListener(onSelectionOverlay);
     _composer.selectionNotifier.addListener(onSelectionOverlay);
-    _docEditor = DocumentEditor(document: widget.doc);
-    _docOps = CommonEditorOperations(
-      editor: _docEditor,
-      composer: _composer,
-      documentLayoutResolver: () =>
-          _docLayoutKey.currentState as DocumentLayout,
-    );
 
     widget.doc.removeListener(onDocChange);
     widget.doc.addListener(onDocChange);
     db.getAllLinks().then((links) {
       if (!mounted) return;
-      setState(() {
-        allLinks = links;
-      });
+      allLinks = links;
     });
     super.initState();
   }
@@ -255,7 +244,7 @@ class _EditorState extends ConsumerState<ContentEditor> {
         insertText += ']]';
       }
 
-      _docOps.selectRegion(
+      _docOps?.selectRegion(
           baseDocumentPosition: DocumentPosition(
               nodeId: selectedNode.id,
               nodePosition: TextNodePosition(offset: linkIndex + 2)),
@@ -265,12 +254,12 @@ class _EditorState extends ConsumerState<ContentEditor> {
                   offset: linkIndex +
                       2 +
                       (linkSuggestionQuery.value?.length ?? 0))));
-      _docOps.deleteSelection();
-      _docOps.insertPlainText(insertText);
+      _docOps?.deleteSelection();
+      _docOps?.insertPlainText(insertText);
       var docPos = DocumentPosition(
           nodeId: selectedNode.id,
           nodePosition: TextNodePosition(offset: linkIndex + 4 + link.length));
-      _docOps.selectRegion(
+      _docOps?.selectRegion(
           baseDocumentPosition: docPos, extentDocumentPosition: docPos);
     }
     widget.onChanged?.call();
@@ -335,7 +324,7 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
   @override
   Widget build(BuildContext context) {
-    _docEditor = DocumentEditor(document: widget.doc);
+    final _docEditor = DocumentEditor(document: widget.doc);
     _docOps = CommonEditorOperations(
       editor: _docEditor,
       composer: _composer,
