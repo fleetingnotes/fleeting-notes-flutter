@@ -12,6 +12,7 @@ class LinkSuggestions extends StatefulWidget {
     required this.query,
     required this.onLinkSelect,
     required this.layerLink,
+    required this.focusNode,
   }) : super(key: key);
 
   final Offset caretOffset;
@@ -19,6 +20,7 @@ class LinkSuggestions extends StatefulWidget {
   final String query;
   final Function onLinkSelect;
   final LayerLink layerLink;
+  final FocusNode focusNode;
 
   @override
   State<LinkSuggestions> createState() => _LinkSuggestionsState();
@@ -38,13 +40,13 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
       newCaretOffset = Offset(
           widget.layerLink.leaderSize!.width - width, widget.caretOffset.dy);
     }
-    HardwareKeyboard.instance.addHandler(onKeyEvent);
+    widget.focusNode.onKey = onKeyEvent;
   }
 
   @override
   void dispose() {
+    widget.focusNode.onKey = null;
     super.dispose();
-    HardwareKeyboard.instance.removeHandler(onKeyEvent);
   }
 
   List filterTitles(query) {
@@ -53,23 +55,25 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
         .toList();
   }
 
-  bool onKeyEvent(KeyEvent e) {
-    if (e is! KeyDownEvent || filteredTitles.isEmpty) return false;
-    if (e.logicalKey == LogicalKeyboardKey.arrowDown) {
-      setState(() {
-        selectedIndex = min(selectedIndex + 1, filteredTitles.length - 1);
-      });
-      return true;
-    } else if (e.logicalKey == LogicalKeyboardKey.arrowUp) {
+  KeyEventResult onKeyEvent(FocusNode n, RawKeyEvent e) {
+    if (filteredTitles.isEmpty) {
+      return KeyEventResult.ignored;
+    }
+    if (e.isKeyPressed(LogicalKeyboardKey.enter)) {
+      widget.onLinkSelect(filteredTitles[selectedIndex]);
+      return KeyEventResult.handled;
+    } else if (e.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
       setState(() {
         selectedIndex = max(selectedIndex - 1, 0);
       });
-      return true;
-    } else if (e.logicalKey == LogicalKeyboardKey.enter) {
-      widget.onLinkSelect(filteredTitles[selectedIndex]);
-      return true;
+      return KeyEventResult.handled;
+    } else if (e.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+      setState(() {
+        selectedIndex = min(selectedIndex + 1, filteredTitles.length - 1);
+      });
+      return KeyEventResult.handled;
     }
-    return false;
+    return KeyEventResult.ignored;
   }
 
   @override

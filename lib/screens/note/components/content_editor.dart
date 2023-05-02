@@ -2,11 +2,16 @@
 // TODO: make the note properly populate the fields & save work as intended
 // TODO: add checkboxes
 // TODO: make link suggestions and link previews work
-// TODO: make the save & ntoe hist
+// TODO: Use docOps to appendText & handlePaste image from web
+import 'dart:math';
+
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_editor/super_editor.dart';
 
@@ -31,32 +36,109 @@ class ContentEditor extends ConsumerStatefulWidget {
 class _EditorState extends ConsumerState<ContentEditor> {
   final GlobalKey _docLayoutKey = GlobalKey();
   final DocumentComposer _composer = DocumentComposer();
+  late CommonEditorOperations _docOps;
+  late DocumentEditor _docEditor;
   OverlayEntry? _overlayEntry;
   final LayerLink layerLink = LayerLink();
+  final ValueNotifier<String?> linkSuggestionQuery = ValueNotifier(null);
+  late final FocusNode contentFocusNode;
+
+  List<String> allLinks = [];
 
   @override
   void initState() {
-    _composer.selectionNotifier.addListener(_hideOrShowOverlay);
-    var onChanged = widget.onChanged;
-    if (onChanged != null) {
-      widget.doc.removeListener(onChanged);
-      widget.doc.addListener(onChanged);
-    }
+    final db = ref.read(dbProvider);
+    contentFocusNode = FocusNode();
+    _composer.selectionNotifier.removeListener(onSelectionOverlay);
+    _composer.selectionNotifier.addListener(onSelectionOverlay);
+    _docEditor = DocumentEditor(document: widget.doc);
+    _docOps = CommonEditorOperations(
+      editor: _docEditor,
+      composer: _composer,
+      documentLayoutResolver: () =>
+          _docLayoutKey.currentState as DocumentLayout,
+    );
+
+    // widget.doc.removeListener(onDocChange);
+    // widget.doc.addListener(onDocChange);
+    db.getAllLinks().then((links) {
+      if (!mounted) return;
+      setState(() {
+        allLinks = links;
+      });
+    });
     super.initState();
   }
 
   @override
   void dispose() {
-    var onChanged = widget.onChanged;
-    if (onChanged != null) {
-      widget.doc.removeListener(onChanged);
-    }
+    // widget.doc.removeListener(onDocChange);
     _composer.dispose();
     removeOverlay();
     super.dispose();
   }
 
-  void _hideOrShowOverlay() {
+  void onDocChange() async {
+    final selection = _composer.selection;
+    if (selection == null) {
+      removeOverlay();
+      return;
+    }
+    final editorData = ref.read(editorProvider);
+    final selectedNode =
+        editorData.contentDoc.getNodeById(selection.extent.nodeId);
+    if (selectedNode == null || !selection.isCollapsed) {
+      removeOverlay();
+      return;
+    }
+
+    // TODO: check that this works with lists & tasks
+    if (selectedNode is ParagraphNode) {
+      var allTextNode = selectedNode.computeSelection(
+          base: selectedNode.beginningPosition,
+          extent: selectedNode.endPosition);
+      var selectionTextNode = selectedNode.computeSelection(
+          base: selection.base.nodePosition,
+          extent: selection.extent.nodePosition);
+
+      String allText = selectedNode.copyContent(allTextNode);
+
+      var caretOffset = min(selectionTextNode.baseOffset + 1, allText.length);
+      bool isVisible = linkSuggestionsVisible(allText, caretOffset);
+      if (isVisible) {
+        if (linkSuggestionQuery.value == null) {
+          linkSuggestionQuery.value = '';
+          showLinkSuggestionsOverlay();
+        } else {
+          String beforeCaretText = allText.substring(0, caretOffset);
+          String query = beforeCaretText.substring(
+              beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
+          // print('isVisible: $isVisible ,  query: $query');
+          linkSuggestionQuery.value = query;
+        }
+      } else {
+        linkSuggestionQuery.value = null;
+        removeOverlay();
+      }
+      // TODO: replace below with PGVector stuff
+      final db = ref.read(dbProvider);
+      var isPremium = await db.supabase.getSubscriptionTier() ==
+          SubscriptionTier.premiumSub;
+      if (allText.length % 30 == 0 && allText.isNotEmpty && isPremium) {
+        db.textSimilarity
+            .orderListByRelevance(allText, allLinks)
+            .then((newLinkSuggestions) {
+          if (!mounted) return;
+          setState(() {
+            allLinks = newLinkSuggestions;
+          });
+        });
+      }
+    }
+    widget.onChanged?.call();
+  }
+
+  void onSelectionOverlay() {
     final selection = _composer.selection;
     if (selection == null) {
       removeOverlay();
@@ -75,6 +157,7 @@ class _EditorState extends ConsumerState<ContentEditor> {
       removeOverlay();
       return;
     }
+    // TODO: check that this works with lists & tasks
     if (selectedNode is ParagraphNode) {
       var allTextNode = selectedNode.computeSelection(
           base: selectedNode.beginningPosition,
@@ -92,16 +175,12 @@ class _EditorState extends ConsumerState<ContentEditor> {
           m.end > selectionTextNode.baseOffset &&
           m.end > selectionTextNode.extentOffset);
       if (filteredMatches.isNotEmpty) {
-        String? title = filteredMatches.first.group(1);
-        removeOverlay();
+        var m = filteredMatches.first;
+        String? title = m.group(1);
         if (title != null) {
-          // bool keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
-          // if (!keyboardVisible) {
-          //   contentFocusNode.unfocus();
-          // }
           showFollowLinkOverlay(title);
         }
-      } else {
+      } else if (linkSuggestionQuery.value == null) {
         removeOverlay();
       }
     }
@@ -146,16 +225,98 @@ class _EditorState extends ConsumerState<ContentEditor> {
     overlayContent(builder);
   }
 
+  // handles linkSelect
+  _onLinkSelect(String link) {
+    var selection = _composer.selection;
+    if (selection == null) {
+      linkSuggestionQuery.value = null;
+      removeOverlay();
+      return;
+    }
+
+    final selectedNode = widget.doc.getNodeById(selection.base.nodeId);
+    if (selectedNode == null) {
+      linkSuggestionQuery.value = null;
+      removeOverlay();
+      return;
+    }
+    if (selectedNode is ParagraphNode) {
+      var allTextNode = selectedNode.computeSelection(
+          base: selectedNode.beginningPosition,
+          extent: selectedNode.endPosition);
+      var selectionTextNode = selectedNode.computeSelection(
+          base: selection.base.nodePosition,
+          extent: selection.extent.nodePosition);
+      String allText = selectedNode.copyContent(allTextNode);
+      String beforeCaretText = selectionTextNode.textBefore(allText);
+      int linkIndex = beforeCaretText.lastIndexOf('[[');
+      String insertText = link;
+
+      if (!selectionTextNode.textAfter(allText).startsWith(']]')) {
+        insertText += ']]';
+      }
+
+      _docOps.selectRegion(
+          baseDocumentPosition: DocumentPosition(
+              nodeId: selectedNode.id,
+              nodePosition: TextNodePosition(offset: linkIndex + 2)),
+          extentDocumentPosition: DocumentPosition(
+              nodeId: selectedNode.id,
+              nodePosition: TextNodePosition(
+                  offset: linkIndex +
+                      2 +
+                      (linkSuggestionQuery.value?.length ?? 0))));
+      _docOps.deleteSelection();
+      _docOps.insertPlainText(insertText);
+      var docPos = DocumentPosition(
+          nodeId: selectedNode.id,
+          nodePosition: TextNodePosition(offset: linkIndex + 4 + link.length));
+      _docOps.selectRegion(
+          baseDocumentPosition: docPos, extentDocumentPosition: docPos);
+    }
+    widget.onChanged?.call();
+    linkSuggestionQuery.value = null;
+    removeOverlay();
+  }
+
+  void showLinkSuggestionsOverlay() async {
+    removeOverlay();
+    Offset caretOffset = getOverlayBoundingBox().bottomLeft;
+    Widget builder(context) {
+      // ignore: avoid_unnecessary_containers
+      return Container(
+        child: ValueListenableBuilder(
+            valueListenable: linkSuggestionQuery,
+            builder: (context, _, __) {
+              final val = linkSuggestionQuery.value;
+              if (val == null) return const SizedBox.shrink();
+              return LinkSuggestions(
+                caretOffset: caretOffset,
+                allLinks: allLinks,
+                query: val,
+                onLinkSelect: _onLinkSelect,
+                layerLink: layerLink,
+                focusNode: contentFocusNode,
+              );
+            }),
+      );
+    }
+
+    overlayContent(builder);
+  }
+
   Rect getOverlayBoundingBox() {
     final selection = _composer.selection;
     var rect = const Rect.fromLTRB(0, 0, 0, 0);
     if (selection == null) return rect;
-    rect = (_docLayoutKey.currentState as DocumentLayout)
-            .getRectForSelection(selection.base, selection.extent) ??
+
+    // Note: we start at offset 0 so selection isnt "collapsed". This way it gives a proper rect.
+    rect = (_docLayoutKey.currentState as DocumentLayout).getRectForSelection(
+            DocumentPosition(
+                nodeId: selection.base.nodeId,
+                nodePosition: const TextNodePosition(offset: 0)),
+            selection.extent) ??
         rect;
-    if (selection.isCollapsed) {
-      rect = rect.shift(Offset(0, 25)); // dependent on font size here
-    }
     return rect;
   }
 
@@ -175,6 +336,13 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
   @override
   Widget build(BuildContext context) {
+    _docEditor = DocumentEditor(document: widget.doc);
+    _docOps = CommonEditorOperations(
+      editor: _docEditor,
+      composer: _composer,
+      documentLayoutResolver: () =>
+          _docLayoutKey.currentState as DocumentLayout,
+    );
     return WillPopScope(
       onWillPop: () async {
         removeOverlay();
@@ -187,6 +355,7 @@ class _EditorState extends ConsumerState<ContentEditor> {
             editor: DocumentEditor(document: widget.doc),
             composer: _composer,
             autofocus: widget.autofocus,
+            focusNode: contentFocusNode,
             stylesheet: Stylesheet(
               rules: defaultStylesheet.rules,
               inlineTextStyler: defaultStylesheet.inlineTextStyler,
@@ -199,6 +368,11 @@ class _EditorState extends ConsumerState<ContentEditor> {
       ),
     );
   }
+}
+
+TextStyle inlineStyleBuilder(Set<Attribution> attributions, TextStyle style) {
+  return style;
+  // StyleRule()
 }
 
 TextStyle _textStyleBuilder(Set<Attribution> attributions) {
@@ -285,3 +459,10 @@ class EmptyHintComponentBuilder implements ComponentBuilder {
 }
 
 const emptyAttribution = NamedAttribution('empty');
+bool linkSuggestionsVisible(String text, int caretIndex) {
+  String lastLine = '';
+  lastLine = text.substring(0, min(caretIndex, text.length)).split('\n').last;
+  RegExp r = RegExp(r'\[\[((?!([\]])).)*$');
+  bool showLinkSuggestions = r.hasMatch(lastLine);
+  return showLinkSuggestions;
+}
