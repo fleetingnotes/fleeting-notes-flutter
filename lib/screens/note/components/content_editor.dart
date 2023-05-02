@@ -59,8 +59,8 @@ class _EditorState extends ConsumerState<ContentEditor> {
           _docLayoutKey.currentState as DocumentLayout,
     );
 
-    // widget.doc.removeListener(onDocChange);
-    // widget.doc.addListener(onDocChange);
+    widget.doc.removeListener(onDocChange);
+    widget.doc.addListener(onDocChange);
     db.getAllLinks().then((links) {
       if (!mounted) return;
       setState(() {
@@ -72,13 +72,14 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
   @override
   void dispose() {
-    // widget.doc.removeListener(onDocChange);
+    widget.doc.removeListener(onDocChange);
     _composer.dispose();
     removeOverlay();
     super.dispose();
   }
 
   void onDocChange() async {
+    widget.onChanged?.call();
     final selection = _composer.selection;
     if (selection == null) {
       removeOverlay();
@@ -113,7 +114,6 @@ class _EditorState extends ConsumerState<ContentEditor> {
           String beforeCaretText = allText.substring(0, caretOffset);
           String query = beforeCaretText.substring(
               beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
-          // print('isVisible: $isVisible ,  query: $query');
           linkSuggestionQuery.value = query;
         }
       } else {
@@ -135,7 +135,6 @@ class _EditorState extends ConsumerState<ContentEditor> {
         });
       }
     }
-    widget.onChanged?.call();
   }
 
   void onSelectionOverlay() {
@@ -352,7 +351,7 @@ class _EditorState extends ConsumerState<ContentEditor> {
         link: layerLink,
         child: SuperEditor(
             documentLayoutKey: _docLayoutKey,
-            editor: DocumentEditor(document: widget.doc),
+            editor: _docEditor,
             composer: _composer,
             autofocus: widget.autofocus,
             focusNode: contentFocusNode,
