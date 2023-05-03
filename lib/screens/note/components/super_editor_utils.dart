@@ -108,18 +108,7 @@ class WikilinkComponentBuilder implements ComponentBuilder {
     return null;
   }
 
-  @override
-  Widget? createComponent(SingleColumnDocumentComponentContext componentContext,
-      SingleColumnLayoutComponentViewModel componentViewModel) {
-    AttributedText? attributedText;
-    if (componentViewModel is ParagraphComponentViewModel) {
-      attributedText = componentViewModel.text;
-    } else if (componentViewModel is ListItemComponentViewModel) {
-      attributedText = componentViewModel.text;
-    }
-    if (attributedText == null) {
-      return null;
-    }
+  AttributedText highlightWikilinks(AttributedText attributedText) {
     attributedText = attributedText.copyText(0, attributedText.text.length);
     var matches = RegExp(Note.linkRegex).allMatches(attributedText.text);
     if (attributedText.text.isNotEmpty) {
@@ -130,10 +119,16 @@ class WikilinkComponentBuilder implements ComponentBuilder {
       attributedText.addAttribution(
           wikilinkAttribution, SpanRange(start: m.start, end: m.end - 1));
     }
+    return attributedText;
+  }
+
+  @override
+  Widget? createComponent(SingleColumnDocumentComponentContext componentContext,
+      SingleColumnLayoutComponentViewModel componentViewModel) {
     if (componentViewModel is ParagraphComponentViewModel) {
       return TextComponent(
         key: componentContext.componentKey,
-        text: attributedText,
+        text: highlightWikilinks(componentViewModel.text),
         textStyleBuilder: textStyleBuilder,
         textSelection: componentViewModel.selection,
         selectionColor: componentViewModel.selectionColor,
@@ -144,7 +139,7 @@ class WikilinkComponentBuilder implements ComponentBuilder {
         return OrderedListItemComponent(
           textKey: componentContext.componentKey,
           listIndex: componentViewModel.ordinalValue ?? 1,
-          text: attributedText,
+          text: highlightWikilinks(componentViewModel.text),
           textSelection: componentViewModel.selection,
           selectionColor: componentViewModel.selectionColor,
           styleBuilder: textStyleBuilder,
@@ -154,7 +149,7 @@ class WikilinkComponentBuilder implements ComponentBuilder {
       } else if (componentViewModel.type == ListItemType.unordered) {
         return UnorderedListItemComponent(
           textKey: componentContext.componentKey,
-          text: attributedText,
+          text: highlightWikilinks(componentViewModel.text),
           textSelection: componentViewModel.selection,
           selectionColor: componentViewModel.selectionColor,
           styleBuilder: textStyleBuilder,
@@ -162,6 +157,12 @@ class WikilinkComponentBuilder implements ComponentBuilder {
           highlightWhenEmpty: componentViewModel.highlightWhenEmpty,
         );
       }
+    } else if (componentViewModel is TaskComponentViewModel) {
+      componentViewModel.text = highlightWikilinks(componentViewModel.text);
+      componentViewModel.textStyleBuilder = textStyleBuilder;
+      return TaskComponent(
+        viewModel: componentViewModel,
+      );
     }
     return null;
   }
