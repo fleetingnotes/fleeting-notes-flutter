@@ -325,9 +325,8 @@ class _EditorState extends ConsumerState<ContentEditor> {
               documentPadding: EdgeInsets.zero,
             ),
             componentBuilders: [
-              TaskComponentBuilder(_docEditor),
               const EmptyHintComponentBuilder(),
-              const WikilinkComponentBuilder(),
+              WikilinkComponentBuilder(_docEditor),
               ...defaultComponentBuilders,
             ]),
       ),

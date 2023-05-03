@@ -1,5 +1,7 @@
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:fleeting_notes_flutter/screens/note/inline_markdown_to_document.dart';
 import 'package:flutter/material.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:super_editor/super_editor.dart';
 import 'package:super_editor_markdown/super_editor_markdown.dart';
 
@@ -100,12 +102,34 @@ class EmptyHintComponentBuilder implements ComponentBuilder {
 }
 
 class WikilinkComponentBuilder implements ComponentBuilder {
-  const WikilinkComponentBuilder();
+  const WikilinkComponentBuilder(this._editor);
+  final DocumentEditor _editor;
 
+  // copied from tasks.dart in super_editor package
   @override
   SingleColumnLayoutComponentViewModel? createViewModel(
       Document document, DocumentNode node) {
-    return null;
+    if (node is! TaskNode) {
+      return null;
+    }
+
+    return TaskComponentViewModel(
+      nodeId: node.id,
+      padding: EdgeInsets.zero,
+      isComplete: node.isComplete,
+      setComplete: (bool isComplete) {
+        _editor.executeCommand(EditorCommandFunction((document, transaction) {
+          // Technically, this line could be called without the editor, but
+          // that's only because Super Editor hasn't fully separated document
+          // queries from document edits. In the future, all edits will have
+          // to go through a dedicated editing interface.
+          node.isComplete = isComplete;
+        }));
+      },
+      text: node.text,
+      textStyleBuilder: noStyleBuilder,
+      selectionColor: const Color(0x00000000),
+    );
   }
 
   AttributedText highlightWikilinks(AttributedText attributedText) {
@@ -161,10 +185,69 @@ class WikilinkComponentBuilder implements ComponentBuilder {
       componentViewModel.text = highlightWikilinks(componentViewModel.text);
       componentViewModel.textStyleBuilder = textStyleBuilder;
       return TaskComponent(
+        key: componentContext.componentKey,
         viewModel: componentViewModel,
       );
     }
     return null;
+  }
+}
+
+class TaskElementToNode extends ElementToNodeConverter {
+  final _listItemTypeStack = <ListItemType>[];
+  @override
+  DocumentNode? handleElement(md.Element element) {
+    switch (element.tag) {
+      case 'li':
+        bool? isComplete;
+        String content = element.textContent;
+        if (content.startsWith('[ ] ')) {
+          content = content.replaceFirst('[ ] ', '');
+          isComplete = false;
+        } else if (content.startsWith('[x] ')) {
+          content = content.replaceFirst('[x] ', '');
+          isComplete = true;
+        }
+        if (isComplete != null) {
+          return TaskNode(
+            id: DocumentEditor.createNodeId(),
+            isComplete: isComplete,
+            text: _parseInlineText(content),
+          );
+        }
+        break;
+      case 'ol':
+        _listItemTypeStack.add(ListItemType.ordered);
+        break;
+      case 'ul':
+        _listItemTypeStack.add(ListItemType.unordered);
+        break;
+    }
+    return null;
+  }
+
+  // modified from: https://github.com/superlistapp/super_editor/blob/main/super_editor_markdown/lib/src/markdown_to_document_parsing.dart#L289
+  AttributedText _parseInlineText(String content) {
+    final inlineVisitor = _parseInline(content);
+    return inlineVisitor.attributedText;
+  }
+
+  InlineMarkdownToDocument _parseInline(String content) {
+    final inlineParser = md.InlineParser(
+      content,
+      md.Document(
+        inlineSyntaxes: [
+          md.StrikethroughSyntax(),
+          UnderlineSyntax(),
+        ],
+      ),
+    );
+    final inlineVisitor = InlineMarkdownToDocument();
+    final inlineNodes = inlineParser.parse();
+    for (final inlineNode in inlineNodes) {
+      inlineNode.accept(inlineVisitor);
+    }
+    return inlineVisitor;
   }
 }
 

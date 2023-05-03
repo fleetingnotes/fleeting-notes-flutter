@@ -108,7 +108,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   Note getNote() {
     final ed = ref.read(editorProvider);
-    String serializedContent = serializeDocumentToMarkdown(ed.contentDoc);
+    String serializedContent = ed.serializeDocToMd(ed.contentDoc);
     Note note = widget.note.copyWith(
       title: ed.titleController.text,
       content: serializedContent,
@@ -151,7 +151,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     if (n == null) return;
     isNoteShareable = n.isShareable;
     bool noteSimilar = ed.titleController.text == n.title &&
-        serializeDocumentToMarkdown(ed.contentDoc) == n.content &&
+        ed.serializeDocToMd(ed.contentDoc) == n.content &&
         ed.sourceController.text == n.source;
     bool isNewerNote = DateTime.parse(n.modifiedAt)
         // add 5 second buffer to prevent prevent notes updating as user types

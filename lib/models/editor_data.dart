@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/note/components/super_editor_utils.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,14 +15,24 @@ class EditorData {
   TextEditingController sourceController = TextEditingController();
 
   void appendToDoc(String text) {
-    String md = serializeDocumentToMarkdown(contentDoc);
+    String md = serializeDocToMd(contentDoc);
     md += text;
-    contentDoc = deserializeMarkdownToDocument(md);
+    contentDoc = deserializeMdToDoc(md);
   }
 
   void updateFields(Note n) {
     titleController.text = n.title;
     sourceController.text = n.source;
-    contentDoc = deserializeMarkdownToDocument(n.content);
+    contentDoc = deserializeMdToDoc(n.content);
+  }
+
+  MutableDocument deserializeMdToDoc(String md) {
+    return deserializeMarkdownToDocument(md,
+        customElementToNodeConverters: [TaskElementToNode()]);
+  }
+
+  String serializeDocToMd(MutableDocument doc) {
+    return serializeDocumentToMarkdown(doc,
+        customNodeSerializers: [TaskNodeSerializer()]);
   }
 }
