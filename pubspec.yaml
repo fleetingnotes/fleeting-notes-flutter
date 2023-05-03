@@ -76,8 +76,15 @@ dependencies:
   super_editor_markdown:
     git:
       url: https://github.com/superlistapp/super_editor.git
-      ref: 9deba063099852dd9159b96288f335027039b7aa
+      ref: c05eaf8bd55655e39445b3208b574d1bfeb0e0c0
       path: super_editor_markdown
+
+dependency_overrides:
+  super_editor:
+    git:
+      url: https://github.com/superlistapp/super_editor.git
+      ref: c05eaf8bd55655e39445b3208b574d1bfeb0e0c0
+      path: super_editor
 
 
 dev_dependencies:

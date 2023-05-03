@@ -8,10 +8,10 @@ import 'dart:math';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/super_editor_utils.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_editor/super_editor.dart';
 
@@ -319,12 +319,13 @@ class _EditorState extends ConsumerState<ContentEditor> {
               inlineTextStyler:
                   (Set<Attribution> attributions, TextStyle existingStyle) {
                 return existingStyle.merge(
-                  _textStyleBuilder(attributions),
+                  textStyleBuilder(attributions),
                 );
               },
               documentPadding: EdgeInsets.zero,
             ),
             componentBuilders: [
+              TaskComponentBuilder(_docEditor),
               const EmptyHintComponentBuilder(),
               const WikilinkComponentBuilder(),
               ...defaultComponentBuilders,
@@ -334,143 +335,6 @@ class _EditorState extends ConsumerState<ContentEditor> {
   }
 }
 
-TextStyle _textStyleBuilder(Set<Attribution> attributions) {
-  // We only care about altering a few styles. Start by getting
-  // the standard styles for these attributions.
-  var newStyle = defaultStyleBuilder(attributions);
-  // makes it so we can see a cursor
-  newStyle = newStyle.copyWith(
-    fontSize: 14,
-  );
-
-  // Style headers
-  for (final attribution in attributions) {
-    if (attribution == emptyAttribution) {
-      newStyle = newStyle.copyWith(
-        color: const Color(0xFF444444),
-        fontSize: 14,
-      );
-    } else if (attribution == wikilinkAttribution) {
-      newStyle = newStyle.copyWith(
-        color: Color(Colors.lightBlue.value),
-      );
-    }
-  }
-
-  return newStyle;
-}
-
-// https://github.com/superlistapp/super_editor/issues/861#issuecomment-1312222604
-class EmptyHintComponentBuilder implements ComponentBuilder {
-  const EmptyHintComponentBuilder();
-
-  @override
-  SingleColumnLayoutComponentViewModel? createViewModel(
-      Document document, DocumentNode node) {
-    if (node is! ParagraphNode) {
-      return null;
-    }
-    // We only care about the situation where the Document is empty. In this case
-    // a Document is "empty" when there is only a single ParagraphNode.
-    if (document.nodes.length > 1) {
-      return null;
-    }
-    // We only care about the situation where the first ParagraphNode is empty.
-    if (node.text.text.isNotEmpty) {
-      return null;
-    }
-    // This component builder can work with the standard paragraph view model.
-    // We'll defer to the standard paragraph component builder to create it.
-    return ParagraphComponentViewModel(
-        nodeId: node.id,
-        text: node.text,
-        blockType: emptyAttribution,
-        textStyleBuilder: _textStyleBuilder,
-        selectionColor: defaultSelectionStyle.selectionColor);
-  }
-
-  @override
-  Widget? createComponent(SingleColumnDocumentComponentContext componentContext,
-      SingleColumnLayoutComponentViewModel componentViewModel) {
-    if (componentViewModel is! ParagraphComponentViewModel) {
-      return null;
-    }
-
-    final blockAttribution = componentViewModel.blockType;
-    if (blockAttribution != emptyAttribution) {
-      return null;
-    }
-
-    final textSelection = componentViewModel.selection;
-    return TextWithHintComponent(
-      key: componentContext.componentKey,
-      text: componentViewModel.text,
-      textStyleBuilder: _textStyleBuilder,
-      metadata: componentViewModel.blockType != null
-          ? {
-              'blockType': componentViewModel.blockType,
-            }
-          : {},
-      // This is the text displayed as a hint.
-      hintText: AttributedText(
-        text: 'Start writing your thoughts...',
-      ),
-      // This is the function that selects styles for the hint text.
-      hintStyleBuilder: (Set<Attribution> attributions) =>
-          _textStyleBuilder(attributions).copyWith(
-        color: const Color(0xFFDDDDDD),
-      ),
-      textSelection: textSelection,
-      selectionColor: componentViewModel.selectionColor,
-    );
-  }
-}
-
-class WikilinkComponentBuilder implements ComponentBuilder {
-  const WikilinkComponentBuilder();
-
-  @override
-  SingleColumnLayoutComponentViewModel? createViewModel(
-      Document document, DocumentNode node) {
-    return null;
-  }
-
-  @override
-  Widget? createComponent(SingleColumnDocumentComponentContext componentContext,
-      SingleColumnLayoutComponentViewModel componentViewModel) {
-    AttributedText? attributedText;
-    if (componentViewModel is ParagraphComponentViewModel) {
-      attributedText = componentViewModel.text;
-    } else if (componentViewModel is ListItemComponentViewModel) {
-      attributedText = componentViewModel.text;
-    }
-    if (attributedText == null ||
-        componentViewModel is! TextComponentViewModel) {
-      return null;
-    }
-    attributedText = attributedText.copyText(0, attributedText.text.length);
-    var matches = RegExp(Note.linkRegex).allMatches(attributedText.text);
-    if (attributedText.text.isNotEmpty) {
-      attributedText.removeAttribution(wikilinkAttribution,
-          SpanRange(start: 0, end: attributedText.text.length - 1));
-    }
-    for (var m in matches) {
-      attributedText.addAttribution(
-          wikilinkAttribution, SpanRange(start: m.start, end: m.end - 1));
-    }
-    return TextComponent(
-      key: componentContext.componentKey,
-      text: attributedText,
-      textStyleBuilder: _textStyleBuilder,
-      textSelection: componentViewModel.selection,
-      selectionColor: componentViewModel.selectionColor,
-      highlightWhenEmpty: componentViewModel.highlightWhenEmpty,
-    );
-  }
-}
-
-const emptyAttribution = NamedAttribution('empty');
-const wikilinkAttribution = NamedAttribution('wikilink');
 bool linkSuggestionsVisible(String text, int caretIndex) {
   String lastLine = '';
   lastLine = text.substring(0, min(caretIndex, text.length)).split('\n').last;

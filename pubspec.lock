@@ -534,6 +534,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  follow_the_leader:
+    dependency: transitive
+    description:
+      name: follow_the_leader
+      sha256: "4e74bcf1ed3b4ce9c6743ee9f24bc68c0cf017ca3731d849018eb083c60687fe"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4+2"
   frontend_server_client:
     dependency: transitive
     description:
@@ -830,6 +838,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  overlord:
+    dependency: transitive
+    description:
+      name: overlord
+      sha256: "7fa6a83455b7da5c66a16320c02783d110c574a6e6c511750c662dbadfe9399f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3+2"
   package_config:
     dependency: transitive
     description:
@@ -1292,19 +1308,20 @@ packages:
     source: hosted
     version: "1.5.0"
   super_editor:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: super_editor
-      sha256: dd121f775e846d91003931d645e4f4e2471817ab65a99f93e34016536bb65f67
-      url: "https://pub.dev"
-    source: hosted
+      path: super_editor
+      ref: c05eaf8bd55655e39445b3208b574d1bfeb0e0c0
+      resolved-ref: c05eaf8bd55655e39445b3208b574d1bfeb0e0c0
+      url: "https://github.com/superlistapp/super_editor.git"
+    source: git
     version: "0.2.3+1"
   super_editor_markdown:
     dependency: "direct main"
     description:
       path: super_editor_markdown
-      ref: "9deba063099852dd9159b96288f335027039b7aa"
-      resolved-ref: "9deba063099852dd9159b96288f335027039b7aa"
+      ref: c05eaf8bd55655e39445b3208b574d1bfeb0e0c0
+      resolved-ref: c05eaf8bd55655e39445b3208b574d1bfeb0e0c0
       url: "https://github.com/superlistapp/super_editor.git"
     source: git
     version: "0.1.4+1"
