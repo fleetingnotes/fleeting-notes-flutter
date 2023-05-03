@@ -108,9 +108,10 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   Note getNote() {
     final ed = ref.read(editorProvider);
+    String serializedContent = serializeDocumentToMarkdown(ed.contentDoc);
     Note note = widget.note.copyWith(
       title: ed.titleController.text,
-      content: serializeDocumentToMarkdown(ed.contentDoc),
+      content: serializedContent,
       source: ed.sourceController.text,
     );
     // populate source metadata!
@@ -122,9 +123,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     return note;
   }
 
-  void storeUnsavedNote() {
+  void storeUnsavedNote(Note note) {
     final noteUtils = ref.read(noteUtilsProvider);
-    noteUtils.setUnsavedNote(context, getNote());
+    noteUtils.setUnsavedNote(context, note);
   }
 
   void onChanged() async {
@@ -133,13 +134,12 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     modifiedAt = DateTime.now().toUtc();
     final db = ref.read(dbProvider);
     Note unsavedNote = db.settings.get('unsaved-note') ?? widget.note;
-    bool isNoteDiff =
-        unsavedNote.content != serializeDocumentToMarkdown(ed.contentDoc) ||
-            unsavedNote.title != ed.titleController.text ||
-            unsavedNote.source != ed.sourceController.text;
+    noteUtils.cachedNote = getNote();
+    bool isNoteDiff = unsavedNote.content != noteUtils.cachedNote.content ||
+        unsavedNote.title != noteUtils.cachedNote.title ||
+        unsavedNote.source != noteUtils.cachedNote.source;
     if (isNoteDiff) {
-      noteUtils.cachedNote = getNote();
-      storeUnsavedNote();
+      storeUnsavedNote(noteUtils.cachedNote);
       resetSaveTimer(
           updateMetadata: unsavedNote.source != ed.sourceController.text);
     }

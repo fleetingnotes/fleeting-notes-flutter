@@ -11,6 +11,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_editor/super_editor.dart';
 
@@ -46,8 +47,6 @@ class _EditorState extends ConsumerState<ContentEditor> {
   @override
   void initState() {
     final db = ref.read(dbProvider);
-    _composer.selectionNotifier.removeListener(onSelectionOverlay);
-    _composer.selectionNotifier.addListener(onSelectionOverlay);
 
     db.getAllLinks().then((links) {
       if (!mounted) return;
@@ -66,64 +65,9 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
   void onDocChange() async {
     widget.onChanged?.call();
-    // final selection = _composer.selection;
-    // if (selection == null) {
-    //   removeOverlay();
-    //   return;
-    // }
-    // final editorData = ref.read(editorProvider);
-    // final selectedNode =
-    //     editorData.contentDoc.getNodeById(selection.extent.nodeId);
-    // if (selectedNode == null || !selection.isCollapsed) {
-    //   removeOverlay();
-    //   return;
-    // }
-    //
-    // // TODO: check that this works with lists & tasks
-    // if (selectedNode is ParagraphNode) {
-    //   var allTextNode = selectedNode.computeSelection(
-    //       base: selectedNode.beginningPosition,
-    //       extent: selectedNode.endPosition);
-    //   var selectionTextNode = selectedNode.computeSelection(
-    //       base: selection.base.nodePosition,
-    //       extent: selection.extent.nodePosition);
-    //
-    //   String allText = selectedNode.copyContent(allTextNode);
-    //
-    //   var caretOffset = min(selectionTextNode.baseOffset + 1, allText.length);
-    //   bool isVisible = linkSuggestionsVisible(allText, caretOffset);
-    //   if (isVisible) {
-    //     if (linkSuggestionQuery.value == null) {
-    //       linkSuggestionQuery.value = '';
-    //       showLinkSuggestionsOverlay();
-    //     } else {
-    //       String beforeCaretText = allText.substring(0, caretOffset);
-    //       String query = beforeCaretText.substring(
-    //           beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
-    //       linkSuggestionQuery.value = query;
-    //     }
-    //   } else {
-    //     linkSuggestionQuery.value = null;
-    //     removeOverlay();
-    //   }
-    //   // TODO: replace below with PGVector stuff
-    //   final db = ref.read(dbProvider);
-    //   var isPremium = await db.supabase.getSubscriptionTier() ==
-    //       SubscriptionTier.premiumSub;
-    //   if (allText.length % 30 == 0 && allText.isNotEmpty && isPremium) {
-    //     db.textSimilarity
-    //         .orderListByRelevance(allText, allLinks)
-    //         .then((newLinkSuggestions) {
-    //       if (!mounted) return;
-    //       setState(() {
-    //         allLinks = newLinkSuggestions;
-    //       });
-    //     });
-    //   }
-    // }
   }
 
-  void onSelectionOverlay() {
+  void onSelectionOverlay() async {
     final selection = _composer.selection;
     if (selection == null) {
       removeOverlay();
@@ -166,27 +110,36 @@ class _EditorState extends ConsumerState<ContentEditor> {
         if (title != null) {
           showFollowLinkOverlay(title);
         }
-      } else if (linkSuggestionQuery.value == null) {
-        removeOverlay();
+      } else {
+        // Link Suggestion Overlay
+        var caretOffset = min(selectionTextNode.baseOffset, allText.length);
+        bool isVisible = linkSuggestionsVisible(allText, caretOffset);
+        if (isVisible) {
+          if (linkSuggestionQuery.value == null) {
+            linkSuggestionQuery.value = '';
+            showLinkSuggestionsOverlay();
+          } else {
+            String beforeCaretText = allText.substring(0, caretOffset);
+            String query = beforeCaretText.substring(
+                beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
+            linkSuggestionQuery.value = query;
+          }
+        } else {
+          linkSuggestionQuery.value = null;
+          removeOverlay();
+        }
       }
-
-      // Link Suggestion Overlay
-      // var caretOffset = min(selectionTextNode.baseOffset, allText.length);
-      // bool isVisible = linkSuggestionsVisible(allText, caretOffset);
-      // if (isVisible) {
-      //   if (linkSuggestionQuery.value == null) {
-      //     linkSuggestionQuery.value = '';
-      //     showLinkSuggestionsOverlay();
-      //   } else {
-      //     String beforeCaretText = allText.substring(0, caretOffset);
-      //     String query = beforeCaretText.substring(
-      //         beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
-      //     linkSuggestionQuery.value = query;
-      //   }
-      // } else {
-      //   linkSuggestionQuery.value = null;
-      //   removeOverlay();
-      // }
+      // TODO: replace below with PGVector stuff
+      final db = ref.read(dbProvider);
+      var isPremium = await db.supabase.getSubscriptionTier() ==
+          SubscriptionTier.premiumSub;
+      if (allText.length % 30 == 0 && allText.isNotEmpty && isPremium) {
+        db.textSimilarity
+            .orderListByRelevance(allText, allLinks)
+            .then((newLinkSuggestions) {
+          allLinks = newLinkSuggestions;
+        });
+      }
     }
   }
 
@@ -207,7 +160,7 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
     // init overlay entry
     removeOverlay();
-    Offset caretOffset = getOverlayBoundingBox().bottomLeft;
+    Offset caretOffset = getOverlayBoundingBox().bottomCenter;
     Widget builder(context) {
       return FutureBuilder<Note>(
           future: getFollowLinkNote(),
@@ -285,25 +238,22 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
   void showLinkSuggestionsOverlay() async {
     removeOverlay();
-    Offset caretOffset = getOverlayBoundingBox().bottomLeft;
+    Offset caretOffset = getOverlayBoundingBox().bottomCenter;
     Widget builder(context) {
-      // ignore: avoid_unnecessary_containers
-      return Container(
-        child: ValueListenableBuilder(
-            valueListenable: linkSuggestionQuery,
-            builder: (context, _, __) {
-              final val = linkSuggestionQuery.value;
-              if (val == null) return const SizedBox.shrink();
-              return LinkSuggestions(
-                caretOffset: caretOffset,
-                allLinks: allLinks,
-                query: val,
-                onLinkSelect: _onLinkSelect,
-                layerLink: layerLink,
-                focusNode: contentFocusNode,
-              );
-            }),
-      );
+      return ValueListenableBuilder(
+          valueListenable: linkSuggestionQuery,
+          builder: (context, _, __) {
+            final val = linkSuggestionQuery.value;
+            if (val == null) return const SizedBox.shrink();
+            return LinkSuggestions(
+              caretOffset: caretOffset,
+              allLinks: allLinks,
+              query: val,
+              onLinkSelect: _onLinkSelect,
+              layerLink: layerLink,
+              focusNode: contentFocusNode,
+            );
+          });
     }
 
     overlayContent(builder);
@@ -340,6 +290,8 @@ class _EditorState extends ConsumerState<ContentEditor> {
 
   @override
   Widget build(BuildContext context) {
+    _composer.selectionNotifier.removeListener(onSelectionOverlay);
+    _composer.selectionNotifier.addListener(onSelectionOverlay);
     widget.doc.removeListener(onDocChange);
     widget.doc.addListener(onDocChange);
     final _docEditor = DocumentEditor(document: widget.doc);
@@ -373,8 +325,8 @@ class _EditorState extends ConsumerState<ContentEditor> {
               documentPadding: EdgeInsets.zero,
             ),
             componentBuilders: [
-              const WikilinkComponentBuilder(),
               const EmptyHintComponentBuilder(),
+              const WikilinkComponentBuilder(),
               ...defaultComponentBuilders,
             ]),
       ),
@@ -386,6 +338,10 @@ TextStyle _textStyleBuilder(Set<Attribution> attributions) {
   // We only care about altering a few styles. Start by getting
   // the standard styles for these attributions.
   var newStyle = defaultStyleBuilder(attributions);
+  // makes it so we can see a cursor
+  newStyle = newStyle.copyWith(
+    fontSize: 14,
+  );
 
   // Style headers
   for (final attribution in attributions) {
@@ -488,8 +444,11 @@ class WikilinkComponentBuilder implements ComponentBuilder {
     } else if (componentViewModel is ListItemComponentViewModel) {
       attributedText = componentViewModel.text;
     }
-
-    if (attributedText == null) return null;
+    if (attributedText == null ||
+        componentViewModel is! TextComponentViewModel) {
+      return null;
+    }
+    attributedText = attributedText.copyText(0, attributedText.text.length);
     var matches = RegExp(Note.linkRegex).allMatches(attributedText.text);
     if (attributedText.text.isNotEmpty) {
       attributedText.removeAttribution(wikilinkAttribution,
@@ -499,7 +458,14 @@ class WikilinkComponentBuilder implements ComponentBuilder {
       attributedText.addAttribution(
           wikilinkAttribution, SpanRange(start: m.start, end: m.end - 1));
     }
-    return null;
+    return TextComponent(
+      key: componentContext.componentKey,
+      text: attributedText,
+      textStyleBuilder: _textStyleBuilder,
+      textSelection: componentViewModel.selection,
+      selectionColor: componentViewModel.selectionColor,
+      highlightWhenEmpty: componentViewModel.highlightWhenEmpty,
+    );
   }
 }
 

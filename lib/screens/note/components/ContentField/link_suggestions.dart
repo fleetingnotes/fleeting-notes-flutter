@@ -40,13 +40,13 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
       newCaretOffset = Offset(
           widget.layerLink.leaderSize!.width - width, widget.caretOffset.dy);
     }
-    widget.focusNode.onKey = onKeyEvent;
+    HardwareKeyboard.instance.addHandler(onKeyEvent);
   }
 
   @override
   void dispose() {
-    widget.focusNode.onKey = null;
     super.dispose();
+    HardwareKeyboard.instance.removeHandler(onKeyEvent);
   }
 
   List filterTitles(query) {
@@ -55,25 +55,23 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
         .toList();
   }
 
-  KeyEventResult onKeyEvent(FocusNode n, RawKeyEvent e) {
-    if (filteredTitles.isEmpty) {
-      return KeyEventResult.ignored;
-    }
-    if (e.isKeyPressed(LogicalKeyboardKey.enter)) {
-      widget.onLinkSelect(filteredTitles[selectedIndex]);
-      return KeyEventResult.handled;
-    } else if (e.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
-      setState(() {
-        selectedIndex = max(selectedIndex - 1, 0);
-      });
-      return KeyEventResult.handled;
-    } else if (e.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+  bool onKeyEvent(KeyEvent e) {
+    if (e is! KeyDownEvent || filteredTitles.isEmpty) return false;
+    if (e.logicalKey == LogicalKeyboardKey.arrowDown) {
       setState(() {
         selectedIndex = min(selectedIndex + 1, filteredTitles.length - 1);
       });
-      return KeyEventResult.handled;
+      return true;
+    } else if (e.logicalKey == LogicalKeyboardKey.arrowUp) {
+      setState(() {
+        selectedIndex = max(selectedIndex - 1, 0);
+      });
+      return true;
+    } else if (e.logicalKey == LogicalKeyboardKey.enter) {
+      widget.onLinkSelect(filteredTitles[selectedIndex]);
+      return true;
     }
-    return KeyEventResult.ignored;
+    return false;
   }
 
   @override
