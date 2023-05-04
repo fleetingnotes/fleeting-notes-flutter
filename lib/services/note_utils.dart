@@ -171,14 +171,14 @@ class NoteUtils {
     ));
   }
 
-  void setUnsavedNote(BuildContext context, Note note,
+  Future<void> setUnsavedNote(BuildContext context, Note note,
       {bool saveUnsaved = false}) async {
     final db = ref.read(dbProvider);
     Note? unsavedNote = db.settings.get('unsaved-note');
     if (saveUnsaved && unsavedNote != null) {
       await handleSaveNote(context, unsavedNote);
     }
-    db.settings.set('unsaved-note', note);
+    await db.settings.set('unsaved-note', note);
   }
 
   Future<void> onPopNote(BuildContext context, String noteId) async {

@@ -13,17 +13,18 @@ class EditorData {
   TextEditingController titleController = TextEditingController();
   MutableDocument contentDoc = MutableDocument();
   TextEditingController sourceController = TextEditingController();
+  CommonEditorOperations? docOps;
 
   void appendToDoc(String text) {
-    String md = serializeDocToMd(contentDoc);
+    String md = serializeDocumentToMarkdown(contentDoc);
     md += text;
-    contentDoc = deserializeMdToDoc(md);
+    contentDoc = deserializeMarkdownToDocument(md);
   }
 
   void updateFields(Note n) {
     titleController.text = n.title;
     sourceController.text = n.source;
-    contentDoc = deserializeMdToDoc(n.content);
+    contentDoc = deserializeMarkdownToDocument(n.content);
   }
 
   MutableDocument deserializeMdToDoc(String md) {

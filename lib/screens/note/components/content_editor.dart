@@ -8,11 +8,14 @@ import 'dart:math';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/content_toolbar.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/super_editor_utils.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:super_editor/super_editor.dart';
 
 class ContentEditor extends ConsumerStatefulWidget {
@@ -86,7 +89,6 @@ class _EditorState extends ConsumerState<ContentEditor> {
       removeOverlay();
       return;
     }
-    // TODO: check that this works with lists & tasks
     if (selectedNode is TextNode) {
       var allTextNode = selectedNode.computeSelection(
           base: selectedNode.beginningPosition,
@@ -288,19 +290,32 @@ class _EditorState extends ConsumerState<ContentEditor> {
     }
   }
 
+  List<Widget Function(FocusNode)> toolbarButtons(
+      CommonEditorOperations docOps) {
+    return [
+      (node) {
+        return ContentEditingToolbar(
+            document: widget.doc, composer: _composer, commonOps: docOps);
+      }
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     _composer.selectionNotifier.removeListener(onSelectionOverlay);
     _composer.selectionNotifier.addListener(onSelectionOverlay);
     widget.doc.removeListener(onDocChange);
     widget.doc.addListener(onDocChange);
+    final ed = ref.watch(editorProvider);
     final _docEditor = DocumentEditor(document: widget.doc);
-    _docOps = CommonEditorOperations(
+    final _newDocOps = CommonEditorOperations(
       editor: _docEditor,
       composer: _composer,
       documentLayoutResolver: () =>
           _docLayoutKey.currentState as DocumentLayout,
     );
+    _docOps = _newDocOps;
+    ed.docOps = _docOps;
     return WillPopScope(
       onWillPop: () async {
         removeOverlay();
@@ -308,27 +323,44 @@ class _EditorState extends ConsumerState<ContentEditor> {
       },
       child: CompositedTransformTarget(
         link: layerLink,
-        child: SuperEditor(
-            documentLayoutKey: _docLayoutKey,
-            editor: _docEditor,
-            composer: _composer,
-            autofocus: widget.autofocus,
-            focusNode: contentFocusNode,
-            stylesheet: Stylesheet(
-              rules: defaultStylesheet.rules,
-              inlineTextStyler:
-                  (Set<Attribution> attributions, TextStyle existingStyle) {
-                return existingStyle.merge(
-                  textStyleBuilder(attributions),
-                );
-              },
-              documentPadding: EdgeInsets.zero,
-            ),
-            componentBuilders: [
-              const EmptyHintComponentBuilder(),
-              WikilinkComponentBuilder(_docEditor),
-              ...defaultComponentBuilders,
-            ]),
+        child: KeyboardActions(
+          enable: [TargetPlatform.iOS, TargetPlatform.android]
+              .contains(defaultTargetPlatform),
+          disableScroll: true,
+          isDialog: true,
+          config: KeyboardActionsConfig(
+              keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
+              actions: [
+                KeyboardActionsItem(
+                  focusNode: contentFocusNode,
+                  displayArrows: false,
+                  displayDoneButton: false,
+                  toolbarAlignment: MainAxisAlignment.spaceAround,
+                  toolbarButtons: toolbarButtons(_newDocOps),
+                ),
+              ]),
+          child: SuperEditor(
+              documentLayoutKey: _docLayoutKey,
+              editor: _docEditor,
+              composer: _composer,
+              autofocus: widget.autofocus,
+              focusNode: contentFocusNode,
+              stylesheet: Stylesheet(
+                rules: defaultStylesheet.rules,
+                inlineTextStyler:
+                    (Set<Attribution> attributions, TextStyle existingStyle) {
+                  return existingStyle.merge(
+                    textStyleBuilder(attributions),
+                  );
+                },
+                documentPadding: EdgeInsets.zero,
+              ),
+              componentBuilders: [
+                const EmptyHintComponentBuilder(),
+                WikilinkComponentBuilder(_docEditor),
+                ...defaultComponentBuilders,
+              ]),
+        ),
       ),
     );
   }

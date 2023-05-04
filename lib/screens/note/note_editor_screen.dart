@@ -97,12 +97,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         Note? queriedNote = notes.firstWhereOrNull((n) => n.source == qpSource);
         if (queriedNote != null) {
           if (qpContent.isNotEmpty) {
-            if (note?.id == queriedNote.id) {
-              final editorData = ref.read(editorProvider);
-              editorData.appendToDoc('\n$qpContent');
-            }
+            // if (note?.id == queriedNote.id) {
+            //   final editorData = ref.read(editorProvider);
+            //   editorData.appendToDoc('\n$qpContent');
+            // }
             queriedNote.content += "\n$qpContent";
-            noteUtils.setUnsavedNote(context, queriedNote, saveUnsaved: true);
+            await noteUtils.setUnsavedNote(context, queriedNote,
+                saveUnsaved: true);
           }
           autofocus = true;
           return queriedNote;
@@ -110,7 +111,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       }
       newNote = newNote ?? extraNote ?? Note.empty(id: noteId);
       if (!newNote.isEmpty()) {
-        noteUtils.setUnsavedNote(context, newNote, saveUnsaved: true);
+        await noteUtils.setUnsavedNote(context, newNote, saveUnsaved: true);
       }
       autofocus = true;
     }
@@ -159,8 +160,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     bool bottomAppBarVisible = !noteHistory.isHistoryEmpty;
     if (currentLoc?.toString() != GoRouter.of(context).location) {
       currentLoc = Uri.parse(GoRouter.of(context).location);
-      scaffoldKey = GlobalKey<ScaffoldState>();
-      initNoteScreen(noteHistory);
+      initNoteScreen(noteHistory).then((_) {
+        scaffoldKey = GlobalKey();
+      });
     }
     return Shortcuts(
       shortcuts: noteShortcutMapping,

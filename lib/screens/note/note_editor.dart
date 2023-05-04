@@ -145,6 +145,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     }
   }
 
+  void refreshEditor(Note n) {
+    final ed = ref.read(editorProvider);
+    ed.updateFields(n);
+  }
+
   void handleNoteEvent(NoteEvent e) {
     final ed = ref.read(editorProvider);
     Note? n = e.notes.firstWhereOrNull((n) => n.id == widget.note.id);
@@ -158,13 +163,12 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         .subtract(const Duration(seconds: 5))
         .isAfter(modifiedAt);
     if (!noteSimilar && !n.isDeleted && isNewerNote) {
-      ed.updateFields(n);
+      refreshEditor(n);
     }
   }
 
   void handleAuthChange(_) {
-    final ed = ref.read(editorProvider);
-    ed.updateFields(Note.empty());
+    refreshEditor(Note.empty());
   }
 
   void onClearSource() {
@@ -190,12 +194,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   void initCurrNote() async {
     if (currNote.id == widget.note.id || !mounted) return;
-    final ed = ref.read(editorProvider);
     saveTimer?.cancel();
     sourceMetadata = null;
     currNote = widget.note;
 
-    ed.updateFields(currNote);
+    refreshEditor(currNote);
     var db = ref.read(dbProvider);
     if (db.settings.get('unsaved-note') != null &&
         await db.getNoteById(currNote.id) != null) {
