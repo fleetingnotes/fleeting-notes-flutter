@@ -76,6 +76,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     int saveMs = defaultSaveMs ?? settings.get('save-delay-ms');
     saveTimer?.cancel();
     saveTimer = Timer(Duration(milliseconds: saveMs), () async {
+      if (!mounted) return;
       await _saveNote();
       if (updateMetadata) {
         await updateSourceMetadata(ed.sourceController.text);
