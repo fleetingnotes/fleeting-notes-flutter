@@ -241,6 +241,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
             valueListenable: titleLinkQuery,
             builder: (context, value, child) {
               return LinkSuggestions(
+                focusNode: contentFocusNode,
                 caretOffset: caretOffset,
                 allLinks: allLinks,
                 query: titleLinkQuery.value,

@@ -3,9 +3,11 @@
 // TODO: add checkboxes
 // TODO: make link suggestions and link previews work
 // TODO: Use docOps to appendText & handlePaste image from web
+import 'dart:async';
 import 'dart:math';
 
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/content_toolbar.dart';
@@ -14,8 +16,10 @@ import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'package:super_editor/super_editor.dart';
 
 class ContentEditor extends ConsumerStatefulWidget {
@@ -44,12 +48,20 @@ class _EditorState extends ConsumerState<ContentEditor> {
   final LayerLink layerLink = LayerLink();
   final ValueNotifier<String?> linkSuggestionQuery = ValueNotifier(null);
   final FocusNode contentFocusNode = FocusNode();
+  bool isPasting = false;
+  StreamSubscription<Uint8List?>? pasteListener;
 
   List<String> allLinks = [];
 
   @override
   void initState() {
     final db = ref.read(dbProvider);
+    final be = ref.read(browserExtensionProvider);
+    pasteListener = be.pasteController.stream.listen((pasteImage) {
+      if (contentFocusNode.hasFocus && !isPasting) {
+        handlePaste(pasteImage: pasteImage, docOps: _docOps);
+      }
+    });
 
     db.getAllLinks().then((links) {
       if (!mounted) return;
@@ -62,12 +74,73 @@ class _EditorState extends ConsumerState<ContentEditor> {
   void dispose() {
     widget.doc.removeListener(onDocChange);
     _composer.dispose();
+    pasteListener?.cancel();
     removeOverlay();
     super.dispose();
   }
 
   void onDocChange() async {
     widget.onChanged?.call();
+  }
+
+  void handlePaste(
+      {Uint8List? pasteImage, CommonEditorOperations? docOps}) async {
+    isPasting = true;
+    final db = ref.read(dbProvider);
+    try {
+      pasteImage ??= await Pasteboard.image;
+      if (pasteImage != null) {
+        try {
+          Note? newNote =
+              await db.addAttachmentToNewNote(fileBytes: pasteImage);
+          if (newNote != null) {
+            docOps?.insertPlainText("[[${newNote.title}]]");
+            widget.onChanged?.call();
+          }
+        } on FleetingNotesException catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(e.message),
+            duration: const Duration(seconds: 2),
+          ));
+        }
+      } else {
+        throw FleetingNotesException('No Image to paste');
+      }
+    } catch (e) {
+      // perform regular paste
+      var clipboardData = await Clipboard.getData('text/plain');
+      String? clipboardText = clipboardData?.text;
+      if (clipboardText != null) {
+        docOps?.insertPlainText(clipboardText);
+        widget.onChanged?.call();
+      }
+    }
+    isPasting = false;
+  }
+
+  ExecutionInstruction pasteWhenCmdVPressed({
+    required EditContext editContext,
+    required RawKeyEvent keyEvent,
+  }) {
+    if (keyEvent is! RawKeyDownEvent) {
+      return ExecutionInstruction.continueExecution;
+    }
+
+    if (!keyEvent.isPrimaryShortcutKeyPressed ||
+        keyEvent.logicalKey != LogicalKeyboardKey.keyV) {
+      return ExecutionInstruction.continueExecution;
+    }
+    if (editContext.composer.selection == null) {
+      return ExecutionInstruction.continueExecution;
+    }
+
+    if (!kIsWeb) {
+      // if web, use paste listener (to handle paste from firefox)
+      handlePaste(docOps: editContext.commonOps);
+      return ExecutionInstruction.haltExecution;
+    }
+    // change to continueExectuion to trigger browser paste
+    return ExecutionInstruction.continueExecution;
   }
 
   void onSelectionOverlay() async {
@@ -341,6 +414,35 @@ class _EditorState extends ConsumerState<ContentEditor> {
               ]),
           child: SuperEditor(
               documentLayoutKey: _docLayoutKey,
+              keyboardActions: [
+                toggleInteractionModeWhenCmdOrCtrlPressed,
+                doNothingWhenThereIsNoSelection,
+                pasteWhenCmdVPressed,
+                copyWhenCmdCIsPressed,
+                cutWhenCmdXIsPressed,
+                collapseSelectionWhenEscIsPressed,
+                selectAllWhenCmdAIsPressed,
+                moveUpDownLeftAndRightWithArrowKeys,
+                moveToLineStartWithHome,
+                moveToLineEndWithEnd,
+                tabToIndentListItem,
+                shiftTabToUnIndentListItem,
+                backspaceToUnIndentListItem,
+                backspaceToClearParagraphBlockType,
+                cmdBToToggleBold,
+                cmdIToToggleItalics,
+                shiftEnterToInsertNewlineInBlock,
+                enterToInsertNewTask,
+                enterToInsertBlockNewline,
+                backspaceToRemoveUpstreamContent,
+                deleteToRemoveDownstreamContent,
+                moveToLineStartOrEndWithCtrlAOrE,
+                deleteLineWithCmdBksp,
+                deleteWordWithAltBksp,
+                anyCharacterOrDestructiveKeyToDeleteSelection,
+                anyCharacterToInsertInParagraph,
+                anyCharacterToInsertInTextContent,
+              ],
               editor: _docEditor,
               composer: _composer,
               autofocus: widget.autofocus,
