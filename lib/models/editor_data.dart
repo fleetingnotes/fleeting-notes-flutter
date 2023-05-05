@@ -16,15 +16,15 @@ class EditorData {
   CommonEditorOperations? docOps;
 
   void appendToDoc(String text) {
-    String md = serializeDocumentToMarkdown(contentDoc);
+    String md = serializeDocToMd(contentDoc);
     md += text;
-    contentDoc = deserializeMarkdownToDocument(md);
+    contentDoc = deserializeMdToDoc(md);
   }
 
   void updateFields(Note n) {
     titleController.text = n.title;
     sourceController.text = n.source;
-    contentDoc = deserializeMarkdownToDocument(n.content);
+    contentDoc = deserializeMdToDoc(n.content);
   }
 
   MutableDocument deserializeMdToDoc(String md) {
