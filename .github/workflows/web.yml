@@ -29,6 +29,7 @@ jobs:
     - run: flutter doctor -v
     - run: flutter analyze
     - run: flutter pub get
+    - run: flutter test
     - run: ./build_web_app.sh
     - run: ./build_web_ext.sh
     - name: Rename files
