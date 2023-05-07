@@ -241,7 +241,10 @@ class Database {
         upsertNotes(notesToUpdate);
         break;
       case NoteEventStatus.delete:
-        deleteNotes(e.notes.toList());
+        List<Note> notesToUpdate =
+            await SyncManager.getNotesToUpdate(e.notes, getNotesByIds);
+        if (notesToUpdate.isEmpty) break;
+        deleteNotes(notesToUpdate);
         break;
     }
   }
