@@ -163,28 +163,18 @@ const onActionPressed = async (tab, src) => {
   if (typeof src != "string") {
     src = getIframeUrl();
     try {
-      const srcInfo = await chrome.tabs.sendMessage(tab.id, { msg: "get-src" });
-      if (srcInfo.source) {
-        src += `?source=${encodeURIComponent(srcInfo.source)}`;
-        if (srcInfo.source_title) {
-          src += `&source_title=${encodeURIComponent(srcInfo.source_title)}`;
-        }
-        if (srcInfo.source_description) {
-          src += `&source_description=${
-            encodeURIComponent(srcInfo.source_description)
-          }`;
-        }
-        if (srcInfo.source_image_url) {
-          src += `&source_image_url=${
-            encodeURIComponent(srcInfo.source_image_url)
-          }`;
-        }
-      }
+      // if possible, retrieve src from content script (more info)
+      src = await chrome.tabs.sendMessage(tab.id, { msg: "get-src" });
     } catch (e) {}
   }
   const use_sidebar = await getSidebarStatus();
   if (use_sidebar) {
-    chrome.tabs.sendMessage(tab.id, { msg: "toggle-sidebar", src: null });
+    try {
+      chrome.tabs.sendMessage(tab.id, { msg: "toggle-sidebar", src: null });
+    } catch (e) {
+      console.log(e);
+      openPopup(src, true);
+    }
   } else {
     openPopup(src, true);
   }
@@ -214,4 +204,3 @@ initContextMenu();
 initPopup();
 initCommands();
 initSidebar();
-
