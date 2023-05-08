@@ -16,7 +16,7 @@ String uuid = "07666b8a-2a65-4556-8696-b81505829910";
 class MockDatabaseTests extends Database {
   MockDatabaseTests()
       : super(
-            supabase: MockSupabaseDB(),
+            supabase: getBaseMockSupabaseDB(),
             settings: settings,
             localFileSync: LocalFileSync(settings: settings));
 

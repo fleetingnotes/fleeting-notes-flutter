@@ -175,6 +175,23 @@ const getIframeSrc = () => {
   let url = `${chrome.runtime.getURL("web-ext.html")}?`;
   url += (selectionText) ? `content=${encodeURIComponent(selectionText)}&` : "";
   url += `source=${encodeURIComponent(src)}&`;
+  const srcInfo = getSrcInfo();
+  if (srcInfo.source) {
+    url += `?source=${encodeURIComponent(srcInfo.source)}`;
+    if (srcInfo.source_title) {
+      url += `&source_title=${encodeURIComponent(srcInfo.source_title)}`;
+    }
+    if (srcInfo.source_description) {
+      url += `&source_description=${
+        encodeURIComponent(srcInfo.source_description)
+      }`;
+    }
+    if (srcInfo.source_image_url) {
+      url += `&source_image_url=${
+        encodeURIComponent(srcInfo.source_image_url)
+      }`;
+    }
+  }
   return url;
 };
 
@@ -243,8 +260,8 @@ function listenMessages() {
       toggleSidebar(request.src);
       response(true);
     } else if (request.msg === "get-src") {
-      const srcInfo = getSrcInfo();
-      response(srcInfo);
+      const src = getIframeSrc();
+      response(src);
     }
     return true; // used to send response async
   });
@@ -252,4 +269,3 @@ function listenMessages() {
 
 initSidebar();
 listenMessages();
-

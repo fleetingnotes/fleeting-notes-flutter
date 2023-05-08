@@ -220,6 +220,8 @@ class Database {
     return notes;
   }
 
+  // TODO: remove this because notes should be already intialized in supabase.init()
+  // but i'll need to test so that it maintains same behaviour
   Future<void> initNotes() async {
     var notes = await getAllNotes(forceSync: true);
     noteChangeController.add(NoteEvent(notes, NoteEventStatus.init));
@@ -241,7 +243,10 @@ class Database {
         upsertNotes(notesToUpdate);
         break;
       case NoteEventStatus.delete:
-        deleteNotes(e.notes.toList());
+        List<Note> notesToUpdate =
+            await SyncManager.getNotesToUpdate(e.notes, getNotesByIds);
+        if (notesToUpdate.isEmpty) break;
+        deleteNotes(notesToUpdate);
         break;
     }
   }

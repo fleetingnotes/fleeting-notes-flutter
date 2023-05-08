@@ -56,7 +56,8 @@ class SyncManager {
     bool isSimilarNote(Note n1, Note n2) {
       return n1.title == n2.title &&
           n1.content == n2.content &&
-          n1.source == n2.source;
+          n1.source == n2.source &&
+          n1.isDeleted == n2.isDeleted;
     }
 
     var localModified = DateTime.parse(currNote.modifiedAt);

@@ -118,9 +118,11 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                   content: params['content'] ?? '',
                   source: params['source'] ?? '',
                 );
-                note.sourceTitle = params['source_title'];
-                note.sourceDescription = params['source_description'];
-                note.sourceImageUrl = params['source_image_url'];
+                if (note.sourceMetadata.isEmpty) {
+                  note.sourceTitle = params['source_title'];
+                  note.sourceDescription = params['source_description'];
+                  note.sourceImageUrl = params['source_image_url'];
+                }
 
                 return DialogPage(
                   child: DynamicDialog(

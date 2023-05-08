@@ -193,11 +193,18 @@ class SupabaseDB extends SyncTerface {
 
   @override
   Future<Iterable<Note?>> getNotesByIds(Iterable<String> ids) async {
-    List<dynamic> supaNotes =
-        await client.from('notes').select().in_('id', ids.toList());
-    String? encryptionKey = await getEncryptionKey();
-    Iterable<Note> notes =
-        supaNotes.map((n) => fromSupabaseJson(n, encryptionKey: encryptionKey));
+    Iterable<Note> notes;
+    if (ids.length < 100) {
+      List<dynamic> supaNotes =
+          await client.from('notes').select().in_('id', ids.toList());
+      String? encryptionKey = await getEncryptionKey();
+      notes = supaNotes
+          .map((n) => fromSupabaseJson(n, encryptionKey: encryptionKey));
+    } else {
+      var idSet = ids.toSet();
+      notes = await getAllNotes();
+      notes = notes.where((n) => idSet.contains(n.id));
+    }
     return notes;
   }
 

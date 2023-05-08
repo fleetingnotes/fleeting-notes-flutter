@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:fleeting_notes_flutter/models/syncterface.dart';
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 
@@ -25,6 +26,10 @@ Session emptySession() {
 class MockSupabaseDB extends Mock implements SupabaseDB {
   @override
   User? currUser;
+  @override
+  bool get canSync => false;
+  @override
+  Stream<NoteEvent> get noteStream => const Stream<NoteEvent>.empty();
   @override
   StreamController<AuthChangeEvent?> authChangeController =
       StreamController<AuthChangeEvent?>.broadcast();
@@ -53,6 +58,8 @@ MockSupabaseDB getBaseMockSupabaseDB() {
   when(() => mockSupabase.getStoredSession())
       .thenAnswer((_) => Future.value(null));
   when(() => mockSupabase.getUrlMetadata(any()))
+      .thenAnswer((_) => Future.value(null));
+  when(() => mockSupabase.init(notes: any(named: "notes")))
       .thenAnswer((_) => Future.value(null));
   return mockSupabase;
 }
