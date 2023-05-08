@@ -146,7 +146,7 @@ ${content}''';
   }
 
   static Note createDeletedNote(String id) {
-    return Note(
+    var note = Note(
       id: id,
       title: "",
       content: "",
@@ -154,6 +154,8 @@ ${content}''';
       createdAt: "2000-01-01",
       isDeleted: true,
     );
+    note.modifiedAt = DateTime.now().toUtc().toIso8601String();
+    return note;
   }
 
   static Note encodeNote(Note note) {
