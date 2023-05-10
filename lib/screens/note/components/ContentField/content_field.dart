@@ -34,14 +34,14 @@ class ContentField extends ConsumerStatefulWidget {
 }
 
 class _ContentFieldState extends ConsumerState<ContentField> {
-  final ValueNotifier<String> titleLinkQuery = ValueNotifier('');
+  final ValueNotifier<String?> titleLinkQuery = ValueNotifier(null);
+  final ValueNotifier<String?> tagQuery = ValueNotifier(null);
   List<String> allLinks = [];
   final LayerLink layerLink = LayerLink();
   late final FocusNode contentFocusNode;
   OverlayEntry? overlayEntry = OverlayEntry(
     builder: (context) => Container(),
   );
-  bool titleLinksVisible = false;
   bool isPasting = false;
   StreamSubscription<Uint8List?>? pasteListener;
 
@@ -118,10 +118,31 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   }
 
   KeyEventResult onKeyEvent(node, e) {
+    if (e is! RawKeyDownEvent) return KeyEventResult.ignored;
     if ([LogicalKeyboardKey.arrowLeft, LogicalKeyboardKey.arrowRight]
         .contains(e.logicalKey)) {
       removeOverlay();
     }
+
+    // function to show tag suggestions overlay
+    var char = e.character ?? '';
+    int baseOffset = widget.controller.selection.baseOffset;
+    int extentOffset = widget.controller.selection.extentOffset;
+    int caretIndex = baseOffset + char.length;
+    var postKeyPressText =
+        widget.controller.text.replaceRange(baseOffset, extentOffset, char);
+    if (e.logicalKey == LogicalKeyboardKey.backspace &&
+        postKeyPressText.isNotEmpty) {
+      postKeyPressText =
+          postKeyPressText.substring(0, postKeyPressText.length - 1);
+      caretIndex -= 1;
+    }
+
+    var tempTagQuery = getTagQuery(postKeyPressText, caretIndex);
+    if (tempTagQuery != null && tagQuery.value == null) {
+      showTagSuggestionsOverlay(context, const BoxConstraints());
+    }
+    tagQuery.value = tempTagQuery;
     return KeyEventResult.ignored;
   }
 
@@ -154,17 +175,16 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
     bool isVisible = isTitleLinksVisible(text);
     if (isVisible) {
-      if (!titleLinksVisible) {
+      if (titleLinkQuery.value == null) {
         showTitleLinksOverlay(context, size);
-        titleLinksVisible = true;
+        titleLinkQuery.value = '';
       } else {
         String query = beforeCaretText.substring(
             beforeCaretText.lastIndexOf('[[') + 2, beforeCaretText.length);
         titleLinkQuery.value = query;
       }
     } else {
-      titleLinksVisible = false;
-      removeOverlay();
+      titleLinkQuery.value = null;
     }
     var isPremium =
         await db.supabase.getSubscriptionTier() == SubscriptionTier.premiumSub;
@@ -191,6 +211,17 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     return showTitleLinks;
   }
 
+  String? getTagQuery(String text, int caretIndex) {
+    String beforeCaretText = text.substring(0, caretIndex);
+    RegExp r = RegExp(Note.tagRegex, multiLine: true);
+    var matches = r.allMatches(beforeCaretText);
+    RegExpMatch? lastMatch = (matches.isEmpty) ? null : matches.last;
+    if (lastMatch?.end == caretIndex) {
+      return lastMatch?.group(2);
+    }
+    return null;
+  }
+
   Offset getCaretOffset(TextEditingController textController,
       TextStyle? textStyle, BoxConstraints size) {
     String beforeCaretText =
@@ -212,6 +243,36 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   }
 
   // Overlay Functions
+  void showTagSuggestionsOverlay(context, BoxConstraints size) async {
+    removeOverlay();
+    Offset caretOffset = getCaretOffset(
+      widget.controller,
+      Theme.of(context).textTheme.bodyMedium,
+      size,
+    );
+
+    Widget builder(context) {
+      // ignore: avoid_unnecessary_containers
+      return Container(
+        child: ValueListenableBuilder<String?>(
+            valueListenable: tagQuery,
+            builder: (context, val, child) {
+              final tempTagQuery = tagQuery.value;
+              print('listening builder: ${tempTagQuery}');
+              if (tempTagQuery == null) return const SizedBox.shrink();
+              return LinkSuggestions(
+                  caretOffset: caretOffset,
+                  allLinks: ['hello,', 'world'],
+                  query: tempTagQuery,
+                  onLinkSelect: (_) {},
+                  layerLink: layerLink);
+            }),
+      );
+    }
+
+    overlayContent(builder);
+  }
+
   void showTitleLinksOverlay(context, BoxConstraints size) async {
     _onLinkSelect(String link) {
       String t = widget.controller.text;
@@ -240,10 +301,12 @@ class _ContentFieldState extends ConsumerState<ContentField> {
         child: ValueListenableBuilder(
             valueListenable: titleLinkQuery,
             builder: (context, value, child) {
+              final query = titleLinkQuery.value;
+              if (query == null) return const SizedBox.shrink();
               return LinkSuggestions(
                 caretOffset: caretOffset,
                 allLinks: allLinks,
-                query: titleLinkQuery.value,
+                query: query,
                 onLinkSelect: _onLinkSelect,
                 layerLink: layerLink,
               );
@@ -309,6 +372,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     if (overlayEntry != null && overlayEntry?.mounted == true) {
       overlayEntry?.remove();
       titleLinkQuery.value = '';
+      tagQuery.value = null;
       overlayEntry = null;
     }
   }

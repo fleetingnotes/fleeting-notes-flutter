@@ -15,9 +15,9 @@ class LinkSuggestions extends StatefulWidget {
   }) : super(key: key);
 
   final Offset caretOffset;
-  final List allLinks;
+  final List<String> allLinks;
   final String query;
-  final Function onLinkSelect;
+  final Function(String) onLinkSelect;
   final LayerLink layerLink;
 
   @override
@@ -28,7 +28,7 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
   int selectedIndex = 0;
   double width = 300;
   late Offset newCaretOffset;
-  late List filteredTitles = filterTitles(widget.query);
+  late List<String> filteredTitles = filterTitles(widget.query);
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
     HardwareKeyboard.instance.removeHandler(onKeyEvent);
   }
 
-  List filterTitles(query) {
+  List<String> filterTitles(query) {
     return widget.allLinks
         .where((title) => title.toLowerCase().contains(query.toLowerCase()))
         .toList();
