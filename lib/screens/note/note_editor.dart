@@ -51,16 +51,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   UrlMetadata? sourceMetadata;
 
   TextEditingController titleController = TextEditingController();
-  TextEditingController contentController = StyleableTextFieldController(
-    styles: TextPartStyleDefinitions(definitionList: [
-      TextPartStyleDefinition(
-          pattern: Note.linkRegex,
-          style: const TextStyle(
-            color: Color.fromARGB(255, 138, 180, 248),
-            decoration: TextDecoration.underline,
-          ))
-    ]),
-  );
+  TextEditingController contentController = TextEditingController();
   TextEditingController sourceController = TextEditingController();
 
   @override
