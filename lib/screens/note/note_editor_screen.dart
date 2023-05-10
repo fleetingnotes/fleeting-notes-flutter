@@ -159,7 +159,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           style: const TextStyle(
             color: Color.fromARGB(255, 138, 180, 248),
             decoration: TextDecoration.underline,
-          ))
+          )),
+      TextPartStyleDefinition(
+          pattern: Note.tagRegex,
+          style: const TextStyle(
+            color: Colors.grey,
+          )),
     ]),
   );
   TextEditingController sourceController = TextEditingController();
