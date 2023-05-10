@@ -122,11 +122,14 @@ class Database {
     return note != null;
   }
 
-  Future<List<String>> getAllItems(RegExp re, int group) async {
+  Future<List<String>> getAllItems(RegExp re, int group,
+      {bool addTitle = false}) async {
     var allNotes = await getAllNotes();
     var linkSet = <String>{};
     for (var note in allNotes) {
-      linkSet.add(note.title);
+      if (addTitle) {
+        linkSet.add(note.title);
+      }
       var matches = re.allMatches(note.content);
       for (var match in matches) {
         String? item = match.group(group);
@@ -140,7 +143,8 @@ class Database {
   }
 
   Future<List<String>> getAllLinks() async {
-    return getAllItems(RegExp(Note.linkRegex, multiLine: true), 1);
+    return getAllItems(RegExp(Note.linkRegex, multiLine: true), 1,
+        addTitle: true);
   }
 
   Future<List<String>> getAllTags() async {

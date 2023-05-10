@@ -130,31 +130,11 @@ class _ContentFieldState extends ConsumerState<ContentField> {
         .contains(e.logicalKey)) {
       removeOverlay();
     }
-
-    // function to show tag suggestions overlay
-    var char = e.character ?? '';
-    int baseOffset = widget.controller.selection.baseOffset;
-    int extentOffset = widget.controller.selection.extentOffset;
-    int caretIndex = baseOffset + char.length;
-    var postKeyPressText =
-        widget.controller.text.replaceRange(baseOffset, extentOffset, char);
-    if (e.logicalKey == LogicalKeyboardKey.backspace &&
-        postKeyPressText.isNotEmpty) {
-      postKeyPressText =
-          postKeyPressText.substring(0, postKeyPressText.length - 1);
-      caretIndex -= 1;
-    }
-
-    var tempTagQuery = getTagQuery(postKeyPressText, caretIndex);
-    if (tempTagQuery != null && tagQuery.value == null) {
-      showTagSuggestionsOverlay(context, const BoxConstraints());
-    }
-    tagQuery.value = tempTagQuery;
     return KeyEventResult.ignored;
   }
 
   // Widget Functions
-  void _onContentTap(context, BoxConstraints size) async {
+  void _onContentTap() async {
     removeOverlay();
     // check if caretOffset is in a link
     var caretIndex = widget.controller.selection.baseOffset;
@@ -169,21 +149,26 @@ class _ContentFieldState extends ConsumerState<ContentField> {
         if (!keyboardVisible) {
           contentFocusNode.unfocus();
         }
-        showFollowLinkOverlay(context, title, size);
+        showFollowLinkOverlay(title);
       }
     }
   }
 
-  void _onContentChanged(context, text, size) async {
-    final db = ref.read(dbProvider);
-    widget.onChanged?.call();
-    String beforeCaretText =
-        text.substring(0, widget.controller.selection.baseOffset);
+  void tagSuggestionsOnChange(String text, TextSelection selection) async {
+    var tempTagQuery = getTagQuery(text, selection.baseOffset);
+    if (tempTagQuery != null && tagQuery.value == null) {
+      showTagSuggestionsOverlay();
+    }
+    tagQuery.value = tempTagQuery;
+  }
 
+  void linkSuggestionsOnChange(String text, TextSelection selection) async {
+    final db = ref.read(dbProvider);
     bool isVisible = isTitleLinksVisible(text);
+    String beforeCaretText = text.substring(0, selection.baseOffset);
     if (isVisible) {
       if (titleLinkQuery.value == null) {
-        showTitleLinksOverlay(context, size);
+        showTitleLinksOverlay();
         titleLinkQuery.value = '';
       } else {
         String query = beforeCaretText.substring(
@@ -209,6 +194,12 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
   }
 
+  void _onContentChanged(text) async {
+    widget.onChanged?.call();
+    linkSuggestionsOnChange(text, widget.controller.selection);
+    tagSuggestionsOnChange(text, widget.controller.selection);
+  }
+
   // Helper Functions
   bool isTitleLinksVisible(String text) {
     var caretIndex = widget.controller.selection.baseOffset;
@@ -229,8 +220,9 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     return null;
   }
 
-  Offset getCaretOffset(TextEditingController textController,
-      TextStyle? textStyle, BoxConstraints size) {
+  Offset getCaretOffset(
+      TextEditingController textController, TextStyle? textStyle,
+      {BoxConstraints size = const BoxConstraints()}) {
     String beforeCaretText =
         textController.text.substring(0, textController.selection.baseOffset);
 
@@ -250,7 +242,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   }
 
   // Overlay Functions
-  void showTagSuggestionsOverlay(context, BoxConstraints size) async {
+  void showTagSuggestionsOverlay() async {
     _onTagSelect(String tag) {
       String t = widget.controller.text;
       int caretI = widget.controller.selection.baseOffset;
@@ -268,7 +260,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     Offset caretOffset = getCaretOffset(
       widget.controller,
       Theme.of(context).textTheme.bodyMedium,
-      size,
     );
 
     Widget builder(context) {
@@ -292,7 +283,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     overlayContent(builder);
   }
 
-  void showTitleLinksOverlay(context, BoxConstraints size) async {
+  void showTitleLinksOverlay() async {
     _onLinkSelect(String link) {
       String t = widget.controller.text;
       int caretI = widget.controller.selection.baseOffset;
@@ -311,7 +302,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     Offset caretOffset = getCaretOffset(
       widget.controller,
       Theme.of(context).textTheme.bodyMedium,
-      size,
     );
 
     Widget builder(context) {
@@ -336,7 +326,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     overlayContent(builder);
   }
 
-  void showFollowLinkOverlay(context, String title, BoxConstraints size) async {
+  void showFollowLinkOverlay(String title) async {
     Future<Note> getFollowLinkNote() async {
       final db = ref.read(dbProvider);
       Note? note = await db.getNoteByTitle(title);
@@ -357,7 +347,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     Offset caretOffset = getCaretOffset(
       widget.controller,
       Theme.of(context).textTheme.bodyMedium,
-      size,
     );
     Widget builder(context) {
       return FutureBuilder<Note>(
@@ -394,7 +383,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
   }
 
-  List<Widget Function(FocusNode)> toolbarButtons(BoxConstraints size) {
+  List<Widget Function(FocusNode)> toolbarButtons() {
     return [
       (node) {
         return SizedBox(
@@ -408,7 +397,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                   icon: Icons.data_array,
                   onPressed: () {
                     shortcuts.action('[[', ']]');
-                    _onContentChanged(context, widget.controller.text, size);
+                    _onContentChanged(widget.controller.text);
                   },
                   tooltip: 'Add link',
                 ),
@@ -416,42 +405,42 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                   icon: Icons.tag,
                   onPressed: () {
                     shortcuts.action('#', '');
-                    _onContentChanged(context, widget.controller.text, size);
+                    _onContentChanged(widget.controller.text);
                   },
                 ),
                 KeyboardButton(
                   icon: Icons.format_bold,
                   onPressed: () {
                     shortcuts.action('**', '**');
-                    _onContentChanged(context, widget.controller.text, size);
+                    _onContentChanged(widget.controller.text);
                   },
                 ),
                 KeyboardButton(
                   icon: Icons.format_italic,
                   onPressed: () {
                     shortcuts.action('*', '*');
-                    _onContentChanged(context, widget.controller.text, size);
+                    _onContentChanged(widget.controller.text);
                   },
                 ),
                 KeyboardButton(
                   icon: Icons.add_link,
                   onPressed: () {
                     shortcuts.addLink();
-                    _onContentChanged(context, widget.controller.text, size);
+                    _onContentChanged(widget.controller.text);
                   },
                 ),
                 KeyboardButton(
                   icon: Icons.list,
                   onPressed: () {
                     shortcuts.toggleList();
-                    _onContentChanged(context, widget.controller.text, size);
+                    _onContentChanged(widget.controller.text);
                   },
                 ),
                 KeyboardButton(
                   icon: Icons.checklist_outlined,
                   onPressed: () {
                     shortcuts.toggleCheckbox();
-                    _onContentChanged(context, widget.controller.text, size);
+                    _onContentChanged(widget.controller.text);
                   },
                 ),
                 KeyboardButton(
@@ -466,19 +455,19 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     ];
   }
 
-  Map<Type, Action<Intent>> getTextFieldActions(BoxConstraints size) {
+  Map<Type, Action<Intent>> getTextFieldActions() {
     return {
       BoldIntent: CallbackAction(onInvoke: (Intent intent) {
         shortcuts.action('**', '**');
-        return _onContentChanged(context, widget.controller.text, size);
+        return _onContentChanged(widget.controller.text);
       }),
       ItalicIntent: CallbackAction(onInvoke: (Intent intent) {
         shortcuts.action('*', '*');
-        return _onContentChanged(context, widget.controller.text, size);
+        return _onContentChanged(widget.controller.text);
       }),
       AddLinkIntent: CallbackAction(onInvoke: (Intent intent) {
         shortcuts.addLink();
-        return _onContentChanged(context, widget.controller.text, size);
+        return _onContentChanged(widget.controller.text);
       }),
     };
   }
@@ -487,50 +476,48 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
       link: layerLink,
-      child: LayoutBuilder(builder: (context, size) {
-        return WillPopScope(
-          onWillPop: () async {
-            removeOverlay();
-            return true;
-          },
-          child: KeyboardActions(
-            enable: [TargetPlatform.iOS, TargetPlatform.android]
-                .contains(defaultTargetPlatform),
-            disableScroll: true,
-            isDialog: true,
-            config: KeyboardActionsConfig(
-                keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
-                actions: [
-                  KeyboardActionsItem(
-                    focusNode: contentFocusNode,
-                    displayArrows: false,
-                    displayDoneButton: false,
-                    toolbarAlignment: MainAxisAlignment.spaceAround,
-                    toolbarButtons: toolbarButtons(size),
-                  ),
-                ]),
-            child: Actions(
-              actions: getTextFieldActions(size),
-              child: TextField(
-                focusNode: contentFocusNode,
-                textCapitalization: TextCapitalization.sentences,
-                autofocus: widget.autofocus,
-                controller: widget.controller,
-                keyboardType: TextInputType.multiline,
-                minLines: 10,
-                maxLines: null,
-                style: Theme.of(context).textTheme.bodyMedium,
-                decoration: const InputDecoration(
-                  hintText: "Start writing your thoughts...",
-                  border: InputBorder.none,
+      child: WillPopScope(
+        onWillPop: () async {
+          removeOverlay();
+          return true;
+        },
+        child: KeyboardActions(
+          enable: [TargetPlatform.iOS, TargetPlatform.android]
+              .contains(defaultTargetPlatform),
+          disableScroll: true,
+          isDialog: true,
+          config: KeyboardActionsConfig(
+              keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
+              actions: [
+                KeyboardActionsItem(
+                  focusNode: contentFocusNode,
+                  displayArrows: false,
+                  displayDoneButton: false,
+                  toolbarAlignment: MainAxisAlignment.spaceAround,
+                  toolbarButtons: toolbarButtons(),
                 ),
-                onChanged: (text) => _onContentChanged(context, text, size),
-                onTap: () => _onContentTap(context, size),
+              ]),
+          child: Actions(
+            actions: getTextFieldActions(),
+            child: TextField(
+              focusNode: contentFocusNode,
+              textCapitalization: TextCapitalization.sentences,
+              autofocus: widget.autofocus,
+              controller: widget.controller,
+              keyboardType: TextInputType.multiline,
+              minLines: 10,
+              maxLines: null,
+              style: Theme.of(context).textTheme.bodyMedium,
+              decoration: const InputDecoration(
+                hintText: "Start writing your thoughts...",
+                border: InputBorder.none,
               ),
+              onChanged: (text) => _onContentChanged(text),
+              onTap: () => _onContentTap(),
             ),
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }
