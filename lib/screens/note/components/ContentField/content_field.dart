@@ -37,6 +37,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   final ValueNotifier<String?> titleLinkQuery = ValueNotifier(null);
   final ValueNotifier<String?> tagQuery = ValueNotifier(null);
   List<String> allLinks = [];
+  List<String> allTags = [];
   final LayerLink layerLink = LayerLink();
   late final FocusNode contentFocusNode;
   OverlayEntry? overlayEntry = OverlayEntry(
@@ -63,6 +64,12 @@ class _ContentFieldState extends ConsumerState<ContentField> {
       controller: widget.controller,
       bringEditorToFocus: contentFocusNode.requestFocus,
     );
+    db.getAllTags().then((tags) {
+      if (!mounted) return;
+      setState(() {
+        allTags = tags;
+      });
+    });
     db.getAllLinks().then((links) {
       if (!mounted) return;
       setState(() {
@@ -244,6 +251,19 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
   // Overlay Functions
   void showTagSuggestionsOverlay(context, BoxConstraints size) async {
+    _onTagSelect(String tag) {
+      String t = widget.controller.text;
+      int caretI = widget.controller.selection.baseOffset;
+      String beforeCaretText = t.substring(0, caretI);
+      int tagIndex = beforeCaretText.lastIndexOf('#');
+      widget.controller.text =
+          t.substring(0, tagIndex) + '#$tag' + t.substring(caretI, t.length);
+      widget.controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: tagIndex + tag.length + 1));
+      widget.onChanged?.call();
+      removeOverlay();
+    }
+
     removeOverlay();
     Offset caretOffset = getCaretOffset(
       widget.controller,
@@ -258,13 +278,12 @@ class _ContentFieldState extends ConsumerState<ContentField> {
             valueListenable: tagQuery,
             builder: (context, val, child) {
               final tempTagQuery = tagQuery.value;
-              print('listening builder: ${tempTagQuery}');
               if (tempTagQuery == null) return const SizedBox.shrink();
-              return LinkSuggestions(
+              return Suggestions(
                   caretOffset: caretOffset,
-                  allLinks: ['hello,', 'world'],
+                  suggestions: allTags,
                   query: tempTagQuery,
-                  onLinkSelect: (_) {},
+                  onSelect: _onTagSelect,
                   layerLink: layerLink);
             }),
       );
@@ -303,11 +322,11 @@ class _ContentFieldState extends ConsumerState<ContentField> {
             builder: (context, value, child) {
               final query = titleLinkQuery.value;
               if (query == null) return const SizedBox.shrink();
-              return LinkSuggestions(
+              return Suggestions(
                 caretOffset: caretOffset,
-                allLinks: allLinks,
+                suggestions: allLinks,
                 query: query,
-                onLinkSelect: _onLinkSelect,
+                onSelect: _onLinkSelect,
                 layerLink: layerLink,
               );
             }),
@@ -371,8 +390,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   void removeOverlay() {
     if (overlayEntry != null && overlayEntry?.mounted == true) {
       overlayEntry?.remove();
-      titleLinkQuery.value = '';
-      tagQuery.value = null;
       overlayEntry = null;
     }
   }

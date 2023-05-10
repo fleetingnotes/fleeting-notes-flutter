@@ -122,22 +122,29 @@ class Database {
     return note != null;
   }
 
-  Future<List<String>> getAllLinks() async {
+  Future<List<String>> getAllItems(RegExp re, int group) async {
     var allNotes = await getAllNotes();
-    RegExp linkRegex = RegExp(Note.linkRegex, multiLine: true);
     var linkSet = <String>{};
     for (var note in allNotes) {
       linkSet.add(note.title);
-      var matches = linkRegex.allMatches(note.content);
+      var matches = re.allMatches(note.content);
       for (var match in matches) {
-        String? link = match.group(1);
-        if (link != null) {
-          linkSet.add(link);
+        String? item = match.group(group);
+        if (item != null) {
+          linkSet.add(item);
         }
       }
     }
     linkSet.remove('');
     return linkSet.toList();
+  }
+
+  Future<List<String>> getAllLinks() async {
+    return getAllItems(RegExp(Note.linkRegex, multiLine: true), 1);
+  }
+
+  Future<List<String>> getAllTags() async {
+    return getAllItems(RegExp(Note.tagRegex, multiLine: true), 2);
   }
 
   Future<bool> noteExists(Note note) async {
