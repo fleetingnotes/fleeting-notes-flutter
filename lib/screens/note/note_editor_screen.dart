@@ -103,14 +103,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (newNote == null) {
       var params = currentLoc?.queryParameters ?? {};
       var extraNote = widget.extraNote;
-      if (currNote?.id == noteId) {
-        newNote = currNote;
-      } else if (notePath != null) {
-        newNote = noteFromPath(notePath);
-      } else {
-        newNote = Note.empty(id: noteId);
-      }
-
+      newNote = (currNote?.id == noteId)
+          ? currNote
+          : noteFromPath(currentLoc ?? Uri());
       bool appendSameSource =
           db.settings.get('append-same-source', defaultValue: true);
       // find note with same source and append content
@@ -137,7 +132,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           return queriedNote;
         }
       }
-      newNote = newNote ?? extraNote ?? Note.empty(id: noteId);
+      newNote = newNote ?? Note.empty(id: noteId);
       if (!newNote.isEmpty()) {
         noteUtils.setUnsavedNote(context, newNote, saveUnsaved: true);
       }
