@@ -83,7 +83,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     Note? newNote = await db.getNoteById(noteId);
     if (newNote == null) {
       var extraNote = widget.extraNote;
-      newNote = currNote;
+      newNote = (noteId == currNote?.id) ? currNote : Note.empty(id: noteId);
       bool appendSameSource =
           db.settings.get('append-same-source', defaultValue: true);
       // find note with same source and append content

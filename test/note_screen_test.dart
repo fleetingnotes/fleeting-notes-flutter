@@ -265,6 +265,20 @@ void main() {
         ),
         findsOneWidget);
   });
+
+  testWidgets('Sharing new note w/ note open, opens new note',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'hello world', closeDialog: false);
+    await goToNewNote(tester, addQueryParams: true);
+    await tester.pumpAndSettle();
+    expect(
+        find.descendant(
+          of: find.byType(NoteEditor),
+          matching: find.text('hello world', findRichText: true),
+        ),
+        findsNothing);
+  });
 }
 
 bool? contentFieldHasFocus(WidgetTester tester) {
