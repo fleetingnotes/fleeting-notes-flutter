@@ -69,6 +69,24 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
   }
 
+  Note? noteFromPath(Uri path) {
+    String pathNoteId = path.pathSegments.last;
+    if (!isValidUuid(pathNoteId)) return null;
+    var params = path.queryParameters;
+    var newNote = Note.empty(
+      id: pathNoteId,
+      title: params['title'] ?? '',
+      content: params['content'] ?? '',
+      source: params['source'] ?? '',
+    );
+    if (newNote.sourceMetadata.isEmpty) {
+      newNote.sourceTitle = params['source_title'];
+      newNote.sourceDescription = params['source_description'];
+      newNote.sourceImageUrl = params['source_image_url'];
+    }
+    return newNote;
+  }
+
   Future<Note> getNote() async {
     // initialize shared
     final db = ref.read(dbProvider);
@@ -80,15 +98,24 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (isValidUuid(pathNoteId)) {
       noteId = pathNoteId;
     }
+    final notePath = currentLoc;
     Note? newNote = await db.getNoteById(noteId);
     if (newNote == null) {
+      var params = currentLoc?.queryParameters ?? {};
       var extraNote = widget.extraNote;
-      newNote = (noteId == currNote?.id) ? currNote : Note.empty(id: noteId);
+      if (currNote?.id == noteId) {
+        newNote = currNote;
+      } else if (notePath != null) {
+        newNote = noteFromPath(notePath);
+      } else {
+        newNote = Note.empty(id: noteId);
+      }
+
       bool appendSameSource =
           db.settings.get('append-same-source', defaultValue: true);
       // find note with same source and append content
-      String qpSource = currentLoc?.queryParameters['source'] ?? '';
-      String qpContent = currentLoc?.queryParameters['content'] ?? '';
+      String qpSource = params['source'] ?? '';
+      String qpContent = params['content'] ?? '';
       if (qpSource.isNotEmpty && appendSameSource) {
         final query = SearchQuery(
             searchByContent: false,
