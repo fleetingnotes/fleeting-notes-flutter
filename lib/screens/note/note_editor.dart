@@ -166,7 +166,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     final noteUtils = ref.read(noteUtilsProvider);
     modifiedAt = DateTime.now().toUtc();
     final db = ref.read(dbProvider);
-    Note unsavedNote = db.settings.get('unsaved-note') ?? widget.note;
+    Note unsavedNote = db.settings.get('unsaved-note') ??
+        (await db.getNoteById(widget.note.id)) ??
+        widget.note;
     bool isNoteDiff = unsavedNote.content != contentController.text ||
         unsavedNote.title != titleController.text ||
         unsavedNote.source != sourceController.text;
