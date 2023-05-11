@@ -7,9 +7,6 @@ import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
-import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
-import 'package:fleeting_notes_flutter/models/text_part_style_definition.dart';
-import 'package:fleeting_notes_flutter/models/text_part_style_definitions.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
@@ -51,16 +48,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   UrlMetadata? sourceMetadata;
 
   TextEditingController titleController = TextEditingController();
-  TextEditingController contentController = StyleableTextFieldController(
-    styles: TextPartStyleDefinitions(definitionList: [
-      TextPartStyleDefinition(
-          pattern: Note.linkRegex,
-          style: const TextStyle(
-            color: Color.fromARGB(255, 138, 180, 248),
-            decoration: TextDecoration.underline,
-          ))
-    ]),
-  );
+  TextEditingController contentController = TextEditingController();
   TextEditingController sourceController = TextEditingController();
 
   @override

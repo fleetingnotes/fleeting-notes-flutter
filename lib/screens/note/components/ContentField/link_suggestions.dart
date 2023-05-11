@@ -4,31 +4,31 @@ import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class LinkSuggestions extends StatefulWidget {
-  const LinkSuggestions({
+class Suggestions extends StatefulWidget {
+  const Suggestions({
     Key? key,
     required this.caretOffset,
-    required this.allLinks,
+    required this.suggestions,
     required this.query,
-    required this.onLinkSelect,
+    required this.onSelect,
     required this.layerLink,
   }) : super(key: key);
 
   final Offset caretOffset;
-  final List allLinks;
+  final List<String> suggestions;
   final String query;
-  final Function onLinkSelect;
+  final Function(String) onSelect;
   final LayerLink layerLink;
 
   @override
-  State<LinkSuggestions> createState() => _LinkSuggestionsState();
+  State<Suggestions> createState() => _SuggestionsState();
 }
 
-class _LinkSuggestionsState extends State<LinkSuggestions> {
+class _SuggestionsState extends State<Suggestions> {
   int selectedIndex = 0;
   double width = 300;
   late Offset newCaretOffset;
-  late List filteredTitles = filterTitles(widget.query);
+  late List<String> filteredTitles = filterTitles(widget.query);
 
   @override
   void initState() {
@@ -47,8 +47,8 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
     HardwareKeyboard.instance.removeHandler(onKeyEvent);
   }
 
-  List filterTitles(query) {
-    return widget.allLinks
+  List<String> filterTitles(query) {
+    return widget.suggestions
         .where((title) => title.toLowerCase().contains(query.toLowerCase()))
         .toList();
   }
@@ -66,7 +66,7 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
       });
       return true;
     } else if (e.logicalKey == LogicalKeyboardKey.enter) {
-      widget.onLinkSelect(filteredTitles[selectedIndex]);
+      widget.onSelect(filteredTitles[selectedIndex]);
       return true;
     }
     return false;
@@ -116,7 +116,7 @@ class _LinkSuggestionsState extends State<LinkSuggestions> {
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   onTap: () {
-                    widget.onLinkSelect(item);
+                    widget.onSelect(item);
                   },
                 ),
               );

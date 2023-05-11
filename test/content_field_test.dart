@@ -39,25 +39,35 @@ void main() {
     expect(find.byType(LinkPreview), findsNothing);
   }, skip: true);
 
-  testWidgets('TitleLinks list appears on `[[` type',
+  testWidgets('Suggestions list appears on `[[` type',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
     await addNote(tester);
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), '[[');
     await tester.pump();
-    expect(find.byType(LinkSuggestions), findsOneWidget);
+    expect(find.byType(Suggestions), findsOneWidget);
   });
 
-  testWidgets('Key navigation works in TitleLinks',
+  testWidgets('Suggestions list appears on `#` type',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await setupLinkSuggestions(tester);
+    await addNote(tester);
+    await tester.enterText(
+        find.bySemanticsLabel('Start writing your thoughts...'), '#');
+    await tester.pump();
+    expect(find.byType(Suggestions), findsOneWidget);
+  });
+
+  testWidgets('Key navigation works in Suggestions',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await setupSuggestions(tester);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
 
-    expect(find.byType(LinkSuggestions), findsNothing);
+    expect(find.byType(Suggestions), findsNothing);
     expect(
         find.descendant(
             of: find.byType(ContentField), matching: find.text('[[world]]')),
@@ -67,11 +77,11 @@ void main() {
   testWidgets('Key navigation doesnt break on left key navigation',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await setupLinkSuggestions(tester);
+    await setupSuggestions(tester);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
 
-    expect(find.byType(LinkSuggestions), findsNothing);
+    expect(find.byType(Suggestions), findsNothing);
   });
 
   group('List syntax tests', () {
@@ -144,7 +154,7 @@ void main() {
   });
 }
 
-Future<void> setupLinkSuggestions(WidgetTester tester) async {
+Future<void> setupSuggestions(WidgetTester tester) async {
   // add notes
   await addNote(tester, title: 'hello', closeDialog: true);
   await addNote(tester, content: '[[world]]', closeDialog: true);
