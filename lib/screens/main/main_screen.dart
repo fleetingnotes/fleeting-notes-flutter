@@ -92,7 +92,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             contentDescription:
                 "Launches Fleeting Notes app and creates a new note",
             suggestedInvocationPhrase: "Create fleeting note"));
-    // TODO: update eligible for search & prediction
+    // wait 3 seconds so other activity can be registered
+    // https://github.com/myriky/flutter_siri_suggestions/issues/17
+    await Future.delayed(const Duration(seconds: 3));
     await FlutterSiriSuggestions.instance.registerActivity(
         const FlutterSiriActivity("Record New Note", "recordActivity",
             isEligibleForSearch: true,
