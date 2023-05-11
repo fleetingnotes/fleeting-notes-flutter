@@ -69,12 +69,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
   }
 
-  Note? noteFromPath(Uri path) {
-    String pathNoteId = path.pathSegments.last;
-    if (!isValidUuid(pathNoteId)) return null;
+  Note? noteFromPath(Uri? path) {
+    if (path == null || !isValidUuid(path.pathSegments.last)) return null;
     var params = path.queryParameters;
     var newNote = Note.empty(
-      id: pathNoteId,
+      id: path.pathSegments.last,
       title: params['title'] ?? '',
       content: params['content'] ?? '',
       source: params['source'] ?? '',
@@ -98,14 +97,10 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (isValidUuid(pathNoteId)) {
       noteId = pathNoteId;
     }
-    final notePath = currentLoc;
     Note? newNote = await db.getNoteById(noteId);
     if (newNote == null) {
       var params = currentLoc?.queryParameters ?? {};
-      var extraNote = widget.extraNote;
-      newNote = (currNote?.id == noteId)
-          ? currNote
-          : noteFromPath(currentLoc ?? Uri());
+      newNote = (currNote?.id == noteId) ? currNote : noteFromPath(currentLoc);
       bool appendSameSource =
           db.settings.get('append-same-source', defaultValue: true);
       // find note with same source and append content
