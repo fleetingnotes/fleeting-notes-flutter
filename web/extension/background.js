@@ -121,7 +121,7 @@ const openPopup = async (url, closeOnFocusChange = true) => {
   try {
     currWin = await chrome.windows.getCurrent();
   } catch (e) {}
-  const width = 365;
+  const width = 500;
   const height = 400;
   const top = (currWin) ? currWin.top : 0;
   const left = (currWin) ? (currWin.left + currWin.width - width) : 0;
