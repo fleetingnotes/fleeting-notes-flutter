@@ -69,6 +69,23 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
   }
 
+  Note? noteFromPath(Uri? path) {
+    if (path == null || !isValidUuid(path.pathSegments.last)) return null;
+    var params = path.queryParameters;
+    var newNote = Note.empty(
+      id: path.pathSegments.last,
+      title: params['title'] ?? '',
+      content: params['content'] ?? '',
+      source: params['source'] ?? '',
+    );
+    if (newNote.sourceMetadata.isEmpty) {
+      newNote.sourceTitle = params['source_title'];
+      newNote.sourceDescription = params['source_description'];
+      newNote.sourceImageUrl = params['source_image_url'];
+    }
+    return newNote;
+  }
+
   Future<Note> getNote() async {
     // initialize shared
     final db = ref.read(dbProvider);
@@ -82,13 +99,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
     Note? newNote = await db.getNoteById(noteId);
     if (newNote == null) {
-      var extraNote = widget.extraNote;
-      newNote = currNote;
+      var params = currentLoc?.queryParameters ?? {};
+      newNote = (currNote?.id == noteId) ? currNote : noteFromPath(currentLoc);
       bool appendSameSource =
           db.settings.get('append-same-source', defaultValue: true);
       // find note with same source and append content
-      String qpSource = currentLoc?.queryParameters['source'] ?? '';
-      String qpContent = currentLoc?.queryParameters['content'] ?? '';
+      String qpSource = params['source'] ?? '';
+      String qpContent = params['content'] ?? '';
       if (qpSource.isNotEmpty && appendSameSource) {
         final query = SearchQuery(
             searchByContent: false,
@@ -110,7 +127,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           return queriedNote;
         }
       }
-      newNote = newNote ?? extraNote ?? Note.empty(id: noteId);
+      newNote = newNote ?? Note.empty(id: noteId);
       if (!newNote.isEmpty()) {
         noteUtils.setUnsavedNote(context, newNote, saveUnsaved: true);
       }

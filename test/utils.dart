@@ -87,7 +87,7 @@ Future<void> goToNewNote(WidgetTester tester,
     {String title = '',
     String content = '',
     String source = '',
-    bool addQueryParams = false}) async {
+    bool addQueryParams = true}) async {
   final BuildContext context = tester.element(find.byType(MainScreen));
   final newNote = Note.empty(title: title, content: content, source: source);
   Map<String, String> qp = (addQueryParams)
