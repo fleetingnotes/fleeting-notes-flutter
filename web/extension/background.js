@@ -59,18 +59,23 @@ const initContextMenu = async () => {
     await chrome.contextMenus.removeAll();
   } catch (e) {}
   const use_sidebar = await getSidebarStatus();
+  const is_firefox = navigator.userAgent.indexOf("Firefox") > 0;
 
   //create
   await Promise.all([
     chrome.contextMenus.create({
       id: "create_new_note",
       title: "Create new note",
-      contexts: ["action", "browser_action"],
+      contexts: (is_firefox)
+        ? ["browser_action"]
+        : ["action", "browser_action"],
     }),
     chrome.contextMenus.create({
       id: "new_window",
       title: "Open persistent window",
-      contexts: ["action", "browser_action"],
+      contexts: (is_firefox)
+        ? ["browser_action"]
+        : ["action", "browser_action"],
     }),
     chrome.contextMenus.create({
       id: "save_page",
@@ -102,7 +107,9 @@ const initContextMenu = async () => {
       title: "Use sidebar (Requires third-party cookies)",
       checked: use_sidebar,
       type: "checkbox",
-      contexts: ["action", "browser_action"],
+      contexts: (is_firefox)
+        ? ["browser_action"]
+        : ["action", "browser_action"],
     }),
   ]);
   chrome.contextMenus.onClicked.removeListener(onClicked);
