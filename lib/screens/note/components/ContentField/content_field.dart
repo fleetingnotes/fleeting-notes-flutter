@@ -38,6 +38,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   final ValueNotifier<String?> tagQuery = ValueNotifier(null);
   List<String> allLinks = [];
   List<String> allTags = [];
+  BoxConstraints layoutSize = BoxConstraints();
   final LayerLink layerLink = LayerLink();
   late final FocusNode contentFocusNode;
   OverlayEntry? overlayEntry = OverlayEntry(
@@ -222,7 +223,8 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
   Offset getCaretOffset(
       TextEditingController textController, TextStyle? textStyle,
-      {BoxConstraints size = const BoxConstraints()}) {
+      {BoxConstraints? size}) {
+    size = size ?? layoutSize;
     String beforeCaretText =
         textController.text.substring(0, textController.selection.baseOffset);
 
@@ -237,7 +239,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
     return Offset(
       painter.computeLineMetrics().last.width,
-      painter.height + 10,
+      painter.height + 12,
     );
   }
 
@@ -476,48 +478,51 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
       link: layerLink,
-      child: WillPopScope(
-        onWillPop: () async {
-          removeOverlay();
-          return true;
-        },
-        child: KeyboardActions(
-          enable: [TargetPlatform.iOS, TargetPlatform.android]
-              .contains(defaultTargetPlatform),
-          disableScroll: true,
-          isDialog: true,
-          config: KeyboardActionsConfig(
-              keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
-              actions: [
-                KeyboardActionsItem(
-                  focusNode: contentFocusNode,
-                  displayArrows: false,
-                  displayDoneButton: false,
-                  toolbarAlignment: MainAxisAlignment.spaceAround,
-                  toolbarButtons: toolbarButtons(),
+      child: LayoutBuilder(builder: (context, size) {
+        layoutSize = size;
+        return WillPopScope(
+          onWillPop: () async {
+            removeOverlay();
+            return true;
+          },
+          child: KeyboardActions(
+            enable: [TargetPlatform.iOS, TargetPlatform.android]
+                .contains(defaultTargetPlatform),
+            disableScroll: true,
+            isDialog: true,
+            config: KeyboardActionsConfig(
+                keyboardBarColor: Theme.of(context).scaffoldBackgroundColor,
+                actions: [
+                  KeyboardActionsItem(
+                    focusNode: contentFocusNode,
+                    displayArrows: false,
+                    displayDoneButton: false,
+                    toolbarAlignment: MainAxisAlignment.spaceAround,
+                    toolbarButtons: toolbarButtons(),
+                  ),
+                ]),
+            child: Actions(
+              actions: getTextFieldActions(),
+              child: TextField(
+                focusNode: contentFocusNode,
+                textCapitalization: TextCapitalization.sentences,
+                autofocus: widget.autofocus,
+                controller: widget.controller,
+                keyboardType: TextInputType.multiline,
+                minLines: 10,
+                maxLines: null,
+                style: Theme.of(context).textTheme.bodyMedium,
+                decoration: const InputDecoration(
+                  hintText: "Start writing your thoughts...",
+                  border: InputBorder.none,
                 ),
-              ]),
-          child: Actions(
-            actions: getTextFieldActions(),
-            child: TextField(
-              focusNode: contentFocusNode,
-              textCapitalization: TextCapitalization.sentences,
-              autofocus: widget.autofocus,
-              controller: widget.controller,
-              keyboardType: TextInputType.multiline,
-              minLines: 10,
-              maxLines: null,
-              style: Theme.of(context).textTheme.bodyMedium,
-              decoration: const InputDecoration(
-                hintText: "Start writing your thoughts...",
-                border: InputBorder.none,
+                onChanged: (text) => _onContentChanged(text),
+                onTap: () => _onContentTap(),
               ),
-              onChanged: (text) => _onContentChanged(text),
-              onTap: () => _onContentTap(),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
