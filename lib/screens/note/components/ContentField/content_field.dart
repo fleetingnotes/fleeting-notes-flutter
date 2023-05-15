@@ -38,7 +38,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   final ValueNotifier<String?> tagQuery = ValueNotifier(null);
   List<String> allLinks = [];
   List<String> allTags = [];
-  BoxConstraints layoutSize = BoxConstraints();
+  BoxConstraints layoutSize = const BoxConstraints();
   final LayerLink layerLink = LayerLink();
   late final FocusNode contentFocusNode;
   OverlayEntry? overlayEntry = OverlayEntry(
