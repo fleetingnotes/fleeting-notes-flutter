@@ -87,6 +87,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
             var bytes = await sourceFile.readAsBytes();
             source = await db.uploadAttachment(fileBytes: bytes);
             sourceController.text = source;
+            onChanged();
           }
         }
         updateSourceMetadata(source);
