@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:collection/collection.dart';
 import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -69,7 +71,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
   }
 
-  void initSourceMetadata(UrlMetadata metadata) {
+  void initSourceMetadata(UrlMetadata metadata) async {
+    final db = ref.read(dbProvider);
     if (metadata.url.isNotEmpty) {
       if (!metadata.isEmpty) {
         if (!mounted) return;
@@ -77,7 +80,16 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
           sourceMetadata = metadata;
         });
       } else {
-        updateSourceMetadata(widget.note.source);
+        var source = widget.note.source;
+        if (!kIsWeb) {
+          var sourceFile = File(widget.note.source);
+          if (await sourceFile.exists()) {
+            var bytes = await sourceFile.readAsBytes();
+            source = await db.uploadAttachment(fileBytes: bytes);
+            sourceController.text = source;
+          }
+        }
+        updateSourceMetadata(source);
       }
     }
   }

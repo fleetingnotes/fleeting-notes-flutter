@@ -152,6 +152,12 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
       }
     }
 
+    void handleMedia(List<SharedMediaFile> files) {
+      if (files.isEmpty) return;
+      String mediaSource = files.first.path;
+      goToNote(Note.empty(source: mediaSource));
+    }
+
     if (Platform.isAndroid) {
       ri.ReceiveIntent.getInitialIntent().then(handleAndroidIntent);
       androidIntentSub = ri.ReceiveIntent.receivedIntentStream
@@ -179,6 +185,10 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
           goToNote(note);
         }
       });
+
+      // For sharing or opening media
+      ReceiveSharingIntent.getInitialMedia().then(handleMedia);
+      ReceiveSharingIntent.getMediaStream().listen(handleMedia);
 
       // When app is started from widget
       HomeWidget.setAppGroupId('group.com.fleetingnotes');

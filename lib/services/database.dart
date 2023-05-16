@@ -303,7 +303,7 @@ class Database {
       filename = "$filename.$ext";
     }
 
-    // upload file & return note
+    // upload file & return url
     return await supabase.addAttachment(filename, fileBytes);
   }
 
