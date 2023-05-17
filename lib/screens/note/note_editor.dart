@@ -72,7 +72,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   }
 
   void initSourceMetadata(UrlMetadata metadata) async {
-    final db = ref.read(dbProvider);
+    final noteUtils = ref.read(noteUtilsProvider);
     if (metadata.url.isNotEmpty) {
       if (!metadata.isEmpty) {
         if (!mounted) return;
@@ -80,12 +80,14 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
           sourceMetadata = metadata;
         });
       } else {
-        var source = widget.note.source;
+        String source = widget.note.source;
         if (!kIsWeb) {
           var sourceFile = File(source);
           if (sourceFile.existsSync()) {
             var bytes = await sourceFile.readAsBytes();
-            source = await db.uploadAttachment(fileBytes: bytes);
+            source =
+                (await noteUtils.uploadAttachment(context, fileBytes: bytes)) ??
+                    source;
             sourceController.text = source;
             onChanged();
           }
