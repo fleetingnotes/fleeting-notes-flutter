@@ -82,8 +82,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       } else {
         var source = widget.note.source;
         if (!kIsWeb) {
-          var sourceFile = File(widget.note.source);
-          if (await sourceFile.exists()) {
+          var sourceFile = File(source);
+          if (sourceFile.existsSync()) {
             var bytes = await sourceFile.readAsBytes();
             source = await db.uploadAttachment(fileBytes: bytes);
             sourceController.text = source;
