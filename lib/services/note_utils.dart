@@ -100,6 +100,18 @@ class NoteUtils {
     }
   }
 
+  Future<String?> uploadAttachment(BuildContext context,
+      {String? filename, Uint8List? fileBytes}) async {
+    final db = ref.read(dbProvider);
+    try {
+      return await db.uploadAttachment(
+          filename: filename, fileBytes: fileBytes);
+    } on FleetingNotesException catch (e) {
+      _showSnackbar(context, e.message);
+    }
+    return null;
+  }
+
   void onAddAttachment(
       BuildContext context, Note note, String filename, Uint8List? bytes,
       {TextEditingController? controller}) async {
