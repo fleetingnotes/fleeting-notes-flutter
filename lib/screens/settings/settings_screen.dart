@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/plugin_commands_setting.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:fleeting_notes_flutter/widgets/info_card.dart';
@@ -270,6 +271,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               email = e;
                             });
                           }),
+                    if (isLoggedIn) const PluginCommandSetting(),
                     const SizedBox(height: 16),
                     const SettingsTitle(title: "Backup"),
                     Backup(

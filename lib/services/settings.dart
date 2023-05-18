@@ -33,6 +33,7 @@ class Settings {
     "max-attachment-size-mb": int,
     "max-attachment-size-mb-premium": int,
     "last-sync-time": DateTime,
+    "plugin-slash-commands": List,
   };
 
   Settings() {
