@@ -95,7 +95,7 @@ class _PluginCommandTileState extends ConsumerState<PluginCommandTile> {
             )
           ],
         ),
-        SettingsItem(
+        const SettingsItem(
           name: 'Metadata',
           description: 'The metdata passed to the command',
         ),

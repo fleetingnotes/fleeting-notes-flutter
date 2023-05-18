@@ -36,6 +36,7 @@ class ContentField extends ConsumerStatefulWidget {
 class _ContentFieldState extends ConsumerState<ContentField> {
   final ValueNotifier<String?> titleLinkQuery = ValueNotifier(null);
   final ValueNotifier<String?> tagQuery = ValueNotifier(null);
+  final ValueNotifier<String?> commandQuery = ValueNotifier(null);
   List<String> allLinks = [];
   List<String> allTags = [];
   BoxConstraints layoutSize = const BoxConstraints();
@@ -157,10 +158,20 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
   void tagSuggestionsOnChange(String text, TextSelection selection) async {
     var tempTagQuery = getTagQuery(text, selection.baseOffset);
-    if (tempTagQuery != null && tagQuery.value == null) {
+    if (tempTagQuery != null &&
+        (tagQuery.value == null || overlayEntry == null)) {
       showTagSuggestionsOverlay();
     }
     tagQuery.value = tempTagQuery;
+  }
+
+  void slashCommandsOnChange(String text, TextSelection selection) async {
+    var tempCommandQuery = getCommandQuery(text, selection.baseOffset);
+    if (tempCommandQuery != null &&
+        (commandQuery.value == null || overlayEntry == null)) {
+      showSlashCommandSuggestionsOverlay();
+    }
+    commandQuery.value = tempCommandQuery;
   }
 
   void linkSuggestionsOnChange(String text, TextSelection selection) async {
@@ -196,9 +207,13 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   }
 
   void _onContentChanged(text) async {
+    final db = ref.read(dbProvider);
     widget.onChanged?.call();
     linkSuggestionsOnChange(text, widget.controller.selection);
     tagSuggestionsOnChange(text, widget.controller.selection);
+    if (db.loggedIn) {
+      slashCommandsOnChange(text, widget.controller.selection);
+    }
   }
 
   // Helper Functions
@@ -213,6 +228,17 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   String? getTagQuery(String text, int caretIndex) {
     String beforeCaretText = text.substring(0, caretIndex);
     RegExp r = RegExp(Note.tagRegex, multiLine: true);
+    var matches = r.allMatches(beforeCaretText);
+    RegExpMatch? lastMatch = (matches.isEmpty) ? null : matches.last;
+    if (lastMatch?.end == caretIndex) {
+      return lastMatch?.group(2);
+    }
+    return null;
+  }
+
+  String? getCommandQuery(String text, int caretIndex) {
+    String beforeCaretText = text.substring(0, caretIndex);
+    RegExp r = RegExp(Note.commandRegex, multiLine: true);
     var matches = r.allMatches(beforeCaretText);
     RegExpMatch? lastMatch = (matches.isEmpty) ? null : matches.last;
     if (lastMatch?.end == caretIndex) {
@@ -244,6 +270,54 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   }
 
   // Overlay Functions
+  void showSlashCommandSuggestionsOverlay() async {
+    _onCommandSelect(String tag) {
+      String t = widget.controller.text;
+      int caretI = widget.controller.selection.baseOffset;
+      String beforeCaretText = t.substring(0, caretI);
+      int slashIndex = beforeCaretText.lastIndexOf('/');
+      widget.controller.text =
+          t.substring(0, slashIndex) + t.substring(caretI, t.length);
+      widget.controller.selection =
+          TextSelection.fromPosition(TextPosition(offset: slashIndex));
+      widget.onChanged?.call();
+      removeOverlay();
+    }
+
+    removeOverlay();
+    final settings = ref.read(settingsProvider);
+    List<String> commandSuggestions =
+        (settings.get('plugin-slash-commands') as List? ?? [])
+            .map((v) => v['alias'] as String? ?? '')
+            .toList();
+    commandSuggestions.removeWhere((q) => q.isEmpty);
+
+    Offset caretOffset = getCaretOffset(
+      widget.controller,
+      Theme.of(context).textTheme.bodyMedium,
+    );
+
+    Widget builder(context) {
+      // ignore: avoid_unnecessary_containers
+      return Container(
+        child: ValueListenableBuilder<String?>(
+            valueListenable: commandQuery,
+            builder: (context, val, child) {
+              final tempCommandQuery = commandQuery.value;
+              if (tempCommandQuery == null) return const SizedBox.shrink();
+              return Suggestions(
+                  caretOffset: caretOffset,
+                  suggestions: commandSuggestions,
+                  query: tempCommandQuery,
+                  onSelect: _onCommandSelect,
+                  layerLink: layerLink);
+            }),
+      );
+    }
+
+    overlayContent(builder);
+  }
+
   void showTagSuggestionsOverlay() async {
     _onTagSelect(String tag) {
       String t = widget.controller.text;
@@ -255,6 +329,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
       widget.controller.selection = TextSelection.fromPosition(
           TextPosition(offset: tagIndex + tag.length + 1));
       widget.onChanged?.call();
+      tagQuery.value = null;
       removeOverlay();
     }
 

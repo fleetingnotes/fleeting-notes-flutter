@@ -47,6 +47,7 @@ class Note {
   static const String linkRegex =
       "\\[\\[([^$invalidChars]+?)(\\|([^$invalidChars]*))?\\]\\]";
   static const String tagRegex = r"(^|\B)#(?![0-9]+\b)([a-zA-Z0-9_\/]*)";
+  static const String commandRegex = r"(^|\B)\/([^\/\n\r]*)";
   static const String defaultNoteTemplate = r'''
 ---
 id: "${id}"
