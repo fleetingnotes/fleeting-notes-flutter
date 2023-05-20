@@ -125,7 +125,7 @@ ${content}''';
     return copiedNote;
   }
 
-  toJson() {
+  Map<String, String> toJson() {
     return {
       'id': id,
       'title': title,

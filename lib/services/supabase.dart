@@ -40,6 +40,7 @@ class SupabaseDB extends SyncTerface {
         client.auth.onAuthStateChange.listen(handleAuthStateChange);
   }
   User? get currUser => client.auth.currentUser;
+  Session? get currSession => client.auth.currentSession;
   User? prevUser; // used for authStateChange
   SubscriptionTier? subTier;
   String? get userId =>

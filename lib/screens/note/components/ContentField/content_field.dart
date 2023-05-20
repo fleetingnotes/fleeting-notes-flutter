@@ -19,12 +19,14 @@ class ContentField extends ConsumerStatefulWidget {
   const ContentField({
     Key? key,
     required this.controller,
+    this.onCommandRun,
     this.autofocus = false,
     this.onChanged,
     this.onPop,
   }) : super(key: key);
 
   final TextEditingController controller;
+  final Function(String)? onCommandRun;
   final VoidCallback? onChanged;
   final VoidCallback? onPop;
   final bool autofocus;
@@ -271,7 +273,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
 
   // Overlay Functions
   void showSlashCommandSuggestionsOverlay() async {
-    _onCommandSelect(String tag) {
+    _onCommandSelect(String alias) async {
       String t = widget.controller.text;
       int caretI = widget.controller.selection.baseOffset;
       String beforeCaretText = t.substring(0, caretI);
@@ -280,6 +282,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
           t.substring(0, slashIndex) + t.substring(caretI, t.length);
       widget.controller.selection =
           TextSelection.fromPosition(TextPosition(offset: slashIndex));
+      widget.onCommandRun?.call(alias);
       widget.onChanged?.call();
       removeOverlay();
     }

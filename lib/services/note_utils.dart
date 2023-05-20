@@ -1,8 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:collection/collection.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
 import '../models/Note.dart';
 import '../models/exceptions.dart';
@@ -110,6 +115,42 @@ class NoteUtils {
       _showSnackbar(context, e.message);
     }
     return null;
+  }
+
+  Future<http.Response> callPluginFunction(Note note, String alias) async {
+    final db = ref.read(dbProvider);
+    List<dynamic> allCommands = db.settings.get('plugin-slash-commands') ?? [];
+    var commandSettings =
+        allCommands.firstWhereOrNull((command) => command['alias'] == alias) ??
+            {};
+    if (!commandSettings.containsKey('commandId')) {
+      throw FleetingNotesException('Command ID not found for alias: $alias');
+    }
+    var commandId = commandSettings['commandId'];
+    final url =
+        Uri.https("fleeting-notes-plugins.deno.dev", "plugins/$commandId");
+    dynamic metadata = commandSettings['metadata'] ?? '';
+    try {
+      metadata = jsonDecode(metadata);
+      // ignore: empty_catches
+    } on FormatException {}
+    Map<String, dynamic> body = {
+      "metadata": metadata,
+      "note": note.toJson(),
+    };
+    try {
+      var res = await http.post(
+        url,
+        body: jsonEncode(body),
+        headers: {
+          "Authorization": "Bearer ${db.supabase.currSession?.accessToken}",
+          "Content-Type": "application/json",
+        },
+      );
+      return res;
+    } catch (e) {
+      throw FleetingNotesException('Failed to call plugin `$commandId`: $e');
+    }
   }
 
   void onAddAttachment(
