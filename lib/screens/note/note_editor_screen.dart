@@ -101,8 +101,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (unsavedNote?.id != noteId) {
       unsavedNote = null;
     }
-    Note? newNote =
-        await db.getNoteById(noteId) ?? db.settings.get('unsaved-note');
+    Note? newNote = await db.getNoteById(noteId) ?? unsavedNote;
     if (newNote == null) {
       var params = currentLoc?.queryParameters ?? {};
       newNote = (currNote?.id == noteId) ? currNote : noteFromPath(currentLoc);
