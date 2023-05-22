@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
@@ -240,13 +241,23 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     resetSaveTimer(defaultSaveMs: 0, updateMetadata: false);
   }
 
-  void updateFields(Note n) {
+  void updateFields(Note n, {bool setUnsaved = false}) {
     var prevTitleSel = titleController.selection;
     var prevContentSel = contentController.selection;
     var prevSourceSel = sourceController.selection;
-    titleController.text = n.title;
-    contentController.text = n.content;
-    sourceController.text = n.source;
+    bool hasChanges = false;
+    if (n.title != titleController.text) {
+      titleController.text = n.title;
+      hasChanges = true;
+    }
+    if (n.content != contentController.text) {
+      contentController.text = n.content;
+      hasChanges = true;
+    }
+    if (n.source != sourceController.text) {
+      sourceController.text = n.source;
+      hasChanges = true;
+    }
     // attempt to reset selection
     try {
       titleController.selection = prevTitleSel;
@@ -265,6 +276,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       sourceController.selection =
           TextSelection(baseOffset: sourceLen, extentOffset: sourceLen);
     }
+    if (hasChanges && setUnsaved) onChanged();
   }
 
   void initCurrNote() async {
@@ -285,6 +297,43 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       resetSaveTimer();
     }
     initSourceMetadata(currNote.sourceMetadata);
+  }
+
+  void onCommandRun(String alias) async {
+    final noteUtils = ref.read(noteUtilsProvider);
+    String body = '';
+    var note = getNote();
+    try {
+      final res = await noteUtils.callPluginFunction(note, alias);
+      if (!mounted) return;
+      body = res.body;
+      if (res.statusCode != 200) {
+        throw FleetingNotesException("${res.statusCode}: ${res.body}");
+      }
+      final data = jsonDecode(res.body);
+      var newNote = note.copyWith(
+        title: data?['note']?['title'],
+        content: data?['note']?['content'],
+        source: data?['note']?['source'],
+      );
+      updateFields(newNote, setUnsaved: true);
+    } on FleetingNotesException catch (e) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Command Error'),
+          content: Text(e.message),
+        ),
+      );
+    } on FormatException {
+      // insert data in contentController
+      var currIndex = contentController.selection.extentOffset;
+      var t = contentController.text;
+      contentController.text =
+          t.substring(0, currIndex) + body + t.substring(currIndex, t.length);
+      contentController.selection = TextSelection.fromPosition(
+          TextPosition(offset: currIndex + body.length));
+    }
   }
 
   @override
@@ -334,6 +383,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                     onChanged: onChanged,
                     autofocus: widget.autofocus,
                     onPop: () => noteUtils.onPopNote(context, widget.note.id),
+                    onCommandRun: onCommandRun,
                   ),
                 ],
               ),

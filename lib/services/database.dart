@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -27,6 +28,7 @@ class Database {
   final TextSimilarity textSimilarity = TextSimilarity();
   SyncManager? syncManager;
   BrowserExtension be = BrowserExtension();
+  http.Client httpClient = http.Client();
   Database({
     required this.supabase,
     required this.localFileSync,

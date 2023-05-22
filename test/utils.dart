@@ -7,7 +7,6 @@ import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.d
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
-import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/gestures.dart';
@@ -25,7 +24,7 @@ import 'mocks/mock_supabase.dart';
 class FNMocks {
   MockDatabase db;
   LocalFileSync localFs;
-  SupabaseDB supabase;
+  MockSupabaseDB supabase;
   Settings settings;
   FNMocks(this.db, this.settings, this.supabase, this.localFs);
 }
@@ -36,7 +35,7 @@ Future<FNMocks> fnPumpWidget(
   Widget widget, {
   bool isLoggedIn = false,
   Settings? settings,
-  SupabaseDB? supabase,
+  MockSupabaseDB? supabase,
   LocalFileSync? localFs,
   MockDatabase? db,
 }) async {
