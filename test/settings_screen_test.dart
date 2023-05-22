@@ -9,6 +9,7 @@ import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/one_account_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/account.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/plugin_commands_setting.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -36,14 +37,15 @@ void main() {
     await navigateToSettings(tester);
     expect(find.byType(Auth), findsOneWidget);
     expect(find.byType(Account), findsNothing);
+    expect(find.byType(PluginCommandSetting), findsNothing);
   });
 
   testWidgets('Login works as expected', (WidgetTester tester) async {
-    var mockSupabase = getBaseMockSupabaseDB();
-    await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
+    await fnPumpWidget(tester, const MyApp());
     await navigateToSettings(tester);
     await attemptLogin(tester);
     expect(find.text('Logout'), findsOneWidget);
+    expect(find.byType(PluginCommandSetting), findsOneWidget);
   });
 
   testWidgets('Premium user sees no login dialog', (WidgetTester tester) async {

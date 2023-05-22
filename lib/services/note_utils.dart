@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
-
 import '../models/Note.dart';
 import '../models/exceptions.dart';
 import 'package:path/path.dart' as p;
@@ -139,7 +136,7 @@ class NoteUtils {
       "note": note.toJson(),
     };
     try {
-      var res = await http.post(
+      var res = await db.httpClient.post(
         url,
         body: jsonEncode(body),
         headers: {
