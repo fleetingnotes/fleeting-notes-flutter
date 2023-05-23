@@ -162,6 +162,20 @@ void main() {
     expect(contentFieldHasFocus(tester), isTrue);
   });
 
+  testWidgets('Changing orientation maintains unsaved note',
+      (WidgetTester tester) async {
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    var testId = '00000000-0000-0000-0000-000000000000';
+
+    // Setting unsaved note
+    await mocks.db.settings
+        .set('unsaved-note', Note.empty(id: testId, content: 'content'));
+
+    // "Change orientations" by going to new note
+    await goToNewNote(tester, id: testId);
+    expect(find.text('content'), findsOneWidget);
+  });
+
   testWidgets('New note with source preview has focus on content field',
       (WidgetTester tester) async {
     var mockSupabase = getBaseMockSupabaseDB();

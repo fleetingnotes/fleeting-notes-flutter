@@ -15,6 +15,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart';
+import 'package:http/testing.dart';
 import 'package:mocktail/mocktail.dart';
 import 'mocks/mock_database.dart';
 import 'mocks/mock_local_file_sync.dart';
@@ -49,6 +51,7 @@ Future<FNMocks> fnPumpWidget(
         supabase: supabase,
         localFileSync: localFs,
       );
+  mockDb.httpClient = MockClient((request) async => Response('', 200));
 
   await tester.pumpWidget(ProviderScope(
     overrides: [
@@ -83,12 +86,14 @@ Future<void> searchNotes(WidgetTester tester, String query) async {
 }
 
 Future<void> goToNewNote(WidgetTester tester,
-    {String title = '',
+    {String? id,
+    String title = '',
     String content = '',
     String source = '',
     bool addQueryParams = true}) async {
   final BuildContext context = tester.element(find.byType(MainScreen));
-  final newNote = Note.empty(title: title, content: content, source: source);
+  final newNote =
+      Note.empty(id: id, title: title, content: content, source: source);
   Map<String, String> qp = (addQueryParams)
       ? {'title': title, 'content': content, 'source': source}
       : {};
