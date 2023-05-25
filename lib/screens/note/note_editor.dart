@@ -315,7 +315,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       if (data['note'] == null) {
         throw const FormatException('Insert body as string');
       }
-      var newNote = noteObj.copyWith(
+      var newNote = note.copyWith(
         title: noteObj?['title'],
         content: noteObj?['content'],
         source: noteObj?['source'],
