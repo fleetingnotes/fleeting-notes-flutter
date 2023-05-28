@@ -69,9 +69,9 @@ class Settings {
     if (!settingsMap.containsKey(key)) {
       throw FleetingNotesException('Key provided is not in settingsMap');
     }
-    if (value != null && value.runtimeType != settingsMap[key]) {
-      throw FleetingNotesException('Settings type mismatch');
-    }
+    // if (value != null && value.runtimeType != settingsMap[key]) {
+    //   throw FleetingNotesException('Settings type mismatch');
+    // }
   }
 
   bool isFirstTimeOpen() {

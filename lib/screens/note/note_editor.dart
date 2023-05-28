@@ -311,10 +311,14 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         throw FleetingNotesException("${res.statusCode}: ${res.body}");
       }
       final data = jsonDecode(res.body);
+      final noteObj = data?['note'];
+      if (data['note'] == null) {
+        throw const FormatException('Insert body as string');
+      }
       var newNote = note.copyWith(
-        title: data?['note']?['title'],
-        content: data?['note']?['content'],
-        source: data?['note']?['source'],
+        title: noteObj?['title'],
+        content: noteObj?['content'],
+        source: noteObj?['source'],
       );
       updateFields(newNote, setUnsaved: true);
     } on FleetingNotesException catch (e) {
