@@ -60,15 +60,19 @@ class Database {
   Future<List<Note>> getSearchNotes(SearchQuery query,
       {forceSync = false}) async {
     RegExp r = getQueryRegex(query.query);
+    bool noteValid(Note note) =>
+        !note.isDeleted &&
+        ((query.searchByTitle && r.hasMatch(note.title)) ||
+            (query.searchByContent && r.hasMatch(note.content)) ||
+            (query.searchBySource &&
+                (r.hasMatch(note.source) ||
+                    r.hasMatch(note.sourceTitle ?? ''))));
+    Note? unsavedNote = settings.get('unsaved-note');
     var allNotes = await getAllNotes(forceSync: forceSync);
-    var notes = allNotes.where((note) {
-      return !note.isDeleted &&
-          ((query.searchByTitle && r.hasMatch(note.title)) ||
-              (query.searchByContent && r.hasMatch(note.content)) ||
-              (query.searchBySource &&
-                  (r.hasMatch(note.source) ||
-                      r.hasMatch(note.sourceTitle ?? ''))));
-    }).toList();
+    if (unsavedNote != null) {
+      allNotes.insert(0, unsavedNote);
+    }
+    var notes = allNotes.where(noteValid).toList();
     notes.sort(sortMap[query.sortBy]);
     return notes.sublist(0, min(notes.length, query.limit ?? notes.length));
   }
@@ -158,8 +162,12 @@ class Database {
     return filteredNote != null;
   }
 
-  Future<Note?> getNoteById(String id) async {
+  Future<Note?> getNoteById(String id, {getUnsavedNote = false}) async {
     var box = await getBox();
+    Note? unsavedNote = (getUnsavedNote) ? settings.get('unsaved-note') : null;
+    if (unsavedNote?.id == id) {
+      return unsavedNote;
+    }
     return box.get(id);
   }
 
