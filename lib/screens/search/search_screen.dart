@@ -73,6 +73,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     super.initState();
     final db = ref.read(dbProvider);
     final sq = ref.read(searchProvider);
+    final noteUtils = ref.read(noteUtilsProvider);
+    // refresh unsaved note
+    noteUtils.setUnsavedNote(context, null, saveUnsaved: true);
     loadNotes();
     SchedulerBinding.instance.addPostFrameCallback((_) {
       noteChangeStream?.cancel();

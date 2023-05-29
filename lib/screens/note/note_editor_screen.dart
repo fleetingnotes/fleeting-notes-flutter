@@ -97,7 +97,10 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (isValidUuid(pathNoteId)) {
       noteId = pathNoteId;
     }
-    Note? newNote = await db.getNoteById(noteId, getUnsavedNote: true);
+    Note? unsavedNote = db.settings.get('unsaved-note');
+    Note? newNote = (unsavedNote?.id == noteId)
+        ? unsavedNote
+        : await db.getNoteById(noteId);
     if (newNote == null) {
       var params = currentLoc?.queryParameters ?? {};
       newNote = (currNote?.id == noteId) ? currNote : noteFromPath(currentLoc);
@@ -113,8 +116,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             sortBy: SortOptions.modifiedDESC,
             query: qpSource,
             limit: null);
-        List<Note> notes = await db.getSearchNotes(query);
-        Note? queriedNote = notes.firstWhereOrNull((n) => n.source == qpSource);
+        Note? queriedNote;
+        if (unsavedNote?.source == qpSource) {
+          queriedNote = unsavedNote;
+        } else {
+          List<Note> notes = await db.getSearchNotes(query);
+          queriedNote = notes.firstWhereOrNull((n) => n.source == qpSource);
+        }
         if (queriedNote != null) {
           if (qpContent.isNotEmpty) {
             if (note?.id == queriedNote.id) {

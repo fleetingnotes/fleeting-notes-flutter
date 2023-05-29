@@ -67,11 +67,7 @@ class Database {
             (query.searchBySource &&
                 (r.hasMatch(note.source) ||
                     r.hasMatch(note.sourceTitle ?? ''))));
-    Note? unsavedNote = settings.get('unsaved-note');
     var allNotes = await getAllNotes(forceSync: forceSync);
-    if (unsavedNote != null) {
-      allNotes.insert(0, unsavedNote);
-    }
     var notes = allNotes.where(noteValid).toList();
     notes.sort(sortMap[query.sortBy]);
     return notes.sublist(0, min(notes.length, query.limit ?? notes.length));
@@ -162,12 +158,8 @@ class Database {
     return filteredNote != null;
   }
 
-  Future<Note?> getNoteById(String id, {getUnsavedNote = false}) async {
+  Future<Note?> getNoteById(String id) async {
     var box = await getBox();
-    Note? unsavedNote = (getUnsavedNote) ? settings.get('unsaved-note') : null;
-    if (unsavedNote?.id == id) {
-      return unsavedNote;
-    }
     return box.get(id);
   }
 

@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_bar.dart';
@@ -13,6 +14,7 @@ import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'mocks/mock_settings.dart';
 import 'mocks/mock_supabase.dart';
 import 'utils.dart';
 
@@ -52,6 +54,20 @@ void main() {
         find.descendant(
             of: find.byType(NoteEditor),
             matching: find.text('Click me note!', findRichText: true)),
+        findsOneWidget);
+  });
+
+  testWidgets('Going to main screen with unsaved note saves note',
+      (WidgetTester tester) async {
+    var settings = MockSettings();
+    // Setting unsaved note
+    await settings.set('unsaved-note', Note.empty(content: 'content'));
+
+    await fnPumpWidget(tester, const MyApp(), settings: settings);
+    expect(
+        find.descendant(
+            of: find.byType(NoteCard),
+            matching: find.text('content', findRichText: true)),
         findsOneWidget);
   });
 
