@@ -258,6 +258,12 @@ ${content}''';
             return source.replaceAll('"', r'\"');
           }
           return source;
+        case 'created_date':
+          var createdDate = createdAt.substring(0, 10);
+          if (matchInMetadata(m, template ?? '')) {
+            return createdDate.replaceAll('"', r'\"');
+          }
+          return createdDate;
         case 'created_time':
           if (matchInMetadata(m, template ?? '')) {
             return createdAt.replaceAll('"', r'\"');
