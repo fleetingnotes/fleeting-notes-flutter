@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_bar.dart';
@@ -13,6 +14,7 @@ import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'mocks/mock_settings.dart';
 import 'mocks/mock_supabase.dart';
 import 'utils.dart';
 
@@ -55,6 +57,20 @@ void main() {
         findsOneWidget);
   });
 
+  testWidgets('Going to main screen with unsaved note saves note',
+      (WidgetTester tester) async {
+    var settings = MockSettings();
+    // Setting unsaved note
+    await settings.set('unsaved-note', Note.empty(content: 'content'));
+
+    await fnPumpWidget(tester, const MyApp(), settings: settings);
+    expect(
+        find.descendant(
+            of: find.byType(NoteCard),
+            matching: find.text('content', findRichText: true)),
+        findsOneWidget);
+  });
+
   testWidgets('Save note updates list of notes', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
     await addNote(tester, content: 'Test save note!', closeDialog: true);
@@ -67,8 +83,10 @@ void main() {
 
   testWidgets('Delete note updates list of notes', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester, content: 'Test delete note!');
+    await addNote(tester, content: 'Test delete note!', closeDialog: true);
     expect(find.byType(NoteCard), findsOneWidget);
+    await tester.tap(find.text('Test delete note!', findRichText: true));
+    await tester.pumpAndSettle();
     await deleteCurrentNote(tester);
     expect(find.byType(NoteCard), findsNothing);
   });

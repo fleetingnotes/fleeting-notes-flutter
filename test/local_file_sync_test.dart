@@ -20,7 +20,7 @@ void main() {
           settings: settings, localFs: lfs);
 
       expect(lfs.fs.directory(lfs.syncDir).listSync().isEmpty, isTrue);
-      await addNote(tester, title: "hello-world");
+      await createSavedNote(tester);
       expect(lfs.fs.directory(lfs.syncDir).listSync().length == 1, isTrue);
       expect(
         lfs.fs.directory(lfs.syncDir).listSync().first.basename ==
@@ -35,7 +35,7 @@ void main() {
         var lfs = await setupLfs(settings: settings);
         await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
-        await addNote(tester, title: "hello-world");
+        await createSavedNote(tester);
 
         File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
         expect(file.readAsStringSync().contains("a modification"), isFalse);
@@ -50,7 +50,7 @@ void main() {
         var lfs = await setupLfs(settings: settings);
         await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
-        await addNote(tester, title: "hello-world");
+        await createSavedNote(tester);
 
         expect(lfs.fs.directory(lfs.syncDir).listSync().isEmpty, isFalse);
         await deleteCurrentNote(tester);
@@ -64,8 +64,7 @@ void main() {
         var lfs = await setupLfs(settings: settings);
         await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
-        await addNote(tester, title: "hello-world", content: "");
-
+        await createSavedNote(tester);
         expect(find.byType(NoteCard), findsOneWidget);
         File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
         var newPath =
@@ -87,7 +86,7 @@ void main() {
         var lfs = await setupLfs(settings: settings);
         await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
-        await addNote(tester, title: "hello-world", content: "");
+        await createSavedNote(tester);
 
         expect(find.byType(NoteCard), findsOneWidget);
         File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
@@ -105,7 +104,7 @@ void main() {
         var lfs = await setupLfs(settings: settings);
         await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
-        await addNote(tester, title: "hello-world", content: "");
+        await createSavedNote(tester);
 
         expect(find.byType(NoteCard), findsOneWidget);
         File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
@@ -125,7 +124,7 @@ void main() {
         var lfs = await setupLfs(settings: settings);
         await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
-        await addNote(tester, title: "hello-world", content: "");
+        await createSavedNote(tester);
 
         expect(find.byType(NoteCard), findsOneWidget);
         File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
@@ -141,7 +140,7 @@ void main() {
         var lfs = await setupLfs(settings: settings);
         await fnPumpWidget(tester, const MyApp(),
             settings: settings, localFs: lfs);
-        await addNote(tester, title: "hello-world", content: "");
+        await createSavedNote(tester);
 
         expect(find.byType(NoteCard), findsOneWidget);
         File file = lfs.fs.directory(lfs.syncDir).listSync().first as File;
@@ -241,4 +240,10 @@ void renameFile(File file, MockLocalFileSync lfs, String destination) async {
   lfs.dirController.add(WatchEvent(ChangeType.ADD, destination));
   await Future.delayed(const Duration(milliseconds: 100));
   lfs.dirController.add(WatchEvent(ChangeType.REMOVE, file.path));
+}
+
+Future<void> createSavedNote(WidgetTester tester) async {
+  await addNote(tester, title: "hello-world", content: "", closeDialog: true);
+  await tester.tap(find.text('hello-world', findRichText: true));
+  await tester.pumpAndSettle();
 }

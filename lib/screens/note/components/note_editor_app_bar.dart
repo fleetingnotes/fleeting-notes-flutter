@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../../models/Note.dart';
 import '../../../services/providers.dart';
@@ -30,7 +29,6 @@ class NoteEditorAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final noteUtils = ref.watch(noteUtilsProvider);
-    final settings = ref.watch(settingsProvider);
     final n = note;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -38,20 +36,6 @@ class NoteEditorAppBar extends ConsumerWidget {
         children: [
           IconButton(onPressed: onClose, icon: const Icon(Icons.close)),
           const Spacer(),
-          ValueListenableBuilder(
-              valueListenable: settings.box.listenable(keys: ['unsaved-note']),
-              builder: (context, Box box, _) {
-                var unsavedNote = box.get('unsaved-note');
-                bool saveEnabled =
-                    unsavedNote != null && n != null && unsavedNote?.id == n.id;
-                return IconButton(
-                    onPressed: (saveEnabled)
-                        ? () {
-                            noteUtils.handleSaveNote(context, unsavedNote);
-                          }
-                        : null,
-                    icon: const Icon(Icons.save));
-              }),
           NotePopupMenu(
             note: note,
             onAddAttachment: (String fn, Uint8List? fb) {

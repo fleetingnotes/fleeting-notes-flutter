@@ -145,13 +145,17 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     }
 
     try {
-      setState(() {
-        hasNewChanges = false;
-      });
+      if (mounted) {
+        setState(() {
+          hasNewChanges = false;
+        });
+      }
       await noteUtils.handleSaveNote(context, updatedNote);
-      setState(() {
-        savedAt = DateTime.now();
-      });
+      if (mounted) {
+        setState(() {
+          savedAt = DateTime.now();
+        });
+      }
     } on FleetingNotesException {
       onChanged();
     }

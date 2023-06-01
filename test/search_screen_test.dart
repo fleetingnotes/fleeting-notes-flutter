@@ -25,7 +25,7 @@ void main() {
 
   testWidgets('Render List of Notes', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester);
+    await addNote(tester, closeDialog: true);
     expect(find.byType(SearchScreen), findsOneWidget);
     expect(find.byType(NoteCard), findsOneWidget);
   });

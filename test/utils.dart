@@ -3,6 +3,7 @@ import 'package:file/memory.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/note_editor_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
@@ -130,19 +131,18 @@ Future<void> modifyCurrentNote(
   if (source != null) {
     await tester.enterText(find.bySemanticsLabel('Source'), source);
   }
-  await tester.pumpAndSettle();
-  await tester.tap(find.byIcon(Icons.save));
   await tester.pumpAndSettle(
       const Duration(seconds: 1)); // Wait for animation to finish
   if (closeDialog) {
-    await tester.tap(find.byIcon(Icons.close));
+    await tester.tap(find.descendant(
+        of: find.byType(NoteEditorAppBar), matching: find.byIcon(Icons.close)));
     await tester.pumpAndSettle();
   }
 }
 
 Future<void> saveCurrentNote(WidgetTester tester) async {
   await tester.pump();
-  await tester.tap(find.byIcon(Icons.save));
+  // await tester.tap(find.byIcon(Icons.save));
   await tester.pump();
 }
 
@@ -211,7 +211,7 @@ Future<void> clickLinkInContentField(WidgetTester tester,
   await tester.enterText(
       find.bySemanticsLabel('Start writing your thoughts...'), '[[$linkName]]');
   await tester.pump();
-  await tester.tap(find.byIcon(Icons.save));
+  // await tester.tap(find.byIcon(Icons.save));
   await tester.pumpAndSettle();
   await tester.tapAt(tester
       .getTopLeft(find.bySemanticsLabel('Start writing your thoughts...'))

@@ -11,31 +11,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'utils.dart';
 
 void main() {
-  testWidgets('Save note button is enabled when note is changed',
-      (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MyApp());
-    await addNote(tester);
-    await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), 'new note');
-    await tester.pump();
-
-    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
-  });
-
-  testWidgets('Save note button is disabled when pressed',
-      (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MyApp());
-    await addNote(tester, content: 'new note');
-
-    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNull);
-  });
-
-  testWidgets('Save note button shows snackbar if title has invlaid chars',
+  testWidgets('Saving note with invalid chars shows snackbar',
       (WidgetTester tester) async {
     // test for snackbar failure
     await fnPumpWidget(tester, const MyApp());
     // title contains invalid characters
-    await addNote(tester, content: 'new note', title: r'[]#*:/\^');
+    await addNote(tester,
+        content: 'new note', title: r'[]#*:/\^', closeDialog: true);
     expect(find.byType(SnackBar), findsOneWidget);
   });
 
