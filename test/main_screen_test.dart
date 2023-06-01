@@ -83,8 +83,10 @@ void main() {
 
   testWidgets('Delete note updates list of notes', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester, content: 'Test delete note!');
+    await addNote(tester, content: 'Test delete note!', closeDialog: true);
     expect(find.byType(NoteCard), findsOneWidget);
+    await tester.tap(find.text('Test delete note!', findRichText: true));
+    await tester.pumpAndSettle();
     await deleteCurrentNote(tester);
     expect(find.byType(NoteCard), findsNothing);
   });
