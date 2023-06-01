@@ -196,18 +196,6 @@ void main() {
           findsOneWidget);
     });
   });
-  testWidgets('setting content controller text enables save button',
-      (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MyApp());
-    await addNote(tester);
-    var contentController =
-        tester.widget<ContentField>(find.byType(ContentField)).controller;
-    contentController.text = 'set text';
-
-    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNull);
-    await tester.pump();
-    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
-  });
 }
 
 Future<void> setupLinkSuggestions(WidgetTester tester) async {

@@ -31,10 +31,11 @@ void main() {
 
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester, title: 'link', content: '[[link]]');
-    await tester.enterText(find.bySemanticsLabel('Title'), 'hello world');
-    await saveCurrentNote(tester);
-    await tester.pumpAndSettle(); // wait for notes to update
+    await addNote(tester, content: '[[link]]', closeDialog: true);
+    await addNote(tester, title: 'link', closeDialog: true);
+    await tester.tap(find.text('link', findRichText: true));
+    await tester.pumpAndSettle();
+    await modifyCurrentNote(tester, title: 'hello world', closeDialog: true);
     expect(
         find.descendant(
           of: find.byType(NoteCard),
@@ -56,35 +57,34 @@ void main() {
   });
 
   testWidgets('Note is not auto saved if new', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MyApp());
+    var mocks = await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
     // auto save
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), 'save');
     await tester.pumpAndSettle();
-    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
+    expect(mocks.settings.get('unsaved-note'), isNotNull);
     await tester.pumpAndSettle(const Duration(seconds: 3));
-    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
+    expect(mocks.settings.get('unsaved-note'), isNotNull);
   });
 
   testWidgets('Note is autosaved if exists in db', (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MyApp());
-    await addNote(tester, content: 'save');
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    await createSavedNote(tester, 'save');
     await tester.enterText(
         find.bySemanticsLabel('Start writing your thoughts...'), 'save asdf');
     // auto save
     await tester.pumpAndSettle();
-    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
+    expect(mocks.settings.get('unsaved-note'), isNotNull);
     await tester.pumpAndSettle(const Duration(seconds: 3));
-    expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNull);
+    expect(mocks.settings.get('unsaved-note'), isNull);
   });
 
   testWidgets('Cursor location doesnt change when handling note event',
       (WidgetTester tester) async {
     // setup
     var mocks = await fnPumpWidget(tester, const MyApp());
-    await goToNewNote(tester);
-    await modifyCurrentNote(tester, content: 'save');
+    await createSavedNote(tester, 'save');
     var prevController =
         tester.widget<ContentField>(find.byType(ContentField)).controller;
 
@@ -106,8 +106,8 @@ void main() {
       (WidgetTester tester) async {
     // setup
     var mocks = await fnPumpWidget(tester, const MyApp());
-    await goToNewNote(tester);
-    await modifyCurrentNote(tester, content: 'save');
+    await createSavedNote(tester, 'save');
+    await tester.tap(find.byType(ContentField));
 
     // trigger handleNoteEvent
     var note = (await mocks.db.getAllNotes()).first;
@@ -128,8 +128,7 @@ void main() {
       (WidgetTester tester) async {
     // setup
     var mocks = await fnPumpWidget(tester, const MyApp());
-    await goToNewNote(tester);
-    await modifyCurrentNote(tester, content: 'save');
+    await createSavedNote(tester, 'save');
 
     // note updated within 5 seconds of previous note saved
     var note = (await mocks.db.getAllNotes()).first;
@@ -263,13 +262,13 @@ void main() {
     });
     testWidgets('Appends content with same note open',
         (WidgetTester tester) async {
-      await fnPumpWidget(tester, const MyApp());
+      var mocks = await fnPumpWidget(tester, const MyApp());
       await addNote(tester,
           content: 'hello world', source: 'source', closeDialog: false);
       await goToNewNote(tester,
           source: 'source', content: 'pp', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
-      expect(findIconButtonByIcon(tester, Icons.save).onPressed, isNotNull);
+      expect(mocks.settings.get('unsaved-note'), isNotNull);
       expect(
           find.descendant(
               of: find.bySemanticsLabel('Start writing your thoughts...'),
@@ -315,4 +314,10 @@ bool? contentFieldHasFocus(WidgetTester tester) {
           matching: find.byType(TextField)))
       .focusNode
       ?.hasFocus;
+}
+
+Future<void> createSavedNote(WidgetTester tester, String text) async {
+  await addNote(tester, content: text, closeDialog: true);
+  await tester.tap(find.text(text, findRichText: true));
+  await tester.pumpAndSettle();
 }
