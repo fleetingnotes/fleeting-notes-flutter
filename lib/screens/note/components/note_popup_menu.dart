@@ -11,6 +11,7 @@ class NotePopupMenu extends ConsumerStatefulWidget {
     Key? key,
     required this.note,
     this.onAddAttachment,
+    this.onShare,
     this.backlinksOption = true,
     this.deleteOption = true,
     this.shareOption = false,
@@ -18,6 +19,7 @@ class NotePopupMenu extends ConsumerStatefulWidget {
 
   final Note? note;
   final Function(String, Uint8List?)? onAddAttachment;
+  final VoidCallback? onShare;
   final bool backlinksOption;
   final bool deleteOption;
   final bool shareOption;
@@ -94,6 +96,14 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
               });
             },
           ),
+        PopupMenuItem(
+          child: const ListTile(
+            title: Text("Share"),
+            leading: Icon(Icons.share),
+            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
+          ),
+          onTap: widget.onShare,
+        ),
         if (widget.deleteOption)
           PopupMenuItem(
             child: const ListTile(

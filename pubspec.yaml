@@ -74,6 +74,7 @@ dependencies:
   wiredash: ^1.6.0
   package_info_plus: ^3.1.0
   http: ^0.13.6
+  share_plus: ^7.0.2
 
 
 dev_dependencies:

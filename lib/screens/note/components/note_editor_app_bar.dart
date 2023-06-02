@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../models/Note.dart';
 import '../../../services/providers.dart';
@@ -30,6 +31,7 @@ class NoteEditorAppBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final noteUtils = ref.watch(noteUtilsProvider);
     final n = note;
+    final box = context.findRenderObject() as RenderBox?;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -37,13 +39,20 @@ class NoteEditorAppBar extends ConsumerWidget {
           IconButton(onPressed: onClose, icon: const Icon(Icons.close)),
           const Spacer(),
           NotePopupMenu(
-            note: note,
-            onAddAttachment: (String fn, Uint8List? fb) {
-              if (n == null) return;
-              noteUtils.onAddAttachment(context, n, fn, fb,
-                  controller: contentController);
-            },
-          ),
+              note: note,
+              onAddAttachment: (String fn, Uint8List? fb) {
+                if (n == null) return;
+                noteUtils.onAddAttachment(context, n, fn, fb,
+                    controller: contentController);
+              },
+              onShare: () {
+                Share.share(
+                  contentController?.text ?? '',
+                  subject: titleController?.text,
+                  sharePositionOrigin:
+                      box!.localToGlobal(Offset.zero) & box.size,
+                );
+              }),
           if (onBacklinks != null)
             OutlinedButton(
               onPressed: onBacklinks,
