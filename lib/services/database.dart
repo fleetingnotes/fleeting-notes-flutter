@@ -78,8 +78,20 @@ class Database {
     try {
       if ((box.isEmpty || forceSync) && loggedIn) {
         DateTime? lastSyncTime = settings.get('last-sync-time');
-        List<Note> notes = await supabase.getAllNotes(
-            partition: shareUserId, modifiedAfter: lastSyncTime);
+        List<Note>? tempNotes;
+        List<Note> notes = [];
+        int start = 0, end = 1000;
+        while (tempNotes == null || tempNotes.length == 1000) {
+          tempNotes = await supabase.getAllNotes(
+            partition: shareUserId,
+            modifiedAfter: lastSyncTime,
+            start: start,
+            end: end,
+          );
+          start += 1000;
+          end += 1000;
+          notes.addAll(tempNotes);
+        }
         settings.set('last-sync-time', DateTime.now());
         Map<String, Note> noteIdMap = {for (var note in notes) note.id: note};
         await box.putAll(noteIdMap);
