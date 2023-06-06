@@ -1,5 +1,5 @@
 import 'package:fleeting_notes_flutter/screens/settings/components/plugin_command.dart';
-import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/settings_title.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/material.dart';
