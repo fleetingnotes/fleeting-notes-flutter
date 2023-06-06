@@ -178,7 +178,7 @@ class SupabaseDB extends SyncTerface {
     await upsertNotes([]); // pushes cached notes if any
     // only check deleted notes if modified_at is set
     baseFilter = (modifiedAfter == null)
-        ? baseFilter
+        ? baseFilter.neq('deleted', true)
         : baseFilter.gt('modified_at', modifiedAfter.toUtc().toIso8601String());
     List<dynamic> supaNotes = await baseFilter.range(start, end);
     String? encryptionKey = await getEncryptionKey();
