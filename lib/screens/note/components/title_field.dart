@@ -17,6 +17,8 @@ class TitleField extends StatelessWidget {
     return TextField(
       style: Theme.of(context).textTheme.titleLarge,
       controller: controller,
+      textCapitalization: TextCapitalization.sentences,
+      textInputAction: TextInputAction.next,
       decoration: const InputDecoration(
         hintText: "Title",
         border: InputBorder.none,

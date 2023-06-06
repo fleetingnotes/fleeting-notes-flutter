@@ -378,6 +378,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                   TitleField(
                     controller: titleController,
                     onChanged: onChanged,
+                    autofocus: widget.autofocus,
                   ),
                   SourceContainer(
                     controller: sourceController,
@@ -389,7 +390,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                   ContentField(
                     controller: contentController,
                     onChanged: onChanged,
-                    autofocus: widget.autofocus,
                     onPop: () => noteUtils.onPopNote(context, widget.note.id),
                     onCommandRun: onCommandRun,
                   ),
