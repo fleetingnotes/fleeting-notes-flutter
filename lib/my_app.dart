@@ -180,7 +180,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                     : Brightness.light,
                 textTheme: Theme.of(context).textTheme.apply(
                       fontSizeFactor:
-                          box.get('text-scale-factor', defaultValue: 1),
+                          box.get('text-scale-factor', defaultValue: 1.0),
                     ),
               ),
               routeInformationProvider: router.routeInformationProvider,

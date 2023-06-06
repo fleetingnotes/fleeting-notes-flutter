@@ -10,7 +10,7 @@ class SettingsItemSlider extends ConsumerWidget {
     required this.settingsKey,
     this.name = '',
     this.description = '',
-    this.defaultValue = 1,
+    this.defaultValue = 1.0,
   });
 
   final String settingsKey;
