@@ -166,7 +166,8 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
       projectId: const String.fromEnvironment('WIREDASH_PROJ_ID'),
       secret: const String.fromEnvironment('WIREDASH_SECRET'),
       child: ValueListenableBuilder(
-          valueListenable: db.settings.box.listenable(keys: ['dark-mode']),
+          valueListenable: db.settings.box
+              .listenable(keys: ['dark-mode', 'text-scale-factor']),
           builder: (context, Box box, _) {
             return MaterialApp.router(
               title: 'Fleeting Notes',
@@ -177,6 +178,10 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                 brightness: box.get('dark-mode', defaultValue: false)
                     ? Brightness.dark
                     : Brightness.light,
+                textTheme: Theme.of(context).textTheme.apply(
+                      fontSizeFactor:
+                          box.get('text-scale-factor', defaultValue: 1.0),
+                    ),
               ),
               routeInformationProvider: router.routeInformationProvider,
               routeInformationParser: router.routeInformationParser,

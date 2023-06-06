@@ -12,12 +12,14 @@ class Settings {
     "save-delay-ms": 1000,
     "max-attachment-size-mb": 10,
     "max-attachment-size-mb-premium": 25,
+    "text-scale-factor": 1.0,
   };
   Map<String, Type> settingsMap = {
     // user settings
     'analytics-enabled': bool,
     'auto-fill-source': bool,
     'dark-mode': bool,
+    'text-scale-factor': double,
     'first-time-open': bool,
     'unsaved-note': Note,
     'append-same-source': bool,

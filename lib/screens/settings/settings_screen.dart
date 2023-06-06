@@ -2,6 +2,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/plugin_commands_setting.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/settings_item_slider.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/settings_item_switch.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/settings_title.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:fleeting_notes_flutter/widgets/info_card.dart';
@@ -12,7 +15,6 @@ import 'package:file_saver/file_saver.dart';
 import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wiredash/wiredash.dart';
@@ -21,7 +23,6 @@ import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
 import 'components/local_file_sync_setting.dart';
-import 'components/setting_item.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -307,66 +308,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         defaultValue: false,
                         description:
                             "Toggles the search screen between list and grid view"),
+                    const SettingsItemSlider(
+                      settingsKey: 'text-scale-factor',
+                      name: "Text scale factor",
+                      description:
+                          "Magnifies the text based on a factor (default: 1)",
+                    ),
                     const SizedBox(height: 24),
                     const LegalLinks(),
                   ],
                 )),
           )
         ],
-      ),
-    );
-  }
-}
-
-class SettingsItemSwitch extends ConsumerWidget {
-  const SettingsItemSwitch({
-    super.key,
-    required this.settingsKey,
-    this.name = '',
-    this.description = '',
-    this.defaultValue = false,
-  });
-
-  final String settingsKey;
-  final String name;
-  final String description;
-  final bool defaultValue;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
-    return ValueListenableBuilder(
-      valueListenable: settings.box.listenable(keys: [settingsKey]),
-      builder: (context, Box box, _) {
-        return SettingsItem(
-          name: name,
-          description: description,
-          actions: [
-            Switch(
-                value: settings.get(settingsKey, defaultValue: defaultValue),
-                onChanged: (v) => settings.set(settingsKey, v))
-          ],
-        );
-      },
-    );
-  }
-}
-
-class SettingsTitle extends StatelessWidget {
-  final String title;
-
-  const SettingsTitle({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
       ),
     );
   }
