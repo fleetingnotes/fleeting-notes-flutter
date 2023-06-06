@@ -143,22 +143,11 @@ void main() {
     expect(nextController.text == 'save', isTrue);
   });
 
-  testWidgets('Title field doesnt lose focus when typing',
-      (WidgetTester tester) async {
-    await fnPumpWidget(tester, const MyApp());
-    await goToNewNote(tester);
-    await tester.enterText(find.bySemanticsLabel('Title'), 'test');
-    await tester.pumpAndSettle();
-
-    expect(contentFieldHasFocus(tester), isFalse);
-  });
-
-  testWidgets('New note has focus on content field',
-      (WidgetTester tester) async {
+  testWidgets('New note has focus on title field', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
     await tester.pumpAndSettle();
-    expect(contentFieldHasFocus(tester), isTrue);
+    expect(titleFieldHasFocus(tester), isTrue);
   });
 
   testWidgets('Changing orientation maintains unsaved note',
@@ -188,7 +177,7 @@ void main() {
     expect(find.text('content'), findsOneWidget);
   });
 
-  testWidgets('New note with source preview has focus on content field',
+  testWidgets('New note with source preview has focus on title field',
       (WidgetTester tester) async {
     var mockSupabase = getBaseMockSupabaseDB();
     when(() => mockSupabase.getUrlMetadata(any())).thenAnswer((_) =>
@@ -200,7 +189,8 @@ void main() {
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
     await goToNewNote(tester, source: 'https://test.test');
     await tester.pumpAndSettle(const Duration(seconds: 3));
-    expect(contentFieldHasFocus(tester), isTrue);
+
+    expect(titleFieldHasFocus(tester), isTrue);
   });
 
   testWidgets('auth change refreshes current note',
@@ -307,13 +297,11 @@ void main() {
   });
 }
 
-bool? contentFieldHasFocus(WidgetTester tester) {
+bool? titleFieldHasFocus(WidgetTester tester) {
   return tester
       .widget<TextField>(find.ancestor(
-          of: find.bySemanticsLabel('Start writing your thoughts...'),
-          matching: find.byType(TextField)))
-      .focusNode
-      ?.hasFocus;
+          of: find.bySemanticsLabel('Title'), matching: find.byType(TextField)))
+      .autofocus;
 }
 
 Future<void> createSavedNote(WidgetTester tester, String text) async {

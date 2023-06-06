@@ -87,9 +87,10 @@ class NoteUtils {
     var allNotes = await db.getAllNotes();
     // update backlinks
     List<Note> updatedBacklinks = [];
+    var titleLink = '[[${oldNote.title}]]';
     for (var n in allNotes) {
-      if (n.content.contains('[[${oldNote.title}]]')) {
-        n.content = n.content.replaceAll(r, '[[${newNote.title}]]');
+      if (n.content.contains(titleLink)) {
+        n.content = n.content.replaceAll(titleLink, '[[${newNote.title}]]');
         updatedBacklinks.add(n);
       }
     }
