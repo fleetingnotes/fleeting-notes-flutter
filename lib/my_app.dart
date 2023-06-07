@@ -170,8 +170,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
               .listenable(keys: ['dark-mode', 'text-scale-factor']),
           builder: (context, Box box, _) {
             final bool isDarkMode = box.get('dark-mode', defaultValue: false);
-            final double textScale =
-                box.get('text-scale-factor', defaultValue: 1.0);
+            final double textScale = box.get('text-scale-factor') ?? 1.0;
             return MaterialApp.router(
               title: 'Fleeting Notes',
               builder: (context, child) {

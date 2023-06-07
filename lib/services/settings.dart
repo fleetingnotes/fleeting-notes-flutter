@@ -12,7 +12,6 @@ class Settings {
     "save-delay-ms": 1000,
     "max-attachment-size-mb": 10,
     "max-attachment-size-mb-premium": 25,
-    "text-scale-factor": 1.0,
   };
   Map<String, Type> settingsMap = {
     // user settings
