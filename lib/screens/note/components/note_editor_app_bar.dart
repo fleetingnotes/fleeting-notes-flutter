@@ -30,7 +30,8 @@ class NoteEditorAppBar extends ConsumerWidget {
 
   void _onShare(BuildContext context) async {
     if (kIsWeb) {
-      await Clipboard.setData(ClipboardData(text: contentController?.text));
+      await Clipboard.setData(
+          ClipboardData(text: contentController?.text ?? ''));
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         behavior: SnackBarBehavior.floating,
         content: Text("Copied Note Content"),
@@ -68,10 +69,10 @@ class NoteEditorAppBar extends ConsumerWidget {
           if (onBacklinks != null)
             OutlinedButton(
               onPressed: onBacklinks,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(Icons.link),
                     SizedBox(width: 8),
                     Text('Backlinks'),

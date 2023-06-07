@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/screens/search/components/search_bar.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -10,7 +11,6 @@ import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
 import '../../utils/responsive.dart';
 import 'components/modify_notes_bar.dart';
-import 'components/search_bar.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({
@@ -188,7 +188,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: SearchBar(
+                        child: CustomSearchBar(
                           onMenu: db.openDrawer,
                           controller: queryController,
                           focusNode: widget.searchFocusNode,

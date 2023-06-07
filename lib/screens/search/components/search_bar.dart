@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/search_query.dart';
 import '../../../utils/responsive.dart';
 
-class SearchBar extends ConsumerStatefulWidget {
-  const SearchBar({
+class CustomSearchBar extends ConsumerStatefulWidget {
+  const CustomSearchBar({
     Key? key,
     required this.onMenu,
     this.controller,
@@ -19,10 +19,10 @@ class SearchBar extends ConsumerStatefulWidget {
   final FocusNode? focusNode;
 
   @override
-  ConsumerState<SearchBar> createState() => _SearchBarState();
+  ConsumerState<CustomSearchBar> createState() => _CustomSearchBarState();
 }
 
-class _SearchBarState extends ConsumerState<SearchBar> {
+class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
   bool maintainFocus = false;
   bool hasSearchFocus = false;
   MenuController menuController = MenuController();
