@@ -49,7 +49,7 @@ class NoteUtils {
     final db = ref.read(dbProvider);
     try {
       var oldNote = await db.getNoteById(note.id);
-      await _checkTitle(note.id, note.title);
+      await _checkTitle(context, note.id, note.title);
       bool isSaveSuccess = await db.upsertNotes([note], setModifiedAt: true);
       if (!isSaveSuccess) {
         throw FleetingNotesException('Failed to save note');
@@ -74,10 +74,12 @@ class NoteUtils {
 
   Future<List<Note>> updateBacklinks(
       BuildContext context, Note? oldNote, Note newNote) async {
+    RegExp r = RegExp('[${Note.invalidChars}]');
     if (oldNote == null ||
         oldNote.title == newNote.title ||
         oldNote.title.isEmpty ||
-        newNote.title.isEmpty) {
+        newNote.title.isEmpty ||
+        r.hasMatch(newNote.title)) {
       return [];
     }
 
@@ -85,10 +87,10 @@ class NoteUtils {
     var allNotes = await db.getAllNotes();
     // update backlinks
     List<Note> updatedBacklinks = [];
+    var titleLink = '[[${oldNote.title}]]';
     for (var n in allNotes) {
-      RegExp r = RegExp('\\[\\[${oldNote.title}\\]\\]', multiLine: true);
-      if (r.hasMatch(n.content)) {
-        n.content = n.content.replaceAll(r, '[[${newNote.title}]]');
+      if (n.content.contains(titleLink)) {
+        n.content = n.content.replaceAll(titleLink, '[[${newNote.title}]]');
         updatedBacklinks.add(n);
       }
     }
@@ -197,7 +199,8 @@ class NoteUtils {
   }
 
   // helpers
-  Future<void> _checkTitle(id, title) async {
+  Future<void> _checkTitle(
+      BuildContext context, String id, String title) async {
     final db = ref.read(dbProvider);
     if (title == '') return;
 
@@ -206,10 +209,10 @@ class NoteUtils {
     final titleExists = await db.titleExists(id, title);
 
     if (invalidMatch != null) {
-      throw FleetingNotesException(
-          r'Title cannot contain [, ], #, *, :, ^, \, /');
+      _showSnackbar(context,
+          r'Warning: Title contains invalid filename characters:  [, ], #, *, :, ^, \, /');
     } else if (titleExists) {
-      throw FleetingNotesException('Title `$title` already exists');
+      _showSnackbar(context, 'Warning: Title `$title` already exists');
     }
   }
 

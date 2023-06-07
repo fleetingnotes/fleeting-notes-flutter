@@ -105,14 +105,17 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
   Widget build(BuildContext context) {
     final m = widget.metadata;
     if (m != null) {
-      return SourcePreview(
-        metadata: m,
-        onPressed: () => onPressedPreview(m.url),
-        onClear: widget.onClearSource,
+      return ExcludeFocusTraversal(
+        child: SourcePreview(
+          metadata: m,
+          onPressed: () => onPressedPreview(m.url),
+          onClear: widget.onClearSource,
+        ),
       );
     }
     return TextField(
         focusNode: focusNode,
+        textInputAction: TextInputAction.next,
         contextMenuBuilder: (context, editableTextState) {
           SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
             controller.selection = TextSelection(

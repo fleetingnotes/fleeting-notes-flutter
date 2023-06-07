@@ -115,9 +115,11 @@ class Database {
   }
 
   Future<Note?> getNoteByTitle(String title) async {
+    // When updating this function ensure that latest note gets returned
+    // this is important for when user creates new note with same title
     if (title.isEmpty) return null;
     var allNotes = await getAllNotes();
-    Note? note = allNotes.firstWhereOrNull((note) {
+    Note? note = allNotes.lastWhereOrNull((note) {
       return note.title == title;
     });
     return note;
