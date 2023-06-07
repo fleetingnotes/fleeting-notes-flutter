@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/Note.dart';
 
@@ -143,7 +145,7 @@ class _NoteCardState extends State<NoteCard> {
   }
 }
 
-class CustomRichText extends StatelessWidget {
+class CustomRichText extends ConsumerWidget {
   const CustomRichText({
     Key? key,
     required this.text,
@@ -193,7 +195,13 @@ class CustomRichText extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final textScale = settings.get('text-scale-factor') ?? 1.0;
+    TextStyle updatedStyle = style ?? const TextStyle();
+    double newFontSize = (updatedStyle.fontSize ?? 1.0) * textScale;
+    updatedStyle = updatedStyle.copyWith(fontSize: newFontSize);
+
     return RichText(
       text: TextSpan(
           children: highlightString(
@@ -201,7 +209,7 @@ class CustomRichText extends StatelessWidget {
         (sQuery != null && sQuery!.searchByTitle) ? sQuery!.query : '',
         text,
         highlightStyle,
-        style,
+        updatedStyle,
       )),
       maxLines: maxLines,
       overflow: TextOverflow.ellipsis,

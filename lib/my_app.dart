@@ -169,19 +169,23 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
           valueListenable: db.settings.box
               .listenable(keys: ['dark-mode', 'text-scale-factor']),
           builder: (context, Box box, _) {
+            final bool isDarkMode = box.get('dark-mode', defaultValue: false);
+            final double textScale =
+                box.get('text-scale-factor', defaultValue: 1.0);
             return MaterialApp.router(
               title: 'Fleeting Notes',
+              builder: (context, child) {
+                final MediaQueryData data = MediaQuery.of(context);
+                return MediaQuery(
+                  child: child ?? Container(),
+                  data: data.copyWith(textScaleFactor: textScale),
+                );
+              },
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
                 useMaterial3: true,
                 colorSchemeSeed: Colors.blue,
-                brightness: box.get('dark-mode', defaultValue: false)
-                    ? Brightness.dark
-                    : Brightness.light,
-                textTheme: Theme.of(context).textTheme.apply(
-                      fontSizeFactor:
-                          box.get('text-scale-factor', defaultValue: 1.0),
-                    ),
+                brightness: isDarkMode ? Brightness.dark : Brightness.light,
               ),
               routeInformationProvider: router.routeInformationProvider,
               routeInformationParser: router.routeInformationParser,
