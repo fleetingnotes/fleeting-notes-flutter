@@ -1,4 +1,6 @@
 import 'package:fleeting_notes_flutter/my_app.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
+import 'package:flutter/material.dart';
 import 'package:watcher/watcher.dart';
 import 'package:file/file.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
@@ -112,7 +114,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(
             find.descendant(
-                of: find.bySemanticsLabel('Start writing your thoughts...'),
+                of: find.descendant(
+                    of: find.byType(ContentField),
+                    matching: find.byType(TextField)),
                 matching: find.text('a modification', findRichText: true)),
             findsOneWidget);
       },
@@ -151,7 +155,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(
             find.descendant(
-                of: find.bySemanticsLabel('Start writing your thoughts...'),
+                of: find.descendant(
+                    of: find.byType(ContentField),
+                    matching: find.byType(TextField)),
                 matching: find.text('a modification', findRichText: true)),
             findsOneWidget);
       },
@@ -191,7 +197,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(
             find.descendant(
-                of: find.bySemanticsLabel('Start writing your thoughts...'),
+                of: find.descendant(
+                    of: find.byType(ContentField),
+                    matching: find.byType(TextField)),
                 matching: find.text('local mod', findRichText: true)),
             findsOneWidget);
 
@@ -208,7 +216,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(
             find.descendant(
-                of: find.bySemanticsLabel('Start writing your thoughts...'),
+                of: find.descendant(
+                    of: find.byType(ContentField),
+                    matching: find.byType(TextField)),
                 matching: find.text('filesystem mod', findRichText: true)),
             findsOneWidget);
 

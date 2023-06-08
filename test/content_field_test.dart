@@ -11,6 +11,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
@@ -38,7 +39,8 @@ void main() {
     await fnPumpWidget(tester, const MyApp());
     await addNote(tester);
     await clickLinkInContentField(tester);
-    await tester.tap(find.bySemanticsLabel('Title'));
+    await tester.tap(find.descendant(
+        of: find.byType(TitleField), matching: find.byType(TextField)));
     await tester.pumpAndSettle();
     expect(find.byType(LinkPreview), findsNothing);
   }, skip: true);
@@ -48,7 +50,9 @@ void main() {
     await fnPumpWidget(tester, const MyApp());
     await addNote(tester);
     await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), '[[');
+        find.descendant(
+            of: find.byType(ContentField), matching: find.byType(TextField)),
+        '[[');
     await tester.pump();
     expect(find.byType(Suggestions), findsOneWidget);
   });
@@ -58,7 +62,9 @@ void main() {
     await fnPumpWidget(tester, const MyApp());
     await addNote(tester);
     await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), '#');
+        find.descendant(
+            of: find.byType(ContentField), matching: find.byType(TextField)),
+        '#');
     await tester.pump();
     expect(find.byType(Suggestions), findsOneWidget);
   });
@@ -204,9 +210,12 @@ Future<void> setupLinkSuggestions(WidgetTester tester) async {
   await addNote(tester);
 
   // trigger link suggestion
-  await tester.tap(find.bySemanticsLabel('Start writing your thoughts...'));
+  await tester.tap(find.descendant(
+      of: find.byType(ContentField), matching: find.byType(TextField)));
   await tester.enterText(
-      find.bySemanticsLabel('Start writing your thoughts...'), '[[');
+      find.descendant(
+          of: find.byType(ContentField), matching: find.byType(TextField)),
+      '[[');
   await tester.pump();
 }
 
@@ -217,6 +226,8 @@ Future<void> setupSlashSuggestions(WidgetTester tester, FNMocks mocks) async {
   ]);
   await addNote(tester);
   await tester.enterText(
-      find.bySemanticsLabel('Start writing your thoughts...'), '/');
+      find.descendant(
+          of: find.byType(ContentField), matching: find.byType(TextField)),
+      '/');
   await tester.pump();
 }

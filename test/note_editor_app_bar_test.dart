@@ -3,6 +3,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/ContentField/cont
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/backlinks_drawer.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
@@ -59,7 +60,9 @@ void main() {
     expect(find.text('Backlinks', findRichText: true), findsOneWidget);
     expect(
         find.descendant(
-            of: find.bySemanticsLabel('Title'), matching: find.text('link')),
+            of: find.descendant(
+                of: find.byType(TitleField), matching: find.byType(TextField)),
+            matching: find.text('link')),
         findsOneWidget);
   });
 
@@ -80,7 +83,9 @@ void main() {
     expect(find.text('Backlinks', findRichText: true), findsNothing);
     expect(
         find.descendant(
-            of: find.bySemanticsLabel('Title'), matching: find.text('link')),
+            of: find.descendant(
+                of: find.byType(TitleField), matching: find.byType(TextField)),
+            matching: find.text('link')),
         findsNothing);
     expect(
         find.descendant(
