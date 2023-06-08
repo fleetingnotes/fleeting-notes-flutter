@@ -201,10 +201,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         child: FilledButton(
                           onPressed: widget.addNote,
                           onLongPress: widget.recordNote,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.0),
                             child: Row(
-                              children: const [
+                              children: [
                                 Icon(Icons.add),
                                 SizedBox(width: 8),
                                 Text('New note'),
