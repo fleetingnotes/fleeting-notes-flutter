@@ -191,135 +191,139 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
     final currUser = db.supabase.currUser;
-    return Center(
-      child: Column(
-        children: [
-          AppBar(
-            elevation: (Responsive.isMobile(context)) ? null : dialogElevation,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: Navigator.of(context).pop,
-            ),
-            title: const Text('Settings'),
+    return ScaffoldMessenger(
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: Navigator.of(context).pop,
           ),
-          Expanded(
-            child: SingleChildScrollView(
-                controller: ScrollController(),
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    (isLoggedIn && currUser != null)
-                        ? Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: InfoCard(
-                                title: 'Matt Wants Your Feedback!',
-                                description:
-                                    "Need Help? Bugs? Feature Requests? Feedback sent through here is directly forwarded to my email (matthew@fleetingnotes.app)",
-                                buttonText: "Send me your feedback",
-                                onPressed: () {
-                                  Wiredash.of(context).show(
-                                      inheritMaterialTheme: true,
-                                      options: WiredashFeedbackOptions(
-                                          labels: const [
-                                            // Take the label ids from your project console
-                                            // https://console.wiredash.io/ -> Settings -> Labels
-                                            Label(
-                                              id: 'lbl-r65egsdf',
-                                              title: 'Bug',
-                                            ),
-                                            Label(
-                                              id: 'lbl-6543df23s',
-                                              title: 'Feature Request',
-                                            ),
-                                            Label(
-                                              id: 'lbl-2r98yas4',
-                                              title: 'Praise',
-                                            ),
-                                          ],
-                                          collectMetaData: (metadata) async {
-                                            PackageInfo packageInfo =
-                                                await PackageInfo
-                                                    .fromPlatform();
-                                            return metadata
-                                              ..userEmail = currUser.email
-                                              ..userId = currUser.id
-                                              ..custom['supabaseEmail'] =
-                                                  currUser.email
-                                              ..buildNumber =
-                                                  packageInfo.buildNumber
-                                              ..buildVersion =
-                                                  packageInfo.version;
-                                          }));
-                                }),
-                          )
-                        : const SizedBox.shrink(),
-                    const SettingsTitle(title: "Account"),
-                    (isLoggedIn)
-                        ? Account(
-                            email: email,
-                            onLogout: onLogoutPress,
-                            onForceSync: onForceSyncPress,
-                            onDeleteAccount: onDeleteAccountPress,
-                            onEnableEncryption: (encryptionEnabled)
-                                ? null
-                                : onEnableEncryptionPress,
-                          )
-                        : Auth(onLogin: (e) {
-                            getEncryptionKey();
-                            setState(() {
-                              isLoggedIn = true;
-                              email = e;
-                            });
-                          }),
-                    if (isLoggedIn) const PluginCommandSetting(),
-                    const SizedBox(height: 16),
-                    const SettingsTitle(title: "Backup"),
-                    Backup(
-                      backupOption: backupOption,
-                      onImportPress: onImportPress,
-                      onExportPress: onExportPress,
-                      onBackupOptionChange: onBackupDropdownChange,
-                    ),
-                    (!kIsWeb)
-                        ? Column(
-                            children: [
-                              const SettingsTitle(title: "Sync"),
-                              LocalSyncSetting(
-                                settings: db.settings,
-                                getAllNotes: db.getAllNotes,
-                              ),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                    const SizedBox(height: 8),
-                    const SettingsTitle(title: "Other Settings"),
-                    const SettingsItemSwitch(
-                        settingsKey: 'dark-mode', name: "Dark mode"),
-                    const SettingsItemSwitch(
-                        settingsKey: 'append-same-source',
-                        name: 'Append same source',
-                        defaultValue: true,
-                        description:
-                            "Append shared notes with the same source"),
-                    const SettingsItemSwitch(
-                        settingsKey: 'search-is-list-view',
-                        name: 'Enable list view',
-                        defaultValue: false,
-                        description:
-                            "Toggles the search screen between list and grid view"),
-                    const SettingsItemSlider(
-                      settingsKey: 'text-scale-factor',
-                      name: "Text scale factor",
-                      description:
-                          "Magnifies the text based on a factor (default: 1)",
-                    ),
-                    const SizedBox(height: 24),
-                    const LegalLinks(),
-                  ],
-                )),
-          )
-        ],
+          title: const Text('Settings'),
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                    controller: ScrollController(),
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        (isLoggedIn && currUser != null)
+                            ? Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: InfoCard(
+                                    title: 'Matt Wants Your Feedback!',
+                                    description:
+                                        "Need Help? Bugs? Feature Requests? Feedback sent through here is directly forwarded to my email (matthew@fleetingnotes.app)",
+                                    buttonText: "Send me your feedback",
+                                    onPressed: () {
+                                      Wiredash.of(context).show(
+                                          inheritMaterialTheme: true,
+                                          options: WiredashFeedbackOptions(
+                                              labels: const [
+                                                // Take the label ids from your project console
+                                                // https://console.wiredash.io/ -> Settings -> Labels
+                                                Label(
+                                                  id: 'lbl-r65egsdf',
+                                                  title: 'Bug',
+                                                ),
+                                                Label(
+                                                  id: 'lbl-6543df23s',
+                                                  title: 'Feature Request',
+                                                ),
+                                                Label(
+                                                  id: 'lbl-2r98yas4',
+                                                  title: 'Praise',
+                                                ),
+                                              ],
+                                              collectMetaData:
+                                                  (metadata) async {
+                                                PackageInfo packageInfo =
+                                                    await PackageInfo
+                                                        .fromPlatform();
+                                                return metadata
+                                                  ..userEmail = currUser.email
+                                                  ..userId = currUser.id
+                                                  ..custom['supabaseEmail'] =
+                                                      currUser.email
+                                                  ..buildNumber =
+                                                      packageInfo.buildNumber
+                                                  ..buildVersion =
+                                                      packageInfo.version;
+                                              }));
+                                    }),
+                              )
+                            : const SizedBox.shrink(),
+                        const SettingsTitle(title: "Account"),
+                        (isLoggedIn)
+                            ? Account(
+                                email: email,
+                                onLogout: onLogoutPress,
+                                onForceSync: onForceSyncPress,
+                                onDeleteAccount: onDeleteAccountPress,
+                                onEnableEncryption: (encryptionEnabled)
+                                    ? null
+                                    : onEnableEncryptionPress,
+                              )
+                            : Auth(onLogin: (e) {
+                                getEncryptionKey();
+                                setState(() {
+                                  isLoggedIn = true;
+                                  email = e;
+                                });
+                              }),
+                        if (isLoggedIn) const PluginCommandSetting(),
+                        const SizedBox(height: 16),
+                        const SettingsTitle(title: "Backup"),
+                        Backup(
+                          backupOption: backupOption,
+                          onImportPress: onImportPress,
+                          onExportPress: onExportPress,
+                          onBackupOptionChange: onBackupDropdownChange,
+                        ),
+                        (!kIsWeb)
+                            ? Column(
+                                children: [
+                                  const SettingsTitle(title: "Sync"),
+                                  LocalSyncSetting(
+                                    settings: db.settings,
+                                    getAllNotes: db.getAllNotes,
+                                  ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
+                        const SizedBox(height: 8),
+                        const SettingsTitle(title: "Other Settings"),
+                        const SettingsItemSwitch(
+                            settingsKey: 'dark-mode', name: "Dark mode"),
+                        const SettingsItemSwitch(
+                            settingsKey: 'append-same-source',
+                            name: 'Append same source',
+                            defaultValue: true,
+                            description:
+                                "Append shared notes with the same source"),
+                        const SettingsItemSwitch(
+                            settingsKey: 'search-is-list-view',
+                            name: 'Enable list view',
+                            defaultValue: false,
+                            description:
+                                "Toggles the search screen between list and grid view"),
+                        const SettingsItemSlider(
+                          settingsKey: 'text-scale-factor',
+                          name: "Text scale factor",
+                          description:
+                              "Magnifies the text based on a factor (default: 1)",
+                        ),
+                        const SizedBox(height: 24),
+                        const LegalLinks(),
+                      ],
+                    )),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
