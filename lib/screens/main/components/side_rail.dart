@@ -1,5 +1,3 @@
-import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
-import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

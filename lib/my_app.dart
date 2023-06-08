@@ -40,7 +40,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   void refreshApp(AuthChangeEvent? event) async {
     final db = ref.read(dbProvider);
     await db.refreshApp(ref);
-    router.goNamed('home');
+    if (!router.location.contains('settings')) router.goNamed('home');
   }
 
   @override

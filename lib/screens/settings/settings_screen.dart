@@ -6,7 +6,6 @@ import 'package:fleeting_notes_flutter/screens/settings/components/settings_item
 import 'package:fleeting_notes_flutter/screens/settings/components/settings_item_switch.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/settings_title.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:fleeting_notes_flutter/widgets/info_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -18,7 +17,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wiredash/wiredash.dart';
-import '../../utils/responsive.dart';
 import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
