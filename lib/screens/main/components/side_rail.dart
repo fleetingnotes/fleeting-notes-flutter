@@ -1,13 +1,8 @@
-import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
-import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 void onSetting(BuildContext context) {
-  showDialog(
-    context: context,
-    useSafeArea: false,
-    builder: (context) => const DynamicDialog(child: SettingsScreen()),
-  );
+  context.goNamed('settings');
 }
 
 class SideRail extends StatelessWidget {

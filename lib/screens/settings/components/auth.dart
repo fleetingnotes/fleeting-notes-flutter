@@ -34,6 +34,7 @@ class _AuthState extends ConsumerState<Auth> {
 
   Future<void> onLoginPress(String email, String password) async {
     final db = ref.read(dbProvider);
+    final noteUtils = ref.read(noteUtilsProvider);
     try {
       var user = await db.login(email, password);
       var subTier = await db.supabase.getSubscriptionTier();
@@ -53,25 +54,20 @@ class _AuthState extends ConsumerState<Auth> {
       }
       widget.onLogin?.call(email);
     } on FleetingNotesException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.message),
-        duration: const Duration(seconds: 2),
-      ));
+      noteUtils.showSnackbar(context, e.message);
     }
   }
 
   Future<void> _register(String email, String password) async {
     final db = ref.read(dbProvider);
+    final noteUtils = ref.read(noteUtilsProvider);
     try {
       await db.register(email, password);
       await db.login(email, password);
       await db.setInitialNotes().catchError((e) {});
       widget.onLogin?.call(email);
     } on FleetingNotesException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.message),
-        duration: const Duration(seconds: 2),
-      ));
+      noteUtils.showSnackbar(context, e.message);
     }
   }
 
