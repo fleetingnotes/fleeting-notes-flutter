@@ -21,14 +21,14 @@ class NoteUtils {
     final db = ref.read(dbProvider);
     var note = await db.getNoteById(noteId);
     if (note == null) {
-      _showSnackbar(context, 'Could not find note');
+      showSnackbar(context, 'Could not find note');
       return;
     }
     note.isShareable = true;
     await db.upsertNotes([note]);
     Clipboard.setData(ClipboardData(
         text: p.join("https://my.fleetingnotes.app/", "?note=${note.id}")));
-    _showSnackbar(context, 'URL copied to clipboard');
+    showSnackbar(context, 'URL copied to clipboard');
   }
 
   Future<bool> handleDeleteNote(BuildContext context, List<Note> notes) async {
@@ -40,7 +40,7 @@ class NoteUtils {
       }
       return true;
     } on FleetingNotesException catch (e) {
-      _showSnackbar(context, e.message);
+      showSnackbar(context, e.message);
       return false;
     }
   }
@@ -58,7 +58,7 @@ class NoteUtils {
         await updateBacklinks(context, oldNote, note);
       }
     } on FleetingNotesException catch (e) {
-      _showSnackbar(context, e.message);
+      showSnackbar(context, e.message);
       return;
     }
   }
@@ -96,7 +96,7 @@ class NoteUtils {
     }
     if (await db.upsertNotes(updatedBacklinks, setModifiedAt: true)) {
       if (updatedBacklinks.isNotEmpty) {
-        _showSnackbar(context, '${updatedBacklinks.length} link(s) updated');
+        showSnackbar(context, '${updatedBacklinks.length} link(s) updated');
       }
       return updatedBacklinks;
     } else {
@@ -111,7 +111,7 @@ class NoteUtils {
       return await db.uploadAttachment(
           filename: filename, fileBytes: fileBytes);
     } on FleetingNotesException catch (e) {
-      _showSnackbar(context, e.message);
+      showSnackbar(context, e.message);
     }
     return null;
   }
@@ -172,7 +172,7 @@ class NoteUtils {
         }
       }
     } on FleetingNotesException catch (e) {
-      _showSnackbar(context, e.message);
+      showSnackbar(context, e.message);
     }
   }
 
@@ -209,14 +209,14 @@ class NoteUtils {
     final titleExists = await db.titleExists(id, title);
 
     if (invalidMatch != null) {
-      _showSnackbar(context,
+      showSnackbar(context,
           r'Warning: Title contains invalid filename characters:  [, ], #, *, :, ^, \, /');
     } else if (titleExists) {
-      _showSnackbar(context, 'Warning: Title `$title` already exists');
+      showSnackbar(context, 'Warning: Title `$title` already exists');
     }
   }
 
-  void _showSnackbar(BuildContext context, String text) {
+  void showSnackbar(BuildContext context, String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       behavior: SnackBarBehavior.floating,
       content: Text(text),

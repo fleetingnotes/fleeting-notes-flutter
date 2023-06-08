@@ -90,20 +90,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void onExportPress() async {
     final db = ref.read(dbProvider);
+    final noteUtils = ref.read(noteUtilsProvider);
     List<Note> notes = await db.getAllNotes();
     if (backupOption == 'Markdown') {
       _downloadNotesAsMarkdownZIP(notes);
     } else {
       _downloadNotesAsJSON(notes);
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Exported ${notes.length} notes'),
-      duration: const Duration(seconds: 2),
-    ));
+    noteUtils.showSnackbar(context, 'Exported ${notes.length} notes');
   }
 
   void onImportPress() async {
     final db = ref.read(dbProvider);
+    final noteUtils = ref.read(noteUtilsProvider);
     await showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -139,10 +138,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     }
     await db.upsertNotes(notes);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Imported ${notes.length} notes'),
-      duration: const Duration(seconds: 2),
-    ));
+    noteUtils.showSnackbar(context, 'Imported ${notes.length} notes');
   }
 
   void onLogoutPress() async {

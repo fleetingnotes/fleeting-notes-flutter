@@ -89,7 +89,7 @@ class SupabaseDB extends SyncTerface {
         return newUser;
       }
     } on AuthException catch (e) {
-      throw FleetingNotesException('Registration failed: ${e.message}');
+      throw FleetingNotesException(e.message);
     }
   }
 
