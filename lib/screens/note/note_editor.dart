@@ -380,11 +380,13 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                     onChanged: onChanged,
                     autofocus: widget.autofocus,
                   ),
-                  SourceContainer(
-                    controller: sourceController,
-                    metadata: sourceMetadata,
-                    onChanged: onChanged,
-                    onClearSource: onClearSource,
+                  ExcludeFocusTraversal(
+                    child: SourceContainer(
+                      controller: sourceController,
+                      metadata: sourceMetadata,
+                      onChanged: onChanged,
+                      onClearSource: onClearSource,
+                    ),
                   ),
                   const Divider(),
                   ContentField(
