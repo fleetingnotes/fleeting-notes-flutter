@@ -130,7 +130,7 @@ void main() {
     // Change to mobile
     resizeToMobile(tester);
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(SearchBar));
+    await tester.tap(find.byType(CustomSearchBar));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.tune), findsOneWidget);
     expect(find.byIcon(Icons.arrow_back), findsOneWidget);

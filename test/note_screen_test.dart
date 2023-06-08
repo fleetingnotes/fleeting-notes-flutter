@@ -7,6 +7,7 @@ import 'package:fleeting_notes_flutter/screens/note/components/ContentField/cont
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:fleeting_notes_flutter/widgets/note_card.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,8 @@ void main() {
     await goToNewNote(tester);
     await clickLinkInContentField(tester);
     await tester.tapAt(tester
-        .getTopRight(find.bySemanticsLabel('Start writing your thoughts...'))
+        .getTopRight(find.descendant(
+            of: find.byType(ContentField), matching: find.byType(TextField)))
         .translate(-20, 10));
     await tester.pumpAndSettle();
     expect(find.byType(LinkPreview), findsNothing);
@@ -61,7 +63,9 @@ void main() {
     await goToNewNote(tester);
     // auto save
     await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), 'save');
+        find.descendant(
+            of: find.byType(ContentField), matching: find.byType(TextField)),
+        'save');
     await tester.pumpAndSettle();
     expect(mocks.settings.get('unsaved-note'), isNotNull);
     await tester.pumpAndSettle(const Duration(seconds: 3));
@@ -72,7 +76,9 @@ void main() {
     var mocks = await fnPumpWidget(tester, const MyApp());
     await createSavedNote(tester, 'save');
     await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), 'save asdf');
+        find.descendant(
+            of: find.byType(ContentField), matching: find.byType(TextField)),
+        'save asdf');
     // auto save
     await tester.pumpAndSettle();
     expect(mocks.settings.get('unsaved-note'), isNotNull);
@@ -214,11 +220,7 @@ void main() {
       await goToNewNote(tester,
           source: 'source', content: '', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
-      expect(
-          find.descendant(
-              of: find.bySemanticsLabel('Start writing your thoughts...'),
-              matching: find.text('hello world', findRichText: true)),
-          findsOneWidget);
+      expect(getContentFieldText(tester) == 'hello world', isTrue);
     });
     testWidgets('Appends content with same source',
         (WidgetTester tester) async {
@@ -228,11 +230,7 @@ void main() {
       await goToNewNote(tester,
           source: 'source', content: 'pp', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
-      expect(
-          find.descendant(
-              of: find.bySemanticsLabel('Start writing your thoughts...'),
-              matching: find.text('hello world\npp', findRichText: true)),
-          findsOneWidget);
+      expect(getContentFieldText(tester) == 'hello world\npp', isTrue);
     });
     testWidgets('Appends content with other note open',
         (WidgetTester tester) async {
@@ -244,11 +242,7 @@ void main() {
       await goToNewNote(tester,
           source: 'source', content: 'pp', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
-      expect(
-          find.descendant(
-              of: find.bySemanticsLabel('Start writing your thoughts...'),
-              matching: find.text('hello world\npp', findRichText: true)),
-          findsOneWidget);
+      expect(getContentFieldText(tester) == 'hello world\npp', isTrue);
     });
     testWidgets('Appends content with same note open',
         (WidgetTester tester) async {
@@ -259,11 +253,7 @@ void main() {
           source: 'source', content: 'pp', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
       expect(mocks.settings.get('unsaved-note'), isNotNull);
-      expect(
-          find.descendant(
-              of: find.bySemanticsLabel('Start writing your thoughts...'),
-              matching: find.text('hello world\npp', findRichText: true)),
-          findsOneWidget);
+      expect(getContentFieldText(tester) == 'hello world\npp', isTrue);
     });
   });
 
@@ -298,10 +288,11 @@ void main() {
 }
 
 bool? titleFieldHasFocus(WidgetTester tester) {
-  return tester
-      .widget<TextField>(find.ancestor(
-          of: find.bySemanticsLabel('Title'), matching: find.byType(TextField)))
-      .autofocus;
+  return tester.widget<TitleField>(find.byType(TitleField)).autofocus;
+}
+
+String? getContentFieldText(WidgetTester tester) {
+  return tester.widget<ContentField>(find.byType(ContentField)).controller.text;
 }
 
 Future<void> createSavedNote(WidgetTester tester, String text) async {

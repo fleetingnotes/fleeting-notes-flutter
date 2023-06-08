@@ -3,7 +3,9 @@ import 'package:file/memory.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/screens/main/main_screen.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_app_bar.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
@@ -69,13 +71,13 @@ Future<FNMocks> fnPumpWidget(
 
 // resizing
 Future<void> resizeToDesktop(WidgetTester tester) async {
-  tester.binding.window.physicalSizeTestValue = const Size(1000, 500);
-  tester.binding.window.devicePixelRatioTestValue = 1.0;
+  tester.view.physicalSize = const Size(1000, 500);
+  tester.view.devicePixelRatio = 1.0;
 }
 
 Future<void> resizeToMobile(WidgetTester tester) async {
-  tester.binding.window.physicalSizeTestValue = const Size(300, 500);
-  tester.binding.window.devicePixelRatioTestValue = 1.0;
+  tester.view.physicalSize = const Size(300, 500);
+  tester.view.devicePixelRatio = 1.0;
 }
 
 // screen interactions
@@ -122,11 +124,16 @@ Future<void> modifyCurrentNote(
   bool closeDialog = false,
 }) async {
   if (title != null) {
-    await tester.enterText(find.bySemanticsLabel('Title'), title);
+    await tester.enterText(
+        find.descendant(
+            of: find.byType(TitleField), matching: find.byType(TextField)),
+        title);
   }
   if (content != null) {
     await tester.enterText(
-        find.bySemanticsLabel('Start writing your thoughts...'), content);
+        find.descendant(
+            of: find.byType(ContentField), matching: find.byType(TextField)),
+        content);
   }
   if (source != null) {
     await tester.enterText(find.bySemanticsLabel('Source'), source);
@@ -209,12 +216,15 @@ Future<void> attemptLogin(WidgetTester tester) async {
 Future<void> clickLinkInContentField(WidgetTester tester,
     {String linkName = "hello world"}) async {
   await tester.enterText(
-      find.bySemanticsLabel('Start writing your thoughts...'), '[[$linkName]]');
+      find.descendant(
+          of: find.byType(ContentField), matching: find.byType(TextField)),
+      '[[$linkName]]');
   await tester.pump();
   // await tester.tap(find.byIcon(Icons.save));
   await tester.pumpAndSettle();
   await tester.tapAt(tester
-      .getTopLeft(find.bySemanticsLabel('Start writing your thoughts...'))
+      .getTopLeft(find.descendant(
+          of: find.byType(ContentField), matching: find.byType(TextField)))
       .translate(20, 10));
   await tester.pumpAndSettle();
 }
