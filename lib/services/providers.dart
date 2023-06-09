@@ -35,6 +35,7 @@ final searchProvider = StateNotifierProvider<SearchNotifier, SearchQuery?>(
 final noteHistoryProvider =
     StateNotifierProvider<NoteHistoryNotifier, NoteHistory>(
         (ref) => NoteHistoryNotifier());
+final noteLoadingProvider = StateProvider<bool>((ref) => false);
 final noteUtilsProvider = Provider<NoteUtils>((ref) {
   return NoteUtils(ref);
 });

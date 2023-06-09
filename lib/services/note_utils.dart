@@ -152,7 +152,7 @@ class NoteUtils {
     }
   }
 
-  void onAddAttachment(
+  Future<void> onAddAttachment(
       BuildContext context, Note note, String filename, Uint8List? bytes,
       {TextEditingController? controller}) async {
     final db = ref.read(dbProvider);
