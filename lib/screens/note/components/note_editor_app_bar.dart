@@ -50,6 +50,7 @@ class NoteEditorAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final noteUtils = ref.watch(noteUtilsProvider);
+    final noteLoading = ref.watch(noteLoadingProvider);
     final n = note;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -57,12 +58,23 @@ class NoteEditorAppBar extends ConsumerWidget {
         children: [
           IconButton(onPressed: onClose, icon: const Icon(Icons.close)),
           const Spacer(),
+          if (noteLoading)
+            Container(
+              height: 20,
+              width: 20,
+              child: const CircularProgressIndicator(strokeWidth: 3),
+              margin: const EdgeInsets.only(right: 8),
+            ),
           NotePopupMenu(
             note: note,
-            onAddAttachment: (String fn, Uint8List? fb) {
+            onAddAttachment: (String fn, Uint8List? fb) async {
               if (n == null) return;
-              noteUtils.onAddAttachment(context, n, fn, fb,
+              final noteLoadingNotifier =
+                  ref.read(noteLoadingProvider.notifier);
+              noteLoadingNotifier.update((_) => true);
+              await noteUtils.onAddAttachment(context, n, fn, fb,
                   controller: contentController);
+              noteLoadingNotifier.update((_) => false);
             },
             onShare: () => _onShare(context),
           ),

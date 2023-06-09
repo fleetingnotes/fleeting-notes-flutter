@@ -74,6 +74,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   void initSourceMetadata(UrlMetadata metadata) async {
     final noteUtils = ref.read(noteUtilsProvider);
+    final noteLoading = ref.read(noteLoadingProvider.notifier);
     if (metadata.url.isNotEmpty) {
       if (!metadata.isEmpty) {
         if (!mounted) return;
@@ -85,12 +86,14 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         if (!kIsWeb) {
           var sourceFile = File(source);
           if (sourceFile.existsSync()) {
+            noteLoading.update((_) => true);
             var bytes = await sourceFile.readAsBytes();
             source =
                 (await noteUtils.uploadAttachment(context, fileBytes: bytes)) ??
                     source;
             sourceController.text = source;
             onChanged();
+            noteLoading.update((_) => false);
           }
         }
         updateSourceMetadata(source);
@@ -305,9 +308,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   void onCommandRun(String alias) async {
     final noteUtils = ref.read(noteUtilsProvider);
+    final noteLoading = ref.read(noteLoadingProvider.notifier);
     String body = '';
     var note = getNote();
     try {
+      noteLoading.update((_) => true);
       final res = await noteUtils.callPluginFunction(note, alias);
       if (!mounted) return;
       body = res.body;
@@ -342,6 +347,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       contentController.selection = TextSelection.fromPosition(
           TextPosition(offset: currIndex + body.length));
     }
+    noteLoading.update((_) => false);
   }
 
   @override
