@@ -1,5 +1,6 @@
 import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({
@@ -26,10 +27,17 @@ class SideMenu extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                        child: Text(
-                      'Fleeting Notes',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    )),
+                        child: FutureBuilder<PackageInfo>(
+                            future: PackageInfo.fromPlatform(),
+                            builder: (context, snapshot) {
+                              var text = 'Fleeting Notes';
+                              if (snapshot.hasData) {
+                                text += ' v${snapshot.data?.version}';
+                              }
+                              return Text(text,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium);
+                            })),
                     IconButton(
                       onPressed: closeDrawer,
                       icon: const Icon(Icons.menu_open),
