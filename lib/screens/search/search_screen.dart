@@ -19,6 +19,7 @@ class SearchScreen extends ConsumerStatefulWidget {
     this.hasSearchFocus = false,
     this.addNote,
     this.recordNote,
+    this.scrollController,
     // keep track of notes selected
   }) : super(key: key);
 
@@ -26,6 +27,7 @@ class SearchScreen extends ConsumerStatefulWidget {
   final bool hasSearchFocus;
   final VoidCallback? addNote;
   final VoidCallback? recordNote;
+  final ScrollController? scrollController;
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -33,7 +35,7 @@ class SearchScreen extends ConsumerStatefulWidget {
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   StreamSubscription? noteChangeStream;
-  final ScrollController scrollController = ScrollController();
+  ScrollController scrollController = ScrollController();
   final TextEditingController queryController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
   var selectedNotes = <Note>[];
@@ -74,6 +76,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final db = ref.read(dbProvider);
     final sq = ref.read(searchProvider);
     final noteUtils = ref.read(noteUtilsProvider);
+    scrollController = widget.scrollController ?? scrollController;
     // refresh unsaved note
     noteUtils.setUnsavedNote(context, null, saveUnsaved: true);
     loadNotes();

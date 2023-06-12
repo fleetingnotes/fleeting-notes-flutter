@@ -4,22 +4,18 @@ class NoteFAB extends StatelessWidget {
   const NoteFAB({
     super.key,
     required this.onPressed,
-    this.onLongPress,
+    this.isElevated = true,
   });
 
   final VoidCallback onPressed;
-  final VoidCallback? onLongPress;
+  final bool isElevated;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: onLongPress,
-      child: FloatingActionButton(
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: const Icon(Icons.add),
-        onPressed: onPressed,
-      ),
+    return FloatingActionButton(
+      elevation: isElevated ? null : 0,
+      child: const Icon(Icons.add),
+      onPressed: onPressed,
     );
   }
 }

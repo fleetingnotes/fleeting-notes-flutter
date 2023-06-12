@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/main/components/fn_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/one_account_dialog.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
@@ -7,6 +8,7 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_menu.dart';
 import 'package:fleeting_notes_flutter/utils/responsive.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
@@ -24,6 +26,11 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
+  final scrollController = ScrollController();
+  bool bottomAppBarVisible = true;
+  FloatingActionButtonLocation get _fabLocation => bottomAppBarVisible
+      ? FloatingActionButtonLocation.endContained
+      : FloatingActionButtonLocation.endFloat;
   FocusNode searchFocusNode = FocusNode();
   Widget? desktopSideWidget;
   bool bannerExists = false;
@@ -44,6 +51,24 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
     attemptRecoverSession();
     handleSiriSuggestions();
+    scrollController.addListener(_listenScroll);
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_listenScroll);
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void _listenScroll() {
+    final ScrollDirection direction =
+        scrollController.position.userScrollDirection;
+    if (direction == ScrollDirection.forward && !bottomAppBarVisible) {
+      setState(() => bottomAppBarVisible = true);
+    } else if (direction == ScrollDirection.reverse && bottomAppBarVisible) {
+      setState(() => bottomAppBarVisible = false);
+    }
   }
 
   void attemptRecoverSession() async {
@@ -124,6 +149,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    final isMobile = Responsive.isMobile(context);
     return Shortcuts(
       shortcuts: mainShortcutMapping,
       child: Actions(
@@ -141,12 +167,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               addNote: addNote,
               closeDrawer: db.closeDrawer,
             ),
-            floatingActionButton: (Responsive.isMobile(context))
-                ? NoteFAB(onPressed: addNote, onLongPress: recordNote)
+            bottomNavigationBar: FNBottomAppBar(
+              isElevated: true,
+              isVisible: isMobile && bottomAppBarVisible,
+            ),
+            floatingActionButtonLocation: _fabLocation,
+            floatingActionButton: (isMobile)
+                ? NoteFAB(onPressed: addNote, isElevated: !bottomAppBarVisible)
                 : null,
             body: SafeArea(
               child: Responsive(
-                mobile: SearchScreen(searchFocusNode: searchFocusNode),
+                mobile: SearchScreen(
+                    searchFocusNode: searchFocusNode,
+                    scrollController: scrollController),
                 tablet: Row(
                   children: [
                     SideRail(addNote: addNote, onMenu: db.openDrawer),
