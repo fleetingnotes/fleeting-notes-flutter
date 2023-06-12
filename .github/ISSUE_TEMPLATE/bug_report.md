@@ -17,16 +17,5 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
-
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Extra Info (please complete the following information):**
- - Device: [e.g. iPhone6, Windows, Mac, etc.]
- - OS / Browser: [e.g. iOS8.1, Android 13, Chrome]
- - Fleeting Notes Version [e.g. v0.7.6]
-
 **Additional context**
 Add any other context about the problem here.
