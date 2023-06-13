@@ -67,7 +67,7 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
         await noteUtils.handleSaveNote(context, note);
       }
     }
-    Navigator.pop(context);
+    if (mounted) Navigator.pop(context);
   }
 
   void onError(SpeechRecognitionError? e) {

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fleeting_notes_flutter/models/note_history.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
@@ -22,10 +24,12 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
     super.key,
     required this.noteId,
     this.extraNote,
+    this.attachment,
   });
 
   final String noteId;
   final Note? extraNote;
+  final Uint8List? attachment;
 
   @override
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
@@ -248,6 +252,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                             autofocus: autofocus,
                             padding: const EdgeInsets.only(
                                 left: 24, right: 24, bottom: 16),
+                            attachment: widget.attachment,
                           ),
                   ),
                   if (bottomAppBarVisible)

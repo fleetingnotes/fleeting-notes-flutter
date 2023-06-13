@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/main/components/fn_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/one_account_dialog.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
@@ -7,9 +8,11 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/screens/search/search_screen.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_menu.dart';
 import 'package:fleeting_notes_flutter/utils/responsive.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/record_dialog.dart';
 import 'components/onboarding_dialog.dart';
@@ -24,9 +27,16 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
+  final scrollController = ScrollController();
+  final imagePicker = ImagePicker();
+  bool bottomAppBarVisible = true;
+  FloatingActionButtonLocation get _fabLocation => bottomAppBarVisible
+      ? FloatingActionButtonLocation.endDocked
+      : FloatingActionButtonLocation.endFloat;
   FocusNode searchFocusNode = FocusNode();
   Widget? desktopSideWidget;
   bool bannerExists = false;
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +54,24 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
     attemptRecoverSession();
     handleSiriSuggestions();
+    scrollController.addListener(_listenScroll);
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_listenScroll);
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void _listenScroll() {
+    final ScrollDirection direction =
+        scrollController.position.userScrollDirection;
+    if (direction == ScrollDirection.forward && !bottomAppBarVisible) {
+      setState(() => bottomAppBarVisible = true);
+    } else if (direction == ScrollDirection.reverse && bottomAppBarVisible) {
+      setState(() => bottomAppBarVisible = false);
+    }
   }
 
   void attemptRecoverSession() async {
@@ -104,12 +132,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             suggestedInvocationPhrase: "Record fleeting note"));
   }
 
-  void addNote() {
+  void addNote({Note? note, Uint8List? attachment}) {
     final nh = ref.read(noteHistoryProvider.notifier);
     final db = ref.read(dbProvider);
     db.closeDrawer();
-    final note = Note.empty();
-    nh.addNote(context, note);
+    note = note ?? Note.empty();
+    nh.addNote(context, note, attachment: attachment);
   }
 
   void recordNote() async {
@@ -121,9 +149,28 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
   }
 
+  void onPickImage(ImageSource source) async {
+    Navigator.pop(context);
+    var img = await imagePicker.pickImage(source: source);
+    if (img != null) {
+      var bytes = await img.readAsBytes();
+      addNote(note: Note.empty(source: img.path), attachment: bytes);
+    }
+  }
+
+  void onPickImageOption() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return PickImageOptions(onPickImage: onPickImage);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    final isMobile = Responsive.isMobile(context);
     return Shortcuts(
       shortcuts: mainShortcutMapping,
       child: Actions(
@@ -141,12 +188,23 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               addNote: addNote,
               closeDrawer: db.closeDrawer,
             ),
-            floatingActionButton: (Responsive.isMobile(context))
-                ? NoteFAB(onPressed: addNote, onLongPress: recordNote)
-                : null,
+            bottomNavigationBar: FNBottomAppBar(
+              isElevated: true,
+              isVisible: isMobile && bottomAppBarVisible,
+              onRecord: recordNote,
+              onAddChecklist: () {
+                addNote(note: Note.empty(content: '- [ ] '));
+              },
+              onImagePicker: onPickImageOption,
+            ),
+            floatingActionButtonLocation: _fabLocation,
+            floatingActionButton:
+                (isMobile) ? NoteFAB(onPressed: addNote) : null,
             body: SafeArea(
               child: Responsive(
-                mobile: SearchScreen(searchFocusNode: searchFocusNode),
+                mobile: SearchScreen(
+                    searchFocusNode: searchFocusNode,
+                    scrollController: scrollController),
                 tablet: Row(
                   children: [
                     SideRail(addNote: addNote, onMenu: db.openDrawer),
@@ -187,6 +245,37 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class PickImageOptions extends StatelessWidget {
+  const PickImageOptions({
+    super.key,
+    required this.onPickImage,
+  });
+
+  final Function(ImageSource) onPickImage;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 160,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.photo_camera_outlined),
+            title: const Text('Take photo'),
+            onTap: () => onPickImage(ImageSource.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_outlined),
+            title: const Text('Choose image'),
+            onTap: () => onPickImage(ImageSource.gallery),
+          ),
+        ],
       ),
     );
   }

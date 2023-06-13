@@ -100,8 +100,7 @@ Future<void> goToNewNote(WidgetTester tester,
   Map<String, String> qp = (addQueryParams)
       ? {'title': title, 'content': content, 'source': source}
       : {};
-  context.goNamed('note',
-      params: {'id': newNote.id}, extra: newNote, queryParams: qp);
+  context.goNamed('note', params: {'id': newNote.id}, queryParams: qp);
   await tester.pumpAndSettle();
 }
 

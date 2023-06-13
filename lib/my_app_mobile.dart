@@ -90,7 +90,7 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
     void goToNote(Note note, {bool noteExists = false}) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (noteExists) {
-          router.goNamed('note', params: {'id': note.id}, extra: note);
+          router.goNamed('note', params: {'id': note.id});
         } else {
           router.goNamed('home', queryParams: {
             'title': note.title,

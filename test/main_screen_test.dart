@@ -253,19 +253,30 @@ void main() {
     expect(find.byType(OneAccountDialog), findsNothing);
   });
 
-  // long pressing opens record note dialog
-  testWidgets('Long press opens record note dialog mobile', (tester) async {
+  // test bottom app bar (on mobile)
+  testWidgets('press record button opens dialog mobile', (tester) async {
     resizeToMobile(tester);
     await fnPumpWidget(tester, const MyApp());
-    await tester.longPress(find.byIcon(Icons.add));
+    await tester.tap(find.byIcon(Icons.mic_outlined));
     await tester.pump();
     expect(find.byType(RecordDialog), findsOneWidget);
   });
-  testWidgets('Long press opens record note dialog desktop', (tester) async {
-    resizeToDesktop(tester);
+
+  testWidgets('press checklist button opens new note with checklist',
+      (tester) async {
+    resizeToMobile(tester);
     await fnPumpWidget(tester, const MyApp());
-    await tester.longPress(find.byIcon(Icons.add));
-    await tester.pump();
-    expect(find.byType(RecordDialog), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.check_box_outlined));
+    await tester.pumpAndSettle();
+    expect(find.byType(NoteEditor), findsOneWidget);
+    expect(find.text('- [ ] ', findRichText: true), findsOneWidget);
+  });
+
+  testWidgets('press photo button opens pick image options', (tester) async {
+    resizeToMobile(tester);
+    await fnPumpWidget(tester, const MyApp());
+    await tester.tap(find.byIcon(Icons.photo_outlined));
+    await tester.pumpAndSettle();
+    expect(find.byType(PickImageOptions), findsOneWidget);
   });
 }
