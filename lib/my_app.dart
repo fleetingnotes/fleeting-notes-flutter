@@ -122,6 +122,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                 var params = state.queryParams;
                 var noteId =
                     state.subloc.split('?').first.replaceFirst('/note/', '');
+                Uint8List? attachment = state.extra as Uint8List?;
                 Note note = Note.empty(
                   id: noteId,
                   title: params['title'] ?? '',
@@ -139,6 +140,7 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                     child: NoteEditorScreen(
                       noteId: noteId,
                       extraNote: note,
+                      attachment: attachment,
                     ),
                   ),
                 );

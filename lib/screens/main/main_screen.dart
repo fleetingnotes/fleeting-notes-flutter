@@ -132,12 +132,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             suggestedInvocationPhrase: "Record fleeting note"));
   }
 
-  void addNote({Note? note}) {
+  void addNote({Note? note, Uint8List? attachment}) {
     final nh = ref.read(noteHistoryProvider.notifier);
     final db = ref.read(dbProvider);
     db.closeDrawer();
     note = note ?? Note.empty();
-    nh.addNote(context, note);
+    nh.addNote(context, note, attachment: attachment);
   }
 
   void recordNote() async {
@@ -152,9 +152,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   void onPickImage(ImageSource source) async {
     Navigator.pop(context);
     var img = await imagePicker.pickImage(source: source);
-    var path = img?.path;
-    if (path != null) {
-      addNote(note: Note.empty(source: path));
+    if (img != null) {
+      var bytes = await img.readAsBytes();
+      addNote(note: Note.empty(source: img.path), attachment: bytes);
     }
   }
 

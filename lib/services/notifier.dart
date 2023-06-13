@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +26,7 @@ class NoteHistoryNotifier extends StateNotifier<NoteHistory> {
     GoRouter? router,
     bool addQueryParams = false,
     bool refreshHistory = false,
+    Uint8List? attachment,
   }) {
     router ??= GoRouter.of(context);
     NoteHistory nh = (refreshHistory) ? NoteHistory() : state.copy();
@@ -46,7 +48,7 @@ class NoteHistoryNotifier extends StateNotifier<NoteHistory> {
     nh.forwardNoteHistory = [];
     nh.currNote = note;
     router.goNamed('note',
-        params: {'id': note.id}, extra: note, queryParams: qp);
+        params: {'id': note.id}, extra: attachment, queryParams: qp);
     state = nh;
   }
 

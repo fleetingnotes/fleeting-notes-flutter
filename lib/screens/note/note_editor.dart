@@ -10,6 +10,7 @@ import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/models/Note.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
@@ -25,6 +26,7 @@ class NoteEditor extends ConsumerStatefulWidget {
     this.sourceController,
     this.autofocus = false,
     this.padding,
+    this.attachment,
   }) : super(key: key);
 
   final Note note;
@@ -33,6 +35,7 @@ class NoteEditor extends ConsumerStatefulWidget {
   final TextEditingController? contentController;
   final TextEditingController? sourceController;
   final EdgeInsetsGeometry? padding;
+  final Uint8List? attachment;
 
   @override
   _NoteEditorState createState() => _NoteEditorState();
@@ -54,6 +57,17 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   TextEditingController contentController = TextEditingController();
   TextEditingController sourceController = TextEditingController();
 
+  void onUploadAttachment(Uint8List? attachment) async {
+    if (attachment == null) return;
+    final noteLoading = ref.read(noteLoadingProvider.notifier);
+    noteLoading.update((_) => true);
+    final db = ref.read(dbProvider);
+    var sourceUrl = await db.uploadAttachment(fileBytes: attachment);
+    sourceController.text = sourceUrl;
+    noteLoading.update((_) => false);
+    onChanged();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -70,6 +84,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     authChangeStream =
         db.supabase.authChangeController.stream.listen(handleAuthChange);
     modifiedAt = DateTime.parse(widget.note.modifiedAt);
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      onUploadAttachment(widget.attachment);
+    });
   }
 
   void initSourceMetadata(UrlMetadata metadata) async {
@@ -85,7 +102,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         String source = widget.note.source;
         if (!kIsWeb) {
           var sourceFile = File(source);
-          if (sourceFile.existsSync()) {
+          if (sourceFile.existsSync() && widget.attachment == null) {
             noteLoading.update((_) => true);
             var bytes = await sourceFile.readAsBytes();
             source =
