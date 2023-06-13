@@ -120,10 +120,9 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
               },
               pageBuilder: (context, state) {
                 var params = state.queryParams;
-                Note? note = state.extra as Note?;
                 var noteId =
                     state.subloc.split('?').first.replaceFirst('/note/', '');
-                note ??= Note.empty(
+                Note note = Note.empty(
                   id: noteId,
                   title: params['title'] ?? '',
                   content: params['content'] ?? '',
