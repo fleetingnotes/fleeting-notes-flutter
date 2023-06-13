@@ -5,10 +5,16 @@ class FNBottomAppBar extends StatelessWidget {
     super.key,
     required this.isElevated,
     required this.isVisible,
+    this.onRecord,
+    this.onAddChecklist,
+    this.onImagePicker,
   });
 
   final bool isElevated;
   final bool isVisible;
+  final VoidCallback? onRecord;
+  final VoidCallback? onAddChecklist;
+  final VoidCallback? onImagePicker;
 
   @override
   Widget build(BuildContext context) {
@@ -21,29 +27,17 @@ class FNBottomAppBar extends StatelessWidget {
           children: <Widget>[
             IconButton(
               icon: const Icon(Icons.check_box_outlined),
-              onPressed: () {
-                final SnackBar snackBar = SnackBar(
-                  content: const Text('Yay! A SnackBar!'),
-                  action: SnackBarAction(
-                    label: 'Undo',
-                    onPressed: () {},
-                  ),
-                );
-
-                // Find the ScaffoldMessenger in the widget tree
-                // and use it to show a SnackBar.
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              },
+              onPressed: onAddChecklist,
             ),
             const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.mic_outlined),
-              onPressed: () {},
+              onPressed: onRecord,
             ),
             const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.photo_outlined),
-              onPressed: () {},
+              onPressed: onImagePicker,
             ),
           ],
         ),

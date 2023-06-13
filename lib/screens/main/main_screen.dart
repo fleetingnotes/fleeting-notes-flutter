@@ -129,11 +129,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             suggestedInvocationPhrase: "Record fleeting note"));
   }
 
-  void addNote() {
+  void addNote({Note? note}) {
     final nh = ref.read(noteHistoryProvider.notifier);
     final db = ref.read(dbProvider);
     db.closeDrawer();
-    final note = Note.empty();
+    note = note ?? Note.empty();
     nh.addNote(context, note);
   }
 
@@ -168,9 +168,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               closeDrawer: db.closeDrawer,
             ),
             bottomNavigationBar: FNBottomAppBar(
-              isElevated: true,
-              isVisible: isMobile && bottomAppBarVisible,
-            ),
+                isElevated: true,
+                isVisible: isMobile && bottomAppBarVisible,
+                onRecord: recordNote,
+                onAddChecklist: () {
+                  addNote(note: Note.empty(content: '- [ ] '));
+                }),
             floatingActionButtonLocation: _fabLocation,
             floatingActionButton: (isMobile)
                 ? NoteFAB(onPressed: addNote, isElevated: !bottomAppBarVisible)
