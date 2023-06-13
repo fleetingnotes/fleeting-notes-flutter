@@ -162,24 +162,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return SizedBox(
-          height: 160,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_camera_outlined),
-                title: const Text('Take photo'),
-                onTap: () => onPickImage(ImageSource.camera),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_outlined),
-                title: const Text('Choose image'),
-                onTap: () => onPickImage(ImageSource.gallery),
-              ),
-            ],
-          ),
-        );
+        return PickImageOptions(onPickImage: onPickImage);
       },
     );
   }
@@ -262,6 +245,37 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class PickImageOptions extends StatelessWidget {
+  const PickImageOptions({
+    super.key,
+    required this.onPickImage,
+  });
+
+  final Function(ImageSource) onPickImage;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 160,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.photo_camera_outlined),
+            title: const Text('Take photo'),
+            onTap: () => onPickImage(ImageSource.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_outlined),
+            title: const Text('Choose image'),
+            onTap: () => onPickImage(ImageSource.gallery),
+          ),
+        ],
       ),
     );
   }
