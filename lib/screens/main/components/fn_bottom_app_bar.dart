@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class FNBottomAppBar extends StatelessWidget {
@@ -18,23 +19,21 @@ class FNBottomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const height = (kIsWeb) ? 80.0 : 100.0;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      height: isVisible ? 80.0 : 0,
+      height: isVisible ? height : 0,
       child: BottomAppBar(
-        elevation: isElevated ? null : 0.0,
         child: Row(
           children: <Widget>[
             IconButton(
               icon: const Icon(Icons.check_box_outlined),
               onPressed: onAddChecklist,
             ),
-            const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.mic_outlined),
               onPressed: onRecord,
             ),
-            const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.photo_outlined),
               onPressed: onImagePicker,

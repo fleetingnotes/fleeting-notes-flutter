@@ -70,6 +70,7 @@ dependencies:
   package_info_plus: ^3.1.0
   http: ^0.13.6
   share_plus: ^7.0.2
+  image_picker: ^0.8.8
 
 
 dev_dependencies:

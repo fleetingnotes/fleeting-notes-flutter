@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/record_dialog.dart';
 import 'components/onboarding_dialog.dart';
@@ -27,13 +28,15 @@ class MainScreen extends ConsumerStatefulWidget {
 
 class _MainScreenState extends ConsumerState<MainScreen> {
   final scrollController = ScrollController();
+  final imagePicker = ImagePicker();
   bool bottomAppBarVisible = true;
   FloatingActionButtonLocation get _fabLocation => bottomAppBarVisible
-      ? FloatingActionButtonLocation.endContained
+      ? FloatingActionButtonLocation.endDocked
       : FloatingActionButtonLocation.endFloat;
   FocusNode searchFocusNode = FocusNode();
   Widget? desktopSideWidget;
   bool bannerExists = false;
+
   @override
   void initState() {
     super.initState();
@@ -146,6 +149,41 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
   }
 
+  void onPickImage(ImageSource source) async {
+    Navigator.pop(context);
+    var img = await imagePicker.pickImage(source: source);
+    var path = img?.path;
+    if (path != null) {
+      addNote(note: Note.empty(source: path));
+    }
+  }
+
+  void onPickImageOption() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: 160,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: const Text('Take photo'),
+                onTap: () => onPickImage(ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_outlined),
+                title: const Text('Choose image'),
+                onTap: () => onPickImage(ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
@@ -168,16 +206,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               closeDrawer: db.closeDrawer,
             ),
             bottomNavigationBar: FNBottomAppBar(
-                isElevated: true,
-                isVisible: isMobile && bottomAppBarVisible,
-                onRecord: recordNote,
-                onAddChecklist: () {
-                  addNote(note: Note.empty(content: '- [ ] '));
-                }),
+              isElevated: true,
+              isVisible: isMobile && bottomAppBarVisible,
+              onRecord: recordNote,
+              onAddChecklist: () {
+                addNote(note: Note.empty(content: '- [ ] '));
+              },
+              onImagePicker: onPickImageOption,
+            ),
             floatingActionButtonLocation: _fabLocation,
-            floatingActionButton: (isMobile)
-                ? NoteFAB(onPressed: addNote, isElevated: !bottomAppBarVisible)
-                : null,
+            floatingActionButton:
+                (isMobile) ? NoteFAB(onPressed: addNote) : null,
             body: SafeArea(
               child: Responsive(
                 mobile: SearchScreen(
