@@ -102,7 +102,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         String source = widget.note.source;
         if (!kIsWeb) {
           var sourceFile = File(source);
-          if (sourceFile.existsSync() && widget.attachment == null) {
+          if (!noteLoading.state && sourceFile.existsSync()) {
             noteLoading.update((_) => true);
             var bytes = await sourceFile.readAsBytes();
             source =
@@ -320,6 +320,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         await db.getNoteById(currNote.id) != null) {
       resetSaveTimer();
     }
+
     initSourceMetadata(currNote.sourceMetadata);
   }
 
