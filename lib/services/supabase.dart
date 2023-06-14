@@ -259,6 +259,14 @@ class SupabaseDB extends SyncTerface {
     return null;
   }
 
+  Future<Box?> getUserBox() async {
+    var currUserId = currUser?.id;
+    if (currUserId != null) {
+      return await Hive.openBox(currUserId);
+    }
+    return null;
+  }
+
   Future<Map<String, Note>> getNotesCache() async {
     var box = await getNotesCacheBox();
     Map<String, Note> mapping = {
@@ -309,7 +317,11 @@ class SupabaseDB extends SyncTerface {
   // helpers
   Future<String?> getEncryptionKey() async {
     if (userId != null) {
-      return await secureStorage.read(key: 'encryption-key-$userId');
+      var box = await getUserBox();
+      String? key = box?.get('encryption-key') ??
+          await secureStorage.read(key: 'encryption-key-$userId');
+      box?.put('encryption-key', key);
+      return key;
     }
     return null;
   }
@@ -386,6 +398,8 @@ class SupabaseDB extends SyncTerface {
     } else if (supabaseHashedKey != hashedKey) {
       throw FleetingNotesException('Encryption key does not match');
     }
+    var box = await getUserBox();
+    await box?.put('encryption-key', key);
     await secureStorage.write(key: 'encryption-key-$userId', value: key);
   }
 
