@@ -1,19 +1,8 @@
-# fleeting_notes_flutter
-Fleeting Notes - is a reference for the ideas in your mind
+# Fleeting Notes
+Fleeting Notes is like Apple Notes but with better integration to other apps
 
-## Running Application for dev
-```
-flutter run
-```
-Or as a web-server
-```
-flutter run -d web-server
-```
+docs: https://www.fleetingnotes.app/docs/contributing/start-here
 
-## Testing Applications on browser
-```
-flutter test --platform chrome
-```
 ## How-Tos
 - [How to Build Web Extensions for Dev](build_web_extension_for_dev.md)
 - [How to Release](release_steps.md)
