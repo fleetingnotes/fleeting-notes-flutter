@@ -21,6 +21,8 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
   SiriWaveController waveController =
       SiriWaveController(amplitude: 0.2, speed: 0.1);
   SpeechToText speech = SpeechToText();
+  List<LocaleName> locales = [];
+  String? currLocaleId;
   String listenedText = '';
   String errMsg = '';
   bool isListening = true;
@@ -28,6 +30,9 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
 
   @override
   void initState() {
+    final settings = ref.read(settingsProvider);
+    currLocaleId = settings.get('speech-to-text-locale');
+
     initSpeechToText();
     super.initState();
   }
@@ -46,6 +51,7 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
   }
 
   void onStatus(String status) {
+    if (!mounted) return;
     setState(() {
       if (status == 'notListening') {
         onCancel();
@@ -72,6 +78,7 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
 
   void onError(SpeechRecognitionError? e) {
     onCancel();
+    if (!mounted) return;
     setState(() {
       if (e != null) {
         errMsg = 'Failed with error message: $e';
@@ -105,6 +112,12 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
   void initSpeechToText() async {
     bool isReady =
         await speech.initialize(onStatus: onStatus, onError: onError);
+    speech.locales().then((tempLocales) {
+      if (!mounted) return;
+      setState(() {
+        locales = tempLocales;
+      });
+    });
     slowlySetAmplitude(0);
     if (isReady) {
       if (TargetPlatform.iOS == defaultTargetPlatform) {
@@ -118,6 +131,7 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
 
   Future<void> initListen() async {
     await speech.listen(
+      localeId: currLocaleId,
       cancelOnError: true,
       pauseFor: const Duration(seconds: 5),
       onResult: (result) {
@@ -189,6 +203,29 @@ class _RecordDialogState extends ConsumerState<RecordDialog> {
                   controller: waveController,
                   style: SiriWaveStyle.ios_7,
                 ),
+                if (locales.isEmpty)
+                  const DropdownMenu(
+                    width: 200,
+                    label: Text('Language'),
+                    enabled: false,
+                    dropdownMenuEntries: [],
+                  )
+                else
+                  DropdownMenu<String?>(
+                    width: 200,
+                    initialSelection: currLocaleId,
+                    label: const Text('Language'),
+                    dropdownMenuEntries: [
+                      const DropdownMenuEntry(value: null, label: '(Default)'),
+                      ...locales.map((l) =>
+                          DropdownMenuEntry(value: l.localeId, label: l.name))
+                    ],
+                    onSelected: (value) {
+                      final settings = ref.read(settingsProvider);
+                      currLocaleId = value;
+                      settings.set('speech-to-text-locale', value);
+                    },
+                  ),
               ],
             ),
           ),

@@ -35,6 +35,7 @@ class Settings {
     "max-attachment-size-mb-premium": int,
     "last-sync-time": DateTime,
     "plugin-slash-commands": List,
+    "speech-to-text-locale": String,
   };
 
   Settings() {
