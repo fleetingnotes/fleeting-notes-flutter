@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +21,7 @@ class FNBottomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const height = (kIsWeb) ? 80.0 : 100.0;
+    var height = (!kIsWeb && Platform.isIOS) ? 100.0 : 80.0;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       height: isVisible ? height : 0,
