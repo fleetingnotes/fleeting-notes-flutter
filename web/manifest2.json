@@ -17,7 +17,7 @@
     },
     "default_title": "Fleeting Notes",
     "default_panel": "web-ext.html",
-    "open_at_install":true
+    "open_at_install": false
   },
   "background": {
     "scripts": ["extension/background2.js"]
