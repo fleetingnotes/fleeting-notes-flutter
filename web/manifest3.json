@@ -16,8 +16,12 @@
   "permissions": [
     "activeTab",
     "storage",
-    "contextMenus"
+    "contextMenus",
+    "sidePanel"
   ],
+  "side_panel" : {
+    "default_path": "web-ext.html"
+  },
   "background": {
     "service_worker": "extension/background3.js"
   },

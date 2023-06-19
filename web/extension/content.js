@@ -5,7 +5,7 @@ function getVideoId() {
     return "";
   }
   let videoId = window.location.search.split("v=")[1];
-  let ampersandPosition = videoId.indexOf("&");
+  const ampersandPosition = videoId.indexOf("&");
   // filter out irrevelant query part
   if (ampersandPosition != -1) {
     videoId = videoId.substring(0, ampersandPosition);

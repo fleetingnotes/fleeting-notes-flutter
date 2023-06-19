@@ -10,6 +10,15 @@
   "browser_action": {
     "default_icon": "/icons/196.png"
   },
+  "sidebar_action" : {
+    "default_icon": {
+      "16": "/icons/16.png",
+      "32": "/icons/32.png"
+    },
+    "default_title": "Fleeting Notes",
+    "default_panel": "web-ext.html",
+    "open_at_install":true
+  },
   "background": {
     "scripts": ["extension/background2.js"]
   },
