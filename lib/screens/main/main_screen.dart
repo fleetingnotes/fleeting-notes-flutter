@@ -31,7 +31,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   final imagePicker = ImagePicker();
   bool bottomAppBarVisible = true;
   FloatingActionButtonLocation get _fabLocation => bottomAppBarVisible
-      ? FloatingActionButtonLocation.endDocked
+      ? FloatingActionButtonLocation.endContained
       : FloatingActionButtonLocation.endFloat;
   FocusNode searchFocusNode = FocusNode();
   Widget? desktopSideWidget;
@@ -189,7 +189,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               closeDrawer: db.closeDrawer,
             ),
             bottomNavigationBar: FNBottomAppBar(
-              isElevated: true,
+              isElevated: !bottomAppBarVisible,
               isVisible: isMobile && bottomAppBarVisible,
               onRecord: recordNote,
               onAddChecklist: () {
@@ -198,8 +198,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               onImagePicker: onPickImageOption,
             ),
             floatingActionButtonLocation: _fabLocation,
-            floatingActionButton:
-                (isMobile) ? NoteFAB(onPressed: addNote) : null,
+            floatingActionButton: (isMobile)
+                ? NoteFAB(onPressed: addNote, isElevated: !bottomAppBarVisible)
+                : null,
             body: SafeArea(
               child: Responsive(
                 mobile: SearchScreen(
