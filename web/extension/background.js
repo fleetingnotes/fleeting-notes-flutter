@@ -172,7 +172,9 @@ const onActionPressed = async (tab, src) => {
     try {
       // if possible, retrieve src from content script (more info)
       src = await chrome.tabs.sendMessage(tab.id, { msg: "get-src" });
-    } catch (e) {}
+    } catch (_e) {
+      // catch errors
+    }
   }
   const use_sidebar = await getSidebarStatus();
   if (use_sidebar) {
@@ -193,7 +195,7 @@ const initSidebar = () => {
 };
 
 const getSidebarStatus = async () => {
-  let res = await chrome.storage.local.get(["use_sidebar"]);
+  const res = await chrome.storage.local.get(["use_sidebar"]);
   let use_sidebar = res.use_sidebar;
   if (use_sidebar == null) {
     // set default value of sidebar
