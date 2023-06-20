@@ -262,7 +262,7 @@ class SupabaseDB extends SyncTerface {
   Future<Box?> getUserBox() async {
     var currUserId = currUser?.id;
     if (currUserId != null) {
-      return await Hive.openBox(currUserId);
+      return await Hive.openBox('supabase-$currUserId');
     }
     return null;
   }
