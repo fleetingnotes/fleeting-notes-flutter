@@ -104,6 +104,15 @@ void main() {
     expect(allLinks, ['title', 'link']);
   });
 
+  test('getAllLocalNotes works with non-Note type', () async {
+    final db = MockDatabaseTests();
+    var box = await db.getBox();
+    await box.put('random-val', 'asdf');
+    await box.put('note', Note.empty());
+    var notes = db.getAllNotesLocal(box);
+    expect(notes.length == 1, isTrue);
+  });
+
   group("noteExists", () {
     final db = MockDatabaseTests();
     var inputsToExpected = {
