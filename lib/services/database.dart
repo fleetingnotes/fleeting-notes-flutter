@@ -106,8 +106,8 @@ class Database {
 
   List<Note> getAllNotesLocal(Box box) {
     List<Note> notes = [];
-    for (var note in box.values.cast<Note>()) {
-      if (!note.isDeleted) {
+    for (var note in box.values) {
+      if (note.runtimeType == Note && !note.isDeleted) {
         notes.add(note);
       }
     }
