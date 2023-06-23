@@ -44,6 +44,10 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>To take photos, please allow permission to access your camera</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To upload videos with sound, please allow permission to access your microphone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>To upload photos, please allow permission to access your photo library.</string>
   <key>NSSpeechRecognitionUsageDescription</key>
