@@ -10,6 +10,7 @@ import 'package:fleeting_notes_flutter/screens/settings/components/auth.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/one_account_dialog.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/account.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/plugin_commands_setting.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/settings_item_switch.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -38,6 +39,7 @@ void main() {
     expect(find.byType(Auth), findsOneWidget);
     expect(find.byType(Account), findsNothing);
     expect(find.byType(PluginCommandSetting), findsNothing);
+    expect(find.byType(SettingsItemSwitch), findsNWidgets(4));
   });
 
   testWidgets('Login works as expected', (WidgetTester tester) async {
