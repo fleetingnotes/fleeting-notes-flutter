@@ -304,6 +304,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             defaultValue: false,
                             description:
                                 "Toggles the search screen between list and grid view"),
+                        const SettingsItemSwitch(
+                            settingsKey: 'auto-focus-title',
+                            name: 'Enable auto focus title',
+                            defaultValue: false,
+                            description:
+                                "Focuses title field when creating new note"),
                         const SettingsItemSlider(
                           settingsKey: 'text-scale-factor',
                           name: "Text scale factor",

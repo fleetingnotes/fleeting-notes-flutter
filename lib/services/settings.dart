@@ -23,6 +23,7 @@ class Settings {
     'unsaved-note': Note,
     'append-same-source': bool,
     'search-is-list-view': bool,
+    'auto-focus-title': bool,
     // local sync settings
     'local-sync-enabled': bool,
     'local-sync-dir': String,

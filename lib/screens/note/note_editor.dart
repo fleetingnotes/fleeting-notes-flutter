@@ -372,6 +372,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
     final db = ref.watch(dbProvider);
+    bool autoFocusTitle =
+        db.settings.get('auto-focus-title', defaultValue: false);
     initCurrNote();
     return Actions(
       actions: <Type, Action<Intent>>{
@@ -402,9 +404,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                   TitleField(
                     controller: titleController,
                     onChanged: onChanged,
-                    autofocus: (contentController.text.isEmpty)
-                        ? widget.autofocus
-                        : false,
+                    autofocus: autoFocusTitle,
                   ),
                   ExcludeFocusTraversal(
                     child: SourceContainer(
@@ -420,9 +420,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                     onChanged: onChanged,
                     onPop: () => noteUtils.onPopNote(context, widget.note.id),
                     onCommandRun: onCommandRun,
-                    autofocus: (contentController.text.isNotEmpty)
-                        ? widget.autofocus
-                        : false,
+                    autofocus: !autoFocusTitle,
                   ),
                 ],
               ),
