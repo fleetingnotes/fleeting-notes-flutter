@@ -310,6 +310,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             defaultValue: false,
                             description:
                                 "Focuses title field when creating new note"),
+                        const SettingsItemSwitch(
+                            settingsKey: 'right-to-left',
+                            name: 'Enable right to left text',
+                            defaultValue: false,
+                            description:
+                                "Enable right to left in text when creating new note"),
                         const SettingsItemSlider(
                           settingsKey: 'text-scale-factor',
                           name: "Text scale factor",
