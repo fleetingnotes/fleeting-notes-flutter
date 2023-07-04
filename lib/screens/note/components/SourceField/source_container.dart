@@ -20,6 +20,7 @@ class SourceContainer extends ConsumerStatefulWidget {
     this.onChanged,
     this.onClearSource,
     this.readOnly = false,
+    this.textDirection = TextDirection.ltr,
   }) : super(key: key);
 
   final String? text;
@@ -28,6 +29,7 @@ class SourceContainer extends ConsumerStatefulWidget {
   final VoidCallback? onChanged;
   final VoidCallback? onClearSource;
   final bool readOnly;
+  final TextDirection textDirection;
 
   @override
   ConsumerState<SourceContainer> createState() => _SourceContainerState();
@@ -137,6 +139,7 @@ class _SourceContainerState extends ConsumerState<SourceContainer> {
         style: Theme.of(context).textTheme.bodySmall,
         controller: controller,
         onChanged: (text) => widget.onChanged?.call(),
+        textDirection: widget.textDirection,
         decoration: const InputDecoration(
           isDense: true,
           hintText: "Source",

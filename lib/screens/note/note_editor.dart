@@ -374,6 +374,10 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     final db = ref.watch(dbProvider);
     bool autoFocusTitle =
         db.settings.get('auto-focus-title', defaultValue: false);
+    TextDirection textDirection =
+        db.settings.get('right-to-left', defaultValue: false)
+            ? TextDirection.rtl
+            : TextDirection.ltr;
     initCurrNote();
     return Actions(
       actions: <Type, Action<Intent>>{
@@ -396,23 +400,22 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    widget.note.getShortDateTimeStr(),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  ),
+                  Text(widget.note.getShortDateTimeStr(),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant)),
                   TitleField(
-                    controller: titleController,
-                    onChanged: onChanged,
-                    autofocus: autoFocusTitle,
-                  ),
+                      controller: titleController,
+                      onChanged: onChanged,
+                      autofocus: autoFocusTitle,
+                      textDirection: textDirection),
                   ExcludeFocusTraversal(
                     child: SourceContainer(
-                      controller: sourceController,
-                      metadata: sourceMetadata,
-                      onChanged: onChanged,
-                      onClearSource: onClearSource,
-                    ),
+                        controller: sourceController,
+                        metadata: sourceMetadata,
+                        onChanged: onChanged,
+                        onClearSource: onClearSource,
+                        textDirection: textDirection),
                   ),
                   const Divider(),
                   ContentField(
@@ -421,6 +424,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                     onPop: () => noteUtils.onPopNote(context, widget.note.id),
                     onCommandRun: onCommandRun,
                     autofocus: !autoFocusTitle,
+                    textDirection: textDirection,
                   ),
                 ],
               ),

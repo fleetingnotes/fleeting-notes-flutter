@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
 class TitleField extends StatelessWidget {
-  const TitleField({
-    Key? key,
-    required this.controller,
-    this.onChanged,
-    this.autofocus = false,
-  }) : super(key: key);
+  const TitleField(
+      {Key? key,
+      required this.controller,
+      this.onChanged,
+      this.autofocus = false,
+      this.textDirection = TextDirection.ltr})
+      : super(key: key);
 
   final TextEditingController controller;
   final VoidCallback? onChanged;
   final bool autofocus;
+  final TextDirection textDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class TitleField extends StatelessWidget {
         onChanged?.call();
       },
       autofocus: autofocus,
+      textDirection: textDirection,
     );
   }
 }
