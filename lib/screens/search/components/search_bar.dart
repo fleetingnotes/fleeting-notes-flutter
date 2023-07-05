@@ -73,7 +73,12 @@ class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final db = ref.read(dbProvider);
     bool searchFocusMobile = hasSearchFocus && Responsive.isMobile(context);
+    TextDirection textDirection =
+        db.settings.get('right-to-left', defaultValue: false)
+            ? TextDirection.rtl
+            : TextDirection.ltr;
     return AnimatedContainer(
       height: 72,
       duration: const Duration(milliseconds: 100),
@@ -108,6 +113,7 @@ class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
                     borderSide: BorderSide.none,
                   ),
                 ),
+                textDirection: textDirection,
               ),
             ),
             (searchFocusMobile || !Responsive.isMobile(context))

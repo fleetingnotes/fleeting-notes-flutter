@@ -114,6 +114,22 @@ void main() {
     expect(find.text('authchangeevent', findRichText: true), findsOneWidget);
   });
 
+  testWidgets('Search bar input has text direction ltr by default',
+      (tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    expect(tester.widget<TextField>(find.byType(TextField)).textDirection,
+        TextDirection.ltr);
+  });
+
+  testWidgets('Search bar input text direction rtl if is enabled by settings',
+      (WidgetTester tester) async {
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    await mocks.db.settings.set('right-to-left', true);
+
+    expect(tester.widget<TextField>(find.byType(TextField)).textDirection,
+        TextDirection.ltr);
+  });
+
   testWidgets('When search by dialog has all unchecked boxes, then no notes',
       (WidgetTester tester) async {},
       skip: true);
