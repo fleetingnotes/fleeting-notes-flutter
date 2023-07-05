@@ -197,10 +197,15 @@ class CustomRichText extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
+    final db = ref.read(dbProvider);
     final textScale = settings.get('text-scale-factor') ?? 1.0;
     TextStyle updatedStyle = style ?? const TextStyle();
     double newFontSize = (updatedStyle.fontSize ?? 1.0) * textScale;
     updatedStyle = updatedStyle.copyWith(fontSize: newFontSize);
+    TextDirection textDirection =
+        db.settings.get('right-to-left', defaultValue: false)
+            ? TextDirection.rtl
+            : TextDirection.ltr;
 
     return RichText(
       text: TextSpan(
@@ -213,6 +218,7 @@ class CustomRichText extends ConsumerWidget {
       )),
       maxLines: maxLines,
       overflow: TextOverflow.ellipsis,
+      textDirection: textDirection,
     );
   }
 }
