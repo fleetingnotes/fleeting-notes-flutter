@@ -5,6 +5,7 @@ import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_preview.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
@@ -295,6 +296,40 @@ void main() {
           matching: find.text('hello world', findRichText: true),
         ),
         findsNothing);
+  });
+
+  testWidgets('New note has text direction ltr by default',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
+    await tester.pumpAndSettle();
+    expect(tester.widget<TitleField>(find.byType(TitleField)).textDirection,
+        TextDirection.ltr);
+    expect(
+        tester
+            .widget<SourceContainer>(find.byType(SourceContainer))
+            .textDirection,
+        TextDirection.ltr);
+    expect(tester.widget<ContentField>(find.byType(ContentField)).textDirection,
+        TextDirection.ltr);
+  });
+
+  testWidgets('New note has text direction rtl if is enabled by settings',
+      (WidgetTester tester) async {
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    await mocks.db.settings.set('right-to-left', true);
+    await goToNewNote(tester);
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<TitleField>(find.byType(TitleField)).textDirection,
+        TextDirection.rtl);
+    expect(
+        tester
+            .widget<SourceContainer>(find.byType(SourceContainer))
+            .textDirection,
+        TextDirection.rtl);
+    expect(tester.widget<ContentField>(find.byType(ContentField)).textDirection,
+        TextDirection.rtl);
   });
 }
 

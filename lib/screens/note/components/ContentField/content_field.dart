@@ -23,6 +23,7 @@ class ContentField extends ConsumerStatefulWidget {
     this.autofocus = false,
     this.onChanged,
     this.onPop,
+    this.textDirection = TextDirection.ltr,
   }) : super(key: key);
 
   final TextEditingController controller;
@@ -30,6 +31,7 @@ class ContentField extends ConsumerStatefulWidget {
   final VoidCallback? onChanged;
   final VoidCallback? onPop;
   final bool autofocus;
+  final TextDirection textDirection;
 
   @override
   ConsumerState<ContentField> createState() => _ContentFieldState();
@@ -596,6 +598,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                 ),
                 onChanged: (text) => _onContentChanged(text),
                 onTap: () => _onContentTap(),
+                textDirection: widget.textDirection,
               ),
             ),
           ),
