@@ -83,6 +83,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     var bytes = utf8.encode(json);
     return bytes;
   }
+
+  Future<String?> openFolderPicker() async {
+    final result = await FilePicker.platform.getDirectoryPath();
+    if (result != null) {
+      return result;
+    }
+    return null;
   }
 
   void onExportPress() async {
