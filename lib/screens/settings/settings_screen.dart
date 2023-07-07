@@ -57,7 +57,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
   }
 
-  _downloadNotesAsMarkdownZIP(List<Note> notes) {
+  List<int> _downloadNotesAsMarkdownZIP(List<Note> notes) {
     var encoder = ZipEncoder();
     var archive = Archive();
 
@@ -75,15 +75,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
     var bytes = encoder.encode(archive,
         level: Deflate.BEST_COMPRESSION, output: outputStream);
-    FileSaver.instance.saveFile(
-        'fleeting_notes_export.zip', Uint8List.fromList(bytes!), 'zip');
+    return bytes!;
   }
 
-  _downloadNotesAsJSON(List<Note> notes) {
+  List<int> _downloadNotesAsJSON(List<Note> notes) {
     var json = jsonEncode(notes);
     var bytes = utf8.encode(json);
-    FileSaver.instance.saveFile(
-        'fleeting_notes_export.json', Uint8List.fromList(bytes), 'json');
+    return bytes;
+  }
   }
 
   void onExportPress() async {
