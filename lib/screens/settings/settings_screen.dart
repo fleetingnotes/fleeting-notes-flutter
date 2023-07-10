@@ -21,6 +21,7 @@ import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
 import 'components/local_file_sync_setting.dart';
 import 'dart:io';
+import 'package:path/path.dart' as path;
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -116,16 +117,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         bytes = _downloadNotesAsJSON(notes);
         fileExtension = "json";
       }
-
-      if (selectedDirectory == null) {
-        FileSaver.instance.saveFile(fileName + "." + fileExtension,
-            Uint8List.fromList(bytes), fileExtension);
-      } else {
-        final newFile =
-            File(selectedDirectory + fileName + "." + fileExtension);
-        newFile.writeAsBytes(bytes);
+      try {
+        if (selectedDirectory == null) {
+          FileSaver.instance.saveFile(fileName + "." + fileExtension,
+              Uint8List.fromList(bytes), fileExtension);
+        } else {
+          final newFile = File(
+              path.join(selectedDirectory, fileName + "." + fileExtension));
+          await newFile.writeAsBytes(bytes);
+        }
+        noteUtils.showSnackbar(context, 'Exported ${notes.length} notes');
+      } catch (e) {
+        noteUtils.showSnackbar(
+            context, 'Error exporting notes in the selected directory');
       }
-      noteUtils.showSnackbar(context, 'Exported ${notes.length} notes');
     }
   }
 
