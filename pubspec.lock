@@ -463,11 +463,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
-  flutter_localizations:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -774,14 +769,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.3"
-  intl:
-    dependency: transitive
-    description:
-      name: intl
-      sha256: a3715e3bc90294e971cb7dc063fbf3cd9ee0ebf8604ffeafabd9e6f16abbdbe6
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.18.0"
   io:
     dependency: transitive
     description:
@@ -1643,14 +1630,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.4"
-  wiredash:
-    dependency: "direct main"
-    description:
-      name: wiredash
-      sha256: dd8faa10f2b46292cf4d8596094b158d929aa4f32cc8e7d02a3fa76d091d274d
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.7.0"
   xdg_directories:
     dependency: transitive
     description:

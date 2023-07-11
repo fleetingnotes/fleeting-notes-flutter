@@ -12,7 +12,6 @@ import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wiredash/wiredash.dart';
 
 import 'models/syncterface.dart';
 
@@ -174,35 +173,23 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    return Wiredash(
-      projectId: const String.fromEnvironment('WIREDASH_PROJ_ID'),
-      secret: const String.fromEnvironment('WIREDASH_SECRET'),
-      child: ValueListenableBuilder(
-          valueListenable: db.settings.box
-              .listenable(keys: ['dark-mode', 'text-scale-factor']),
-          builder: (context, Box box, _) {
-            final bool isDarkMode = box.get('dark-mode', defaultValue: false);
-            final double textScale = box.get('text-scale-factor') ?? 1.0;
-            return MaterialApp.router(
-              title: 'Fleeting Notes',
-              builder: (context, child) {
-                final MediaQueryData data = MediaQuery.of(context);
-                return MediaQuery(
-                  child: child ?? Container(),
-                  data: data.copyWith(textScaleFactor: textScale),
-                );
-              },
-              debugShowCheckedModeBanner: false,
-              theme: ThemeData(
-                useMaterial3: true,
-                colorSchemeSeed: Colors.blue,
-                brightness: isDarkMode ? Brightness.dark : Brightness.light,
-              ),
-              routeInformationProvider: router.routeInformationProvider,
-              routeInformationParser: router.routeInformationParser,
-              routerDelegate: router.routerDelegate,
-            );
-          }),
-    );
+    return ValueListenableBuilder(
+        valueListenable: db.settings.box.listenable(keys: ['dark-mode']),
+        builder: (context, Box box, _) {
+          return MaterialApp.router(
+            title: 'Fleeting Notes',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              useMaterial3: true,
+              colorSchemeSeed: Colors.blue,
+              brightness: box.get('dark-mode', defaultValue: false)
+                  ? Brightness.dark
+                  : Brightness.light,
+            ),
+            routeInformationProvider: router.routeInformationProvider,
+            routeInformationParser: router.routeInformationParser,
+            routerDelegate: router.routerDelegate,
+          );
+        });
   }
 }
