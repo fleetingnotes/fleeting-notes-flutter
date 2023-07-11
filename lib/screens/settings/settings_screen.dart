@@ -128,8 +128,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         }
         noteUtils.showSnackbar(context, 'Exported ${notes.length} notes');
       } catch (e) {
-        noteUtils.showSnackbar(
-            context, 'Error exporting notes in the selected directory');
+        noteUtils.showSnackbar(context,
+            'Error exporting notes: the selected directory is forbidden');
       }
     }
   }
