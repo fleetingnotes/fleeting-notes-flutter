@@ -22,6 +22,7 @@ import 'components/encryption_dialog.dart';
 import 'components/local_file_sync_setting.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'package:uuid/uuid.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -122,12 +123,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           FileSaver.instance.saveFile(fileName + "." + fileExtension,
               Uint8List.fromList(bytes), fileExtension);
         } else {
-          final newFile = File(
-              path.join(selectedDirectory, fileName + "." + fileExtension));
+          final newFile = File(path.join(selectedDirectory,
+              fileName + const Uuid().v4() + "." + fileExtension));
           await newFile.writeAsBytes(bytes);
         }
         noteUtils.showSnackbar(context, 'Exported ${notes.length} notes');
       } catch (e) {
+        debugPrint(e.toString());
         noteUtils.showSnackbar(context,
             'Error exporting notes: the selected directory is forbidden');
       }
