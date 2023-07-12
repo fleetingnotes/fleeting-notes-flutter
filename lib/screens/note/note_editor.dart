@@ -373,7 +373,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     final noteUtils = ref.watch(noteUtilsProvider);
     final db = ref.watch(dbProvider);
     bool autoFocusTitle =
-        db.settings.get('auto-focus-title', defaultValue: false);
+        db.settings.get('auto-focus-title', defaultValue: true);
     TextDirection textDirection =
         db.settings.get('right-to-left', defaultValue: false)
             ? TextDirection.rtl

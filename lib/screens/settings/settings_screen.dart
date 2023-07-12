@@ -215,7 +215,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       path: 'matthew@fleetingnotes.app',
       query: encodeQueryParameters(<String, String>{
         'subject':
-            'Fleeting Notes Feedback (Device: ${getPlatform()} Version: ${packageInfo.version})',
+            'Fleeting Notes Feedback (Device: ${getPlatform()}, Version: ${packageInfo.version})',
       }),
     );
     launchUrl(emailLaunchUri);
@@ -314,7 +314,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         const SettingsItemSwitch(
                             settingsKey: 'auto-focus-title',
                             name: 'Enable auto focus title',
-                            defaultValue: false,
+                            defaultValue: true,
                             description:
                                 "Focuses title field when creating new note"),
                         const SettingsItemSwitch(
