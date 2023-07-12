@@ -70,6 +70,7 @@ dependencies:
   http: ^0.13.6
   share_plus: ^7.0.2
   image_picker: ^0.8.8
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
