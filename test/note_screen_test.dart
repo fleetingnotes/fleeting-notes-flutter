@@ -150,22 +150,22 @@ void main() {
     expect(nextController.text == 'save', isTrue);
   });
 
-  testWidgets('New note has focus on content field by default',
+  testWidgets('New note has focus on text field by default',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
     await goToNewNote(tester);
     await tester.pumpAndSettle();
-    expect(contentFieldHasFocus(tester), isTrue);
-  });
-
-  testWidgets('New note has focus on text field if is enabled by settings',
-      (WidgetTester tester) async {
-    var mocks = await fnPumpWidget(tester, const MyApp());
-    await mocks.db.settings.set('auto-focus-title', true);
-    await goToNewNote(tester);
-    await tester.pumpAndSettle();
 
     expect(titleFieldHasFocus(tester), isTrue);
+  });
+
+  testWidgets('New note has focus on content field if is enabled by settings',
+      (WidgetTester tester) async {
+    var mocks = await fnPumpWidget(tester, const MyApp());
+    await mocks.db.settings.set('auto-focus-title', false);
+    await goToNewNote(tester);
+    await tester.pumpAndSettle();
+    expect(contentFieldHasFocus(tester), isTrue);
   });
 
   testWidgets('Changing orientation maintains unsaved note',
@@ -195,7 +195,7 @@ void main() {
     expect(find.text('content'), findsOneWidget);
   });
 
-  testWidgets('New note with source preview has focus on content field',
+  testWidgets('New note with source preview has focus on title field',
       (WidgetTester tester) async {
     var mockSupabase = getBaseMockSupabaseDB();
     when(() => mockSupabase.getUrlMetadata(any())).thenAnswer((_) =>
@@ -208,7 +208,7 @@ void main() {
     await goToNewNote(tester, source: 'https://test.test');
     await tester.pumpAndSettle(const Duration(seconds: 3));
 
-    expect(contentFieldHasFocus(tester), isTrue);
+    expect(titleFieldHasFocus(tester), isTrue);
   });
 
   testWidgets('auth change refreshes current note',
