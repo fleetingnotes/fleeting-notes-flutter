@@ -16,11 +16,11 @@ import 'package:archive/archive.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wiredash/wiredash.dart';
 import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
 import 'components/local_file_sync_setting.dart';
+import 'dart:io' show Platform;
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -181,6 +181,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
   }
 
+  String? encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+  }
+
+  String getPlatform() {
+    if (kIsWeb) {
+      return 'Web';
+    } else if (Platform.isAndroid) {
+      return 'Android';
+    } else if (Platform.isIOS) {
+      return 'iOS';
+    } else if (Platform.isMacOS) {
+      return 'macOS';
+    } else if (Platform.isWindows) {
+      return 'Windows';
+    } else if (Platform.isLinux) {
+      return 'Linux';
+    } else if (Platform.isFuchsia) {
+      return 'Fuchsia';
+    } else {
+      return 'Unknown';
+    }
+  }
+
+  void openEmail() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: 'matthew@fleetingnotes.app',
+      query: encodeQueryParameters(<String, String>{
+        'subject':
+            'Fleeting Notes Feedback (Device: ${getPlatform()} Version: ${packageInfo.version})',
+      }),
+    );
+    launchUrl(emailLaunchUri);
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
@@ -213,40 +253,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         "Need Help? Bugs? Feature Requests? Feedback sent through here is directly forwarded to my email (matthew@fleetingnotes.app)",
                                     buttonText: "Send me your feedback",
                                     onPressed: () {
-                                      Wiredash.of(context).show(
-                                          inheritMaterialTheme: true,
-                                          options: WiredashFeedbackOptions(
-                                              labels: const [
-                                                // Take the label ids from your project console
-                                                // https://console.wiredash.io/ -> Settings -> Labels
-                                                Label(
-                                                  id: 'lbl-r65egsdf',
-                                                  title: 'Bug',
-                                                ),
-                                                Label(
-                                                  id: 'lbl-6543df23s',
-                                                  title: 'Feature Request',
-                                                ),
-                                                Label(
-                                                  id: 'lbl-2r98yas4',
-                                                  title: 'Praise',
-                                                ),
-                                              ],
-                                              collectMetaData:
-                                                  (metadata) async {
-                                                PackageInfo packageInfo =
-                                                    await PackageInfo
-                                                        .fromPlatform();
-                                                return metadata
-                                                  ..userEmail = currUser.email
-                                                  ..userId = currUser.id
-                                                  ..custom['supabaseEmail'] =
-                                                      currUser.email
-                                                  ..buildNumber =
-                                                      packageInfo.buildNumber
-                                                  ..buildVersion =
-                                                      packageInfo.version;
-                                              }));
+                                      openEmail();
                                     }),
                               )
                             : const SizedBox.shrink(),
