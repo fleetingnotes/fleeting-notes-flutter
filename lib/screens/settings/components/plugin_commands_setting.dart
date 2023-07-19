@@ -91,7 +91,7 @@ class PluginCommandSetting extends ConsumerWidget {
             child: Row(children: [
               const SizedBox(height: 16),
               const SettingsTitle(title: "Plugin Slash Commands"),
-              Spacer(),
+              const Spacer(),
               Padding(
                   padding: const EdgeInsets.only(left: 8),
                   child: ElevatedButton(
