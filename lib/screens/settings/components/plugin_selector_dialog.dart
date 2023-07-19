@@ -20,7 +20,7 @@ class PluginSelectionWidget extends StatelessWidget {
       children: [
         Expanded(
             child: ListView.builder(
-          key: const PageStorageKey('ListOfOptions'),
+          key: const PageStorageKey('ListOfPlugins'),
           itemCount: plugins.length,
           shrinkWrap: true,
           itemBuilder: (context, index) => PluginCard(

@@ -1,6 +1,4 @@
-import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class Plugin {
   final String key;
@@ -21,7 +19,6 @@ class PluginCard extends StatefulWidget {
     required this.plugin,
     this.onSelect,
     this.onTap,
-    this.sQuery,
     this.isActive = false,
     this.isSelected = false,
     this.expanded = false,
@@ -34,7 +31,6 @@ class PluginCard extends StatefulWidget {
   final VoidCallback? onSelect;
   final VoidCallback? onTap;
   final Plugin plugin;
-  final SearchQuery? sQuery;
   final int? maxLines;
 
   @override
@@ -51,11 +47,6 @@ class _PluginCardState extends State<PluginCard> {
     if (value == false && widget.isSelected) {
       widget.onTap?.call();
     }
-  }
-
-  void onPressedPreview(String url) {
-    Uri uri = Uri.parse(url);
-    launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
