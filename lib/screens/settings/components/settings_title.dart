@@ -7,15 +7,9 @@ class SettingsTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-      ),
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.labelMedium,
     );
   }
 }

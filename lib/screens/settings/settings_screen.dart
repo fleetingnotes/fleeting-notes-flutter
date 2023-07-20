@@ -262,12 +262,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    final currUser = db.supabase.currUser;
     return ScaffoldMessenger(
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.close),
             onPressed: Navigator.of(context).pop,
           ),
           title: const Text('Settings'),
@@ -282,20 +281,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        (isLoggedIn && currUser != null)
-                            ? Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: InfoCard(
-                                    title: 'Matt Wants Your Feedback!',
-                                    description:
-                                        "Need Help? Bugs? Feature Requests? Feedback sent through here is directly forwarded to my email (matthew@fleetingnotes.app)",
-                                    buttonText: "Send me your feedback",
-                                    onPressed: () {
-                                      openEmail();
-                                    }),
-                              )
-                            : const SizedBox.shrink(),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: InfoCard(
+                            title: 'Matt Wants Your Feedback!',
+                            description:
+                                "Need Help? Bugs? Feature Requests? Feedback sent through here is directly forwarded to my email (matthew@fleetingnotes.app)",
+                            buttonText: "Send me your feedback",
+                            onPressed: openEmail,
+                          ),
+                        ),
                         const SettingsTitle(title: "Account"),
+                        const Divider(),
                         (isLoggedIn)
                             ? Account(
                                 email: email,
@@ -333,22 +330,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ],
                               )
                             : const SizedBox.shrink(),
-                        const SizedBox(height: 8),
-                        const SettingsTitle(title: "Other Settings"),
+                        const SizedBox(height: 16),
+                        const SettingsTitle(title: "App Settings"),
                         const SettingsItemSwitch(
                             settingsKey: 'dark-mode', name: "Dark mode"),
-                        const SettingsItemSwitch(
-                            settingsKey: 'append-same-source',
-                            name: 'Append same source',
-                            defaultValue: true,
-                            description:
-                                "Append shared notes with the same source"),
                         const SettingsItemSwitch(
                             settingsKey: 'search-is-list-view',
                             name: 'Enable list view',
                             defaultValue: false,
                             description:
                                 "Toggles the search screen between list and grid view"),
+                        const SettingsItemSlider(
+                          settingsKey: 'text-scale-factor',
+                          name: "Text scale factor",
+                          description:
+                              "Magnifies the text based on a factor (default: 1)",
+                        ),
+                        const SizedBox(height: 16),
+                        const SettingsTitle(title: "Editor Settings"),
+                        const SettingsItemSwitch(
+                            settingsKey: 'append-same-source',
+                            name: 'Append same source',
+                            defaultValue: true,
+                            description:
+                                "Append shared notes with the same source"),
                         const SettingsItemSwitch(
                             settingsKey: 'auto-focus-title',
                             name: 'Enable auto focus title',
@@ -361,12 +366,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             defaultValue: false,
                             description:
                                 "Enable right to left in text when creating new note"),
-                        const SettingsItemSlider(
-                          settingsKey: 'text-scale-factor',
-                          name: "Text scale factor",
-                          description:
-                              "Magnifies the text based on a factor (default: 1)",
-                        ),
                         const SizedBox(height: 24),
                         const LegalLinks(),
                       ],

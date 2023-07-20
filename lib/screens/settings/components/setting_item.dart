@@ -15,35 +15,37 @@ class SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          if (leading != null)
-            Padding(padding: const EdgeInsets.only(right: 8), child: leading),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (name.isNotEmpty)
-                  Text(
-                    name,
-                    style: Theme.of(context).textTheme.titleSmall,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                if (description.isNotEmpty)
-                  Text(
-                    description,
-                    style: Theme.of(context).textTheme.labelSmall,
-                    overflow: TextOverflow.ellipsis,
-                  )
-              ],
+    return Column(
+      children: [
+        const Divider(),
+        Row(
+          children: [
+            if (leading != null)
+              Padding(padding: const EdgeInsets.only(right: 8), child: leading),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (name.isNotEmpty)
+                    Text(
+                      name,
+                      style: Theme.of(context).textTheme.titleSmall,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  if (description.isNotEmpty)
+                    Text(
+                      description,
+                      style: Theme.of(context).textTheme.labelSmall,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                ],
+              ),
             ),
-          ),
-          ...?actions?.map((a) =>
-              Padding(padding: const EdgeInsets.only(left: 8), child: a)),
-        ],
-      ),
+            ...?actions?.map((a) =>
+                Padding(padding: const EdgeInsets.only(left: 8), child: a)),
+          ],
+        ),
+      ],
     );
   }
 }
