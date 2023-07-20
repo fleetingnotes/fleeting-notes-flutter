@@ -292,7 +292,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ),
                         const SettingsTitle(title: "Account"),
-                        const Divider(),
                         (isLoggedIn)
                             ? Account(
                                 email: email,
@@ -303,14 +302,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                     ? null
                                     : onEnableEncryptionPress,
                               )
-                            : Auth(onLogin: (e) {
-                                getEncryptionKey();
-                                setState(() {
-                                  isLoggedIn = true;
-                                  email = e;
-                                });
-                              }),
-                        if (isLoggedIn) const PluginCommandSetting(),
+                            : Column(
+                                children: [
+                                  const Divider(),
+                                  Auth(onLogin: (e) {
+                                    getEncryptionKey();
+                                    setState(() {
+                                      isLoggedIn = true;
+                                      email = e;
+                                    });
+                                  }),
+                                ],
+                              ),
+                        if (isLoggedIn)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 16),
+                            child: PluginCommandSetting(),
+                          ),
                         const SizedBox(height: 16),
                         const SettingsTitle(title: "Backup"),
                         Backup(

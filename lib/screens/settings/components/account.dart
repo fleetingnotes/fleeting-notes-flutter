@@ -19,52 +19,49 @@ class Account extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SettingsItem(
-            name: 'Email',
-            description: email,
-            actions: [
-              ElevatedButton(onPressed: onLogout, child: const Text('Logout'))
-            ],
-          ),
-          SettingsItem(
-            name: 'Force Sync',
-            description: 'Sync notes from the cloud to the device',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SettingsItem(
+          name: 'Email',
+          description: email,
+          actions: [
+            ElevatedButton(onPressed: onLogout, child: const Text('Logout'))
+          ],
+        ),
+        SettingsItem(
+          name: 'Force Sync',
+          description: 'Sync notes from the cloud to the device',
+          actions: [
+            ElevatedButton(
+                onPressed: onForceSync, child: const Text('Force sync'))
+          ],
+        ),
+        SettingsItem(
+          name: 'End-to-end Encryption',
+          description: 'Encrypt notes with end-to-end encryption',
+          actions: [
+            ElevatedButton(
+                onPressed: onEnableEncryption,
+                child:
+                    Text((onEnableEncryption == null) ? 'Enabled' : 'Enable'))
+          ],
+        ),
+        SettingsItem(
+            name: 'Delete Account',
+            description: 'Delete your account and all your notes',
             actions: [
               ElevatedButton(
-                  onPressed: onForceSync, child: const Text('Force sync'))
-            ],
-          ),
-          SettingsItem(
-            name: 'End-to-end Encryption',
-            description: 'Encrypt notes with end-to-end encryption',
-            actions: [
-              ElevatedButton(
-                  onPressed: onEnableEncryption,
-                  child:
-                      Text((onEnableEncryption == null) ? 'Enabled' : 'Enable'))
-            ],
-          ),
-          SettingsItem(
-              name: 'Delete Account',
-              description: 'Delete your account and all your notes',
-              actions: [
-                ElevatedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) =>
-                            DeleteAccountWidget(onDelete: onDeleteAccount),
-                      );
-                    },
-                    child: const Text('Delete')),
-              ])
-        ],
-      ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) =>
+                          DeleteAccountWidget(onDelete: onDeleteAccount),
+                    );
+                  },
+                  child: const Text('Delete')),
+            ])
+      ],
     );
   }
 }
