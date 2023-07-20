@@ -314,12 +314,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   }),
                                 ],
                               ),
-                        if (isLoggedIn)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 16),
-                            child: PluginCommandSetting(),
-                          ),
-                        const SizedBox(height: 16),
+                        if (isLoggedIn) const PluginCommandSetting(),
                         const SettingsTitle(title: "Backup"),
                         Backup(
                           backupOption: backupOption,
@@ -338,7 +333,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ],
                               )
                             : const SizedBox.shrink(),
-                        const SizedBox(height: 16),
                         const SettingsTitle(title: "App Settings"),
                         const SettingsItemSwitch(
                             settingsKey: 'dark-mode', name: "Dark mode"),
@@ -354,7 +348,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           description:
                               "Magnifies the text based on a factor (default: 1)",
                         ),
-                        const SizedBox(height: 16),
                         const SettingsTitle(title: "Editor Settings"),
                         const SettingsItemSwitch(
                             settingsKey: 'append-same-source',
