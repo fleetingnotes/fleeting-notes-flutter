@@ -20,7 +20,9 @@ import 'components/account.dart';
 import 'components/back_up.dart';
 import 'components/encryption_dialog.dart';
 import 'components/local_file_sync_setting.dart';
-import 'dart:io' show Platform;
+import 'dart:io';
+import 'package:path/path.dart' as path;
+import 'package:uuid/uuid.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -57,7 +59,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
   }
 
-  _downloadNotesAsMarkdownZIP(List<Note> notes) {
+  List<int> _downloadNotesAsMarkdownZIP(List<Note> notes) {
     var encoder = ZipEncoder();
     var archive = Archive();
 
@@ -75,27 +77,63 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
     var bytes = encoder.encode(archive,
         level: Deflate.BEST_COMPRESSION, output: outputStream);
-    FileSaver.instance.saveFile(
-        'fleeting_notes_export.zip', Uint8List.fromList(bytes!), 'zip');
+    return bytes!;
   }
 
-  _downloadNotesAsJSON(List<Note> notes) {
+  List<int> _downloadNotesAsJSON(List<Note> notes) {
     var json = jsonEncode(notes);
     var bytes = utf8.encode(json);
-    FileSaver.instance.saveFile(
-        'fleeting_notes_export.json', Uint8List.fromList(bytes), 'json');
+    return bytes;
+  }
+
+  Future<String?> openFolderPicker() async {
+    final result = await FilePicker.platform.getDirectoryPath();
+    if (result != null) {
+      return result;
+    }
+    return null;
   }
 
   void onExportPress() async {
     final db = ref.read(dbProvider);
     final noteUtils = ref.read(noteUtilsProvider);
     List<Note> notes = await db.getAllNotes();
-    if (backupOption == 'Markdown') {
-      _downloadNotesAsMarkdownZIP(notes);
-    } else {
-      _downloadNotesAsJSON(notes);
+    String? selectedDirectory;
+    bool isMobile = (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.android);
+    if (isMobile) {
+      selectedDirectory = await openFolderPicker();
     }
-    noteUtils.showSnackbar(context, 'Exported ${notes.length} notes');
+
+    if (selectedDirectory == null && isMobile) {
+      noteUtils.showSnackbar(context, 'Not folder selected');
+    } else {
+      String fileExtension = "";
+      String fileName = "fleeting_notes_export";
+      List<int> bytes;
+      if (backupOption == 'Markdown') {
+        bytes = _downloadNotesAsMarkdownZIP(notes);
+        fileExtension = "zip";
+      } else {
+        bytes = _downloadNotesAsJSON(notes);
+        fileExtension = "json";
+      }
+      try {
+        if (selectedDirectory == null) {
+          FileSaver.instance.saveFile(fileName + "." + fileExtension,
+              Uint8List.fromList(bytes), fileExtension);
+        } else {
+          final newFile = File(path.join(selectedDirectory,
+              fileName + const Uuid().v4() + "." + fileExtension));
+          await newFile.writeAsBytes(bytes);
+        }
+        noteUtils.showSnackbar(context, 'Exported ${notes.length} notes');
+      } catch (e) {
+        debugPrint(e.toString());
+        noteUtils.showSnackbar(context,
+            'Error exporting notes: the selected directory is forbidden');
+      }
+    }
   }
 
   void onImportPress() async {
