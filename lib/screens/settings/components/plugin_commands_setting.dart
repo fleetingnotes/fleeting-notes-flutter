@@ -82,38 +82,13 @@ class PluginCommandSetting extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final settings = ref.watch(settingsProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Row(children: [
-              const SizedBox(height: 16),
-              const SettingsTitle(title: "Plugin Slash Commands"),
-              const Spacer(),
-              Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: ElevatedButton(
-                      onPressed: () => showDialog(
-                            context: context,
-                            builder: (c) => PluginSelectorDialog(
-                              plugins: plugins,
-                              onPluginSelected: (Plugin selectedPlugin) {
-                                upsertSlashCommand(
-                                  settings,
-                                  index: null,
-                                  commandSettings: {
-                                    "alias": selectedPlugin.title,
-                                    "commandId": selectedPlugin.commandId,
-                                    "metadata": "",
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                      child: const Text('Add New Plugin'))),
-            ])),
+        const SizedBox(height: 16),
+        const SettingsTitle(title: "Plugin Slash Commands"),
         Card(
           clipBehavior: Clip.hardEdge,
           child: ValueListenableBuilder(
@@ -131,6 +106,29 @@ class PluginCommandSetting extends ConsumerWidget {
                       updateCommandSettings: (newCommandSettings) =>
                           upsertSlashCommand(settings,
                               index: i, commandSettings: newCommandSettings),
+                    ),
+                  ),
+                  ListTile(
+                    tileColor: colorScheme.primaryContainer,
+                    iconColor: colorScheme.onPrimaryContainer,
+                    title: const Text('Add New Command'),
+                    leading: const Icon(Icons.add),
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (c) => PluginSelectorDialog(
+                        plugins: plugins,
+                        onPluginSelected: (Plugin selectedPlugin) {
+                          upsertSlashCommand(
+                            settings,
+                            index: null,
+                            commandSettings: {
+                              "alias": selectedPlugin.title,
+                              "commandId": selectedPlugin.commandId,
+                              "metadata": "",
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ],
