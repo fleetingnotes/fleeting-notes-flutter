@@ -34,7 +34,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(
       of: find.byType(SettingsScreen),
-      matching: find.byIcon(Icons.arrow_back),
+      matching: find.byIcon(Icons.close),
     ));
     await tester.pumpAndSettle();
     expect(
@@ -56,7 +56,7 @@ void main() {
     await tester.tap(find.text('Logout'));
     await tester.tap(find.descendant(
       of: find.byType(SettingsScreen),
-      matching: find.byIcon(Icons.arrow_back),
+      matching: find.byIcon(Icons.close),
     ));
     await tester.pumpAndSettle();
     expect(

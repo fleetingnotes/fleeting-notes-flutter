@@ -71,12 +71,12 @@ Future<FNMocks> fnPumpWidget(
 
 // resizing
 Future<void> resizeToDesktop(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(1000, 500);
+  tester.view.physicalSize = const Size(1000, 800);
   tester.view.devicePixelRatio = 1.0;
 }
 
 Future<void> resizeToMobile(WidgetTester tester) async {
-  tester.view.physicalSize = const Size(300, 500);
+  tester.view.physicalSize = const Size(300, 800);
   tester.view.devicePixelRatio = 1.0;
 }
 
