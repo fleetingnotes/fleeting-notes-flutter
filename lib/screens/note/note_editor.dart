@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/title_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_container.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class NoteEditor extends ConsumerStatefulWidget {
   const NoteEditor({
@@ -25,10 +26,12 @@ class NoteEditor extends ConsumerStatefulWidget {
     this.contentController,
     this.sourceController,
     this.autofocus = false,
+    this.markdownPreviewEnabled = false,
     this.padding,
     this.attachment,
   }) : super(key: key);
 
+  final bool markdownPreviewEnabled;
   final Note note;
   final bool autofocus;
   final TextEditingController? titleController;
@@ -418,14 +421,22 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                         textDirection: textDirection),
                   ),
                   const Divider(),
-                  ContentField(
-                    controller: contentController,
-                    onChanged: onChanged,
-                    onPop: () => noteUtils.onPopNote(context, widget.note.id),
-                    onCommandRun: onCommandRun,
-                    autofocus: !autoFocusTitle,
-                    textDirection: textDirection,
-                  ),
+                  if (widget.markdownPreviewEnabled)
+                    Markdown(
+                      data: contentController.text,
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.only(top: 8),
+                    )
+                  else
+                    ContentField(
+                      controller: contentController,
+                      onChanged: onChanged,
+                      onPop: () => noteUtils.onPopNote(context, widget.note.id),
+                      onCommandRun: onCommandRun,
+                      autofocus: !autoFocusTitle,
+                      textDirection: textDirection,
+                    ),
                 ],
               ),
             ),
