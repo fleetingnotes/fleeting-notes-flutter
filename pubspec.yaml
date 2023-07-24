@@ -71,6 +71,7 @@ dependencies:
   share_plus: ^7.0.2
   image_picker: ^0.8.8
   intl: ^0.18.1
+  flutter_markdown: ^0.6.17
 
 dev_dependencies:
   flutter_test:
