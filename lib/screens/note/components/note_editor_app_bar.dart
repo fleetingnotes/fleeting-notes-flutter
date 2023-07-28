@@ -70,9 +70,9 @@ class NoteEditorAppBar extends ConsumerWidget {
               margin: const EdgeInsets.only(right: 8),
             ),
           IconButton(
-              isSelected: isMarkdownPreviewSelected,
               onPressed: onPreviewMarkdown,
-              icon: const Icon(Icons.menu_book)),
+              icon: (isMarkdownPreviewSelected) ? Icon(Icons.edit) : Icon(Icons.import_contacts),
+          ),
           NotePopupMenu(
             note: note,
             onAddAttachment: (String fn, Uint8List? fb) async {
