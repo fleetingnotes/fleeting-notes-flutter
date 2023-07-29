@@ -5,7 +5,6 @@ import 'package:fleeting_notes_flutter/screens/note/components/note_editor_botto
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:collection/collection.dart';
@@ -43,7 +42,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Uri? currentLoc;
   List<Note> backlinks = [];
   SearchQuery backlinksSq = SearchQuery();
-  late Markdown markdown;
 
   Future<void> initNoteScreen(NoteHistory? noteHistory) async {
     if (!mounted || !GoRouter.of(context).location.startsWith('/note/')) return;
