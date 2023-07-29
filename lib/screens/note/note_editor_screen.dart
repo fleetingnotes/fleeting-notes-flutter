@@ -237,6 +237,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                         ? null
                         : scaffoldKey.currentState?.openEndDrawer,
                     contentController: contentController,
+                    titleController: titleController,
                   ),
                   Flexible(
                     fit: FlexFit.tight,

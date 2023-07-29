@@ -29,9 +29,12 @@ class NoteEditorAppBar extends ConsumerWidget {
   final TextEditingController? titleController;
 
   void _onShare(BuildContext context) async {
+    String content = contentController?.text ?? "";
+    String? title = titleController?.text;
+    String concatenatedText = title != null ? "$title\n$content" : content;
+
     if (kIsWeb) {
-      await Clipboard.setData(
-          ClipboardData(text: contentController?.text ?? ''));
+      await Clipboard.setData(ClipboardData(text: concatenatedText));
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         behavior: SnackBarBehavior.floating,
         content: Text("Copied Note Content"),
@@ -40,9 +43,10 @@ class NoteEditorAppBar extends ConsumerWidget {
       return;
     }
     final box = context.findRenderObject() as RenderBox?;
+
     Share.share(
-      contentController?.text ?? '',
-      subject: titleController?.text,
+      concatenatedText,
+      subject: title,
       sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
     );
   }
