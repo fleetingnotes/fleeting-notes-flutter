@@ -37,6 +37,7 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool autofocus = false;
+  bool markdownPreviewEnabled = false;
   Note? note;
   Uri? currentLoc;
   List<Note> backlinks = [];
@@ -180,6 +181,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
   }
 
+  void onPreviewMarkdown() {
+    setState(() {
+      markdownPreviewEnabled = !markdownPreviewEnabled;
+    });
+  }
+
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
     styles: TextPartStyleDefinitions(definitionList: [
@@ -233,6 +240,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                   NoteEditorAppBar(
                     note: renderNote,
                     onClose: onClose,
+                    onPreviewMarkdown: onPreviewMarkdown,
+                    isMarkdownPreviewSelected: markdownPreviewEnabled,
                     onBacklinks: (backlinks.isEmpty)
                         ? null
                         : scaffoldKey.currentState?.openEndDrawer,
@@ -251,6 +260,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                             contentController: contentController,
                             sourceController: sourceController,
                             autofocus: autofocus,
+                            markdownPreviewEnabled: markdownPreviewEnabled,
                             padding: const EdgeInsets.only(
                                 left: 24, right: 24, bottom: 16),
                             attachment: widget.attachment,

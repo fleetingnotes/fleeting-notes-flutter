@@ -15,18 +15,22 @@ class NoteEditorAppBar extends ConsumerWidget {
     this.elevation,
     this.title,
     this.onClose,
+    this.onPreviewMarkdown,
     this.onBacklinks,
     this.contentController,
     this.titleController,
+    this.isMarkdownPreviewSelected = false,
   });
 
   final Note? note;
   final VoidCallback? onClose;
+  final VoidCallback? onPreviewMarkdown;
   final VoidCallback? onBacklinks;
   final double? elevation;
   final Widget? title;
   final TextEditingController? contentController;
   final TextEditingController? titleController;
+  final bool isMarkdownPreviewSelected;
 
   void _onShare(BuildContext context) async {
     String content = contentController?.text ?? "";
@@ -69,6 +73,12 @@ class NoteEditorAppBar extends ConsumerWidget {
               child: const CircularProgressIndicator(strokeWidth: 3),
               margin: const EdgeInsets.only(right: 8),
             ),
+          IconButton(
+            onPressed: onPreviewMarkdown,
+            icon: (isMarkdownPreviewSelected)
+                ? const Icon(Icons.edit)
+                : const Icon(Icons.import_contacts),
+          ),
           NotePopupMenu(
             note: note,
             onAddAttachment: (String fn, Uint8List? fb) async {
