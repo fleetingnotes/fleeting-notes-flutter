@@ -38,18 +38,24 @@ final List<Plugin> plugins = [
     commandId: 'official/ocr-source',
   ),
   Plugin(
-    key: 'option3',
+    key: 'option5',
     title: 'Speech To Text',
     description:
         'This plugin utilizes Whisper from ChatGPT to fetch and convert the source of your speech.',
     commandId: 'official/speech-to-text',
   ),
   Plugin(
-    key: 'plugin5',
+    key: 'plugin6',
     title: 'Summarize Source',
     description:
-        'This plugin fetches the source of your note and summarizes it into key points using ChatGPT',
+        'This plugin fetches the source of your note and summarizes it into key points using ChatGPT.',
     commandId: 'official/summarize-source',
+  ),
+  Plugin(
+    key: 'plugin7',
+    title: 'Webhook',
+    description: 'This plugin insert the response of a webhook in a note.',
+    commandId: 'official/webhook',
   ),
 ];
 
