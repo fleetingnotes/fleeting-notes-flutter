@@ -33,6 +33,11 @@ class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final db = ref.read(dbProvider);
+    TextDirection textDirection =
+        db.settings.get('right-to-left', defaultValue: false)
+            ? TextDirection.rtl
+            : TextDirection.ltr;
     return SizedBox(
       width: widget.width,
       child: Drawer(
@@ -58,12 +63,12 @@ class _BacklinksDrawerState extends ConsumerState<BacklinksDrawer> {
               const Divider(),
               Expanded(
                 child: NoteGrid(
-                  crossAxisCount: 1,
-                  maxLines: 2,
-                  searchQuery: widget.searchQuery,
-                  notes: widget.backlinks,
-                  onTap: onNoteTap,
-                ),
+                    crossAxisCount: 1,
+                    maxLines: 2,
+                    searchQuery: widget.searchQuery,
+                    notes: widget.backlinks,
+                    onTap: onNoteTap,
+                    textDirection: textDirection),
               ),
             ],
           ),

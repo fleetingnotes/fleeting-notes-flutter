@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_bar.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
+import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -138,9 +139,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  Widget getSearchList() {
+  Widget getSearchList(textDirectionData) {
     final searchQuery = ref.read(searchProvider);
     final settings = ref.read(settingsProvider);
+    TextDirection textDirection =
+        textDirectionData ? TextDirection.rtl : TextDirection.ltr;
     int crossAxisCount = 2;
     if (Responsive.isTablet(context)) {
       crossAxisCount = 3;
@@ -164,6 +167,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           onRefresh: _pullRefreshNotes,
           onSelect: _longPressNote,
           onTap: _pressNote,
+          textDirection: textDirection,
         );
       },
     );
@@ -172,6 +176,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    final textDirectionData =
+        db.settings.get('right-to-left', defaultValue: false);
+    ref.listen<Settings>(settingsProvider, (previous, next) {
+      if (previous?.get('right-to-left') != next.get('right-to-left')) {
+        loadNotes();
+      }
+    });
     ref.listen<SearchQuery?>(searchProvider, (_, sq) {
       if (sq == null) {
         queryController.text = '';
@@ -224,27 +235,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   deleteNotes: deleteNotes,
                 ),
         ),
-        Expanded(child: getSearchList()),
+        Expanded(child: getSearchList(textDirectionData)),
       ],
     );
   }
 }
 
 class NoteGrid extends StatelessWidget {
-  const NoteGrid({
-    super.key,
-    required this.notes,
-    this.selectedNotes = const [],
-    this.searchQuery,
-    this.crossAxisCount = 1,
-    this.childAspectRatio,
-    this.maxLines,
-    this.padding,
-    this.onRefresh,
-    this.onSelect,
-    this.onTap,
-    this.controller,
-  });
+  const NoteGrid(
+      {super.key,
+      required this.notes,
+      this.selectedNotes = const [],
+      this.searchQuery,
+      this.crossAxisCount = 1,
+      this.childAspectRatio,
+      this.maxLines,
+      this.padding,
+      this.onRefresh,
+      this.onSelect,
+      this.onTap,
+      this.controller,
+      this.textDirection});
 
   final List<Note> notes;
   final List<Note> selectedNotes;
@@ -257,6 +268,7 @@ class NoteGrid extends StatelessWidget {
   final Function(BuildContext, Note)? onSelect;
   final Function(BuildContext, Note)? onTap;
   final ScrollController? controller;
+  final TextDirection? textDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -272,15 +284,15 @@ class NoteGrid extends StatelessWidget {
               itemCount: notes.length,
               shrinkWrap: true,
               itemBuilder: (context, index) => NoteCard(
-                sQuery: searchQuery,
-                note: notes[index],
-                isSelected: selectedNotes.contains(notes[index]),
-                onSelect: (onSelect == null)
-                    ? null
-                    : () => onSelect?.call(context, notes[index]),
-                onTap: () => onTap?.call(context, notes[index]),
-                maxLines: maxLines,
-              ),
+                  sQuery: searchQuery,
+                  note: notes[index],
+                  isSelected: selectedNotes.contains(notes[index]),
+                  onSelect: (onSelect == null)
+                      ? null
+                      : () => onSelect?.call(context, notes[index]),
+                  onTap: () => onTap?.call(context, notes[index]),
+                  maxLines: maxLines,
+                  textDirection: textDirection),
             )
           : GridView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -289,16 +301,16 @@ class NoteGrid extends StatelessWidget {
               controller: controller,
               itemCount: notes.length,
               itemBuilder: (context, index) => NoteCard(
-                sQuery: searchQuery,
-                note: notes[index],
-                expanded: true,
-                isSelected: selectedNotes.contains(notes[index]),
-                onSelect: (onSelect == null)
-                    ? null
-                    : () => onSelect?.call(context, notes[index]),
-                onTap: () => onTap?.call(context, notes[index]),
-                maxLines: maxLines,
-              ),
+                  sQuery: searchQuery,
+                  note: notes[index],
+                  expanded: true,
+                  isSelected: selectedNotes.contains(notes[index]),
+                  onSelect: (onSelect == null)
+                      ? null
+                      : () => onSelect?.call(context, notes[index]),
+                  onTap: () => onTap?.call(context, notes[index]),
+                  maxLines: maxLines,
+                  textDirection: textDirection),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
                 childAspectRatio: childAspectRatio ?? 1,
