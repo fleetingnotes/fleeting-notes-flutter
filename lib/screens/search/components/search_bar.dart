@@ -7,13 +7,8 @@ import '../../../models/search_query.dart';
 import '../../../utils/responsive.dart';
 
 class CustomSearchBar extends ConsumerStatefulWidget {
-  const CustomSearchBar({
-    Key? key,
-    required this.onMenu,
-    this.controller,
-    this.focusNode,
-  }) : super(key: key);
-
+  const CustomSearchBar(
+      {super.key, required this.onMenu, this.controller, this.focusNode});
   final VoidCallback onMenu;
   final TextEditingController? controller;
   final FocusNode? focusNode;
@@ -73,77 +68,44 @@ class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final db = ref.read(dbProvider);
     bool searchFocusMobile = hasSearchFocus && Responsive.isMobile(context);
-    TextDirection textDirection =
-        db.settings.get('right-to-left', defaultValue: false)
-            ? TextDirection.rtl
-            : TextDirection.ltr;
-    return AnimatedContainer(
-      height: 72,
-      duration: const Duration(milliseconds: 100),
-      child: Card(
-        shadowColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-            borderRadius: (searchFocusMobile)
-                ? BorderRadius.zero
-                : BorderRadius.circular(30)),
-        elevation: (searchFocusMobile) ? 0 : 3,
-        child: Row(
-          children: [
-            LeadingIcon(
-              hasFocus: searchFocusMobile,
-              onBack: onBack,
-              onMenu: widget.onMenu,
-            ),
-            Expanded(
-              child: TextField(
-                focusNode: focusNode,
-                onTap: () {
-                  setState(() {
-                    hasSearchFocus = true;
-                  });
-                },
-                controller: widget.controller,
-                onChanged: onQueryChange,
-                style: Theme.of(context).textTheme.bodyLarge,
-                decoration: const InputDecoration(
-                  hintText: 'Search Notes',
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                textDirection: textDirection,
-              ),
-            ),
-            (searchFocusMobile || !Responsive.isMobile(context))
-                ? Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: MenuAnchor(
-                      childFocusNode: menuFocusNode,
-                      style: const MenuStyle(
-                        padding: MaterialStatePropertyAll(EdgeInsets.zero),
-                      ),
-                      controller: menuController,
-                      menuChildren: [
-                        SearchDialog(onClose: menuController.close),
-                      ],
-                      child: IconButton(
-                        padding: const EdgeInsets.all(0),
-                        tooltip: "Sort and Filter",
-                        onPressed: menuController.open,
-                        icon: const Icon(Icons.tune),
-                      ),
-                    ),
-                  )
-                : const Padding(
-                    padding: EdgeInsets.only(right: 16),
-                    child: (Icon(Icons.search)),
-                  ),
-          ],
+    return SearchBar(
+        leading: LeadingIcon(
+          hasFocus: searchFocusMobile,
+          onBack: onBack,
+          onMenu: widget.onMenu,
         ),
-      ),
-    );
+        hintText: "Search Notes",
+        focusNode: focusNode,
+        onTap: () {
+          setState(() {
+            hasSearchFocus = true;
+          });
+        },
+        onChanged: onQueryChange,
+        trailing: [
+          (searchFocusMobile || !Responsive.isMobile(context))
+              ? MenuAnchor(
+                  childFocusNode: menuFocusNode,
+                  style: const MenuStyle(
+                    padding: MaterialStatePropertyAll(EdgeInsets.zero),
+                  ),
+                  controller: menuController,
+                  menuChildren: [
+                    SearchDialog(onClose: menuController.close),
+                  ],
+                  child: IconButton(
+                    padding: const EdgeInsets.all(0),
+                    tooltip: "Sort and Filter",
+                    onPressed: menuController.open,
+                    icon: const Icon(Icons.tune),
+                  ),
+                )
+              : const Padding(
+                padding: EdgeInsets.only(right:16.0),
+                child: (Icon(Icons.search)),
+              ),
+        ]);
   }
 }
 
@@ -162,29 +124,20 @@ class LeadingIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (hasFocus) {
-      return Padding(
-        padding: const EdgeInsets.only(left: 16),
-        child: IconButton(
-          padding: const EdgeInsets.all(0),
-          onPressed: onBack,
-          icon: const Icon(Icons.arrow_back, size: 24),
-        ),
+      return IconButton(
+        padding: const EdgeInsets.all(0),
+        onPressed: onBack,
+        icon: const Icon(Icons.arrow_back, size: 24),
       );
     } else if (Responsive.isMobile(context)) {
-      return Padding(
-        padding: const EdgeInsets.only(left: 16),
-        child: IconButton(
-          tooltip: 'Open Menu',
-          padding: const EdgeInsets.all(0),
-          onPressed: onMenu,
-          icon: const Icon(Icons.menu_outlined, size: 24),
-        ),
+      return IconButton(
+        tooltip: 'Open Menu',
+        padding: const EdgeInsets.all(0),
+        onPressed: onMenu,
+        icon: const Icon(Icons.menu_outlined, size: 24),
       );
     } else {
-      return const Padding(
-        padding: EdgeInsets.only(left: 16),
-        child: Icon(Icons.search, size: 24),
-      );
+      return Icon(Icons.search, size: 24);
     }
   }
 }
