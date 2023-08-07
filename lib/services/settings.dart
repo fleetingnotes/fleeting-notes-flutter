@@ -38,6 +38,7 @@ class Settings {
     "last-sync-time": DateTime,
     "plugin-slash-commands": List,
     "speech-to-text-locale": String,
+    "append-to-note-id": String
   };
 
   Settings() {
