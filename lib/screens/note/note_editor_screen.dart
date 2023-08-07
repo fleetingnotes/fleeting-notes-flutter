@@ -106,6 +106,19 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     Note? newNote = (unsavedNote?.id == noteId)
         ? unsavedNote
         : await db.getNoteById(noteId);
+
+    String appendToNoteId =
+        db.settings.get('append-to-note-id', defaultValue: "");
+    if (appendToNoteId.isNotEmpty) {
+      var params = currentLoc?.queryParameters ?? {};
+      String qpContent = params['content'] ?? '';
+      Note? appendToNote = await db.getNoteById(appendToNoteId);
+      if (appendToNote != null && qpContent.isNotEmpty) {
+        appendToNote.content += "\n$qpContent";
+        return appendToNote;
+      }
+    }
+
     if (newNote == null) {
       var params = currentLoc?.queryParameters ?? {};
       newNote = (currNote?.id == noteId) ? currNote : noteFromPath(currentLoc);
