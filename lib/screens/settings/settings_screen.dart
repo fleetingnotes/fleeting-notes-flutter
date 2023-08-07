@@ -355,6 +355,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             defaultValue: true,
                             description:
                                 "Append shared notes with the same source"),
+                        AppendToNoteId(),
                         const SettingsItemSwitch(
                             settingsKey: 'auto-focus-title',
                             name: 'Enable auto focus title',
@@ -375,6 +376,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class AppendToNoteId extends ConsumerWidget {
+  final TextEditingController _idController = TextEditingController();
+  String enteredId = '';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _idController,
+            onChanged: (value) {
+              settings.set("append-to-note-id", value);
+            },
+            decoration: const InputDecoration(
+              labelText: 'Enter ID',
+            ),
+          ),
+        ],
       ),
     );
   }
