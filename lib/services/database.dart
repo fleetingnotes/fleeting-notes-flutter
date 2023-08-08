@@ -222,6 +222,23 @@ class Database {
     }
   }
 
+  Future<bool> restoreNotes(List<Note> notes) async {
+    try {
+      var box = await getBox();
+      Map<String, Note> noteIdMap = {};
+      for (var note in notes) {
+        Note boxNote = box.get(note.id, defaultValue: note);
+        boxNote.isDeleted = false;
+        noteIdMap[note.id] = boxNote;
+      }
+      await box.putAll(noteIdMap);
+      noteChangeController.add(NoteEvent(notes, NoteEventStatus.delete));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> logout() async {
     if (supabase.userId != 'local') {
       var box = await getBox();
