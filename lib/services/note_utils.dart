@@ -45,6 +45,20 @@ class NoteUtils {
     }
   }
 
+  Future<bool> handleRestoreNote(BuildContext context, List<Note> notes) async {
+    final db = ref.read(dbProvider);
+    try {
+      bool success = await db.restoreNotes(notes);
+      if (!success) {
+        throw FleetingNotesException('Failed to restore note');
+      }
+      return true;
+    } on FleetingNotesException catch (e) {
+      showSnackbar(context, e.message);
+      return false;
+    }
+  }
+
   Future<void> handleSaveNote(BuildContext context, Note note) async {
     final db = ref.read(dbProvider);
     try {
