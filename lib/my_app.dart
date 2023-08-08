@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/screens/note/note_editor_screen.dart';
 import 'package:fleeting_notes_flutter/screens/settings/settings_screen.dart';
+import 'package:fleeting_notes_flutter/screens/trash/trash_screen.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/dialog_page.dart';
 import 'package:fleeting_notes_flutter/widgets/record_dialog.dart';
@@ -105,6 +106,14 @@ class MyAppState<T extends StatefulWidget> extends ConsumerState<MyApp> {
                 path: 'note/record',
                 pageBuilder: (context, state) {
                   return const DialogPage(child: RecordDialog());
+                }),
+            GoRoute(
+                name: 'trash',
+                path: 'trash',
+                pageBuilder: (context, state) {
+                  return const DialogPage(
+                    child: TrashScreen(),
+                  );
                 }),
             GoRoute(
               name: 'note',
