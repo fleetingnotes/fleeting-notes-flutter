@@ -64,15 +64,11 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
             child: Scaffold(
                 resizeToAvoidBottomInset: false,
                 body: SafeArea(
-                    child: Center(
-                  child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: tabletLimit),
-                      child: Column(
-                        children: [
-                          banner,
-                          Expanded(child: responsiveSearchScreen),
-                        ],
-                      )),
+                    child: Column(
+                  children: [
+                    banner,
+                    Expanded(child: responsiveSearchScreen),
+                  ],
                 )))),
       ),
     );
