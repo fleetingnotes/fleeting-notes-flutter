@@ -137,7 +137,7 @@ class LeadingIcon extends StatelessWidget {
         icon: const Icon(Icons.menu_outlined, size: 24),
       );
     } else {
-      return Icon(Icons.search, size: 24);
+      return const Icon(Icons.search, size: 24);
     }
   }
 }
