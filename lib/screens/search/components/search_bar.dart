@@ -25,6 +25,7 @@ class CustomSearchBar extends ConsumerStatefulWidget {
 class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
   bool maintainFocus = false;
   bool hasSearchFocus = false;
+  bool showSaveSearch = false;
   MenuController menuController = MenuController();
   FocusNode focusNode = FocusNode();
   FocusNode menuFocusNode = FocusNode();
@@ -62,6 +63,16 @@ class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
     ));
     showSaveSearch = val != "";
   }
+
+  onSaveSearch() {
+    final db = ref.read(dbProvider);
+    final query = ref.read(searchProvider)!.query;
+    const key = "historical-searches";
+    final historicalSearches = db.settings.get(key, defaultValue: []);
+    if (!historicalSearches.contains(query)) {
+      historicalSearches.add(query);
+      db.settings.set(key, historicalSearches);
+    }
   }
 
   onBack() {
