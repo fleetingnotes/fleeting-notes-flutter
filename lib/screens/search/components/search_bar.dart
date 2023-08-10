@@ -68,44 +68,53 @@ class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final db = ref.read(dbProvider);
+    TextDirection textDirection =
+    db.settings.get('right-to-left', defaultValue: false)
+            ? TextDirection.rtl
+            : TextDirection.ltr;
     bool searchFocusMobile = hasSearchFocus && Responsive.isMobile(context);
-    return SearchBar(
-        leading: LeadingIcon(
-          hasFocus: searchFocusMobile,
-          onBack: onBack,
-          onMenu: widget.onMenu,
-        ),
-        hintText: "Search Notes",
-        focusNode: focusNode,
-        onTap: () {
-          setState(() {
-            hasSearchFocus = true;
-          });
-        },
-        onChanged: onQueryChange,
-        trailing: [
-          (searchFocusMobile || !Responsive.isMobile(context))
-              ? MenuAnchor(
-                  childFocusNode: menuFocusNode,
-                  style: const MenuStyle(
-                    padding: MaterialStatePropertyAll(EdgeInsets.zero),
-                  ),
-                  controller: menuController,
-                  menuChildren: [
-                    SearchDialog(onClose: menuController.close),
-                  ],
-                  child: IconButton(
-                    padding: const EdgeInsets.all(0),
-                    tooltip: "Sort and Filter",
-                    onPressed: menuController.open,
-                    icon: const Icon(Icons.tune),
-                  ),
-                )
-              : const Padding(
-                padding: EdgeInsets.only(right:16.0),
-                child: (Icon(Icons.search)),
-              ),
-        ]);
+    
+    return Directionality(
+      textDirection: textDirection,
+      child: SearchBar(
+          leading: LeadingIcon(
+            hasFocus: searchFocusMobile,
+            onBack: onBack,
+            onMenu: widget.onMenu,
+          ),
+          hintText: "Search Notes",
+          focusNode: focusNode,
+          onTap: () {
+            setState(() {
+              hasSearchFocus = true;
+            });
+          },
+          onChanged: onQueryChange,
+          trailing: [
+            (searchFocusMobile || !Responsive.isMobile(context))
+                ? MenuAnchor(
+                    childFocusNode: menuFocusNode,
+                    style: const MenuStyle(
+                      padding: MaterialStatePropertyAll(EdgeInsets.zero),
+                    ),
+                    controller: menuController,
+                    menuChildren: [
+                      SearchDialog(onClose: menuController.close),
+                    ],
+                    child: IconButton(
+                      padding: const EdgeInsets.all(0),
+                      tooltip: "Sort and Filter",
+                      onPressed: menuController.open,
+                      icon: const Icon(Icons.tune),
+                    ),
+                  )
+                : const Padding(
+                  padding: EdgeInsets.only(right:16.0),
+                  child: (Icon(Icons.search)),
+                ),
+          ]),
+    );
   }
 }
 
