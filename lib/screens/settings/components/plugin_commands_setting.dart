@@ -95,7 +95,6 @@ class PluginCommandSetting extends ConsumerWidget {
       children: [
         const SizedBox(height: 16),
         const SettingsTitle(title: "Plugin Slash Commands"),
-        const Divider(),
         Card(
           clipBehavior: Clip.hardEdge,
           child: ValueListenableBuilder(
