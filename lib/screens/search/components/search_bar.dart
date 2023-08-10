@@ -60,6 +60,8 @@ class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
     notifier.updateSearch(searchQuery.copyWith(
       query: val,
     ));
+    showSaveSearch = val != "";
+  }
   }
 
   onBack() {
@@ -120,21 +122,33 @@ class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
                 ? Padding(
                     padding: const EdgeInsets.only(right: 16),
                     child: MenuAnchor(
-                      childFocusNode: menuFocusNode,
-                      style: const MenuStyle(
-                        padding: MaterialStatePropertyAll(EdgeInsets.zero),
-                      ),
-                      controller: menuController,
-                      menuChildren: [
-                        SearchDialog(onClose: menuController.close),
-                      ],
-                      child: IconButton(
-                        padding: const EdgeInsets.all(0),
-                        tooltip: "Sort and Filter",
-                        onPressed: menuController.open,
-                        icon: const Icon(Icons.tune),
-                      ),
-                    ),
+                        childFocusNode: menuFocusNode,
+                        style: const MenuStyle(
+                          padding: MaterialStatePropertyAll(EdgeInsets.zero),
+                        ),
+                        controller: menuController,
+                        menuChildren: [
+                          SearchDialog(onClose: menuController.close),
+                        ],
+                        child: Row(
+                          children: [
+                            if (showSaveSearch)
+                              IconButton(
+                                padding: const EdgeInsets.all(0),
+                                tooltip: "Save Search",
+                                onPressed: onSaveSearch,
+                                icon: const Icon(
+                                  Icons.star_border,
+                                ),
+                              ),
+                            IconButton(
+                              padding: const EdgeInsets.all(0),
+                              tooltip: "Sort and Filter",
+                              onPressed: menuController.open,
+                              icon: const Icon(Icons.tune),
+                            )
+                          ],
+                        )),
                   )
                 : const Padding(
                     padding: EdgeInsets.only(right: 16),
