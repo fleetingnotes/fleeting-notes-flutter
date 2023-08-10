@@ -17,7 +17,7 @@ class SettingsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Divider(),
+        const SizedBox(height: 8),
         Row(
           children: [
             if (leading != null)

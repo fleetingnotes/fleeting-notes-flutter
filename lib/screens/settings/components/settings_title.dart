@@ -7,12 +7,18 @@ class SettingsTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelMedium,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+        ),
+        const Divider(),
+      ],
     );
   }
 }
