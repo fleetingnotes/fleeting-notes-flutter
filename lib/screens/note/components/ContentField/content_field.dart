@@ -7,7 +7,6 @@ import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'keyboard_button.dart';
 import '../../../../utils/shortcut_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
