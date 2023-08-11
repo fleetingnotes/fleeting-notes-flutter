@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../models/search_query.dart';
 import '../../widgets/record_dialog.dart';
 import 'components/onboarding_dialog.dart';
 import 'components/note_fab.dart';
@@ -29,6 +30,7 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   final scrollController = ScrollController();
   final imagePicker = ImagePicker();
+  var searches = <String>[];
   bool bottomAppBarVisible = true;
   FloatingActionButtonLocation get _fabLocation => bottomAppBarVisible
       ? FloatingActionButtonLocation.endContained
@@ -170,6 +172,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
+    searches = (db.settings.get("historical-searches") as List? ?? [])
+        .map((dynamic item) => item.toString())
+        .toList();
     final isMobile = Responsive.isMobile(context);
     return Shortcuts(
       shortcuts: mainShortcutMapping,
@@ -185,9 +190,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             key: db.scaffoldKey,
             resizeToAvoidBottomInset: false,
             drawer: SideMenu(
-              addNote: addNote,
-              closeDrawer: db.closeDrawer,
-            ),
+                addNote: addNote,
+                closeDrawer: db.closeDrawer,
+                searches: searches,
+                onSearch: (query) {
+                  db.closeDrawer();
+                  final searchQuery = ref.read(searchProvider) ?? SearchQuery();
+                  final notifier = ref.read(searchProvider.notifier);
+                  notifier.updateSearch(searchQuery.copyWith(
+                    query: query,
+                  ));
+                }),
             bottomNavigationBar: FNBottomAppBar(
               isElevated: !bottomAppBarVisible,
               isVisible: isMobile && bottomAppBarVisible,
