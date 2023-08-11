@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/textfield_toolbar.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
@@ -468,70 +469,11 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   List<Widget Function(FocusNode)> toolbarButtons() {
     return [
       (node) {
-        return SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: Center(
-            child: ListView(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              children: [
-                KeyboardButton(
-                  icon: Icons.data_array,
-                  onPressed: () {
-                    shortcuts.action('[[', ']]');
-                    _onContentChanged(widget.controller.text);
-                  },
-                  tooltip: 'Add link',
-                ),
-                KeyboardButton(
-                  icon: Icons.tag,
-                  onPressed: () {
-                    shortcuts.action('#', '');
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.format_bold,
-                  onPressed: () {
-                    shortcuts.action('**', '**');
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.format_italic,
-                  onPressed: () {
-                    shortcuts.action('*', '*');
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.add_link,
-                  onPressed: () {
-                    shortcuts.addLink();
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.list,
-                  onPressed: () {
-                    shortcuts.toggleList();
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.checklist_outlined,
-                  onPressed: () {
-                    shortcuts.toggleCheckbox();
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.cancel_outlined,
-                  onPressed: contentFocusNode.unfocus,
-                ),
-              ],
-            ),
-          ),
+        return TextFieldToolbar(
+          shortcuts: shortcuts,
+          controller: widget.controller,
+          onContentChanged: _onContentChanged,
+          unfocus: contentFocusNode.unfocus,
         );
       }
     ];
