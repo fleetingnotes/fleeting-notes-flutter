@@ -208,7 +208,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     scrollController: scrollController),
                 tablet: Row(
                   children: [
-                    SideRail(addNote: addNote, onMenu: db.openDrawer),
+                    SideRail(onMenu: db.openDrawer),
                     Flexible(
                       child: Center(
                         child: ConstrainedBox(
@@ -226,7 +226,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 ),
                 desktop: Row(
                   children: [
-                    SideRail(addNote: addNote, onMenu: db.openDrawer),
+                    SideRail(onMenu: db.openDrawer),
                     Flexible(
                       child: Center(
                         child: ConstrainedBox(

@@ -289,3 +289,11 @@ Future<MockLocalFileSync> setupLfs({
   var lfs = MockLocalFileSync(settings: settings, fs: fs);
   return lfs;
 }
+
+Future<void> navigateToTrash(WidgetTester tester) async {
+  final iconFinder = find.byIcon(Icons.menu);
+  await tester.tap(iconFinder);
+  await tester.pumpAndSettle();
+  await tester.tap(find.byIcon(Icons.delete));
+  await tester.pumpAndSettle();
+}

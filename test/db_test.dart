@@ -36,7 +36,8 @@ class MockDatabaseTests extends Database {
   }
 
   @override
-  Future<List<Note>> getAllNotes({forceSync = false}) {
+  Future<List<Note>> getAllNotes(
+      {forceSync = false, bool? filterDeletedNotes = false}) {
     return Future.value([
       newNote('1', 'title', 'content', 'source'),
       newNote('2', '', 'title in content', ''),

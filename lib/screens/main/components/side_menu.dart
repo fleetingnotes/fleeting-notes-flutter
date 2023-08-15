@@ -1,6 +1,11 @@
 import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+void onTrash(BuildContext context) {
+  context.goNamed('trash');
+}
 
 class SideMenu extends StatelessWidget {
   const SideMenu({
@@ -45,6 +50,12 @@ class SideMenu extends StatelessWidget {
                   ],
                 ),
                 const Spacer(),
+                NavigationButton(
+                  icon: const Icon(Icons.delete),
+                  label: Text('Trash',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  onTap: () => onTrash(context),
+                ),
                 NavigationButton(
                   icon: const Icon(Icons.settings),
                   label: Text('Settings',
