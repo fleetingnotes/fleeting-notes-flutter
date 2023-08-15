@@ -19,6 +19,7 @@ import '../../widgets/record_dialog.dart';
 import 'components/onboarding_dialog.dart';
 import 'components/note_fab.dart';
 import 'components/side_rail.dart';
+import 'components/create_search_dialog.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -57,6 +58,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     attemptRecoverSession();
     handleSiriSuggestions();
     scrollController.addListener(_listenScroll);
+    searches = (db.settings.get("historical-searches") as List? ?? [])
+        .map((dynamic item) => item.toString())
+        .toList();
   }
 
   @override
@@ -169,12 +173,42 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 
+  void openCreateSearchDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CreateSearchDialog(
+          addSearch: (search) {
+            final db = ref.read(dbProvider);
+            const key = "historical-searches";
+            final historicalSearches = db.settings.get(key, defaultValue: []);
+            if (!historicalSearches.contains(search)) {
+              historicalSearches.add(search);
+              db.settings.set(key, historicalSearches);
+              setState(() {
+                searches.add(search);
+              });
+            }
+          },
+          removeSearch: (index) {
+            final db = ref.read(dbProvider);
+            const key = "historical-searches";
+            final historicalSearches = db.settings.get(key, defaultValue: []);
+            historicalSearches.removeAt(index);
+            db.settings.set(key, historicalSearches);
+            setState(() {
+              searches.removeAt(index);
+            });
+          },
+          searches: searches,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
-    searches = (db.settings.get("historical-searches") as List? ?? [])
-        .map((dynamic item) => item.toString())
-        .toList();
     final isMobile = Responsive.isMobile(context);
     return Shortcuts(
       shortcuts: mainShortcutMapping,
@@ -193,6 +227,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 addNote: addNote,
                 closeDrawer: db.closeDrawer,
                 searches: searches,
+                openCreateSearchDialog: () {
+                  openCreateSearchDialog(context);
+                },
                 onSearch: (query) {
                   db.closeDrawer();
                   final searchQuery = ref.read(searchProvider) ?? SearchQuery();
