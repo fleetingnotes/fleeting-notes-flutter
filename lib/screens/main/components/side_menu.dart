@@ -14,7 +14,8 @@ class SideMenu extends StatelessWidget {
       this.closeDrawer,
       this.width,
       this.searches,
-      this.onSearch})
+      this.onSearch,
+      this.openCreateSearchDialog})
       : super(key: key);
 
   final VoidCallback? addNote;
@@ -22,6 +23,7 @@ class SideMenu extends StatelessWidget {
   final double? width;
   final List<String>? searches;
   final Function(String)? onSearch;
+  final VoidCallback? openCreateSearchDialog;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +55,17 @@ class SideMenu extends StatelessWidget {
                     )
                   ],
                 ),
+                const Divider(), // Divider line
+                Container(
+                  height: 46, // Set the height of the title container
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  alignment:
+                      Alignment.centerLeft, // Align the title to the left
+                  child: Text(
+                    'SAVED SEARCHES', // Title for the section
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
                 if (searches != null && searches!.isNotEmpty)
                   Expanded(
                       child: ListView.builder(
@@ -79,7 +92,17 @@ class SideMenu extends StatelessWidget {
                       );
                     },
                   )),
+                NavigationButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  label: Text('Create/Edit searches',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  onTap: () => openCreateSearchDialog!(),
+                ),
                 const Spacer(),
+                const Padding(
+                  padding: EdgeInsets.only(left: 48), // Add left padding
+                  child: Divider(), // Divider line with left padding
+                ),
                 NavigationButton(
                   icon: const Icon(Icons.delete),
                   label: Text('Trash',
