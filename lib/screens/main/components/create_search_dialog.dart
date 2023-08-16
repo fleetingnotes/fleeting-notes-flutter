@@ -57,7 +57,8 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      decoration: const InputDecoration(hintText: 'Create new search'),
+                      decoration:
+                          const InputDecoration(hintText: 'Create new search'),
                     ),
                   ),
                   IconButton(
@@ -128,21 +129,6 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
                     ),
                   );
                 },
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.only(top: 16.0, right: 16.0, bottom: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Done'),
-                  ),
-                ],
               ),
             ),
           ],
