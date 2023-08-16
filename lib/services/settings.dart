@@ -2,7 +2,6 @@ import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:hive/hive.dart';
 
 import '../models/Note.dart';
-import '../models/search_query.dart';
 
 class Settings {
   // Box initialized in main.dart
