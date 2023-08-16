@@ -85,15 +85,26 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     });
   }
 
-  void onAddAttachment() async {
-    final noteUtils = ref.read(noteUtilsProvider);
-    final file = await noteUtils.getAttachment();
-    await handlePaste(pasteImage: file?.bytes);
+  Future<void> onAddAttachment(Uint8List fileBytes) async {
+    final noteLoadingNotifier = ref.read(noteLoadingProvider.notifier);
+    noteLoadingNotifier.update((_) => true);
+    final db = ref.read(dbProvider);
+    try {
+      Note? newNote = await db.addAttachmentToNewNote(fileBytes: fileBytes);
+      if (newNote != null) {
+        db.insertTextAtSelection(widget.controller, "[[${newNote.title}]]");
+        widget.onChanged?.call();
+      }
+    } on FleetingNotesException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        duration: const Duration(seconds: 2),
+      ));
+    }
+    noteLoadingNotifier.update((_) => false);
   }
 
   Future<void> handlePaste({Uint8List? pasteImage}) async {
-    final noteLoadingNotifier = ref.read(noteLoadingProvider.notifier);
-    noteLoadingNotifier.update((_) => true);
     setState(() {
       isPasting = true;
     });
@@ -101,19 +112,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     try {
       pasteImage ??= await Pasteboard.image;
       if (pasteImage != null) {
-        try {
-          Note? newNote =
-              await db.addAttachmentToNewNote(fileBytes: pasteImage);
-          if (newNote != null) {
-            db.insertTextAtSelection(widget.controller, "[[${newNote.title}]]");
-            widget.onChanged?.call();
-          }
-        } on FleetingNotesException catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(e.message),
-            duration: const Duration(seconds: 2),
-          ));
-        }
+        await onAddAttachment(pasteImage);
       } else {
         throw FleetingNotesException('No Image to paste');
       }
@@ -126,7 +125,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
         widget.onChanged?.call();
       }
     }
-    noteLoadingNotifier.update((_) => false);
     setState(() {
       isPasting = false;
     });
@@ -523,7 +521,13 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                       undoController: undoController,
                       onContentChanged: _onContentChanged,
                       focusNode: contentFocusNode,
-                      onAddAttachment: onAddAttachment,
+                      onAddAttachment: () async {
+                        final noteUtils = ref.read(noteUtilsProvider);
+                        final bytes = (await noteUtils.getAttachment())?.bytes;
+                        if (bytes != null) {
+                          await onAddAttachment(bytes);
+                        }
+                      },
                     ),
                   ),
                 ]),

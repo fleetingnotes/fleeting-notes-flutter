@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum ToolbarState {
   edit("Edit", Icons.construction),
-  markdown("Markdown", Icons.military_tech_sharp),
-  tags("Tags", Icons.tag);
+  markdown("Markdown", Icons.military_tech_sharp);
+  // tags("Tags", Icons.tag);
 
   const ToolbarState(this.value, this.icon);
   final String value;
@@ -36,12 +36,13 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(50);
 
   void _showToolbarMenu(BuildContext context, WidgetRef ref) {
+    final toolbarState = ref.read(toolbarProvider);
     final toolbarProviderState = ref.read(toolbarProvider.notifier);
     final RenderBox toolbarBox = context.findRenderObject() as RenderBox;
     final toolbarPosition = toolbarBox.localToGlobal(Offset.zero);
 
     final overlay = Overlay.of(context);
-    const double menuHeight = 176;
+    const double menuHeight = 120;
     const double menuWidth = 200;
 
     OverlayEntry? overlayEntry;
@@ -73,6 +74,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: ToolbarState.values.map((state) {
                         return ListTile(
+                          enabled: toolbarState != state,
                           onTap: () {
                             // Handle tap, maybe change the state
                             toolbarProviderState.update((_) => state);
