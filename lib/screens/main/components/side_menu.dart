@@ -34,74 +34,88 @@ class SideMenu extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Expanded(
-                        child: FutureBuilder<PackageInfo>(
-                            future: PackageInfo.fromPlatform(),
-                            builder: (context, snapshot) {
-                              var text = 'Fleeting Notes';
-                              if (snapshot.hasData) {
-                                text += ' v${snapshot.data?.version}';
-                              }
-                              return Text(text,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium);
-                            })),
+                      child: FutureBuilder<PackageInfo>(
+                        future: PackageInfo.fromPlatform(),
+                        builder: (context, snapshot) {
+                          var text = 'Fleeting Notes';
+                          if (snapshot.hasData) {
+                            text += ' v${snapshot.data?.version}';
+                          }
+                          return Text(text,
+                              style: Theme.of(context).textTheme.titleMedium);
+                        },
+                      ),
+                    ),
                     IconButton(
                       onPressed: closeDrawer,
                       icon: const Icon(Icons.menu_open),
                     )
                   ],
                 ),
-                const Divider(), // Divider line
+                const Divider(),
                 Container(
-                  height: 46, // Set the height of the title container
+                  height: 46,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  alignment:
-                      Alignment.centerLeft, // Align the title to the left
+                  alignment: Alignment.centerLeft,
                   child: Text(
-                    'SAVED SEARCHES', // Title for the section
+                    'SAVED SEARCHES',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
-                if (searches != null && searches!.isNotEmpty)
-                  Expanded(
-                      child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: searches?.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      String? searchQuery = searches?[index];
-                      const int maxTextLength =
-                          15; // Define the maximum length for the text
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Column(
+                          children: [
+                            if (searches != null && searches!.isNotEmpty)
+                              ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: searches?.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  String? searchQuery = searches?[index];
+                                  const int maxTextLength = 15;
 
-                      String truncatedText = searchQuery ?? "";
-                      if (truncatedText.length > maxTextLength) {
-                        truncatedText =
-                            truncatedText.substring(0, maxTextLength) + '...';
-                      }
+                                  String truncatedText = searchQuery ?? "";
+                                  if (truncatedText.length > maxTextLength) {
+                                    truncatedText = truncatedText.substring(
+                                            0, maxTextLength) +
+                                        '...';
+                                  }
 
-                      return NavigationButton(
-                        icon: const Icon(Icons.search),
-                        label: Text(
-                          truncatedText,
-                          style: Theme.of(context).textTheme.titleMedium,
+                                  return NavigationButton(
+                                    icon: const Icon(Icons.search),
+                                    label: Text(
+                                      truncatedText,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
+                                    onTap: () => onSearch!(searchQuery!),
+                                  );
+                                },
+                              ),
+                            NavigationButton(
+                              icon: const Icon(Icons.edit_outlined),
+                              label: Text('Create/Edit searches',
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium),
+                              onTap: () => openCreateSearchDialog!(),
+                            ),
+                          ],
                         ),
-                        onTap: () => onSearch!(searchQuery!),
-                      );
-                    },
-                  )),
-                NavigationButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  label: Text('Create/Edit searches',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  onTap: () => openCreateSearchDialog!(),
+                      ],
+                    ),
+                  ),
                 ),
-                const Spacer(),
                 const Padding(
-                  padding: EdgeInsets.only(left: 48), // Add left padding
-                  child: Divider(), // Divider line with left padding
+                  padding: EdgeInsets.only(left: 48),
+                  child: Divider(),
                 ),
                 NavigationButton(
                   icon: const Icon(Icons.delete),
@@ -114,7 +128,7 @@ class SideMenu extends StatelessWidget {
                   label: Text('Settings',
                       style: Theme.of(context).textTheme.titleMedium),
                   onTap: () => onSetting(context),
-                )
+                ),
               ],
             ),
           ),
