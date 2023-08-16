@@ -465,19 +465,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
   }
 
-  List<Widget Function(FocusNode)> toolbarButtons() {
-    return [
-      (node) {
-        return TextFieldToolbar(
-          shortcuts: shortcuts,
-          controller: widget.controller,
-          onContentChanged: _onContentChanged,
-          unfocus: contentFocusNode.unfocus,
-        );
-      }
-    ];
-  }
-
   Map<Type, Action<Intent>> getTextFieldActions() {
     return {
       BoldIntent: CallbackAction(onInvoke: (Intent intent) {
@@ -518,8 +505,15 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                     focusNode: contentFocusNode,
                     displayArrows: false,
                     displayDoneButton: false,
+                    displayActionBar: false,
                     toolbarAlignment: MainAxisAlignment.spaceAround,
-                    toolbarButtons: toolbarButtons(),
+                    footerBuilder: (_) => TextFieldToolbar(
+                      shortcuts: shortcuts,
+                      controller: widget.controller,
+                      onContentChanged: _onContentChanged,
+                      focusNode: contentFocusNode,
+                      unfocus: contentFocusNode.unfocus,
+                    ),
                   ),
                 ]),
             child: Actions(

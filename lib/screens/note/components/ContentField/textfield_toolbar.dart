@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum ToolbarState {
-  edit("Edit", Icons.edit),
+  edit("Edit", Icons.construction),
   markdown("Markdown", Icons.military_tech_sharp),
   tags("Tags", Icons.tag);
 
@@ -14,98 +14,164 @@ enum ToolbarState {
   final IconData icon;
 }
 
-class TextFieldToolbar extends ConsumerWidget {
-  const TextFieldToolbar({
-    Key? key,
-    required this.shortcuts,
-    required this.controller,
-    this.onContentChanged,
-    this.unfocus,
-  }) : super(key: key);
+class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
+  const TextFieldToolbar(
+      {Key? key,
+      required this.shortcuts,
+      required this.controller,
+      this.onContentChanged,
+      this.unfocus,
+      this.focusNode})
+      : super(key: key);
 
   final ShortcutActions shortcuts;
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final Function(String)? onContentChanged;
   final VoidCallback? unfocus;
 
   @override
-  build(BuildContext context, WidgetRef ref) {
-    final toolbarState = ref.watch(toolbarProvider);
-    final editToolbar = [
-      PopupMenuButton(
-        icon: Icon(toolbarState.icon),
-        itemBuilder: (context) => <PopupMenuEntry>[],
-        // onPressed: unfocus,
-      ),
-      const VerticalDivider(),
-      Expanded(
-        child: ListView(
-          shrinkWrap: true,
-          scrollDirection: Axis.horizontal,
+  Size get preferredSize => const Size.fromHeight(50);
+
+  // final GlobalKey _menuKey = GlobalKey();
+
+  void _showToolbarMenu(BuildContext context, WidgetRef ref) {
+    final toolbarState = ref.read(toolbarProvider.state);
+    final RenderBox toolbarBox = context.findRenderObject() as RenderBox;
+    final toolbarPosition = toolbarBox.localToGlobal(Offset.zero);
+
+    final overlay = Overlay.of(context);
+    const double menuHeight = 176;
+    const double menuWidth = 200;
+
+    OverlayEntry? overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) {
+        return Stack(
           children: [
-            KeyboardButton(
-              icon: Icons.data_array,
-              onPressed: () {
-                shortcuts.action('[[', ']]');
-                onContentChanged?.call(controller.text);
-              },
-              tooltip: 'Add link',
+            // Full screen GestureDetector that catches taps outside the menu
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  overlayEntry?.remove();
+                },
+                child: Container(color: Colors.transparent),
+              ),
             ),
-            KeyboardButton(
-              icon: Icons.tag,
-              onPressed: () {
-                shortcuts.action('#', '');
-                onContentChanged?.call(controller.text);
-              },
-            ),
-            KeyboardButton(
-              icon: Icons.format_bold,
-              onPressed: () {
-                shortcuts.action('**', '**');
-                onContentChanged?.call(controller.text);
-              },
-            ),
-            KeyboardButton(
-              icon: Icons.format_italic,
-              onPressed: () {
-                shortcuts.action('*', '*');
-                onContentChanged?.call(controller.text);
-              },
-            ),
-            KeyboardButton(
-              icon: Icons.add_link,
-              onPressed: () {
-                shortcuts.addLink();
-                onContentChanged?.call(controller.text);
-              },
-            ),
-            KeyboardButton(
-              icon: Icons.list,
-              onPressed: () {
-                shortcuts.toggleList();
-                onContentChanged?.call(controller.text);
-              },
-            ),
-            KeyboardButton(
-              icon: Icons.checklist_outlined,
-              onPressed: () {
-                shortcuts.toggleCheckbox();
-                onContentChanged?.call(controller.text);
-              },
+            Positioned(
+              left: toolbarPosition.dx,
+              top: toolbarPosition.dy -
+                  menuHeight, // Assuming menu height is 200, adjust as necessary
+              width: menuWidth,
+              child: Material(
+                child: SizedBox(
+                  height: menuHeight,
+                  child: Card(
+                    clipBehavior: Clip.hardEdge,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: ToolbarState.values.map((state) {
+                        return ListTile(
+                          onTap: () {
+                            // Handle tap, maybe change the state
+                            toolbarState.update((_) => state);
+                            overlayEntry?.remove();
+                          },
+                          trailing: Icon(state.icon),
+                          title: Text(state.value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
-        ),
-      ),
-      const VerticalDivider(),
+        );
+      },
+    );
+
+    overlay.insert(overlayEntry);
+  }
+
+  @override
+  build(BuildContext context, WidgetRef ref) {
+    final toolbarState = ref.watch(toolbarProvider);
+    final editButtons = [
       KeyboardButton(
-        icon: Icons.keyboard_hide,
-        onPressed: unfocus,
+        icon: Icons.data_array,
+        onPressed: () {
+          shortcuts.action('[[', ']]');
+          onContentChanged?.call(controller.text);
+        },
+        tooltip: 'Add link',
+      ),
+      KeyboardButton(
+        icon: Icons.tag,
+        onPressed: () {
+          shortcuts.action('#', '');
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        icon: Icons.format_bold,
+        onPressed: () {
+          shortcuts.action('**', '**');
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        icon: Icons.format_italic,
+        onPressed: () {
+          shortcuts.action('*', '*');
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        icon: Icons.add_link,
+        onPressed: () {
+          shortcuts.addLink();
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        icon: Icons.list,
+        onPressed: () {
+          shortcuts.toggleList();
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        icon: Icons.checklist_outlined,
+        onPressed: () {
+          shortcuts.toggleCheckbox();
+          onContentChanged?.call(controller.text);
+        },
       ),
     ];
     return SizedBox(
+      height: preferredSize.height,
       width: MediaQuery.of(context).size.width,
       child: Row(
-        children: [if (toolbarState == ToolbarState.edit) ...editToolbar],
+        children: [
+          KeyboardButton(
+              icon: toolbarState.icon,
+              onPressed: () => _showToolbarMenu(context, ref)),
+          const VerticalDivider(),
+          Expanded(
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              children: [if (toolbarState == ToolbarState.edit) ...editButtons],
+            ),
+          ),
+          const VerticalDivider(),
+          KeyboardButton(
+            icon: Icons.keyboard_hide,
+            onPressed: unfocus,
+          ),
+        ],
       ),
     );
   }
