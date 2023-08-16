@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum ToolbarState {
   edit("Edit", Icons.construction),
-  markdown("Markdown", Icons.military_tech_sharp);
+  markdown("Markdown", Icons.edit_note_outlined);
   // tags("Tags", Icons.tag);
 
   const ToolbarState(this.value, this.icon);
