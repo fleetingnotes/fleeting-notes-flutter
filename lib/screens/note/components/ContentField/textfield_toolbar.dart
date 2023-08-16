@@ -19,24 +19,24 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
       {Key? key,
       required this.shortcuts,
       required this.controller,
+      required this.undoController,
       this.onContentChanged,
-      this.unfocus,
+      this.onAddAttachment,
       this.focusNode})
       : super(key: key);
 
   final ShortcutActions shortcuts;
   final TextEditingController controller;
+  final UndoHistoryController undoController;
   final FocusNode? focusNode;
   final Function(String)? onContentChanged;
-  final VoidCallback? unfocus;
+  final VoidCallback? onAddAttachment;
 
   @override
   Size get preferredSize => const Size.fromHeight(50);
 
-  // final GlobalKey _menuKey = GlobalKey();
-
   void _showToolbarMenu(BuildContext context, WidgetRef ref) {
-    final toolbarState = ref.read(toolbarProvider.state);
+    final toolbarProviderState = ref.read(toolbarProvider.notifier);
     final RenderBox toolbarBox = context.findRenderObject() as RenderBox;
     final toolbarPosition = toolbarBox.localToGlobal(Offset.zero);
 
@@ -75,7 +75,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
                         return ListTile(
                           onTap: () {
                             // Handle tap, maybe change the state
-                            toolbarState.update((_) => state);
+                            toolbarProviderState.update((_) => state);
                             overlayEntry?.remove();
                           },
                           trailing: Icon(state.icon),
@@ -100,50 +100,76 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
     final toolbarState = ref.watch(toolbarProvider);
     final editButtons = [
       KeyboardButton(
-        icon: Icons.data_array,
+        child: const Icon(Icons.undo, size: 20),
+        onPressed: () {
+          undoController.undo();
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        child: const Icon(Icons.redo, size: 20),
+        onPressed: () {
+          undoController.redo();
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        child: const Icon(Icons.data_array, size: 20),
         onPressed: () {
           shortcuts.action('[[', ']]');
           onContentChanged?.call(controller.text);
         },
-        tooltip: 'Add link',
       ),
       KeyboardButton(
-        icon: Icons.tag,
+        child: const Text("/", style: TextStyle(fontSize: 20)),
+        onPressed: () {
+          shortcuts.action('/', '');
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        child: const Icon(Icons.image_outlined, size: 20),
+        onPressed: onAddAttachment,
+      ),
+    ];
+    final mdButtons = [
+      KeyboardButton(
+        child: const Icon(Icons.tag, size: 20),
         onPressed: () {
           shortcuts.action('#', '');
           onContentChanged?.call(controller.text);
         },
       ),
       KeyboardButton(
-        icon: Icons.format_bold,
+        child: const Icon(Icons.format_bold, size: 20),
         onPressed: () {
           shortcuts.action('**', '**');
           onContentChanged?.call(controller.text);
         },
       ),
       KeyboardButton(
-        icon: Icons.format_italic,
+        child: const Icon(Icons.format_italic, size: 20),
         onPressed: () {
           shortcuts.action('*', '*');
           onContentChanged?.call(controller.text);
         },
       ),
       KeyboardButton(
-        icon: Icons.add_link,
+        child: const Icon(Icons.add_link, size: 20),
         onPressed: () {
           shortcuts.addLink();
           onContentChanged?.call(controller.text);
         },
       ),
       KeyboardButton(
-        icon: Icons.list,
+        child: const Icon(Icons.list, size: 20),
         onPressed: () {
           shortcuts.toggleList();
           onContentChanged?.call(controller.text);
         },
       ),
       KeyboardButton(
-        icon: Icons.checklist_outlined,
+        child: const Icon(Icons.checklist_outlined, size: 20),
         onPressed: () {
           shortcuts.toggleCheckbox();
           onContentChanged?.call(controller.text);
@@ -164,13 +190,18 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
             child: ListView(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
-              children: [if (toolbarState == ToolbarState.edit) ...editButtons],
+              children: [
+                if (toolbarState == ToolbarState.edit)
+                  ...editButtons
+                else if (toolbarState == ToolbarState.markdown)
+                  ...mdButtons
+              ],
             ),
           ),
           const VerticalDivider(width: 5),
           IconButton(
             icon: const Icon(Icons.keyboard_hide, size: 20),
-            onPressed: unfocus,
+            onPressed: focusNode?.unfocus,
           ),
         ],
       ),

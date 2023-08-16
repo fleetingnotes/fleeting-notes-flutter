@@ -51,6 +51,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   );
   bool isPasting = false;
   StreamSubscription<Uint8List?>? pasteListener;
+  final UndoHistoryController undoController = UndoHistoryController();
 
   late ShortcutActions shortcuts;
 
@@ -84,7 +85,15 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     });
   }
 
-  void handlePaste({Uint8List? pasteImage}) async {
+  void onAddAttachment() async {
+    final noteUtils = ref.read(noteUtilsProvider);
+    final file = await noteUtils.getAttachment();
+    await handlePaste(pasteImage: file?.bytes);
+  }
+
+  Future<void> handlePaste({Uint8List? pasteImage}) async {
+    final noteLoadingNotifier = ref.read(noteLoadingProvider.notifier);
+    noteLoadingNotifier.update((_) => true);
     setState(() {
       isPasting = true;
     });
@@ -117,6 +126,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
         widget.onChanged?.call();
       }
     }
+    noteLoadingNotifier.update((_) => false);
     setState(() {
       isPasting = false;
     });
@@ -510,9 +520,10 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                     footerBuilder: (_) => TextFieldToolbar(
                       shortcuts: shortcuts,
                       controller: widget.controller,
+                      undoController: undoController,
                       onContentChanged: _onContentChanged,
                       focusNode: contentFocusNode,
-                      unfocus: contentFocusNode.unfocus,
+                      onAddAttachment: onAddAttachment,
                     ),
                   ),
                 ]),
@@ -523,6 +534,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                 textCapitalization: TextCapitalization.sentences,
                 autofocus: widget.autofocus,
                 controller: widget.controller,
+                undoController: undoController,
                 keyboardType: TextInputType.multiline,
                 minLines: 10,
                 maxLines: null,

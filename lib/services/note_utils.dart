@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:file_picker/file_picker.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -150,6 +151,16 @@ class NoteUtils {
     } catch (e) {
       throw FleetingNotesException('Failed to call plugin `$commandId`: $e');
     }
+  }
+
+  Future<PlatformFile?> getAttachment() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(withData: true);
+    if (result != null && result.files.isNotEmpty) {
+      PlatformFile? file = result.files.first;
+      return file;
+    }
+    return null;
   }
 
   Future<void> onAddAttachment(
