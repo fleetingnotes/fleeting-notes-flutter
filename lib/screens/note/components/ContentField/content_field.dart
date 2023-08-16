@@ -523,7 +523,9 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                       focusNode: contentFocusNode,
                       onAddAttachment: () async {
                         final noteUtils = ref.read(noteUtilsProvider);
+                        contentFocusNode.unfocus();
                         final bytes = (await noteUtils.getAttachment())?.bytes;
+                        contentFocusNode.requestFocus();
                         if (bytes != null) {
                           await onAddAttachment(bytes);
                         }
