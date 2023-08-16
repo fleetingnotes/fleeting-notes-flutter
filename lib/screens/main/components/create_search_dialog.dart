@@ -37,7 +37,7 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Create/Edit Searches',
+                      'Edit searches',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
