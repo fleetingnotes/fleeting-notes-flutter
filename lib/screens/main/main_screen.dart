@@ -179,31 +179,35 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       builder: (BuildContext context) {
         return CreateSearchDialog(
           addSearch: (search) {
-            final db = ref.read(dbProvider);
-            const key = "historical-searches";
-            final historicalSearches = db.settings.get(key, defaultValue: []);
-            if (!historicalSearches.contains(search)) {
-              historicalSearches.add(search);
-              db.settings.set(key, historicalSearches);
+            if (!searches.contains(search)) {
               setState(() {
                 searches.add(search);
+                updateSearchSettings(searches);
               });
             }
           },
           removeSearch: (index) {
-            final db = ref.read(dbProvider);
-            const key = "historical-searches";
-            final historicalSearches = db.settings.get(key, defaultValue: []);
-            historicalSearches.removeAt(index);
-            db.settings.set(key, historicalSearches);
             setState(() {
               searches.removeAt(index);
+              updateSearchSettings(searches);
+            });
+          },
+          editSearch: (index, search) {
+            setState(() {
+              searches[index] = search;
+              updateSearchSettings(searches);
             });
           },
           searches: searches,
         );
       },
     );
+  }
+
+  void updateSearchSettings(List<String> searches) {
+    final db = ref.read(dbProvider);
+    const key = "historical-searches";
+    db.settings.set(key, searches);
   }
 
   @override
