@@ -21,7 +21,6 @@ class CreateSearchDialog extends StatefulWidget {
 
 class _CreateSearchDialogState extends State<CreateSearchDialog> {
   final TextEditingController _searchController = TextEditingController();
-  bool isEditing = false;
   int editingIndex = -1;
   @override
   Widget build(BuildContext context) {
@@ -81,52 +80,30 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
                 shrinkWrap: true,
                 itemCount: widget.searches.length,
                 itemBuilder: (context, index) {
-                  String editedText = widget.searches[index];
-                  return ListTile(
-                    title: isEditing && editingIndex == index
-                        ? TextFormField(
-                            initialValue: widget.searches[index],
-                            onChanged: (value) {
-                              editedText = value;
-                            },
-                            onFieldSubmitted: (value) {
-                              widget.editSearch(index, editedText);
-                              setState(() {
-                                isEditing = false;
-                                editingIndex = -1;
-                              });
-                            },
-                          )
-                        : Text(widget.searches[index]),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: isEditing && editingIndex == index
-                              ? const Icon(Icons.check)
-                              : const Icon(Icons.edit),
-                          onPressed: () {
-                            setState(() {
-                              if (isEditing && editingIndex == index) {
-                                widget.editSearch(index, editedText);
-                                isEditing = false;
-                                editingIndex = -1;
-                              } else {
-                                isEditing = true;
-                                editingIndex = index;
-                              }
-                            });
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {
-                            widget.removeSearch(index);
-                            stfSetState(() {});
-                          },
-                        ),
-                      ],
-                    ),
+                  return SearchItem(
+                    search: widget.searches[index],
+                    onEdition: () {
+                      setState(() {
+                        editingIndex = index;
+                      });
+                    },
+                    isEditing: index == editingIndex,
+                    onNotEdition: () {
+                      setState(() {
+                        editingIndex = -1;
+                      });
+                    },
+                    editSearch: (String newSearch) {
+                      widget.editSearch(index, newSearch);
+                      setState(() {
+                        editingIndex = -1;
+                      });
+                      stfSetState(() {});
+                    },
+                    removeSearch: () {
+                      widget.removeSearch(index);
+                      stfSetState(() {});
+                    },
                   );
                 },
               ),
@@ -135,5 +112,103 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
         ),
       );
     });
+  }
+}
+
+class SearchItem extends StatefulWidget {
+  final String search;
+  final Function(String) editSearch;
+  final Function removeSearch;
+  final Function onEdition;
+  final bool isEditing;
+  final Function onNotEdition;
+
+  const SearchItem(
+      {super.key,
+      required this.search,
+      required this.editSearch,
+      required this.removeSearch,
+      required this.onEdition,
+      required this.isEditing,
+      required this.onNotEdition});
+
+  @override
+  _SearchItemState createState() => _SearchItemState();
+}
+
+class _SearchItemState extends State<SearchItem> {
+  String editedText = '';
+  bool isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          isHovered = true;
+        });
+      },
+      onExit: (_) {
+        setState(() {
+          isHovered = false;
+        });
+      },
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            widget.onEdition();
+          });
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: isHovered || widget.isEditing
+                    ? const Icon(Icons.delete)
+                    : const Icon(Icons.search),
+                onPressed: () {
+                  widget.removeSearch();
+                },
+              ),
+              if (widget.isEditing)
+                Expanded(
+                  child: TextFormField(
+                    initialValue: widget.search,
+                    onChanged: (value) {
+                      setState(() {
+                        editedText = value; // Update the local editedText state
+                      });
+                    },
+                    onFieldSubmitted: (value) {
+                      widget.editSearch(editedText);
+                      widget.onEdition();
+                    },
+                  ),
+                )
+              else
+                Expanded(child: Text(widget.search)),
+              IconButton(
+                icon: widget.isEditing
+                    ? const Icon(Icons.check)
+                    : const Icon(Icons.edit),
+                onPressed: () {
+                  if (!widget.isEditing) {
+                    widget.onEdition();
+                    setState(() {
+                      editedText = widget.search;
+                    });
+                  } else {
+                    widget.editSearch(editedText);
+                    widget.onNotEdition();
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
