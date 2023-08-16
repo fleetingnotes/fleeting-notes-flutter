@@ -57,7 +57,7 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      decoration: const InputDecoration(hintText: 'New search'),
+                      decoration: const InputDecoration(hintText: 'Create new search'),
                     ),
                   ),
                   IconButton(
