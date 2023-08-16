@@ -154,11 +154,12 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
       height: preferredSize.height,
       width: MediaQuery.of(context).size.width,
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          KeyboardButton(
-              icon: toolbarState.icon,
+          IconButton(
+              icon: Icon(toolbarState.icon, size: 20),
               onPressed: () => _showToolbarMenu(context, ref)),
-          const VerticalDivider(),
+          const VerticalDivider(width: 5),
           Expanded(
             child: ListView(
               shrinkWrap: true,
@@ -166,9 +167,9 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
               children: [if (toolbarState == ToolbarState.edit) ...editButtons],
             ),
           ),
-          const VerticalDivider(),
-          KeyboardButton(
-            icon: Icons.keyboard_hide,
+          const VerticalDivider(width: 5),
+          IconButton(
+            icon: const Icon(Icons.keyboard_hide, size: 20),
             onPressed: unfocus,
           ),
         ],
