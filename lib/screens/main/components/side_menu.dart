@@ -154,11 +154,7 @@ class NavigationButton extends StatelessWidget {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
-          children: [
-            icon,
-            const SizedBox(width: 12),
-            label,
-          ],
+          children: [icon, const SizedBox(width: 12), Expanded(child: label)],
         ),
       ),
     );
