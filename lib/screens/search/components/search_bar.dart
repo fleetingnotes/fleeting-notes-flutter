@@ -63,8 +63,11 @@ class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
   }
 
   onBack() {
+    final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     final notifier = ref.read(searchProvider.notifier);
-    notifier.updateSearch(null);
+    notifier.updateSearch(searchQuery.copyWith(
+      query: '',
+    ));
     setState(() {
       focusNode.unfocus();
       hasSearchFocus = false;
