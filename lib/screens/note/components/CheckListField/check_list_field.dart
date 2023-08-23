@@ -22,22 +22,61 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   bool _showCompletedItems = true;
 
   TextEditingController newItemController = TextEditingController();
+  List<FocusNode> itemFocusNodes = []; // Add this line
+  List<TextEditingController> uncheckedItemControllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    for (int i = 0; i < widget.uncheckedItems.length; i++) {
+      itemFocusNodes.add(FocusNode());
+      uncheckedItemControllers.add(TextEditingController(
+        text: widget.uncheckedItems[i],
+      ));
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var focusNode in itemFocusNodes) {
+      focusNode.dispose();
+    }
+    for (var controller in uncheckedItemControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 
   void addItem() {
     String newItemText = newItemController.text;
     if (newItemText.isNotEmpty) {
       setState(() {
         widget.uncheckedItems.add(newItemText);
+        uncheckedItemControllers.add(TextEditingController(
+          text: newItemText,
+        ));
+        itemFocusNodes.add(FocusNode());
         newItemController.clear();
         updateControllerText();
+      });
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(itemFocusNodes.last);
       });
     }
   }
 
-  void removeItem(int index) {
+  void removeUncheckedItem(int index) {
+    setState(() {
+      widget.uncheckedItems.removeAt(index);
+      uncheckedItemControllers.removeAt(index);
+      updateControllerText();
+    });
+  }
+
+  void removeCheckedItem(int index) {
     setState(() {
       widget.checkedItems.removeAt(index);
-      widget.uncheckedItems.removeAt(index);
+      updateControllerText();
     });
   }
 
@@ -45,6 +84,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     setState(() {
       String item = widget.uncheckedItems[index];
       widget.uncheckedItems.removeAt(index);
+      uncheckedItemControllers.removeAt(index);
       widget.checkedItems.add(item);
       updateControllerText();
     });
@@ -55,6 +95,9 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
       String item = widget.checkedItems[index];
       widget.checkedItems.removeAt(index);
       widget.uncheckedItems.add(item);
+      uncheckedItemControllers.add(TextEditingController(
+        text: item,
+      ));
       updateControllerText();
     });
   }
@@ -71,9 +114,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   }
 
   void updateControllerText() {
-    setState(() {
-      widget.controller.text = generateListText();
-    });
+    widget.controller.text = generateListText();
     widget.onChanged!();
   }
 
@@ -102,7 +143,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                         }
                       },
                       decoration: const InputDecoration(
-                        hintText: 'Element from the list',
+                        hintText: 'List item',
                       ),
                     ),
                   ),
@@ -114,33 +155,28 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
               contentPadding: EdgeInsets.zero,
               trailing: IconButton(
                 icon: const Icon(Icons.close),
-                onPressed: () => removeItem(index),
+                onPressed: () => removeUncheckedItem(index),
               ),
               title: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Checkbox(
-                    value: widget.checkedItems.contains(
-                      widget.uncheckedItems[index],
-                    ),
+                    value: false,
                     onChanged: (_) => setChecked(index),
                   ),
                   Expanded(
                     child: TextField(
-                      controller: TextEditingController(
-                        text: widget.uncheckedItems[index],
-                      ),
+                      controller: uncheckedItemControllers[index],
                       onChanged: (newText) {
-                        setState(() {
-                          widget.uncheckedItems[index] = newText;
-                        });
+                        widget.uncheckedItems[index] = newText;
+                        updateControllerText();
                       },
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
-                      focusNode: FocusNode(skipTraversal: true),
+                      focusNode: itemFocusNodes[index],
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                     ),
@@ -182,7 +218,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                       contentPadding: EdgeInsets.zero,
                       trailing: IconButton(
                         icon: const Icon(Icons.close),
-                        onPressed: () => removeItem(index),
+                        onPressed: () => removeCheckedItem(index),
                       ),
                       title: Row(
                         children: [
