@@ -62,6 +62,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   StreamSubscription<NoteEvent>? noteChangeStream;
   StreamSubscription? authChangeStream;
   UrlMetadata? sourceMetadata;
+  bool checkListEnabled = false;
 
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
@@ -81,6 +82,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   @override
   void initState() {
     super.initState();
+    checkListEnabled = widget.checkListEnabled;
     final db = ref.read(dbProvider);
     hasNewChanges = widget.autofocus;
     isNoteShareable = widget.note.isShareable;
@@ -435,15 +437,18 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       physics: const ClampingScrollPhysics(),
                       padding: const EdgeInsets.only(top: 8),
                     ),
-                  if (widget.checkListEnabled)
-                    ChecklistScreen(
-                      checkedItems: widget.checkedItems ?? [],
-                      controller: contentController,
-                      uncheckedItems: widget.uncheckedItems ?? [],
-                      onChanged: onChanged,
+                  if (checkListEnabled)
+                    Builder(
+                      builder: (context) {
+                        return ChecklistScreen(
+                          checkedItems: widget.checkedItems ?? [],
+                          controller: contentController,
+                          uncheckedItems: widget.uncheckedItems ?? [],
+                          onChanged: onChanged,
+                        );
+                      },
                     ),
-                  if (!widget.markdownPreviewEnabled &&
-                      !widget.checkListEnabled)
+                  if (!widget.markdownPreviewEnabled && !checkListEnabled)
                     ContentField(
                       controller: contentController,
                       onChanged: onChanged,
@@ -451,6 +456,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       onCommandRun: onCommandRun,
                       autofocus: !autoFocusTitle,
                       textDirection: textDirection,
+                      onCheckListPressed: () {
+                        setState(() {
+                          checkListEnabled = true;
+                        });
+                      },
                     ),
                 ],
               ),

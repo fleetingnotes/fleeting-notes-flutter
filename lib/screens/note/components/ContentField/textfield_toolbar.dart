@@ -22,7 +22,8 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
       required this.undoController,
       this.onContentChanged,
       this.onAddAttachment,
-      this.focusNode})
+      this.focusNode,
+      this.onCheckListPressed})
       : super(key: key);
 
   final ShortcutActions shortcuts;
@@ -31,6 +32,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
   final FocusNode? focusNode;
   final Function(String)? onContentChanged;
   final VoidCallback? onAddAttachment;
+  final VoidCallback? onCheckListPressed;
 
   @override
   Size get preferredSize => const Size.fromHeight(50);
@@ -173,8 +175,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
       KeyboardButton(
         child: const Icon(Icons.checklist_outlined, size: 20),
         onPressed: () {
-          shortcuts.toggleCheckbox();
-          onContentChanged?.call(controller.text);
+          onCheckListPressed!();
         },
       ),
     ];
