@@ -1,6 +1,7 @@
 import 'package:fleeting_notes_flutter/models/Note.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/main/components/side_rail.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/CheckListField/check_list_field.dart';
 import 'package:fleeting_notes_flutter/screens/search/components/search_bar.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/one_account_dialog.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
@@ -269,7 +270,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.check_box_outlined));
     await tester.pumpAndSettle();
     expect(find.byType(NoteEditor), findsOneWidget);
-    expect(find.text('- [ ] ', findRichText: true), findsOneWidget);
+    expect(find.byType(ChecklistScreen), findsOneWidget);
   });
 
   testWidgets('press photo button opens pick image options', (tester) async {
