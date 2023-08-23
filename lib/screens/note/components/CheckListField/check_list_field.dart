@@ -34,7 +34,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         text: widget.uncheckedItems[i],
       ));
     }
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(itemFocusNodes.last);
     });
   }
@@ -62,7 +62,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         newItemController.clear();
         updateControllerText();
       });
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).requestFocus(itemFocusNodes.last);
       });
     }
