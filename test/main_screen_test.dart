@@ -270,7 +270,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.check_box_outlined));
     await tester.pumpAndSettle();
     expect(find.byType(NoteEditor), findsOneWidget);
-    expect(find.byType(ChecklistScreen), findsOneWidget);
+    expect(find.byType(ChecklistField), findsOneWidget);
   });
 
   testWidgets('press photo button opens pick image options', (tester) async {

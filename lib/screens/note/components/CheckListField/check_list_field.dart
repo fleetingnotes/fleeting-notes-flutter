@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ChecklistScreen extends StatefulWidget {
-  const ChecklistScreen({
+class ChecklistField extends StatefulWidget {
+  const ChecklistField({
     Key? key,
     required this.checkedItems,
     required this.uncheckedItems,
@@ -15,10 +15,10 @@ class ChecklistScreen extends StatefulWidget {
   final VoidCallback? onChanged;
 
   @override
-  _ChecklistScreenState createState() => _ChecklistScreenState();
+  _ChecklistFieldState createState() => _ChecklistFieldState();
 }
 
-class _ChecklistScreenState extends State<ChecklistScreen> {
+class _ChecklistFieldState extends State<ChecklistField> {
   bool _showCompletedItems = true;
 
   TextEditingController newItemController = TextEditingController();
@@ -34,9 +34,11 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         text: widget.uncheckedItems[i],
       ));
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(itemFocusNodes.last);
-    });
+    if (itemFocusNodes.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(itemFocusNodes.last);
+      });
+    }
   }
 
   @override

@@ -440,7 +440,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                   if (checkListEnabled)
                     Builder(
                       builder: (context) {
-                        return ChecklistScreen(
+                        return ChecklistField(
                           checkedItems: widget.checkedItems ?? [],
                           controller: contentController,
                           uncheckedItems: widget.uncheckedItems ?? [],
