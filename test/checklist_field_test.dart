@@ -20,7 +20,7 @@ void main() {
           home: Scaffold(
             body: ChecklistField(
               uncheckedItems: uncheckedItems,
-              checkedItems: [],
+              checkedItems: const [],
               controller: controller,
               onChanged: () {
                 onChangedCalled = true;
@@ -53,7 +53,7 @@ void main() {
           home: Scaffold(
             body: ChecklistField(
               uncheckedItems: uncheckedItems,
-              checkedItems: [],
+              checkedItems: const [],
               controller: controller,
               onChanged: () {
                 onChangedCalled = true;
