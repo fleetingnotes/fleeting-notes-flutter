@@ -297,3 +297,11 @@ Future<void> navigateToTrash(WidgetTester tester) async {
   await tester.tap(find.byIcon(Icons.delete));
   await tester.pumpAndSettle();
 }
+
+Future<void> navigateToCreateEditSearchesDialog(WidgetTester tester) async {
+  final iconFinder = find.byIcon(Icons.menu);
+  await tester.tap(iconFinder);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Create/Edit searches'));
+  await tester.pumpAndSettle();
+}

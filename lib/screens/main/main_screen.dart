@@ -14,10 +14,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_siri_suggestions/flutter_siri_suggestions.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../models/search_query.dart';
 import '../../widgets/record_dialog.dart';
 import 'components/onboarding_dialog.dart';
 import 'components/note_fab.dart';
 import 'components/side_rail.dart';
+import 'components/create_search_dialog.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -29,6 +31,7 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   final scrollController = ScrollController();
   final imagePicker = ImagePicker();
+  var searches = <String>[];
   bool bottomAppBarVisible = true;
   FloatingActionButtonLocation get _fabLocation => bottomAppBarVisible
       ? FloatingActionButtonLocation.endContained
@@ -55,6 +58,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     attemptRecoverSession();
     handleSiriSuggestions();
     scrollController.addListener(_listenScroll);
+    searches = (db.settings.get("historical-searches") as List? ?? [])
+        .map((dynamic item) => item.toString())
+        .toList();
   }
 
   @override
@@ -167,6 +173,43 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     );
   }
 
+  void openCreateSearchDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CreateSearchDialog(
+          addSearch: (search) {
+            if (!searches.contains(search)) {
+              setState(() {
+                searches.add(search);
+                updateSearchSettings(searches);
+              });
+            }
+          },
+          removeSearch: (index) {
+            setState(() {
+              searches.removeAt(index);
+              updateSearchSettings(searches);
+            });
+          },
+          editSearch: (index, search) {
+            setState(() {
+              searches[index] = search;
+              updateSearchSettings(searches);
+            });
+          },
+          searches: searches,
+        );
+      },
+    );
+  }
+
+  void updateSearchSettings(List<String> searches) {
+    final db = ref.read(dbProvider);
+    const key = "historical-searches";
+    db.settings.set(key, searches);
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(dbProvider);
@@ -185,9 +228,20 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             key: db.scaffoldKey,
             resizeToAvoidBottomInset: false,
             drawer: SideMenu(
-              addNote: addNote,
-              closeDrawer: db.closeDrawer,
-            ),
+                addNote: addNote,
+                closeDrawer: db.closeDrawer,
+                searches: searches,
+                openCreateSearchDialog: () {
+                  openCreateSearchDialog(context);
+                },
+                onSearch: (query) {
+                  db.closeDrawer();
+                  final searchQuery = ref.read(searchProvider) ?? SearchQuery();
+                  final notifier = ref.read(searchProvider.notifier);
+                  notifier.updateSearch(searchQuery.copyWith(
+                    query: query,
+                  ));
+                }),
             bottomNavigationBar: FNBottomAppBar(
               isElevated: !bottomAppBarVisible,
               isVisible: isMobile && bottomAppBarVisible,

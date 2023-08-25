@@ -123,21 +123,24 @@ class _CustomSearchBarState extends ConsumerState<CustomSearchBar> {
                 ? Padding(
                     padding: const EdgeInsets.only(right: 16),
                     child: MenuAnchor(
-                      childFocusNode: menuFocusNode,
-                      style: const MenuStyle(
-                        padding: MaterialStatePropertyAll(EdgeInsets.zero),
-                      ),
-                      controller: menuController,
-                      menuChildren: [
-                        SearchDialog(onClose: menuController.close),
-                      ],
-                      child: IconButton(
-                        padding: const EdgeInsets.all(0),
-                        tooltip: "Sort and Filter",
-                        onPressed: menuController.open,
-                        icon: const Icon(Icons.tune),
-                      ),
-                    ),
+                        childFocusNode: menuFocusNode,
+                        style: const MenuStyle(
+                          padding: MaterialStatePropertyAll(EdgeInsets.zero),
+                        ),
+                        controller: menuController,
+                        menuChildren: [
+                          SearchDialog(onClose: menuController.close),
+                        ],
+                        child: Row(
+                          children: [
+                            IconButton(
+                              padding: const EdgeInsets.all(0),
+                              tooltip: "Sort and Filter",
+                              onPressed: menuController.open,
+                              icon: const Icon(Icons.tune),
+                            )
+                          ],
+                        )),
                   )
                 : const Padding(
                     padding: EdgeInsets.only(right: 16),
