@@ -458,7 +458,9 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       textDirection: textDirection,
                       onCheckListPressed: () {
                         setState(() {
-                          checkListEnabled = true;
+                          if (contentController.text.isEmpty) {
+                            checkListEnabled = true;
+                          }
                         });
                       },
                     ),
