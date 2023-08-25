@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum ToolbarState {
   edit("Edit", Icons.construction),
-  markdown("Markdown", Icons.edit_note_outlined);
-  // tags("Tags", Icons.tag);
+  markdown("Markdown", Icons.edit_note_outlined),
+  tags("#Tags", Icons.tag);
 
   const ToolbarState(this.value, this.icon);
   final String value;
@@ -44,9 +44,8 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
     final toolbarPosition = toolbarBox.localToGlobal(Offset.zero);
 
     final overlay = Overlay.of(context);
-    const double menuHeight = 120;
+    const double menuHeight = 180;
     const double menuWidth = 200;
-
     OverlayEntry? overlayEntry;
 
     overlayEntry = OverlayEntry(
@@ -79,8 +78,12 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
                           enabled: toolbarState != state,
                           onTap: () {
                             // Handle tap, maybe change the state
-                            toolbarProviderState.update((_) => state);
-                            overlayEntry?.remove();
+                            if (state == ToolbarState.tags) {
+                              openTag();
+                            } else {
+                              toolbarProviderState.update((_) => state);
+                              overlayEntry?.remove();
+                            }
                           },
                           trailing: Icon(state.icon),
                           title: Text(state.value),
@@ -97,6 +100,10 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
     );
 
     overlay.insert(overlayEntry);
+  }
+
+  void openTag() {
+    print("open tag");
   }
 
   @override
