@@ -273,6 +273,7 @@ class _EmailFormState extends State<EmailForm> {
                             });
                           },
                           validator: (_) => validateConfirmPasswordField(),
+                          autofillHints: const [AutofillHints.password],
                           keyboardType: TextInputType.text),
                     ],
                   )
