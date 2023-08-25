@@ -104,6 +104,7 @@ class _ChecklistFieldState extends State<ChecklistField> {
       uncheckedItemControllers.add(TextEditingController(
         text: item,
       ));
+      itemFocusNodes.add(FocusNode());
       updateControllerText();
     });
   }
@@ -179,12 +180,10 @@ class _ChecklistFieldState extends State<ChecklistField> {
                       },
                       decoration: const InputDecoration(
                         border: InputBorder.none,
-                        isDense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
-                      focusNode: itemFocusNodes[index],
                       keyboardType: TextInputType.multiline,
-                      maxLines: null,
+                      maxLines: 1,
                     ),
                   ),
                 ],
@@ -221,23 +220,27 @@ class _ChecklistFieldState extends State<ChecklistField> {
                     final int index = entry.key;
                     final String item = entry.value;
                     return ListTile(
+                      dense: true,
                       contentPadding: EdgeInsets.zero,
                       trailing: IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => removeCheckedItem(index),
                       ),
                       title: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Checkbox(
                             value: true,
                             onChanged: (_) => setUnChecked(index),
                           ),
-                          Text(
-                            item,
-                            style: const TextStyle(
-                              decoration: TextDecoration.lineThrough,
+                          Expanded(
+                            child: Text(
+                              item,
+                              style: const TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                              ),
                             ),
-                          ),
+                          )
                         ],
                       ),
                     );
