@@ -13,21 +13,24 @@ import '../../utils/responsive.dart';
 import 'components/modify_notes_bar.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
-  const SearchScreen({
-    Key? key,
-    this.searchFocusNode,
-    this.hasSearchFocus = false,
-    this.addNote,
-    this.recordNote,
-    this.scrollController,
-    // keep track of notes selected
-  }) : super(key: key);
+  const SearchScreen(
+      {Key? key,
+      this.searchFocusNode,
+      this.hasSearchFocus = false,
+      this.addNote,
+      this.recordNote,
+      this.scrollController,
+      this.deletedNotesMode = false
+      // keep track of notes selected
+      })
+      : super(key: key);
 
   final FocusNode? searchFocusNode;
   final bool hasSearchFocus;
   final VoidCallback? addNote;
   final VoidCallback? recordNote;
   final ScrollController? scrollController;
+  final bool deletedNotesMode;
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -47,10 +50,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     searchQuery.limit = null;
     try {
-      var tempNotes = await db.getSearchNotes(
-        searchQuery,
-        forceSync: forceSync,
-      );
+      var tempNotes = await db.getSearchNotes(searchQuery,
+          forceSync: forceSync, filterDeletedNotes: widget.deletedNotesMode);
       if (!mounted) return;
       setState(() {
         notes = tempNotes;
@@ -76,6 +77,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final db = ref.read(dbProvider);
     final sq = ref.read(searchProvider);
     final noteUtils = ref.read(noteUtilsProvider);
+
     scrollController = widget.scrollController ?? scrollController;
     // refresh unsaved note
     noteUtils.setUnsavedNote(context, null, saveUnsaved: true);
@@ -95,18 +97,36 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     noteChangeStream?.cancel();
   }
 
+  void showRestoreConfirmation(BuildContext context, Function onRestore) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return RestoreNoteModal(
+          onRestore: onRestore,
+        );
+      },
+    );
+  }
+
   void _pressNote(BuildContext context, Note note) {
-    final noteHistory = ref.read(noteHistoryProvider.notifier);
-    if (selectedNotes.isEmpty) {
-      noteHistory.addNote(context, note);
-    } else {
-      setState(() {
-        if (selectedNotes.contains(note)) {
-          selectedNotes.remove(note);
-        } else {
-          selectedNotes.add(note);
-        }
+    if (widget.deletedNotesMode) {
+      final noteUtil = ref.read(noteUtilsProvider);
+      showRestoreConfirmation(context, () async {
+        noteUtil.handleRestoreNote(context, [note]);
       });
+    } else {
+      final noteHistory = ref.read(noteHistoryProvider.notifier);
+      if (selectedNotes.isEmpty) {
+        noteHistory.addNote(context, note);
+      } else {
+        setState(() {
+          if (selectedNotes.contains(note)) {
+            selectedNotes.remove(note);
+          } else {
+            selectedNotes.add(note);
+          }
+        });
+      }
     }
   }
 
@@ -162,7 +182,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           crossAxisCount: (isListView) ? 1 : crossAxisCount,
           controller: scrollController,
           onRefresh: _pullRefreshNotes,
-          onSelect: _longPressNote,
+          onSelect: widget.deletedNotesMode ? null : _longPressNote,
           onTap: _pressNote,
         );
       },
@@ -304,6 +324,35 @@ class NoteGrid extends StatelessWidget {
                 childAspectRatio: childAspectRatio ?? 1,
               ),
             ),
+    );
+  }
+}
+
+class RestoreNoteModal extends StatelessWidget {
+  final Function onRestore;
+
+  const RestoreNoteModal({super.key, required this.onRestore});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Restore Note'),
+      content: const Text('Are you sure you want to restore this note?'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(); // Close the dialog
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            onRestore(); // Call the restore function passed in
+            Navigator.of(context).pop(); // Close the dialog
+          },
+          child: const Text('Restore'),
+        ),
+      ],
     );
   }
 }

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:fleeting_notes_flutter/models/exceptions.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/textfield_toolbar.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/services/supabase.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'keyboard_button.dart';
 import '../../../../utils/shortcut_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/link_suggestions.dart';
@@ -51,6 +51,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
   );
   bool isPasting = false;
   StreamSubscription<Uint8List?>? pasteListener;
+  final UndoHistoryController undoController = UndoHistoryController();
 
   late ShortcutActions shortcuts;
 
@@ -84,7 +85,26 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     });
   }
 
-  void handlePaste({Uint8List? pasteImage}) async {
+  Future<void> onAddAttachment(Uint8List fileBytes) async {
+    final noteLoadingNotifier = ref.read(noteLoadingProvider.notifier);
+    noteLoadingNotifier.update((_) => true);
+    final db = ref.read(dbProvider);
+    try {
+      Note? newNote = await db.addAttachmentToNewNote(fileBytes: fileBytes);
+      if (newNote != null) {
+        db.insertTextAtSelection(widget.controller, "[[${newNote.title}]]");
+        widget.onChanged?.call();
+      }
+    } on FleetingNotesException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        duration: const Duration(seconds: 2),
+      ));
+    }
+    noteLoadingNotifier.update((_) => false);
+  }
+
+  Future<void> handlePaste({Uint8List? pasteImage}) async {
     setState(() {
       isPasting = true;
     });
@@ -92,19 +112,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     try {
       pasteImage ??= await Pasteboard.image;
       if (pasteImage != null) {
-        try {
-          Note? newNote =
-              await db.addAttachmentToNewNote(fileBytes: pasteImage);
-          if (newNote != null) {
-            db.insertTextAtSelection(widget.controller, "[[${newNote.title}]]");
-            widget.onChanged?.call();
-          }
-        } on FleetingNotesException catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(e.message),
-            duration: const Duration(seconds: 2),
-          ));
-        }
+        await onAddAttachment(pasteImage);
       } else {
         throw FleetingNotesException('No Image to paste');
       }
@@ -465,78 +473,6 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     }
   }
 
-  List<Widget Function(FocusNode)> toolbarButtons() {
-    return [
-      (node) {
-        return SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: Center(
-            child: ListView(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              children: [
-                KeyboardButton(
-                  icon: Icons.data_array,
-                  onPressed: () {
-                    shortcuts.action('[[', ']]');
-                    _onContentChanged(widget.controller.text);
-                  },
-                  tooltip: 'Add link',
-                ),
-                KeyboardButton(
-                  icon: Icons.tag,
-                  onPressed: () {
-                    shortcuts.action('#', '');
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.format_bold,
-                  onPressed: () {
-                    shortcuts.action('**', '**');
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.format_italic,
-                  onPressed: () {
-                    shortcuts.action('*', '*');
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.add_link,
-                  onPressed: () {
-                    shortcuts.addLink();
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.list,
-                  onPressed: () {
-                    shortcuts.toggleList();
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.checklist_outlined,
-                  onPressed: () {
-                    shortcuts.toggleCheckbox();
-                    _onContentChanged(widget.controller.text);
-                  },
-                ),
-                KeyboardButton(
-                  icon: Icons.cancel_outlined,
-                  onPressed: contentFocusNode.unfocus,
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-    ];
-  }
-
   Map<Type, Action<Intent>> getTextFieldActions() {
     return {
       BoldIntent: CallbackAction(onInvoke: (Intent intent) {
@@ -577,8 +513,24 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                     focusNode: contentFocusNode,
                     displayArrows: false,
                     displayDoneButton: false,
+                    displayActionBar: false,
                     toolbarAlignment: MainAxisAlignment.spaceAround,
-                    toolbarButtons: toolbarButtons(),
+                    footerBuilder: (_) => TextFieldToolbar(
+                      shortcuts: shortcuts,
+                      controller: widget.controller,
+                      undoController: undoController,
+                      onContentChanged: _onContentChanged,
+                      focusNode: contentFocusNode,
+                      onAddAttachment: () async {
+                        final noteUtils = ref.read(noteUtilsProvider);
+                        contentFocusNode.unfocus();
+                        final bytes = (await noteUtils.getAttachment())?.bytes;
+                        contentFocusNode.requestFocus();
+                        if (bytes != null) {
+                          await onAddAttachment(bytes);
+                        }
+                      },
+                    ),
                   ),
                 ]),
             child: Actions(
@@ -588,6 +540,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                 textCapitalization: TextCapitalization.sentences,
                 autofocus: widget.autofocus,
                 controller: widget.controller,
+                undoController: undoController,
                 keyboardType: TextInputType.multiline,
                 minLines: 10,
                 maxLines: null,

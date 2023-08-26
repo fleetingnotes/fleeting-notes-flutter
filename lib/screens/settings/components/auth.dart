@@ -224,80 +224,86 @@ class _EmailFormState extends State<EmailForm> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Enter your email',
-              border: OutlineInputBorder(),
-            ),
-            onChanged: (String value) {
-              setState(() {
-                email = value;
-              });
-            },
-            validator: (_) => validateEmailField(),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Password',
-              border: OutlineInputBorder(),
-            ),
-            obscureText: true,
-            onChanged: (String value) {
-              setState(() {
-                password = value;
-              });
-            },
-            validator: (_) => validatePasswordField(),
-          ),
-          (widget.action == AuthAction.signUp)
-              ? Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Confirm password',
-                        border: OutlineInputBorder(),
-                      ),
-                      obscureText: true,
-                      onChanged: (String value) {
-                        setState(() {
-                          confirmPassword = value;
-                        });
-                      },
-                      validator: (_) => validateConfirmPasswordField(),
-                    ),
-                  ],
-                )
-              : const SizedBox(height: 0),
-          const SizedBox(height: 20),
-          OutlinedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  widget.onSubmit(email, password);
-                }
+      child: AutofillGroup(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Enter your email',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (String value) {
+                setState(() {
+                  email = value;
+                });
               },
-              child: (widget.action == AuthAction.signUp)
-                  ? const Text('Register', style: TextStyle(fontSize: 15))
-                  : const Text('Sign in', style: TextStyle(fontSize: 15))),
-          if (widget.action == AuthAction.signIn) const SizedBox(height: 10),
-          if (widget.action == AuthAction.signIn)
-            TextButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (_) {
-                        return RecoverPasswordDialog(
-                          email: email,
-                          onResetPassword: widget.onResetPassword,
-                        );
-                      });
+              validator: (_) => validateEmailField(),
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                onChanged: (String value) {
+                  setState(() {
+                    password = value;
+                  });
                 },
-                child: const Text('Trouble signing in?')),
-        ],
+                validator: (_) => validatePasswordField(),
+                autofillHints: const [AutofillHints.password],
+                keyboardType: TextInputType.text),
+            (widget.action == AuthAction.signUp)
+                ? Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      TextFormField(
+                          decoration: const InputDecoration(
+                            labelText: 'Confirm password',
+                            border: OutlineInputBorder(),
+                          ),
+                          obscureText: true,
+                          onChanged: (String value) {
+                            setState(() {
+                              confirmPassword = value;
+                            });
+                          },
+                          validator: (_) => validateConfirmPasswordField(),
+                          autofillHints: const [AutofillHints.password],
+                          keyboardType: TextInputType.text),
+                    ],
+                  )
+                : const SizedBox(height: 0),
+            const SizedBox(height: 20),
+            OutlinedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    widget.onSubmit(email, password);
+                  }
+                },
+                child: (widget.action == AuthAction.signUp)
+                    ? const Text('Register', style: TextStyle(fontSize: 15))
+                    : const Text('Sign in', style: TextStyle(fontSize: 15))),
+            if (widget.action == AuthAction.signIn) const SizedBox(height: 10),
+            if (widget.action == AuthAction.signIn)
+              TextButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (_) {
+                          return RecoverPasswordDialog(
+                            email: email,
+                            onResetPassword: widget.onResetPassword,
+                          );
+                        });
+                  },
+                  child: const Text('Trouble signing in?')),
+          ],
+        ),
       ),
     );
   }

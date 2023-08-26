@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/textfield_toolbar.dart';
 import 'package:fleeting_notes_flutter/services/browser_ext/browser_ext.dart';
 import 'package:fleeting_notes_flutter/services/note_utils.dart';
 import 'package:fleeting_notes_flutter/services/sync/local_file_sync.dart';
@@ -36,6 +37,7 @@ final noteHistoryProvider =
     StateNotifierProvider<NoteHistoryNotifier, NoteHistory>(
         (ref) => NoteHistoryNotifier());
 final noteLoadingProvider = StateProvider<bool>((ref) => false);
+final toolbarProvider = StateProvider<ToolbarState>((ref) => ToolbarState.edit);
 final noteUtilsProvider = Provider<NoteUtils>((ref) {
   return NoteUtils(ref);
 });

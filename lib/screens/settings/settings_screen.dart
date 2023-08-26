@@ -304,7 +304,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               )
                             : Column(
                                 children: [
-                                  const Divider(),
                                   Auth(onLogin: (e) {
                                     getEncryptionKey();
                                     setState(() {

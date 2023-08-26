@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:file_picker/file_picker.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,6 +38,20 @@ class NoteUtils {
       bool isSuccessDelete = await db.deleteNotes(notes);
       if (!isSuccessDelete) {
         throw FleetingNotesException('Failed to delete note');
+      }
+      return true;
+    } on FleetingNotesException catch (e) {
+      showSnackbar(context, e.message);
+      return false;
+    }
+  }
+
+  Future<bool> handleRestoreNote(BuildContext context, List<Note> notes) async {
+    final db = ref.read(dbProvider);
+    try {
+      bool success = await db.restoreNotes(notes);
+      if (!success) {
+        throw FleetingNotesException('Failed to restore note');
       }
       return true;
     } on FleetingNotesException catch (e) {
@@ -150,6 +165,16 @@ class NoteUtils {
     } catch (e) {
       throw FleetingNotesException('Failed to call plugin `$commandId`: $e');
     }
+  }
+
+  Future<PlatformFile?> getAttachment() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(withData: true);
+    if (result != null && result.files.isNotEmpty) {
+      PlatformFile? file = result.files.first;
+      return file;
+    }
+    return null;
   }
 
   Future<void> onAddAttachment(

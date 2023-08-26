@@ -8,11 +8,9 @@ void onSetting(BuildContext context) {
 class SideRail extends StatelessWidget {
   const SideRail({
     Key? key,
-    required this.addNote,
     required this.onMenu,
   }) : super(key: key);
 
-  final VoidCallback addNote;
   final VoidCallback onMenu;
 
   @override

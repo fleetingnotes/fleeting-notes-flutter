@@ -58,22 +58,24 @@ class Database {
   bool get loggedIn => supabase.currUser != null;
 
   Future<List<Note>> getSearchNotes(SearchQuery query,
-      {forceSync = false}) async {
+      {forceSync = false, bool filterDeletedNotes = false}) async {
     RegExp r = getQueryRegex(query.query);
     bool noteValid(Note note) =>
-        !note.isDeleted &&
+        note.isDeleted == filterDeletedNotes &&
         ((query.searchByTitle && r.hasMatch(note.title)) ||
             (query.searchByContent && r.hasMatch(note.content)) ||
             (query.searchBySource &&
                 (r.hasMatch(note.source) ||
                     r.hasMatch(note.sourceTitle ?? ''))));
-    var allNotes = await getAllNotes(forceSync: forceSync);
+    var allNotes = await getAllNotes(
+        forceSync: forceSync, filterDeletedNotes: filterDeletedNotes);
     var notes = allNotes.where(noteValid).toList();
     notes.sort(sortMap[query.sortBy]);
     return notes.sublist(0, min(notes.length, query.limit ?? notes.length));
   }
 
-  Future<List<Note>> getAllNotes({forceSync = false}) async {
+  Future<List<Note>> getAllNotes(
+      {forceSync = false, bool? filterDeletedNotes = false}) async {
     var box = await getBox();
     try {
       if ((box.isEmpty || forceSync) && loggedIn) {
@@ -83,11 +85,11 @@ class Database {
         int start = 0, end = 1000;
         while (tempNotes == null || tempNotes.length == 1000) {
           tempNotes = await supabase.getAllNotes(
-            partition: shareUserId,
-            modifiedAfter: lastSyncTime,
-            start: start,
-            end: end,
-          );
+              partition: shareUserId,
+              modifiedAfter: lastSyncTime,
+              start: start,
+              end: end,
+              filterDeletedNotes: filterDeletedNotes);
           start += 1000;
           end += 1000;
           notes.addAll(tempNotes);
@@ -100,14 +102,15 @@ class Database {
     } catch (e) {
       // catch errors with getAllNotes
     }
-    List<Note> notes = getAllNotesLocal(box);
+    List<Note> notes =
+        getAllNotesLocal(box, filterDeletedNotes: filterDeletedNotes);
     return notes;
   }
 
-  List<Note> getAllNotesLocal(Box box) {
+  List<Note> getAllNotesLocal(Box box, {bool? filterDeletedNotes = false}) {
     List<Note> notes = [];
     for (var note in box.values) {
-      if (note.runtimeType == Note && !note.isDeleted) {
+      if (note.runtimeType == Note && note.isDeleted == filterDeletedNotes) {
         notes.add(note);
       }
     }
@@ -209,6 +212,23 @@ class Database {
       for (var note in notes) {
         Note boxNote = box.get(note.id, defaultValue: note);
         boxNote.isDeleted = true;
+        noteIdMap[note.id] = boxNote;
+      }
+      await box.putAll(noteIdMap);
+      noteChangeController.add(NoteEvent(notes, NoteEventStatus.delete));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> restoreNotes(List<Note> notes) async {
+    try {
+      var box = await getBox();
+      Map<String, Note> noteIdMap = {};
+      for (var note in notes) {
+        Note boxNote = box.get(note.id, defaultValue: note);
+        boxNote.isDeleted = false;
         noteIdMap[note.id] = boxNote;
       }
       await box.putAll(noteIdMap);
