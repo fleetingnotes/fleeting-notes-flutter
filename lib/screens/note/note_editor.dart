@@ -63,6 +63,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   StreamSubscription? authChangeStream;
   UrlMetadata? sourceMetadata;
   bool checkListEnabled = false;
+  FocusNode checkListFocusNode = FocusNode();
 
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
@@ -160,6 +161,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteChangeStream?.cancel();
     authChangeStream?.cancel();
     contentController.removeListener(onChanged);
+    checkListFocusNode.dispose();
   }
 
   Future<void> _saveNote() async {
@@ -438,16 +440,12 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       padding: const EdgeInsets.only(top: 8),
                     ),
                   if (!widget.markdownPreviewEnabled && checkListEnabled)
-                    Builder(
-                      builder: (context) {
-                        return ChecklistField(
-                          checkedItems: widget.checkedItems ?? [],
-                          controller: contentController,
-                          uncheckedItems: widget.uncheckedItems ?? [],
-                          onChanged: onChanged,
-                        );
-                      },
-                    ),
+                    ChecklistField(
+                        checkedItems: widget.checkedItems ?? [],
+                        controller: contentController,
+                        uncheckedItems: widget.uncheckedItems ?? [],
+                        onChanged: onChanged,
+                        focusNode: checkListFocusNode),
                   if (!widget.markdownPreviewEnabled && !checkListEnabled)
                     ContentField(
                       controller: contentController,
@@ -460,6 +458,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                         setState(() {
                           if (contentController.text.isEmpty) {
                             checkListEnabled = true;
+                            Future.delayed(const Duration(milliseconds: 100),
+                                () {
+                              FocusScope.of(context)
+                                  .requestFocus(checkListFocusNode);
+                            });
                           }
                         });
                       },

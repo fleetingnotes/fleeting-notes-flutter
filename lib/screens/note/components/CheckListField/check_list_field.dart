@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
 class ChecklistField extends StatefulWidget {
-  const ChecklistField({
-    Key? key,
-    required this.checkedItems,
-    required this.uncheckedItems,
-    required this.controller,
-    this.onChanged,
-  }) : super(key: key);
+  const ChecklistField(
+      {Key? key,
+      required this.checkedItems,
+      required this.uncheckedItems,
+      required this.controller,
+      this.onChanged,
+      required this.focusNode})
+      : super(key: key);
 
   final List<String> checkedItems;
   final List<String> uncheckedItems;
   final TextEditingController controller;
   final VoidCallback? onChanged;
+  final FocusNode focusNode;
 
   @override
   _ChecklistFieldState createState() => _ChecklistFieldState();
@@ -143,6 +145,7 @@ class _ChecklistFieldState extends State<ChecklistField> {
                   ),
                   Expanded(
                     child: TextField(
+                      focusNode: widget.focusNode,
                       controller: newItemController,
                       onChanged: (value) {
                         if (value.isNotEmpty) {
@@ -178,6 +181,7 @@ class _ChecklistFieldState extends State<ChecklistField> {
                         widget.uncheckedItems[index] = newText;
                         updateControllerText();
                       },
+                      focusNode: itemFocusNodes[index],
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
