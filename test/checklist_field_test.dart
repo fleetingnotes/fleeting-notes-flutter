@@ -21,6 +21,7 @@ void main() {
             body: ChecklistField(
               uncheckedItems: uncheckedItems,
               checkedItems: const [],
+              focusNode: FocusNode(),
               controller: controller,
               onChanged: () {
                 onChangedCalled = true;
@@ -54,6 +55,7 @@ void main() {
             body: ChecklistField(
               uncheckedItems: uncheckedItems,
               checkedItems: const [],
+              focusNode: FocusNode(),
               controller: controller,
               onChanged: () {
                 onChangedCalled = true;
