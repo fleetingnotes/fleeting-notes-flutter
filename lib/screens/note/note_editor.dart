@@ -27,15 +27,16 @@ class NoteEditor extends ConsumerStatefulWidget {
       this.contentController,
       this.sourceController,
       this.autofocus = false,
-      this.markdownPreviewEnabled = false,
+      this.previewEnabled = false,
       this.padding,
       this.attachment,
       this.checkedItems,
       this.uncheckedItems,
-      this.checkListEnabled = false})
+      this.checkListEnabled = false,
+      this.onCheckListEnabled})
       : super(key: key);
 
-  final bool markdownPreviewEnabled;
+  final bool previewEnabled;
   final Note note;
   final bool autofocus;
   final TextEditingController? titleController;
@@ -46,6 +47,7 @@ class NoteEditor extends ConsumerStatefulWidget {
   final List<String>? checkedItems;
   final List<String>? uncheckedItems;
   final bool checkListEnabled;
+  final VoidCallback? onCheckListEnabled;
 
   @override
   _NoteEditorState createState() => _NoteEditorState();
@@ -62,7 +64,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   StreamSubscription<NoteEvent>? noteChangeStream;
   StreamSubscription? authChangeStream;
   UrlMetadata? sourceMetadata;
-  bool checkListEnabled = false;
 
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
@@ -82,7 +83,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   @override
   void initState() {
     super.initState();
-    checkListEnabled = widget.checkListEnabled;
     final db = ref.read(dbProvider);
     hasNewChanges = widget.autofocus;
     isNoteShareable = widget.note.isShareable;
@@ -380,13 +380,10 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteLoading.update((_) => false);
   }
 
-  bool onChecklistPressed() {
+  void onChecklistPressed() {
     if (contentController.text.isEmpty) {
-      setState(() {
-        checkListEnabled = true;
-      });
+      widget.onCheckListEnabled!();
     }
-    return checkListEnabled;
   }
 
   @override
@@ -439,7 +436,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                         textDirection: textDirection),
                   ),
                   const Divider(),
-                  if (widget.markdownPreviewEnabled)
+                  if (widget.previewEnabled && !widget.checkListEnabled)
                     Markdown(
                       data: contentController.text,
                       shrinkWrap: true,
@@ -453,7 +450,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       uncheckedItems: widget.uncheckedItems ?? [],
                       onChanged: onChanged,
                     ),
-                  if (!widget.markdownPreviewEnabled && !checkListEnabled)
+                  if (!widget.previewEnabled && !widget.checkListEnabled)
                     ContentField(
                       controller: contentController,
                       onChanged: onChanged,
