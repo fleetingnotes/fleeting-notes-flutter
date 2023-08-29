@@ -382,6 +382,15 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteLoading.update((_) => false);
   }
 
+  bool onChecklistPressed() {
+    if (contentController.text.isEmpty) {
+      setState(() {
+        checkListEnabled = true;
+      });
+    }
+    return checkListEnabled;
+  }
+
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
@@ -454,18 +463,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       onCommandRun: onCommandRun,
                       autofocus: !autoFocusTitle,
                       textDirection: textDirection,
-                      onCheckListPressed: () {
-                        setState(() {
-                          if (contentController.text.isEmpty) {
-                            checkListEnabled = true;
-                            Future.delayed(const Duration(milliseconds: 100),
-                                () {
-                              FocusScope.of(context)
-                                  .requestFocus(checkListFocusNode);
-                            });
-                          }
-                        });
-                      },
+                      onCheckListPressed: onChecklistPressed,
                     ),
                 ],
               ),

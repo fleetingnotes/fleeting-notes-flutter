@@ -174,9 +174,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
       ),
       KeyboardButton(
         child: const Icon(Icons.checklist_outlined, size: 20),
-        onPressed: () {
-          onCheckListPressed!();
-        },
+        onPressed: onCheckListPressed?.call,
       ),
     ];
     return SizedBox(

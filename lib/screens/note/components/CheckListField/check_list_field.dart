@@ -146,6 +146,7 @@ class _ChecklistFieldState extends State<ChecklistField> {
                   Expanded(
                     child: TextField(
                       focusNode: widget.focusNode,
+                      textInputAction: TextInputAction.done,
                       controller: newItemController,
                       onChanged: (value) {
                         if (value.isNotEmpty) {
@@ -182,11 +183,11 @@ class _ChecklistFieldState extends State<ChecklistField> {
                         updateControllerText();
                       },
                       focusNode: itemFocusNodes[index],
+                      textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
                       ),
-                      keyboardType: TextInputType.multiline,
                       maxLines: 1,
                     ),
                   ),

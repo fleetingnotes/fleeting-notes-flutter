@@ -33,7 +33,7 @@ class ContentField extends ConsumerStatefulWidget {
   final VoidCallback? onPop;
   final bool autofocus;
   final TextDirection textDirection;
-  final VoidCallback? onCheckListPressed;
+  final Function? onCheckListPressed;
 
   @override
   ConsumerState<ContentField> createState() => _ContentFieldState();
@@ -532,7 +532,12 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                           await onAddAttachment(bytes);
                         }
                       },
-                      onCheckListPressed: widget.onCheckListPressed,
+                      onCheckListPressed: () {
+                        if (widget.onCheckListPressed?.call() == false) {
+                          shortcuts.toggleCheckbox();
+                          _onContentChanged(widget.controller.text);
+                        }
+                      },
                     ),
                   ),
                 ]),

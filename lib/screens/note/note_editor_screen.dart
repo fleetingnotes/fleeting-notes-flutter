@@ -68,6 +68,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
           } else {
             uncheckedItems.clear();
             checkedItems.clear();
+            break;
           }
         }
       }
