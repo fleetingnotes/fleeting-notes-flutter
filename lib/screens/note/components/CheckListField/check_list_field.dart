@@ -177,6 +177,9 @@ class _ChecklistFieldState extends State<ChecklistField> {
                       },
                       focusNode: itemFocusNodes[index],
                       textInputAction: TextInputAction.next,
+                      onSubmitted: (newItem) {
+                        addItem();
+                      },
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
