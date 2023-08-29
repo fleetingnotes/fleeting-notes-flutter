@@ -33,7 +33,8 @@ class _ChecklistFieldState extends State<ChecklistField> {
         text: widget.uncheckedItems[i],
       ));
     }
-    if (itemFocusNodes.isNotEmpty) {
+    if (itemFocusNodes.length == 1 &&
+        uncheckedItemControllers[0].text.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         FocusScope.of(context).requestFocus(itemFocusNodes.last);
       });
@@ -185,9 +186,7 @@ class _ChecklistFieldState extends State<ChecklistField> {
                       },
                       focusNode: itemFocusNodes[index],
                       textInputAction: TextInputAction.next,
-                      onSubmitted: (newItem) {
-                        addItem();
-                      },
+                      onEditingComplete: addItem,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
