@@ -63,7 +63,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   StreamSubscription? authChangeStream;
   UrlMetadata? sourceMetadata;
   bool checkListEnabled = false;
-  FocusNode checkListFocusNode = FocusNode();
 
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
@@ -161,7 +160,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteChangeStream?.cancel();
     authChangeStream?.cancel();
     contentController.removeListener(onChanged);
-    checkListFocusNode.dispose();
   }
 
   Future<void> _saveNote() async {
@@ -450,11 +448,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                     ),
                   if (!widget.markdownPreviewEnabled && checkListEnabled)
                     ChecklistField(
-                        checkedItems: widget.checkedItems ?? [],
-                        controller: contentController,
-                        uncheckedItems: widget.uncheckedItems ?? [],
-                        onChanged: onChanged,
-                        focusNode: checkListFocusNode),
+                      checkedItems: widget.checkedItems ?? [],
+                      controller: contentController,
+                      uncheckedItems: widget.uncheckedItems ?? [],
+                      onChanged: onChanged,
+                    ),
                   if (!widget.markdownPreviewEnabled && !checkListEnabled)
                     ContentField(
                       controller: contentController,

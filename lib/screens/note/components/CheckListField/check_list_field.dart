@@ -6,15 +6,13 @@ class ChecklistField extends StatefulWidget {
       required this.checkedItems,
       required this.uncheckedItems,
       required this.controller,
-      this.onChanged,
-      required this.focusNode})
+      this.onChanged})
       : super(key: key);
 
   final List<String> checkedItems;
   final List<String> uncheckedItems;
   final TextEditingController controller;
   final VoidCallback? onChanged;
-  final FocusNode focusNode;
 
   @override
   _ChecklistFieldState createState() => _ChecklistFieldState();
@@ -23,7 +21,6 @@ class ChecklistField extends StatefulWidget {
 class _ChecklistFieldState extends State<ChecklistField> {
   bool _showCompletedItems = true;
 
-  TextEditingController newItemController = TextEditingController();
   List<FocusNode> itemFocusNodes = []; // Add this line
   List<TextEditingController> uncheckedItemControllers = [];
 
@@ -55,21 +52,18 @@ class _ChecklistFieldState extends State<ChecklistField> {
   }
 
   void addItem() {
-    String newItemText = newItemController.text;
-    if (newItemText.isNotEmpty) {
-      setState(() {
-        widget.uncheckedItems.add(newItemText);
-        uncheckedItemControllers.add(TextEditingController(
-          text: newItemText,
-        ));
-        itemFocusNodes.add(FocusNode());
-        newItemController.clear();
-        updateControllerText();
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(itemFocusNodes.last);
-      });
-    }
+    String newItemText = "";
+    setState(() {
+      widget.uncheckedItems.add(newItemText);
+      uncheckedItemControllers.add(TextEditingController(
+        text: newItemText,
+      ));
+      itemFocusNodes.add(FocusNode());
+      updateControllerText();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(itemFocusNodes.last);
+    });
   }
 
   void removeUncheckedItem(int index) {
@@ -144,17 +138,16 @@ class _ChecklistFieldState extends State<ChecklistField> {
                     onPressed: addItem,
                   ),
                   Expanded(
-                    child: TextField(
-                      focusNode: widget.focusNode,
-                      textInputAction: TextInputAction.done,
-                      controller: newItemController,
-                      onChanged: (value) {
-                        if (value.isNotEmpty) {
-                          addItem();
-                        }
-                      },
-                      decoration: const InputDecoration(
-                        hintText: 'List item',
+                    child: GestureDetector(
+                      onTap: addItem,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: const Text(
+                          'List item',
+                          style: TextStyle(
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                     ),
                   ),

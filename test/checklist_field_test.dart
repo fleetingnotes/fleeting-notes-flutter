@@ -21,7 +21,6 @@ void main() {
             body: ChecklistField(
               uncheckedItems: uncheckedItems,
               checkedItems: const [],
-              focusNode: FocusNode(),
               controller: controller,
               onChanged: () {
                 onChangedCalled = true;
@@ -33,10 +32,10 @@ void main() {
 
       expect(find.byType(ChecklistField), findsOneWidget);
       expect(uncheckedItems.isEmpty, true);
-
-      await tester.enterText(find.byType(TextField), 'New Unchecked Item');
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'New Unchecked Item');
 
       expect(uncheckedItems.length, 1);
       expect(uncheckedItems[0], 'New Unchecked Item');
@@ -55,7 +54,6 @@ void main() {
             body: ChecklistField(
               uncheckedItems: uncheckedItems,
               checkedItems: const [],
-              focusNode: FocusNode(),
               controller: controller,
               onChanged: () {
                 onChangedCalled = true;
