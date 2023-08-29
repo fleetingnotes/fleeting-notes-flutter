@@ -172,6 +172,14 @@ class _ChecklistFieldState extends State<ChecklistField> {
                     child: TextField(
                       controller: uncheckedItemControllers[index],
                       onChanged: (newText) {
+                        if (newText.isEmpty) {
+                          removeUncheckedItem(index);
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            FocusScope.of(context)
+                                .requestFocus(itemFocusNodes.last);
+                          });
+                          return;
+                        }
                         widget.uncheckedItems[index] = newText;
                         updateControllerText();
                       },
