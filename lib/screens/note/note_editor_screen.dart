@@ -35,6 +35,10 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
 }
 
+bool isChecklistFormat(String line) {
+  return RegExp(r'^\s*- \[.\] ').hasMatch(line);
+}
+
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool autofocus = false;
   bool markdownPreviewEnabled = false;
@@ -42,13 +46,33 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Uri? currentLoc;
   List<Note> backlinks = [];
   SearchQuery backlinksSq = SearchQuery();
+  List<String> checkedItems = [];
+  List<String> uncheckedItems = [];
 
   Future<void> initNoteScreen(NoteHistory? noteHistory) async {
     if (!mounted || !GoRouter.of(context).location.startsWith('/note/')) return;
     final db = ref.read(dbProvider);
     var tempNote = await getNote();
     noteHistory?.currNote = tempNote;
-
+    if (tempNote.content.isNotEmpty) {
+      final lines = tempNote.content.split('\n');
+      for (final line in lines) {
+        if (line.trim().isNotEmpty) {
+          if (isChecklistFormat(line)) {
+            final content = line.substring(6).trim();
+            if (line.contains('- [x]')) {
+              checkedItems.add(content);
+            } else {
+              uncheckedItems.add(content);
+            }
+          } else {
+            uncheckedItems.clear();
+            checkedItems.clear();
+            break;
+          }
+        }
+      }
+    }
     // get backlinks (async)
     if (tempNote.title.isNotEmpty) {
       backlinksSq = SearchQuery(query: "[[${tempNote.title}]]");
@@ -264,6 +288,10 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                             padding: const EdgeInsets.only(
                                 left: 24, right: 24, bottom: 16),
                             attachment: widget.attachment,
+                            checkedItems: checkedItems,
+                            uncheckedItems: uncheckedItems,
+                            checkListEnabled: checkedItems.isNotEmpty ||
+                                uncheckedItems.isNotEmpty,
                           ),
                   ),
                   if (bottomAppBarVisible)

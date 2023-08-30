@@ -5,6 +5,7 @@ import 'package:fleeting_notes_flutter/models/exceptions.dart';
 import 'package:fleeting_notes_flutter/models/syncterface.dart';
 import 'package:collection/collection.dart';
 import 'package:fleeting_notes_flutter/models/url_metadata.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/CheckListField/check_list_field.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/shortcuts.dart';
 import 'package:flutter/foundation.dart';
@@ -19,17 +20,20 @@ import 'package:fleeting_notes_flutter/screens/note/components/SourceField/sourc
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 class NoteEditor extends ConsumerStatefulWidget {
-  const NoteEditor({
-    Key? key,
-    required this.note,
-    this.titleController,
-    this.contentController,
-    this.sourceController,
-    this.autofocus = false,
-    this.markdownPreviewEnabled = false,
-    this.padding,
-    this.attachment,
-  }) : super(key: key);
+  const NoteEditor(
+      {Key? key,
+      required this.note,
+      this.titleController,
+      this.contentController,
+      this.sourceController,
+      this.autofocus = false,
+      this.markdownPreviewEnabled = false,
+      this.padding,
+      this.attachment,
+      this.checkedItems,
+      this.uncheckedItems,
+      this.checkListEnabled = false})
+      : super(key: key);
 
   final bool markdownPreviewEnabled;
   final Note note;
@@ -39,6 +43,9 @@ class NoteEditor extends ConsumerStatefulWidget {
   final TextEditingController? sourceController;
   final EdgeInsetsGeometry? padding;
   final Uint8List? attachment;
+  final List<String>? checkedItems;
+  final List<String>? uncheckedItems;
+  final bool checkListEnabled;
 
   @override
   _NoteEditorState createState() => _NoteEditorState();
@@ -55,6 +62,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   StreamSubscription<NoteEvent>? noteChangeStream;
   StreamSubscription? authChangeStream;
   UrlMetadata? sourceMetadata;
+  bool checkListEnabled = false;
 
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
@@ -74,6 +82,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   @override
   void initState() {
     super.initState();
+    checkListEnabled = widget.checkListEnabled;
     final db = ref.read(dbProvider);
     hasNewChanges = widget.autofocus;
     isNoteShareable = widget.note.isShareable;
@@ -371,6 +380,15 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteLoading.update((_) => false);
   }
 
+  bool onChecklistPressed() {
+    if (contentController.text.isEmpty) {
+      setState(() {
+        checkListEnabled = true;
+      });
+    }
+    return checkListEnabled;
+  }
+
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
@@ -427,8 +445,15 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       shrinkWrap: true,
                       physics: const ClampingScrollPhysics(),
                       padding: const EdgeInsets.only(top: 8),
-                    )
-                  else
+                    ),
+                  if (!widget.markdownPreviewEnabled && checkListEnabled)
+                    ChecklistField(
+                      checkedItems: widget.checkedItems ?? [],
+                      controller: contentController,
+                      uncheckedItems: widget.uncheckedItems ?? [],
+                      onChanged: onChanged,
+                    ),
+                  if (!widget.markdownPreviewEnabled && !checkListEnabled)
                     ContentField(
                       controller: contentController,
                       onChanged: onChanged,
@@ -436,6 +461,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       onCommandRun: onCommandRun,
                       autofocus: !autoFocusTitle,
                       textDirection: textDirection,
+                      onCheckListPressed: onChecklistPressed,
                     ),
                 ],
               ),
