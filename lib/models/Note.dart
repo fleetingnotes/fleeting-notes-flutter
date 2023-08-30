@@ -46,7 +46,8 @@ class Note {
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex =
       "\\[\\[([^$invalidChars]+?)(\\|([^$invalidChars]*))?\\]\\]";
-  static const String tagRegex = r"(^|\B)#(?![0-9]+\b)([a-zA-Z0-9_\/]*)";
+  static const String tagRegex =
+      r'(^|\B)#(?![0-9]+\b)([^\u2000-\u206F\u2E00-\u2E7F\"\!#\$\%&()*+,.:;<=>?@^`{|}~\[\]\\\s]+)';
   static const String commandRegex = r"(^|\B)\/([^\/\n\r]*)";
   static const String defaultNoteTemplate = r'''
 ---
