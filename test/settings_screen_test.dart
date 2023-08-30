@@ -39,7 +39,7 @@ void main() {
     expect(find.byType(Auth), findsOneWidget);
     expect(find.byType(Account), findsNothing);
     expect(find.byType(PluginCommandSetting), findsNothing);
-    expect(find.byType(SettingsItemSwitch), findsNWidgets(5));
+    expect(find.byType(SettingsItemSwitch), findsNWidgets(6));
   });
 
   testWidgets('Login works as expected', (WidgetTester tester) async {
