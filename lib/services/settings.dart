@@ -25,6 +25,8 @@ class Settings {
     'search-is-list-view': bool,
     'auto-focus-title': bool,
     'right-to-left': bool,
+    'default-read-view': bool,
+    'markdown-preview': bool,
     // local sync settings
     'local-sync-enabled': bool,
     'local-sync-dir': String,

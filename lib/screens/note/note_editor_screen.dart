@@ -38,6 +38,7 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool autofocus = false;
   bool markdownPreviewEnabled = false;
+  bool readModeApplied = false;
   Note? note;
   Uri? currentLoc;
   List<Note> backlinks = [];
@@ -182,9 +183,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   }
 
   void onPreviewMarkdown() {
+    final settings = ref.watch(settingsProvider);
     setState(() {
       markdownPreviewEnabled = !markdownPreviewEnabled;
     });
+    settings.set('markdown-preview', markdownPreviewEnabled);
   }
 
   TextEditingController titleController = TextEditingController();
@@ -211,6 +214,16 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     final noteHistory = ref.watch(noteHistoryProvider);
     final renderNote = note;
     bool bottomAppBarVisible = !noteHistory.isHistoryEmpty;
+    final settings = ref.watch(settingsProvider);
+    bool readMode =
+        settings.get('default-read-view', defaultValue: false) ?? false;
+    if (!readModeApplied) {
+      markdownPreviewEnabled = readMode;
+      readModeApplied = true; // Mark the setting as applied
+    } else {
+      markdownPreviewEnabled =
+          settings.get('markdown-preview', defaultValue: false) ?? false;
+    }
     if (currentLoc?.toString() != GoRouter.of(context).location) {
       currentLoc = Uri.parse(GoRouter.of(context).location);
       initNoteScreen(noteHistory);

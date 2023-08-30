@@ -336,6 +336,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         const SettingsItemSwitch(
                             settingsKey: 'dark-mode', name: "Dark mode"),
                         const SettingsItemSwitch(
+                            settingsKey: 'default-read-view',
+                            name: "Default Reading Mode",
+                            description:
+                                "By default opens notes in reading mode"),
+                        const SettingsItemSwitch(
                             settingsKey: 'search-is-list-view',
                             name: 'Enable list view',
                             defaultValue: false,
