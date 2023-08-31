@@ -382,7 +382,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
 
   void onChecklistPressed() {
     if (contentController.text.isEmpty) {
-      widget.onCheckListEnabled!();
+      widget.onCheckListEnabled?.call();
     }
   }
 
