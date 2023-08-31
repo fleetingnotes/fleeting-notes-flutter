@@ -38,7 +38,6 @@ class NoteEditorScreen extends ConsumerStatefulWidget {
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool autofocus = false;
   bool markdownPreviewEnabled = false;
-  bool readModeApplied = false;
   Note? note;
   Uri? currentLoc;
   List<Note> backlinks = [];
