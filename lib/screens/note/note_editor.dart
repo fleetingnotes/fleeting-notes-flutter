@@ -443,7 +443,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       physics: const ClampingScrollPhysics(),
                       padding: const EdgeInsets.only(top: 8),
                     ),
-                  if (!widget.markdownPreviewEnabled && checkListEnabled)
+                  if (widget.checkListEnabled)
                     ChecklistField(
                       checkedItems: widget.checkedItems ?? [],
                       controller: contentController,
