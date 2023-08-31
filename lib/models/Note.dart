@@ -46,6 +46,7 @@ class Note {
   static const String invalidChars = r'\[\]\#\*\:\/\\\^';
   static const String linkRegex =
       "\\[\\[([^$invalidChars]+?)(\\|([^$invalidChars]*))?\\]\\]";
+  // https://github.com/pjeby/tag-wrangler/blob/master/src/Tag.js
   static const String tagRegex =
       r'(^|\B)#(?![0-9]+\b)([^\u2000-\u206F\u2E00-\u2E7F\"\!#\$\%&()*+,.:;<=>?@^`{|}~\[\]\\\s]*)';
   static const String commandRegex = r"(^|\B)\/([^\/\n\r]*)";
