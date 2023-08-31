@@ -213,17 +213,10 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Widget build(BuildContext context) {
     final noteHistory = ref.watch(noteHistoryProvider);
     final renderNote = note;
-    bool bottomAppBarVisible = !noteHistory.isHistoryEmpty;
     final settings = ref.watch(settingsProvider);
-    bool readMode =
-        settings.get('default-read-view', defaultValue: false) ?? false;
-    if (!readModeApplied) {
-      markdownPreviewEnabled = readMode;
-      readModeApplied = true; // Mark the setting as applied
-    } else {
-      markdownPreviewEnabled =
-          settings.get('markdown-preview', defaultValue: false) ?? false;
-    }
+    bool bottomAppBarVisible = !noteHistory.isHistoryEmpty;
+    markdownPreviewEnabled =
+        settings.get('markdown-preview', defaultValue: false) ?? false;
     if (currentLoc?.toString() != GoRouter.of(context).location) {
       currentLoc = Uri.parse(GoRouter.of(context).location);
       initNoteScreen(noteHistory);
