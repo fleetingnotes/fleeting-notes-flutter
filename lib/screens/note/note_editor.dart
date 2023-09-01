@@ -378,9 +378,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteLoading.update((_) => false);
   }
 
+  // TODO: fix work around (https://github.com/fleetingnotes/fleeting-notes-flutter/pull/906)
   String get replacedText {
     return contentController.text
-        .replaceAll(RegExp(r"- \[ \] ?(\n|$)"), "- [ ]\n");
+        .replaceAll(RegExp(r"- \[ \] ?(\n|$)"), "- [ ]\n")
+        .replaceAll(RegExp(r"- \[x\] ?(\n|$)"), "- [x]\n");
   }
 
   @override
