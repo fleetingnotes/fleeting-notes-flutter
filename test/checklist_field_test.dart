@@ -88,6 +88,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(ContentField), findsNothing);
       expect(find.byType(ChecklistField), findsOneWidget);
+      expect(find.byIcon(Icons.import_contacts), findsNothing);
+      expect(find.byIcon(Icons.edit), findsOneWidget);
     });
 
     testWidgets('open default view if the note has not a valid checklist items',
@@ -102,6 +104,34 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(ContentField), findsOneWidget);
       expect(find.byType(ChecklistField), findsNothing);
+      expect(find.byIcon(Icons.import_contacts), findsOneWidget);
+      expect(find.byIcon(Icons.edit), findsNothing);
+    });
+
+    testWidgets('preview empty checklist item', (WidgetTester tester) async {
+      var settings = MockSettings();
+      await fnPumpWidget(tester, const MyApp(), settings: settings);
+      expect(find.byType(MainScreen), findsOneWidget);
+      await addNote(tester, content: '- [ ] ', closeDialog: false);
+      await tester.tap(find.byIcon(Icons.import_contacts));
+      await tester.pumpAndSettle();
+      expect(find.byType(ChecklistField), findsOneWidget);
+      expect(find.byIcon(Icons.edit), findsOneWidget);
+    });
+
+    testWidgets('disable preview empty checklist item',
+        (WidgetTester tester) async {
+      var settings = MockSettings();
+      await fnPumpWidget(tester, const MyApp(), settings: settings);
+      expect(find.byType(MainScreen), findsOneWidget);
+      await addNote(tester, content: '- [ ] ', closeDialog: true);
+      await tester.tap(find.byType(NoteCard));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+      expect(find.byType(ChecklistField), findsNothing);
+      expect(find.byType(ContentField), findsOneWidget);
+      expect(find.byIcon(Icons.import_contacts), findsOneWidget);
     });
   });
 }

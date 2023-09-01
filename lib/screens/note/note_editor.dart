@@ -20,22 +20,22 @@ import 'package:fleeting_notes_flutter/screens/note/components/SourceField/sourc
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 class NoteEditor extends ConsumerStatefulWidget {
-  const NoteEditor(
-      {Key? key,
-      required this.note,
-      this.titleController,
-      this.contentController,
-      this.sourceController,
-      this.autofocus = false,
-      this.markdownPreviewEnabled = false,
-      this.padding,
-      this.attachment,
-      this.checkedItems,
-      this.uncheckedItems,
-      this.checkListEnabled = false})
-      : super(key: key);
+  const NoteEditor({
+    Key? key,
+    required this.note,
+    this.titleController,
+    this.contentController,
+    this.sourceController,
+    this.autofocus = false,
+    this.previewEnabled = false,
+    this.padding,
+    this.attachment,
+    this.checkedItems,
+    this.uncheckedItems,
+    this.checkListEnabled = false,
+  }) : super(key: key);
 
-  final bool markdownPreviewEnabled;
+  final bool previewEnabled;
   final Note note;
   final bool autofocus;
   final TextEditingController? titleController;
@@ -62,7 +62,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   StreamSubscription<NoteEvent>? noteChangeStream;
   StreamSubscription? authChangeStream;
   UrlMetadata? sourceMetadata;
-  bool checkListEnabled = false;
 
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
@@ -82,7 +81,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   @override
   void initState() {
     super.initState();
-    checkListEnabled = widget.checkListEnabled;
     final db = ref.read(dbProvider);
     hasNewChanges = widget.autofocus;
     isNoteShareable = widget.note.isShareable;
@@ -380,13 +378,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteLoading.update((_) => false);
   }
 
-  bool onChecklistPressed() {
-    if (contentController.text.isEmpty) {
-      setState(() {
-        checkListEnabled = true;
-      });
-    }
-    return checkListEnabled;
+  // TODO: fix work around (https://github.com/fleetingnotes/fleeting-notes-flutter/pull/906)
+  String get replacedText {
+    return contentController.text
+        .replaceAll(RegExp(r"- \[ \] ?(\n|$)"), "- [ ]\n")
+        .replaceAll(RegExp(r"- \[x\] ?(\n|$)"), "- [x]\n");
   }
 
   @override
@@ -439,21 +435,21 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                         textDirection: textDirection),
                   ),
                   const Divider(),
-                  if (widget.markdownPreviewEnabled)
+                  if (widget.previewEnabled && !widget.checkListEnabled)
                     Markdown(
-                      data: contentController.text,
+                      data: replacedText,
                       shrinkWrap: true,
                       physics: const ClampingScrollPhysics(),
                       padding: const EdgeInsets.only(top: 8),
                     ),
-                  if (!widget.markdownPreviewEnabled && checkListEnabled)
+                  if (widget.checkListEnabled)
                     ChecklistField(
                       checkedItems: widget.checkedItems ?? [],
                       controller: contentController,
                       uncheckedItems: widget.uncheckedItems ?? [],
                       onChanged: onChanged,
                     ),
-                  if (!widget.markdownPreviewEnabled && !checkListEnabled)
+                  if (!widget.previewEnabled && !widget.checkListEnabled)
                     ContentField(
                       controller: contentController,
                       onChanged: onChanged,
@@ -461,7 +457,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       onCommandRun: onCommandRun,
                       autofocus: !autoFocusTitle,
                       textDirection: textDirection,
-                      onCheckListPressed: onChecklistPressed,
                     ),
                 ],
               ),

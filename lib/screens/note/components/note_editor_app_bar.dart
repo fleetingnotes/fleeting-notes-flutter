@@ -15,7 +15,7 @@ class NoteEditorAppBar extends ConsumerWidget {
     this.elevation,
     this.title,
     this.onClose,
-    this.onPreviewMarkdown,
+    this.onPreview,
     this.onBacklinks,
     this.contentController,
     this.titleController,
@@ -24,7 +24,7 @@ class NoteEditorAppBar extends ConsumerWidget {
 
   final Note? note;
   final VoidCallback? onClose;
-  final VoidCallback? onPreviewMarkdown;
+  final VoidCallback? onPreview;
   final VoidCallback? onBacklinks;
   final double? elevation;
   final Widget? title;
@@ -74,7 +74,7 @@ class NoteEditorAppBar extends ConsumerWidget {
               margin: const EdgeInsets.only(right: 8),
             ),
           IconButton(
-            onPressed: onPreviewMarkdown,
+            onPressed: onPreview,
             icon: (isMarkdownPreviewSelected)
                 ? const Icon(Icons.edit)
                 : const Icon(Icons.import_contacts),

@@ -41,7 +41,8 @@ bool isChecklistFormat(String line) {
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool autofocus = false;
-  bool markdownPreviewEnabled = false;
+  bool previewEnabled = false;
+  bool checkListEnabled = false;
   Note? note;
   Uri? currentLoc;
   List<Note> backlinks = [];
@@ -54,24 +55,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     final db = ref.read(dbProvider);
     var tempNote = await getNote();
     noteHistory?.currNote = tempNote;
-    if (tempNote.content.isNotEmpty) {
-      final lines = tempNote.content.split('\n');
-      for (final line in lines) {
-        if (line.trim().isNotEmpty) {
-          if (isChecklistFormat(line)) {
-            final content = line.substring(6).trim();
-            if (line.contains('- [x]')) {
-              checkedItems.add(content);
-            } else {
-              uncheckedItems.add(content);
-            }
-          } else {
-            uncheckedItems.clear();
-            checkedItems.clear();
-            break;
-          }
-        }
-      }
+    if (createCheckList(tempNote.content)) {
+      previewEnabled = true;
+      checkListEnabled = true;
     }
     // get backlinks (async)
     if (tempNote.title.isNotEmpty) {
@@ -174,6 +160,35 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     return newNote;
   }
 
+  bool createCheckList(text) {
+    if (text.isEmpty) {
+      return false;
+    }
+    if (!text.startsWith("- [")) {
+      return false;
+    }
+    uncheckedItems.clear();
+    checkedItems.clear();
+    final lines = text.split('\n');
+    for (final line in lines) {
+      if (line.trim().isNotEmpty) {
+        if (isChecklistFormat(line)) {
+          final content = line.substring(6).trim();
+          if (line.contains('- [x]')) {
+            checkedItems.add(content);
+          } else {
+            uncheckedItems.add(content);
+          }
+        } else {
+          uncheckedItems.clear();
+          checkedItems.clear();
+          return false;
+        }
+      }
+    }
+    return checkedItems.isNotEmpty || uncheckedItems.isNotEmpty;
+  }
+
   void onBack() async {
     final noteUtils = ref.read(noteUtilsProvider);
 
@@ -205,9 +220,23 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
   }
 
-  void onPreviewMarkdown() {
+  void onCheckListEnabled() {
     setState(() {
-      markdownPreviewEnabled = !markdownPreviewEnabled;
+      previewEnabled = true;
+      checkListEnabled = true;
+    });
+  }
+
+  void onPreview() {
+    setState(() {
+      if (!previewEnabled) {
+        checkListEnabled = createCheckList(contentController.text);
+      } else if (checkListEnabled) {
+        uncheckedItems.clear();
+        checkedItems.clear();
+        checkListEnabled = false;
+      }
+      previewEnabled = !previewEnabled;
     });
   }
 
@@ -264,8 +293,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                   NoteEditorAppBar(
                     note: renderNote,
                     onClose: onClose,
-                    onPreviewMarkdown: onPreviewMarkdown,
-                    isMarkdownPreviewSelected: markdownPreviewEnabled,
+                    onPreview: onPreview,
+                    isMarkdownPreviewSelected: previewEnabled,
                     onBacklinks: (backlinks.isEmpty)
                         ? null
                         : scaffoldKey.currentState?.openEndDrawer,
@@ -284,14 +313,15 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                             contentController: contentController,
                             sourceController: sourceController,
                             autofocus: autofocus,
-                            markdownPreviewEnabled: markdownPreviewEnabled,
+                            previewEnabled: previewEnabled,
                             padding: const EdgeInsets.only(
                                 left: 24, right: 24, bottom: 16),
                             attachment: widget.attachment,
                             checkedItems: checkedItems,
                             uncheckedItems: uncheckedItems,
                             checkListEnabled: checkedItems.isNotEmpty ||
-                                uncheckedItems.isNotEmpty,
+                                uncheckedItems.isNotEmpty ||
+                                checkListEnabled,
                           ),
                   ),
                   if (bottomAppBarVisible)
