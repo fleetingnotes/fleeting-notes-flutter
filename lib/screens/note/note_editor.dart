@@ -378,6 +378,11 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteLoading.update((_) => false);
   }
 
+  String get replacedText {
+    return contentController.text
+        .replaceAll(RegExp(r"- \[ \] ?(\n|$)"), "- [ ]\n");
+  }
+
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
@@ -430,7 +435,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                   const Divider(),
                   if (widget.previewEnabled && !widget.checkListEnabled)
                     Markdown(
-                      data: contentController.text,
+                      data: replacedText,
                       shrinkWrap: true,
                       physics: const ClampingScrollPhysics(),
                       padding: const EdgeInsets.only(top: 8),
