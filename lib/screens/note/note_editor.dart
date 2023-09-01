@@ -20,21 +20,20 @@ import 'package:fleeting_notes_flutter/screens/note/components/SourceField/sourc
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 class NoteEditor extends ConsumerStatefulWidget {
-  const NoteEditor(
-      {Key? key,
-      required this.note,
-      this.titleController,
-      this.contentController,
-      this.sourceController,
-      this.autofocus = false,
-      this.previewEnabled = false,
-      this.padding,
-      this.attachment,
-      this.checkedItems,
-      this.uncheckedItems,
-      this.checkListEnabled = false,
-      this.onCheckListEnabled})
-      : super(key: key);
+  const NoteEditor({
+    Key? key,
+    required this.note,
+    this.titleController,
+    this.contentController,
+    this.sourceController,
+    this.autofocus = false,
+    this.previewEnabled = false,
+    this.padding,
+    this.attachment,
+    this.checkedItems,
+    this.uncheckedItems,
+    this.checkListEnabled = false,
+  }) : super(key: key);
 
   final bool previewEnabled;
   final Note note;
@@ -47,7 +46,6 @@ class NoteEditor extends ConsumerStatefulWidget {
   final List<String>? checkedItems;
   final List<String>? uncheckedItems;
   final bool checkListEnabled;
-  final VoidCallback? onCheckListEnabled;
 
   @override
   _NoteEditorState createState() => _NoteEditorState();
@@ -380,12 +378,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteLoading.update((_) => false);
   }
 
-  void onChecklistPressed() {
-    if (contentController.text.isEmpty) {
-      widget.onCheckListEnabled?.call();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
@@ -458,7 +450,6 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       onCommandRun: onCommandRun,
                       autofocus: !autoFocusTitle,
                       textDirection: textDirection,
-                      onCheckListPressed: onChecklistPressed,
                     ),
                 ],
               ),

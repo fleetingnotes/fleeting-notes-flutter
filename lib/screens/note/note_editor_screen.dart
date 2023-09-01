@@ -222,10 +222,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
 
   void onCheckListEnabled() {
     setState(() {
-      uncheckedItems.clear();
-      checkedItems.clear();
-      contentController.text = "- [ ] ";
-      uncheckedItems.add("");
       previewEnabled = true;
       checkListEnabled = true;
     });
@@ -326,7 +322,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                             checkListEnabled: checkedItems.isNotEmpty ||
                                 uncheckedItems.isNotEmpty ||
                                 checkListEnabled,
-                            onCheckListEnabled: onCheckListEnabled),
+                          ),
                   ),
                   if (bottomAppBarVisible)
                     KeyboardVisibilityBuilder(builder: (context, isVisible) {

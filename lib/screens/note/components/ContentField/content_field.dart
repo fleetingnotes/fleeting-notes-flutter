@@ -24,7 +24,6 @@ class ContentField extends ConsumerStatefulWidget {
     this.onChanged,
     this.onPop,
     this.textDirection = TextDirection.ltr,
-    this.onCheckListPressed,
   }) : super(key: key);
 
   final TextEditingController controller;
@@ -33,7 +32,6 @@ class ContentField extends ConsumerStatefulWidget {
   final VoidCallback? onPop;
   final bool autofocus;
   final TextDirection textDirection;
-  final Function? onCheckListPressed;
 
   @override
   ConsumerState<ContentField> createState() => _ContentFieldState();
@@ -533,10 +531,8 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                         }
                       },
                       onCheckListPressed: () {
-                        if (widget.onCheckListPressed?.call() == false) {
-                          shortcuts.toggleCheckbox();
-                          _onContentChanged(widget.controller.text);
-                        }
+                        shortcuts.toggleCheckbox();
+                        _onContentChanged(widget.controller.text);
                       },
                     ),
                   ),
