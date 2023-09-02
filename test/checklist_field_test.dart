@@ -81,7 +81,6 @@ void main() {
         (WidgetTester tester) async {
       var settings = MockSettings();
       await fnPumpWidget(tester, const MyApp(), settings: settings);
-      print('asd');
       expect(find.byType(MainScreen), findsOneWidget);
       await addNote(tester, content: '- [ ] test\n', closeDialog: true);
       expect(find.byType(NoteCard), findsOneWidget);
