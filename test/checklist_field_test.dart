@@ -127,11 +127,11 @@ void main() {
       await addNote(tester, content: '- [ ] ', closeDialog: true);
       await tester.tap(find.byType(NoteCard));
       await tester.pumpAndSettle();
-      // await tester.tap(find.byIcon(Icons.edit));
-      // await tester.pumpAndSettle();
-      // expect(find.byType(ChecklistField), findsNothing);
-      // expect(find.byType(ContentField), findsOneWidget);
-      // expect(find.byIcon(Icons.import_contacts), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+      expect(find.byType(ChecklistField), findsNothing);
+      expect(find.byType(ContentField), findsOneWidget);
+      expect(find.byIcon(Icons.import_contacts), findsOneWidget);
     });
   });
 }
