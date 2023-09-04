@@ -49,18 +49,20 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      'Edit searches',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () {
                       Navigator.pop(context);
                     },
                   ),
+                  Expanded(
+                    child: Text(
+                      'Edit searches',
+                      style: Theme.of(context).textTheme.titleLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 40),
                 ],
               ),
             ),
@@ -159,7 +161,14 @@ class _SearchItemState extends State<SearchItem> {
             widget.onEdition();
           });
         },
-        child: Padding(
+        child: Container(
+          decoration: (widget.isEditing)
+              ? BoxDecoration(
+                  border: Border.all(
+                  width: 1,
+                  color: Theme.of(context).colorScheme.onBackground,
+                ))
+              : null,
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -169,12 +178,13 @@ class _SearchItemState extends State<SearchItem> {
                     ? const Icon(Icons.delete)
                     : const Icon(Icons.search),
                 onPressed: () {
-                  widget.removeSearch();
+                  if (isHovered || widget.isEditing) widget.removeSearch();
                 },
               ),
               if (widget.isEditing)
                 Expanded(
                   child: TextFormField(
+                    decoration: const InputDecoration(border: InputBorder.none),
                     focusNode: textfieldFocus,
                     initialValue: widget.search,
                     onChanged: (value) {
@@ -186,10 +196,13 @@ class _SearchItemState extends State<SearchItem> {
                       widget.editSearch(editedText);
                       widget.onEdition();
                     },
+                    style: const TextStyle(fontSize: 14),
                   ),
                 )
               else
-                Expanded(child: Text(widget.search)),
+                Expanded(
+                    child: Text(widget.search,
+                        style: const TextStyle(fontSize: 14))),
               IconButton(
                 icon: widget.isEditing
                     ? const Icon(Icons.check)
