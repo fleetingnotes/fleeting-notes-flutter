@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 enum ToolbarState {
   edit("Edit", Icons.construction),
   markdown("Markdown", Icons.edit_note_outlined),
-  tags("#Tags", Icons.tag);
+  tags("Tags", Icons.tag);
 
   const ToolbarState(this.value, this.icon);
   final String value;
@@ -23,7 +23,8 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
       this.onContentChanged,
       this.onAddAttachment,
       this.focusNode,
-      this.onCheckListPressed})
+      this.onCheckListPressed,
+      this.tags})
       : super(key: key);
 
   final ShortcutActions shortcuts;
@@ -33,6 +34,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
   final Function(String)? onContentChanged;
   final VoidCallback? onAddAttachment;
   final VoidCallback? onCheckListPressed;
+  final List<String>? tags;
 
   @override
   Size get preferredSize => const Size.fromHeight(50);
@@ -77,13 +79,8 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
                         return ListTile(
                           enabled: toolbarState != state,
                           onTap: () {
-                            // Handle tap, maybe change the state
-                            if (state == ToolbarState.tags) {
-                              openTag();
-                            } else {
-                              toolbarProviderState.update((_) => state);
-                              overlayEntry?.remove();
-                            }
+                            toolbarProviderState.update((_) => state);
+                            overlayEntry?.remove();
                           },
                           trailing: Icon(state.icon),
                           title: Text(state.value),
@@ -102,13 +99,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
     overlay.insert(overlayEntry);
   }
 
-  void openTag() {
-    print("open tag");
-  }
-
-  @override
-  build(BuildContext context, WidgetRef ref) {
-    final toolbarState = ref.watch(toolbarProvider);
+  List<Widget> getToolbarButtons(ToolbarState toolbarState) {
     final editButtons = [
       KeyboardButton(
         child: const Icon(Icons.undo, size: 20),
@@ -184,6 +175,34 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
         onPressed: onCheckListPressed?.call,
       ),
     ];
+    switch (toolbarState) {
+      case ToolbarState.edit:
+        return editButtons;
+      case ToolbarState.markdown:
+        return mdButtons;
+      case ToolbarState.tags:
+        return tags?.map((tag) {
+              return KeyboardButton(
+                  child: Text(
+                    tag,
+                    style: const TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                  onPressed: () {
+                    shortcuts.action('#' + tag + ' ', '');
+                    onContentChanged?.call(controller.text);
+                  });
+            }).toList() ??
+            [];
+      default:
+        return [];
+    }
+  }
+
+  @override
+  build(BuildContext context, WidgetRef ref) {
+    final toolbarState = ref.watch(toolbarProvider);
     return SizedBox(
       height: preferredSize.height,
       width: MediaQuery.of(context).size.width,
@@ -198,12 +217,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
             child: ListView(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
-              children: [
-                if (toolbarState == ToolbarState.edit)
-                  ...editButtons
-                else if (toolbarState == ToolbarState.markdown)
-                  ...mdButtons
-              ],
+              children: getToolbarButtons(toolbarState),
             ),
           ),
           const VerticalDivider(width: 5),
