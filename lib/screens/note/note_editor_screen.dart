@@ -41,7 +41,6 @@ bool isChecklistFormat(String line) {
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool autofocus = false;
-  bool previewEnabled = false;
   bool checkListEnabled = false;
   Note? note;
   Uri? currentLoc;
@@ -59,9 +58,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     noteHistory?.currNote = tempNote;
 
     if (createCheckList(tempNote.content)) {
-      previewEnabled = true;
       checkListEnabled = true;
-      settings.set('preview', previewEnabled);
+      settings.set('preview', true);
     }
     // get backlinks (async)
     if (tempNote.title.isNotEmpty) {
@@ -228,8 +226,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     final settings = ref.watch(settingsProvider);
 
     setState(() {
-      previewEnabled = true;
-      settings.set('preview', previewEnabled);
+      settings.set('preview', true);
 
       checkListEnabled = true;
     });
@@ -237,7 +234,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
 
   void onPreview() {
     final settings = ref.watch(settingsProvider);
-
+    bool previewEnabled = settings.get('preview', defaultValue: false) ?? false;
     setState(() {
       if (!previewEnabled) {
         checkListEnabled = createCheckList(contentController.text);
@@ -275,7 +272,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     final noteHistory = ref.watch(noteHistoryProvider);
     final renderNote = note;
     final settings = ref.watch(settingsProvider);
-    previewEnabled = settings.get('preview', defaultValue: false) ?? false;
+    bool previewEnabled = settings.get('preview', defaultValue: false) ?? false;
 
     bool bottomAppBarVisible = !noteHistory.isHistoryEmpty;
     if (currentLoc?.toString() != GoRouter.of(context).location) {
