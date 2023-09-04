@@ -52,7 +52,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Future<void> initNoteScreen(NoteHistory? noteHistory) async {
     if (!mounted || !GoRouter.of(context).location.startsWith('/note/')) return;
     final db = ref.read(dbProvider);
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.read(settingsProvider);
 
     var tempNote = await getNote();
     noteHistory?.currNote = tempNote;
