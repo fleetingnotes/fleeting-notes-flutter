@@ -222,7 +222,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
 
   void onCheckListEnabled() {
     final settings = ref.watch(settingsProvider);
-
     setState(() {
       settings.set('preview', true);
       checkListEnabled = true;
