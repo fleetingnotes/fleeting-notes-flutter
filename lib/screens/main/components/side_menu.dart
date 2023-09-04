@@ -129,6 +129,7 @@ class SideMenu extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium),
                 onTap: () => onSetting(context),
               ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
