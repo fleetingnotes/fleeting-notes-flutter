@@ -175,6 +175,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   void openCreateSearchDialog(BuildContext context) {
     showDialog(
+      useSafeArea: false,
       context: context,
       builder: (BuildContext context) {
         return CreateSearchDialog(

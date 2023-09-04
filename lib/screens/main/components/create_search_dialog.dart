@@ -22,10 +22,25 @@ class CreateSearchDialog extends StatefulWidget {
 class _CreateSearchDialogState extends State<CreateSearchDialog> {
   final TextEditingController _searchController = TextEditingController();
   int editingIndex = -1;
+  void onAddSearch() {
+    final searchTerm = _searchController.text;
+    if (searchTerm.isNotEmpty) {
+      widget.addSearch(searchTerm);
+      _searchController.clear();
+      setState(() {});
+    }
+  }
+
+  void setEditingIndex(int index) {
+    setState(() {
+      editingIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StatefulBuilder(builder: (stfContext, stfSetState) {
-      return DynamicDialog(
+    return DynamicDialog(
+      child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,18 +73,12 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
                       controller: _searchController,
                       decoration:
                           const InputDecoration(hintText: 'Create new search'),
+                      onSubmitted: (_) => onAddSearch(),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.add),
-                    onPressed: () {
-                      final searchTerm = _searchController.text;
-                      if (searchTerm.isNotEmpty) {
-                        widget.addSearch(searchTerm);
-                        _searchController.clear();
-                        stfSetState(() {});
-                      }
-                    },
+                    onPressed: onAddSearch,
                   ),
                 ],
               ),
@@ -82,27 +91,16 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
                 itemBuilder: (context, index) {
                   return SearchItem(
                     search: widget.searches[index],
-                    onEdition: () {
-                      setState(() {
-                        editingIndex = index;
-                      });
-                    },
+                    onEdition: () => setEditingIndex(index),
                     isEditing: index == editingIndex,
-                    onNotEdition: () {
-                      setState(() {
-                        editingIndex = -1;
-                      });
-                    },
+                    onNotEdition: () => setEditingIndex(-1),
                     editSearch: (String newSearch) {
                       widget.editSearch(index, newSearch);
-                      setState(() {
-                        editingIndex = -1;
-                      });
-                      stfSetState(() {});
+                      setEditingIndex(-1);
                     },
                     removeSearch: () {
                       widget.removeSearch(index);
-                      stfSetState(() {});
+                      setEditingIndex(-1);
                     },
                   );
                 },
@@ -110,8 +108,8 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
             ),
           ],
         ),
-      );
-    });
+      ),
+    );
   }
 }
 
@@ -139,9 +137,11 @@ class SearchItem extends StatefulWidget {
 class _SearchItemState extends State<SearchItem> {
   String editedText = '';
   bool isHovered = false;
+  FocusNode textfieldFocus = FocusNode();
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isEditing) textfieldFocus.requestFocus();
     return MouseRegion(
       onEnter: (_) {
         setState(() {
@@ -175,6 +175,7 @@ class _SearchItemState extends State<SearchItem> {
               if (widget.isEditing)
                 Expanded(
                   child: TextFormField(
+                    focusNode: textfieldFocus,
                     initialValue: widget.search,
                     onChanged: (value) {
                       setState(() {
