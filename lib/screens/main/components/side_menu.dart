@@ -31,12 +31,13 @@ class SideMenu extends StatelessWidget {
       width: width,
       child: Drawer(
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 16, top: 16, right: 8, bottom: 8),
+                child: Row(
                   children: [
                     Expanded(
                       child: FutureBuilder<PackageInfo>(
@@ -57,80 +58,79 @@ class SideMenu extends StatelessWidget {
                     )
                   ],
                 ),
-                const Divider(),
-                Container(
-                  height: 46,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'SAVED SEARCHES',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+              ),
+              const Divider(),
+              Container(
+                height: 46,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'SAVED SEARCHES',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        Column(
-                          children: [
-                            if (searches != null && searches!.isNotEmpty)
-                              ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: searches?.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  String? searchQuery = searches?[index];
-                                  const int maxTextLength = 15;
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Column(
+                        children: [
+                          if (searches != null && searches!.isNotEmpty)
+                            ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: searches?.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                String? searchQuery = searches?[index];
+                                const int maxTextLength = 15;
 
-                                  String truncatedText = searchQuery ?? "";
-                                  if (truncatedText.length > maxTextLength) {
-                                    truncatedText = truncatedText.substring(
-                                            0, maxTextLength) +
-                                        '...';
-                                  }
+                                String truncatedText = searchQuery ?? "";
+                                if (truncatedText.length > maxTextLength) {
+                                  truncatedText = truncatedText.substring(
+                                          0, maxTextLength) +
+                                      '...';
+                                }
 
-                                  return NavigationButton(
-                                    icon: const Icon(Icons.search),
-                                    label: Text(
-                                      truncatedText,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium,
-                                    ),
-                                    onTap: () => onSearch!(searchQuery!),
-                                  );
-                                },
-                              ),
-                            NavigationButton(
-                              icon: const Icon(Icons.edit_outlined),
-                              label: Text('Create/Edit searches',
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium),
-                              onTap: () => openCreateSearchDialog!(),
+                                return NavigationButton(
+                                  icon: const Icon(Icons.search),
+                                  label: Text(
+                                    truncatedText,
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
+                                  ),
+                                  onTap: () => onSearch!(searchQuery!),
+                                );
+                              },
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
+                          NavigationButton(
+                            icon: const Icon(Icons.edit_outlined),
+                            label: Text('Create/Edit searches',
+                                style: Theme.of(context).textTheme.titleMedium),
+                            onTap: () => openCreateSearchDialog!(),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 48),
-                  child: Divider(),
-                ),
-                NavigationButton(
-                  icon: const Icon(Icons.delete),
-                  label: Text('Trash',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  onTap: () => onTrash(context),
-                ),
-                NavigationButton(
-                  icon: const Icon(Icons.settings),
-                  label: Text('Settings',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  onTap: () => onSetting(context),
-                ),
-              ],
-            ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(left: 48),
+                child: Divider(),
+              ),
+              NavigationButton(
+                icon: const Icon(Icons.delete),
+                label: Text('Trash',
+                    style: Theme.of(context).textTheme.titleMedium),
+                onTap: () => onTrash(context),
+              ),
+              NavigationButton(
+                icon: const Icon(Icons.settings),
+                label: Text('Settings',
+                    style: Theme.of(context).textTheme.titleMedium),
+                onTap: () => onSetting(context),
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         ),
       ),

@@ -22,10 +22,25 @@ class CreateSearchDialog extends StatefulWidget {
 class _CreateSearchDialogState extends State<CreateSearchDialog> {
   final TextEditingController _searchController = TextEditingController();
   int editingIndex = -1;
+  void onAddSearch() {
+    final searchTerm = _searchController.text;
+    if (searchTerm.isNotEmpty) {
+      widget.addSearch(searchTerm);
+      _searchController.clear();
+      setState(() {});
+    }
+  }
+
+  void setEditingIndex(int index) {
+    setState(() {
+      editingIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StatefulBuilder(builder: (stfContext, stfSetState) {
-      return DynamicDialog(
+    return DynamicDialog(
+      child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,18 +49,20 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      'Edit searches',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () {
                       Navigator.pop(context);
                     },
                   ),
+                  Expanded(
+                    child: Text(
+                      'Edit searches',
+                      style: Theme.of(context).textTheme.titleLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 40),
                 ],
               ),
             ),
@@ -58,18 +75,12 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
                       controller: _searchController,
                       decoration:
                           const InputDecoration(hintText: 'Create new search'),
+                      onSubmitted: (_) => onAddSearch(),
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.add),
-                    onPressed: () {
-                      final searchTerm = _searchController.text;
-                      if (searchTerm.isNotEmpty) {
-                        widget.addSearch(searchTerm);
-                        _searchController.clear();
-                        stfSetState(() {});
-                      }
-                    },
+                    onPressed: onAddSearch,
                   ),
                 ],
               ),
@@ -82,27 +93,16 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
                 itemBuilder: (context, index) {
                   return SearchItem(
                     search: widget.searches[index],
-                    onEdition: () {
-                      setState(() {
-                        editingIndex = index;
-                      });
-                    },
+                    onEdition: () => setEditingIndex(index),
                     isEditing: index == editingIndex,
-                    onNotEdition: () {
-                      setState(() {
-                        editingIndex = -1;
-                      });
-                    },
+                    onNotEdition: () => setEditingIndex(-1),
                     editSearch: (String newSearch) {
                       widget.editSearch(index, newSearch);
-                      setState(() {
-                        editingIndex = -1;
-                      });
-                      stfSetState(() {});
+                      setEditingIndex(-1);
                     },
                     removeSearch: () {
                       widget.removeSearch(index);
-                      stfSetState(() {});
+                      setEditingIndex(-1);
                     },
                   );
                 },
@@ -110,8 +110,8 @@ class _CreateSearchDialogState extends State<CreateSearchDialog> {
             ),
           ],
         ),
-      );
-    });
+      ),
+    );
   }
 }
 
@@ -139,9 +139,11 @@ class SearchItem extends StatefulWidget {
 class _SearchItemState extends State<SearchItem> {
   String editedText = '';
   bool isHovered = false;
+  FocusNode textfieldFocus = FocusNode();
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isEditing) textfieldFocus.requestFocus();
     return MouseRegion(
       onEnter: (_) {
         setState(() {
@@ -159,7 +161,14 @@ class _SearchItemState extends State<SearchItem> {
             widget.onEdition();
           });
         },
-        child: Padding(
+        child: Container(
+          decoration: (widget.isEditing)
+              ? BoxDecoration(
+                  border: Border.all(
+                  width: 1,
+                  color: Theme.of(context).colorScheme.onBackground,
+                ))
+              : null,
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -169,12 +178,14 @@ class _SearchItemState extends State<SearchItem> {
                     ? const Icon(Icons.delete)
                     : const Icon(Icons.search),
                 onPressed: () {
-                  widget.removeSearch();
+                  if (isHovered || widget.isEditing) widget.removeSearch();
                 },
               ),
               if (widget.isEditing)
                 Expanded(
                   child: TextFormField(
+                    decoration: const InputDecoration(border: InputBorder.none),
+                    focusNode: textfieldFocus,
                     initialValue: widget.search,
                     onChanged: (value) {
                       setState(() {
@@ -185,10 +196,13 @@ class _SearchItemState extends State<SearchItem> {
                       widget.editSearch(editedText);
                       widget.onEdition();
                     },
+                    style: const TextStyle(fontSize: 14),
                   ),
                 )
               else
-                Expanded(child: Text(widget.search)),
+                Expanded(
+                    child: Text(widget.search,
+                        style: const TextStyle(fontSize: 14))),
               IconButton(
                 icon: widget.isEditing
                     ? const Icon(Icons.check)
