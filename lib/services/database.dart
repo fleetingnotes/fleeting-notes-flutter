@@ -142,7 +142,7 @@ class Database {
   }
 
   Future<List<String>> getAllItems(RegExp re, int group,
-      {bool addTitle = false, bool sorted = true}) async {
+      {bool addTitle = false, bool sorted = false}) async {
     var allNotes = await getAllNotes();
     var linkSet = <String>{};
     for (var note in allNotes) {
