@@ -7,3 +7,4 @@ https://www.fleetingnotes.app/docs/contributing/release-new-version
 - [ ] Chrome (https://chrome.google.com/webstore/devconsole/4d8ee7e3-234d-4403-85bb-2b633b407fbb/gcplhmogdjioeaenmehmapbdonklmdnc/edit/package?hl=en)
 - [ ] Web (https://app.netlify.com/sites/my-fleetingnotes/deploys)
 - [ ] Safari (https://appstoreconnect.apple.com/apps/1669824754/testflight/macos)
+  - For safari make sure to run `./build_web_ext.sh` before!
