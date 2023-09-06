@@ -11,7 +11,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/Note.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/crypt.dart';
-import 'package:collection/collection.dart';
 
 enum SubscriptionTier { freeSub, basicSub, premiumSub, unknownSub }
 
