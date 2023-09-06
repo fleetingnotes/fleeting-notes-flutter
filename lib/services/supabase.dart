@@ -110,10 +110,10 @@ class SupabaseDB extends SyncTerface {
     if (currUser == null) return SubscriptionTier.freeSub;
     if (subscriptionTier != null) return subscriptionTier;
     try {
-      var subscriptionTierStr = await getSubscriptionTierFromTable('stripe');
-      if (subscriptionTierStr == 'free') {
-        subscriptionTierStr = await getSubscriptionTierFromTable('apple_iap');
-      }
+      var subscriptionTierStr =
+          await client.rpc("get_subscription_tier", params: {
+        'supabase_id': currUser?.id,
+      });
       switch (subscriptionTierStr) {
         case 'basic':
           subscriptionTier = SubscriptionTier.basicSub;
@@ -130,18 +130,6 @@ class SupabaseDB extends SyncTerface {
       debugPrint(e.toString());
       return SubscriptionTier.unknownSub;
     }
-  }
-
-  Future<String> getSubscriptionTierFromTable(String table,
-      {String? userId}) async {
-    userId ??= currUser?.id;
-    List<dynamic> tableSubTier =
-        await client.from(table).select('subscription_tier').eq('id', userId);
-
-    var subscriptionTier =
-        (tableSubTier.firstOrNull ?? {})['subscription_tier'] as String? ??
-            'free';
-    return subscriptionTier.isEmpty ? 'free' : subscriptionTier;
   }
 
   Future<UrlMetadata?> getUrlMetadata(String url) async {
