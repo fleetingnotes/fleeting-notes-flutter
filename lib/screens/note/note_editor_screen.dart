@@ -229,7 +229,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   }
 
   void onPreview() {
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.read(settingsProvider);
     bool previewEnabled = settings.get('preview', defaultValue: false) ?? false;
     setState(() {
       if (!previewEnabled) {
