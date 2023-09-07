@@ -184,7 +184,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
         return tags?.map((tag) {
               return KeyboardButton(
                   child: Text(
-                    tag,
+                    '#$tag',
                     style: const TextStyle(
                       fontSize: 20,
                     ),
