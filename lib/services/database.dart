@@ -58,10 +58,13 @@ class Database {
   bool get loggedIn => supabase.currUser != null;
 
   Future<List<Note>> getSearchNotes(SearchQuery query,
-      {forceSync = false, bool filterDeletedNotes = false}) async {
+      {forceSync = false,
+      bool filterDeletedNotes = false,
+      List<String> excludedIds = const []}) async {
     RegExp r = getQueryRegex(query.query);
     bool noteValid(Note note) =>
         note.isDeleted == filterDeletedNotes &&
+        !excludedIds.contains(note.id) &&
         ((query.searchByTitle && r.hasMatch(note.title)) ||
             (query.searchByContent && r.hasMatch(note.content)) ||
             (query.searchBySource &&
