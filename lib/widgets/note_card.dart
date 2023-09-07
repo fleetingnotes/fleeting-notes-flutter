@@ -8,17 +8,19 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/Note.dart';
 
 class NoteCard extends StatefulWidget {
-  const NoteCard({
-    Key? key,
-    required this.note,
-    this.onSelect,
-    this.onTap,
-    this.sQuery,
-    this.isActive = false,
-    this.isSelected = false,
-    this.expanded = false,
-    this.maxLines,
-  }) : super(key: key);
+  const NoteCard(
+      {Key? key,
+      required this.note,
+      this.onSelect,
+      this.onTap,
+      this.sQuery,
+      this.isActive = false,
+      this.isSelected = false,
+      this.expanded = false,
+      this.maxLines,
+      this.onPinNote,
+      this.isPinned = false})
+      : super(key: key);
 
   final bool isActive;
   final bool isSelected;
@@ -28,6 +30,8 @@ class NoteCard extends StatefulWidget {
   final Note note;
   final SearchQuery? sQuery;
   final int? maxLines;
+  final VoidCallback? onPinNote;
+  final bool isPinned;
 
   @override
   State<NoteCard> createState() => _NoteCardState();
@@ -123,6 +127,15 @@ class _NoteCardState extends State<NoteCard> {
                     )
                 ],
               ),
+              if (hovering || widget.isPinned)
+                Positioned(
+                    top: 10,
+                    right: 44,
+                    child: IconButton(
+                        onPressed: widget.onPinNote,
+                        icon: widget.isPinned
+                            ? const Icon(Icons.push_pin)
+                            : const Icon(Icons.push_pin_outlined))),
               if (widget.onSelect != null && (hovering || widget.isSelected))
                 Positioned(
                   top: 12,
