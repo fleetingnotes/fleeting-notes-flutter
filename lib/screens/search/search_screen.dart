@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../../models/pinned_notes_manager.dart';
 import '../../models/search_query.dart';
 import '../../widgets/note_card.dart';
 import '../../models/Note.dart';
@@ -44,17 +45,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   var selectedNotes = <Note>[];
 
   late List<Note> notes = [];
+  late List<Note> pinnedNotes = [];
+
+  late PinnedNotesManager pinnedNotesManager;
 
   Future<void> loadNotes({forceSync = false}) async {
     final db = ref.read(dbProvider);
+    final List<String> pinnedNotesIds = pinnedNotesManager.getPinnedNotes();
     final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     searchQuery.limit = null;
     try {
+      List<Note> tempPinnedNotes = [];
+
+      if (pinnedNotesIds.isNotEmpty) {
+        Iterable<Note?> notes = await db.getNotesByIds(pinnedNotesIds);
+        tempPinnedNotes =
+            notes.where((note) => note != null).cast<Note>().toList();
+      }
       var tempNotes = await db.getSearchNotes(searchQuery,
-          forceSync: forceSync, filterDeletedNotes: widget.deletedNotesMode);
+          forceSync: forceSync,
+          filterDeletedNotes: widget.deletedNotesMode,
+          excludedIds: pinnedNotesIds);
       if (!mounted) return;
       setState(() {
         notes = tempNotes;
+        pinnedNotes = tempPinnedNotes;
       });
     } catch (e) {
       if (e is FleetingNotesException) {
@@ -77,6 +92,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final db = ref.read(dbProvider);
     final sq = ref.read(searchProvider);
     final noteUtils = ref.read(noteUtilsProvider);
+    pinnedNotesManager = PinnedNotesManager(db.settings);
 
     scrollController = widget.scrollController ?? scrollController;
     // refresh unsaved note
@@ -158,7 +174,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  Widget getSearchList() {
+  void onPinNote(String noteId) {
+    pinnedNotesManager.toggleNotePinned(noteId);
+    final searchQuery = ref.read(searchProvider) ?? SearchQuery();
+    final notifier = ref.read(searchProvider.notifier);
+    notifier.updateSearch(searchQuery.copyWith(
+      query: "",
+    ));
+  }
+
+  Widget getSearchList(List<Note> notes) {
     final searchQuery = ref.read(searchProvider);
     final settings = ref.read(settingsProvider);
     int crossAxisCount = 2;
@@ -184,6 +209,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           onRefresh: _pullRefreshNotes,
           onSelect: widget.deletedNotesMode ? null : _longPressNote,
           onTap: _pressNote,
+          onPinNote: onPinNote,
+          pinnedNotes: pinnedNotes,
         );
       },
     );
@@ -244,30 +271,59 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   deleteNotes: deleteNotes,
                 ),
         ),
-        Expanded(child: getSearchList()),
+        if (pinnedNotes.isNotEmpty) const CustomTitleRow(title: "PINNED"),
+        if (pinnedNotes.isNotEmpty) Expanded(child: getSearchList(pinnedNotes)),
+        if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
+          const CustomTitleRow(title: "OTHERS"),
+        Expanded(child: getSearchList(notes)),
+      ],
+    );
+  }
+}
+
+class CustomTitleRow extends StatelessWidget {
+  final String title;
+
+  const CustomTitleRow({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            title.toUpperCase(),
+            style: Theme.of(context).textTheme.titleSmall,
+            textAlign: TextAlign.left,
+          ),
+        ),
       ],
     );
   }
 }
 
 class NoteGrid extends StatelessWidget {
-  const NoteGrid({
-    super.key,
-    required this.notes,
-    this.selectedNotes = const [],
-    this.searchQuery,
-    this.crossAxisCount = 1,
-    this.childAspectRatio,
-    this.maxLines,
-    this.padding,
-    this.onRefresh,
-    this.onSelect,
-    this.onTap,
-    this.controller,
-  });
+  const NoteGrid(
+      {super.key,
+      required this.notes,
+      this.selectedNotes = const [],
+      this.searchQuery,
+      this.crossAxisCount = 1,
+      this.childAspectRatio,
+      this.maxLines,
+      this.padding,
+      this.onRefresh,
+      this.onSelect,
+      this.onTap,
+      this.controller,
+      this.onPinNote,
+      this.isPinned = false,
+      this.pinnedNotes = const []});
 
   final List<Note> notes;
   final List<Note> selectedNotes;
+  final List<Note> pinnedNotes;
   final SearchQuery? searchQuery;
   final int crossAxisCount;
   final double? childAspectRatio;
@@ -277,6 +333,8 @@ class NoteGrid extends StatelessWidget {
   final Function(BuildContext, Note)? onSelect;
   final Function(BuildContext, Note)? onTap;
   final ScrollController? controller;
+  final Function(String)? onPinNote;
+  final bool isPinned;
 
   @override
   Widget build(BuildContext context) {
@@ -295,10 +353,14 @@ class NoteGrid extends StatelessWidget {
                 sQuery: searchQuery,
                 note: notes[index],
                 isSelected: selectedNotes.contains(notes[index]),
+                isPinned: pinnedNotes.contains(notes[index]),
                 onSelect: (onSelect == null)
                     ? null
                     : () => onSelect?.call(context, notes[index]),
                 onTap: () => onTap?.call(context, notes[index]),
+                onPinNote: (onPinNote == null)
+                    ? null
+                    : () => onPinNote?.call(notes[index].id),
                 maxLines: maxLines,
               ),
             )
@@ -313,10 +375,14 @@ class NoteGrid extends StatelessWidget {
                 note: notes[index],
                 expanded: true,
                 isSelected: selectedNotes.contains(notes[index]),
+                isPinned: pinnedNotes.contains(notes[index]),
                 onSelect: (onSelect == null)
                     ? null
                     : () => onSelect?.call(context, notes[index]),
                 onTap: () => onTap?.call(context, notes[index]),
+                onPinNote: (onPinNote == null)
+                    ? null
+                    : () => onPinNote?.call(notes[index].id),
                 maxLines: maxLines,
               ),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
