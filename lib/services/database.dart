@@ -232,7 +232,7 @@ class Database {
         noteIdMap[note.id] = boxNote;
       }
       await box.putAll(noteIdMap);
-      noteChangeController.add(NoteEvent(notes, NoteEventStatus.delete));
+      noteChangeController.add(NoteEvent(notes, NoteEventStatus.upsert));
       return true;
     } catch (e) {
       return false;
