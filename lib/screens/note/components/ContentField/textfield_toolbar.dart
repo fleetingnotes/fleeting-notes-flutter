@@ -186,7 +186,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
                   child: Text(
                     '#$tag',
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 14,
                     ),
                   ),
                   onPressed: () {
