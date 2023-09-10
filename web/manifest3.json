@@ -11,10 +11,12 @@
     "extension_pages": "script-src 'self' ; object-src 'self'"
   },
   "action": {
-    "default_icon": "/icons/196.png"
+    "default_icon": "/icons/196.png",
+    "default_title": "Fleeting Notes Extension"
   },
   "permissions": [
     "activeTab",
+    "tabs",
     "storage",
     "contextMenus",
     "sidePanel"
@@ -33,7 +35,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": [ "web-ext.html" ],
+      "resources": [ "web-ext.html", "popup.html" ],
       "matches": [ "<all_urls>" ]
     }
   ],

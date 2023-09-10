@@ -31,14 +31,11 @@ const onClicked = async (
       content = `${selectionText.trim()}`;
       source = pageUrl;
       break;
-    case "use_sidebar":
-      await setSidebarStatus(checked);
-      return;
   }
   url += `?content=${encodeURIComponent(content)}&source=${
     encodeURIComponent(source)
   }`;
-  await onActionPressed(tab, url);
+  await openPopup(url, true);
 };
 const onCommand = (command) => {
   let url = chrome.runtime.getURL("web-ext.html");
@@ -58,7 +55,6 @@ const initContextMenu = async () => {
   try {
     await chrome.contextMenus.removeAll();
   } catch (e) {}
-  const use_sidebar = await getSidebarStatus();
   const is_firefox = navigator.userAgent.indexOf("Firefox") > 0;
 
   //create
@@ -102,15 +98,6 @@ const initContextMenu = async () => {
       title: "Save highlight",
       contexts: ["selection"],
     }),
-    chrome.contextMenus.create({
-      id: "use_sidebar",
-      title: "Use sidebar (Requires third-party cookies)",
-      checked: use_sidebar,
-      type: "checkbox",
-      contexts: (is_firefox)
-        ? ["browser_action"]
-        : ["action", "browser_action"],
-    }),
   ]);
   chrome.contextMenus.onClicked.removeListener(onClicked);
   chrome.contextMenus.onClicked.addListener(onClicked);
@@ -124,6 +111,7 @@ const initCommands = () => {
 // popup.js
 const winIds = new Set();
 const openPopup = async (url, closeOnFocusChange = true) => {
+  console.log('open popup');
   let currWin;
   try {
     currWin = await chrome.windows.getCurrent();
@@ -162,54 +150,12 @@ const onFocusChanged = (id) => {
 };
 
 const initPopup = () => {
+  chrome.action.setPopup({popup:'popup.html'});
   chrome.windows.onFocusChanged.removeListener(onFocusChanged);
   chrome.windows.onFocusChanged.addListener(onFocusChanged);
-};
-
-const onActionPressed = async (tab, src) => {
-  if (typeof src != "string") {
-    src = getIframeUrl();
-    try {
-      // if possible, retrieve src from content script (more info)
-      src = await chrome.tabs.sendMessage(tab.id, { msg: "get-src" });
-    } catch (_e) {
-      // catch errors
-    }
-  }
-  const use_sidebar = await getSidebarStatus();
-  if (use_sidebar) {
-    try {
-      chrome.tabs.sendMessage(tab.id, { msg: "toggle-sidebar", src: null });
-    } catch (e) {
-      console.log(e);
-      openPopup(src, true);
-    }
-  } else {
-    openPopup(src, true);
-  }
-};
-
-const initSidebar = () => {
-  chrome.action.onClicked.removeListener(onActionPressed);
-  chrome.action.onClicked.addListener(onActionPressed);
-};
-
-const getSidebarStatus = async () => {
-  const res = await chrome.storage.local.get(["use_sidebar"]);
-  let use_sidebar = res.use_sidebar;
-  if (use_sidebar == null) {
-    // set default value of sidebar
-    use_sidebar = false;
-    await chrome.storage.local.set({ use_sidebar });
-  }
-  return use_sidebar;
-};
-const setSidebarStatus = async (use_sidebar) => {
-  await chrome.storage.local.set({ use_sidebar });
 };
 
 // init
 initContextMenu();
 initPopup();
 initCommands();
-initSidebar();

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+    Fore more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+  -->
+  <base href="/">
+
+  <meta charset="UTF-8">
+
+  <title>Fleeting Notes Extension</title>
+
+  <style>
+    html, body {
+      margin: 0 !important;
+      border-radius: 5px;
+      padding: 0;
+      overflow: hidden;
+    }
+    iframe {
+      width: 350px; /* Define the width */
+      height: 400px; /* Define the height */
+      border: none; /* Remove the border */
+    }
+  </style>
+  <script src="popup.js"></script>
+</head>
+<body>
+  <iframe id="fleeting-notes-popup-container" src="web-ext.html"></iframe>
+</body>
+</html>

@@ -20,6 +20,7 @@ cp manifest2.json manifest.json
 cp extension/background.js extension/background2.js
 ## Transform background.js & generate background2.js
 sed -i'' -e 's/chrome\./browser\./g' extension/background2.js
+sed -i'' -e 's/chrome\./browser\./g' popup.js
 sed -i'' -e 's/browser\.action/browser\.browserAction/g' extension/background2.js
 sed -i'' -e "s/\'action\'/\'page_action\'/g" extension/background2.js
 
