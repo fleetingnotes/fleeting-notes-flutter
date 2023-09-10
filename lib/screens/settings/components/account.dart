@@ -1,7 +1,11 @@
+import 'package:fleeting_notes_flutter/screens/settings/components/delete_account_widget.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
+import 'package:fleeting_notes_flutter/screens/settings/components/update_phone_widget.dart';
+import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Account extends StatelessWidget {
+class Account extends ConsumerStatefulWidget {
   const Account({
     Key? key,
     required this.email,
@@ -18,15 +22,23 @@ class Account extends StatelessWidget {
   final VoidCallback? onEnableEncryption;
 
   @override
+  ConsumerState<Account> createState() => _AccountState();
+}
+
+class _AccountState extends ConsumerState<Account> {
+  @override
   Widget build(BuildContext context) {
+    final supabase = ref.watch(supabaseProvider);
+    final phone = supabase.currUser?.phone ?? '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SettingsItem(
           name: 'Email',
-          description: email,
+          description: supabase.currUser?.email ?? '',
           actions: [
-            ElevatedButton(onPressed: onLogout, child: const Text('Logout'))
+            ElevatedButton(
+                onPressed: widget.onLogout, child: const Text('Logout'))
           ],
         ),
         SettingsItem(
@@ -34,7 +46,7 @@ class Account extends StatelessWidget {
           description: 'Sync notes from the cloud to the device',
           actions: [
             ElevatedButton(
-                onPressed: onForceSync, child: const Text('Force sync'))
+                onPressed: widget.onForceSync, child: const Text('Force sync'))
           ],
         ),
         SettingsItem(
@@ -42,83 +54,42 @@ class Account extends StatelessWidget {
           description: 'Encrypt notes with end-to-end encryption',
           actions: [
             ElevatedButton(
-                onPressed: onEnableEncryption,
-                child:
-                    Text((onEnableEncryption == null) ? 'Enabled' : 'Enable'))
+                onPressed: widget.onEnableEncryption,
+                child: Text(
+                    (widget.onEnableEncryption == null) ? 'Enabled' : 'Enable'))
           ],
         ),
         SettingsItem(
-            name: 'Delete Account',
-            description: 'Delete your account and all your notes',
-            actions: [
-              ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) =>
-                          DeleteAccountWidget(onDelete: onDeleteAccount),
-                    );
-                  },
-                  child: const Text('Delete')),
-            ])
-      ],
-    );
-  }
-}
-
-class DeleteAccountWidget extends StatefulWidget {
-  const DeleteAccountWidget({
-    Key? key,
-    required this.onDelete,
-  }) : super(key: key);
-
-  final VoidCallback onDelete;
-
-  @override
-  State<DeleteAccountWidget> createState() => _DeleteAccountWidgetState();
-}
-
-class _DeleteAccountWidgetState extends State<DeleteAccountWidget> {
-  bool canDeleteAccount = false;
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Delete account'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-              'Are you sure you want to delete your account and all your notes? This action cannot be undone.'),
-          const SizedBox(height: 10),
-          TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Type "delete" to confirm',
-              border: OutlineInputBorder(),
-            ),
-            validator: (_) => 'Type delete to confirm',
-            onChanged: (String? value) {
-              setState(() {
-                canDeleteAccount = value == 'delete';
-              });
-            },
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Cancel'),
+          name: 'Update Phone Number',
+          description: (phone.isEmpty)
+              ? 'Phone number is used to create notes from calls or texts'
+              : phone,
+          actions: [
+            ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => UpdatePhoneWidget(
+                        onPhoneUpdated: () => setState(() => {})),
+                  );
+                },
+                child: const Text('Update Phone')),
+          ],
         ),
-        ElevatedButton(
-          onPressed: canDeleteAccount
-              ? () {
-                  Navigator.pop(context);
-                  widget.onDelete();
-                }
-              : null,
-          child: const Text('Delete'),
+        SettingsItem(
+          name: 'Delete Account',
+          description: 'Delete your account and all your notes',
+          actions: [
+            ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) =>
+                        DeleteAccountWidget(onDelete: widget.onDeleteAccount),
+                  );
+                },
+                child: const Text('Delete')),
+          ],
         ),
       ],
     );
