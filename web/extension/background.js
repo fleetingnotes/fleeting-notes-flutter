@@ -111,7 +111,6 @@ const initCommands = () => {
 // popup.js
 const winIds = new Set();
 const openPopup = async (url, closeOnFocusChange = true) => {
-  console.log('open popup');
   let currWin;
   try {
     currWin = await chrome.windows.getCurrent();
