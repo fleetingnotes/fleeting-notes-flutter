@@ -31,6 +31,7 @@
   "web_accessible_resources": [ "web-ext.html" ],
   "permissions": [
     "activeTab",
+    "tabs",
     "storage",
     "contextMenus"
   ],
