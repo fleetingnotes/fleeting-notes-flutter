@@ -521,6 +521,7 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                       undoController: undoController,
                       onContentChanged: _onContentChanged,
                       focusNode: contentFocusNode,
+                      tags: allTags,
                       onAddAttachment: () async {
                         final noteUtils = ref.read(noteUtilsProvider);
                         contentFocusNode.unfocus();

@@ -142,7 +142,7 @@ class Database {
   }
 
   Future<List<String>> getAllItems(RegExp re, int group,
-      {bool addTitle = false}) async {
+      {bool addTitle = false, bool sorted = false}) async {
     var allNotes = await getAllNotes();
     var linkSet = <String>{};
     for (var note in allNotes) {
@@ -158,7 +158,13 @@ class Database {
       }
     }
     linkSet.remove('');
-    return linkSet.toList();
+    var resultList = linkSet.toList();
+
+    if (sorted) {
+      resultList.sort();
+    }
+
+    return resultList;
   }
 
   Future<List<String>> getAllLinks() async {
@@ -166,8 +172,9 @@ class Database {
         addTitle: true);
   }
 
-  Future<List<String>> getAllTags() async {
-    return getAllItems(RegExp(Note.tagRegex, multiLine: true), 2);
+  Future<List<String>> getAllTags({bool sorted = true}) async {
+    return getAllItems(RegExp(Note.tagRegex, multiLine: true), 2,
+        sorted: sorted);
   }
 
   Future<bool> noteExists(Note note) async {
