@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		331F49222AAD897F001D26E1 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 331F49202AAD897F001D26E1 /* popup.js */; };
+		331F49232AAD897F001D26E1 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 331F49212AAD897F001D26E1 /* popup.html */; };
 		3394D7D22991652900958F80 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394D7D12991652900958F80 /* AppDelegate.swift */; };
 		3394D7D62991652900958F80 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7D42991652900958F80 /* Main.html */; };
 		3394D7D82991652900958F80 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7D72991652900958F80 /* Icon.png */; };
@@ -57,6 +59,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		331F49202AAD897F001D26E1 /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = "../build/web-ext-3/popup.js"; sourceTree = "<group>"; };
+		331F49212AAD897F001D26E1 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = "../build/web-ext-3/popup.html"; sourceTree = "<group>"; };
 		3394D7CE2991652900958F80 /* Fleeting Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Fleeting Notes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3394D7D12991652900958F80 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3394D7D52991652900958F80 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = ../Base.lproj/Main.html; sourceTree = "<group>"; };
@@ -111,6 +115,8 @@
 		3394D7C52991652900958F80 = {
 			isa = PBXGroup;
 			children = (
+				331F49212AAD897F001D26E1 /* popup.html */,
+				331F49202AAD897F001D26E1 /* popup.js */,
 				3394D7D02991652900958F80 /* Fleeting Notes */,
 				3394D7EF2991652A00958F80 /* Fleeting Notes Extension */,
 				3394D7CF2991652900958F80 /* Products */,
@@ -280,6 +286,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				331F49222AAD897F001D26E1 /* popup.js in Resources */,
+				331F49232AAD897F001D26E1 /* popup.html in Resources */,
 				3394D81B2991652A00958F80 /* assets in Resources */,
 				3394D8172991652A00958F80 /* flutter_service_worker.js in Resources */,
 				3394D80F2991652A00958F80 /* index.html in Resources */,
