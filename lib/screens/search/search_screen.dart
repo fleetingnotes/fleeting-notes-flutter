@@ -174,8 +174,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
-  void onPinNote(String noteId) {
-    pinnedNotesManager.toggleNotePinned(noteId);
+  void onToggleNotesPinned() async {
+    for (var note in selectedNotes) {
+      pinnedNotesManager.toggleNotePinned(note.id);
+    }
     final searchQuery = ref.read(searchProvider) ?? SearchQuery();
     final notifier = ref.read(searchProvider.notifier);
     notifier.updateSearch(searchQuery.copyWith(
@@ -209,8 +211,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           onRefresh: _pullRefreshNotes,
           onSelect: widget.deletedNotesMode ? null : _longPressNote,
           onTap: _pressNote,
-          onPinNote: onPinNote,
-          pinnedNotes: pinnedNotes,
         );
       },
     );
@@ -269,7 +269,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   selectedNotes: selectedNotes,
                   clearNotes: clearNotes,
                   deleteNotes: deleteNotes,
-                ),
+                  onToggleNotesPinned: onToggleNotesPinned),
         ),
         if (pinnedNotes.isNotEmpty) const CustomTitleRow(title: "PINNED"),
         if (pinnedNotes.isNotEmpty) Expanded(child: getSearchList(pinnedNotes)),
@@ -316,14 +316,10 @@ class NoteGrid extends StatelessWidget {
       this.onRefresh,
       this.onSelect,
       this.onTap,
-      this.controller,
-      this.onPinNote,
-      this.isPinned = false,
-      this.pinnedNotes = const []});
+      this.controller});
 
   final List<Note> notes;
   final List<Note> selectedNotes;
-  final List<Note> pinnedNotes;
   final SearchQuery? searchQuery;
   final int crossAxisCount;
   final double? childAspectRatio;
@@ -333,8 +329,6 @@ class NoteGrid extends StatelessWidget {
   final Function(BuildContext, Note)? onSelect;
   final Function(BuildContext, Note)? onTap;
   final ScrollController? controller;
-  final Function(String)? onPinNote;
-  final bool isPinned;
 
   @override
   Widget build(BuildContext context) {
@@ -353,14 +347,10 @@ class NoteGrid extends StatelessWidget {
                 sQuery: searchQuery,
                 note: notes[index],
                 isSelected: selectedNotes.contains(notes[index]),
-                isPinned: pinnedNotes.contains(notes[index]),
                 onSelect: (onSelect == null)
                     ? null
                     : () => onSelect?.call(context, notes[index]),
                 onTap: () => onTap?.call(context, notes[index]),
-                onPinNote: (onPinNote == null)
-                    ? null
-                    : () => onPinNote?.call(notes[index].id),
                 maxLines: maxLines,
               ),
             )
@@ -375,14 +365,10 @@ class NoteGrid extends StatelessWidget {
                 note: notes[index],
                 expanded: true,
                 isSelected: selectedNotes.contains(notes[index]),
-                isPinned: pinnedNotes.contains(notes[index]),
                 onSelect: (onSelect == null)
                     ? null
                     : () => onSelect?.call(context, notes[index]),
                 onTap: () => onTap?.call(context, notes[index]),
-                onPinNote: (onPinNote == null)
-                    ? null
-                    : () => onPinNote?.call(notes[index].id),
                 maxLines: maxLines,
               ),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
