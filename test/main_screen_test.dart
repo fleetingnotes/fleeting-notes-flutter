@@ -295,4 +295,19 @@ void main() {
     expect(find.text('PINNED'), findsOneWidget);
     expect(find.byType(NoteCard), findsOneWidget);
   });
+
+  testWidgets('Delete note pinned should delete from list the pinned note',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'Test delete note!', closeDialog: true);
+    await tester.tap(find.text('Test delete note!', findRichText: true));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.push_pin_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text('PINNED'), findsOneWidget);
+    expect(find.byType(NoteCard), findsOneWidget);
+    await deleteCurrentNote(tester);
+    expect(find.text('PINNED'), findsNothing);
+    expect(find.byType(NoteCard), findsNothing);
+  });
 }

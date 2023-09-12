@@ -99,6 +99,11 @@ class NoteEditorAppBar extends ConsumerWidget {
                   controller: contentController);
               noteLoadingNotifier.update((_) => false);
             },
+            onDelete: () {
+              if (isNotePinned) {
+                onPinNote?.call();
+              }
+            },
             onShare: () => _onShare(context),
           ),
           if (onBacklinks != null)

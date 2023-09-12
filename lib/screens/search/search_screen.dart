@@ -168,6 +168,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final noteUtil = ref.read(noteUtilsProvider);
     try {
       await noteUtil.handleDeleteNote(context, selectedNotes);
+      List<String> pinnedNotesWithoutSelectedNotesIds = pinnedNotes
+          .where((pinnedNote) => !selectedNotes
+              .any((selectedNote) => selectedNote.id == pinnedNote.id))
+          .map((pinnedNote) => pinnedNote.id)
+          .toList();
+      pinnedNotesManager.updatePinnedNotes(pinnedNotesWithoutSelectedNotesIds);
       clearNotes();
     } on FleetingNotesException {
       return;
