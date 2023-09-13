@@ -10,7 +10,7 @@ void main() {
   InnoSetup(
     app: InnoSetupApp(
       name: 'Fleeting Notes',
-      version: Version.parse('0.11.0'),
+      version: Version.parse('0.11.1'),
       publisher: 'Matthew Wong',
       urls: InnoSetupAppUrls(
         homeUrl: Uri.parse('https://fleetingnotes.app/'),
