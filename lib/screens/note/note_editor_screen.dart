@@ -41,6 +41,7 @@ bool isChecklistFormat(String line) {
 
 class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   bool autofocus = false;
+  bool previewEnabled = false;
   bool checkListEnabled = false;
   Note? note;
   Uri? currentLoc;
@@ -52,12 +53,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Future<void> initNoteScreen(NoteHistory? noteHistory) async {
     if (!mounted || !GoRouter.of(context).location.startsWith('/note/')) return;
     final db = ref.read(dbProvider);
-    final settings = ref.read(settingsProvider);
     var tempNote = await getNote();
     noteHistory?.currNote = tempNote;
     if (createCheckList(tempNote.content)) {
+      previewEnabled = true;
       checkListEnabled = true;
-      settings.set('preview', true);
     }
     // get backlinks (async)
     if (tempNote.title.isNotEmpty) {
@@ -221,16 +221,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   }
 
   void onCheckListEnabled() {
-    final settings = ref.watch(settingsProvider);
     setState(() {
-      settings.set('preview', true);
+      previewEnabled = true;
       checkListEnabled = true;
     });
   }
 
   void onPreview() {
-    final settings = ref.read(settingsProvider);
-    bool previewEnabled = settings.get('preview', defaultValue: false) ?? false;
     setState(() {
       if (!previewEnabled) {
         checkListEnabled = createCheckList(contentController.text);
@@ -240,7 +237,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         checkListEnabled = false;
       }
       previewEnabled = !previewEnabled;
-      settings.set('preview', previewEnabled);
     });
   }
 
@@ -267,8 +263,6 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   Widget build(BuildContext context) {
     final noteHistory = ref.watch(noteHistoryProvider);
     final renderNote = note;
-    final settings = ref.watch(settingsProvider);
-    bool previewEnabled = settings.get('preview', defaultValue: false) ?? false;
     bool bottomAppBarVisible = !noteHistory.isHistoryEmpty;
     if (currentLoc?.toString() != GoRouter.of(context).location) {
       currentLoc = Uri.parse(GoRouter.of(context).location);
