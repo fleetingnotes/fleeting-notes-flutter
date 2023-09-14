@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		331F49222AAD897F001D26E1 /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = 331F49202AAD897F001D26E1 /* popup.js */; };
-		331F49232AAD897F001D26E1 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 331F49212AAD897F001D26E1 /* popup.html */; };
+		331F49382AB2BC88001D26E1 /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = 331F49372AB2BC88001D26E1 /* popup.html */; };
 		3394D7D22991652900958F80 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394D7D12991652900958F80 /* AppDelegate.swift */; };
 		3394D7D62991652900958F80 /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7D42991652900958F80 /* Main.html */; };
 		3394D7D82991652900958F80 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 3394D7D72991652900958F80 /* Icon.png */; };
@@ -59,8 +59,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		331F49202AAD897F001D26E1 /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = "../build/web-ext-3/popup.js"; sourceTree = "<group>"; };
-		331F49212AAD897F001D26E1 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = "../build/web-ext-3/popup.html"; sourceTree = "<group>"; };
+		331F49202AAD897F001D26E1 /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = "../../build/web-ext-3/popup.js"; sourceTree = "<group>"; };
+		331F49372AB2BC88001D26E1 /* popup.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = popup.html; path = "../../build/web-ext-3/popup.html"; sourceTree = "<group>"; };
 		3394D7CE2991652900958F80 /* Fleeting Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Fleeting Notes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3394D7D12991652900958F80 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3394D7D52991652900958F80 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = ../Base.lproj/Main.html; sourceTree = "<group>"; };
@@ -81,7 +81,6 @@
 		3394D7FF2991652A00958F80 /* web-ext.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = "web-ext.html"; path = "../../build/web-ext-3/web-ext.html"; sourceTree = "<group>"; };
 		3394D8002991652A00958F80 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = index.html; path = "../../build/web-ext-3/index.html"; sourceTree = "<group>"; };
 		3394D8012991652A00958F80 /* extension */ = {isa = PBXFileReference; lastKnownFileType = folder; name = extension; path = "../../build/web-ext-3/extension"; sourceTree = "<group>"; };
-		3394D8022991652A00958F80 /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = "../../build/web-ext-3/popup.html"; sourceTree = "<group>"; };
 		3394D8032991652A00958F80 /* main.dart.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = main.dart.js; path = "../../build/web-ext-3/main.dart.js"; sourceTree = "<group>"; };
 		3394D8042991652A00958F80 /* manifest2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest2.json; path = "../../build/web-ext-3/manifest2.json"; sourceTree = "<group>"; };
 		3394D8052991652A00958F80 /* shortcuts.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = shortcuts.js; path = "../../build/web-ext-3/shortcuts.js"; sourceTree = "<group>"; };
@@ -115,8 +114,6 @@
 		3394D7C52991652900958F80 = {
 			isa = PBXGroup;
 			children = (
-				331F49212AAD897F001D26E1 /* popup.html */,
-				331F49202AAD897F001D26E1 /* popup.js */,
 				3394D7D02991652900958F80 /* Fleeting Notes */,
 				3394D7EF2991652A00958F80 /* Fleeting Notes Extension */,
 				3394D7CF2991652900958F80 /* Products */,
@@ -172,11 +169,12 @@
 		3394D7FD2991652A00958F80 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				331F49372AB2BC88001D26E1 /* popup.html */,
+				331F49202AAD897F001D26E1 /* popup.js */,
 				3394D7FE2991652A00958F80 /* version.json */,
 				3394D7FF2991652A00958F80 /* web-ext.html */,
 				3394D8002991652A00958F80 /* index.html */,
 				3394D8012991652A00958F80 /* extension */,
-				3394D8022991652A00958F80 /* popup.html */,
 				3394D8032991652A00958F80 /* main.dart.js */,
 				3394D8042991652A00958F80 /* manifest2.json */,
 				3394D8052991652A00958F80 /* shortcuts.js */,
@@ -287,7 +285,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				331F49222AAD897F001D26E1 /* popup.js in Resources */,
-				331F49232AAD897F001D26E1 /* popup.html in Resources */,
+				331F49382AB2BC88001D26E1 /* popup.html in Resources */,
 				3394D81B2991652A00958F80 /* assets in Resources */,
 				3394D8172991652A00958F80 /* flutter_service_worker.js in Resources */,
 				3394D80F2991652A00958F80 /* index.html in Resources */,
@@ -473,7 +471,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Fleeting Notes Extension/Fleeting_Notes_Extension.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = 4MLDMH9QYL;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -486,7 +484,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 0.11.0;
+				MARKETING_VERSION = 0.11.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -505,7 +503,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Fleeting Notes Extension/Fleeting_Notes_Extension.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = 4MLDMH9QYL;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -518,7 +516,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 0.11.0;
+				MARKETING_VERSION = 0.11.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -541,7 +539,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = 4MLDMH9QYL;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -556,7 +554,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 0.11.0;
+				MARKETING_VERSION = 0.11.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -580,7 +578,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = 4MLDMH9QYL;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -595,7 +593,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 0.11.0;
+				MARKETING_VERSION = 0.11.1;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
