@@ -129,7 +129,13 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   }
 
   void resetSaveTimer({int? defaultSaveMs, bool updateMetadata = true}) async {
+    final db = ref.read(dbProvider);
     final settings = ref.read(settingsProvider);
+    // if note has not been created don't save
+    final dbNote = await db.getNoteById(widget.note.id);
+    if (dbNote == null) {
+      return;
+    }
     int saveMs = defaultSaveMs ?? settings.get('save-delay-ms');
     saveTimer?.cancel();
     saveTimer = Timer(Duration(milliseconds: saveMs), () async {
