@@ -67,6 +67,38 @@ void main() {
             .elevation,
         1);
     expect(find.text('1 notes selected'), findsOneWidget);
+    expect(find.byIcon(Icons.delete), findsOneWidget);
+    expect(find.byIcon(Icons.push_pin_outlined), findsOneWidget);
+  });
+
+  testWidgets('Selecting and pinning a note should update list of notes',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'A note!', closeDialog: true);
+    await addNote(tester, content: 'Click me note!', closeDialog: true);
+    await tester.longPress(find.text('Click me note!', findRichText: true));
+    await tester.pumpAndSettle();
+    expect(find.text('1 notes selected'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.push_pin_outlined));
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    expect(find.text('PINNED'), findsOneWidget);
+    expect(find.text('OTHERS'), findsOneWidget);
+  });
+
+  testWidgets('Delete selected notes should delete pinned notes',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'Click me note!', closeDialog: true);
+    await tester.longPress(find.text('Click me note!', findRichText: true));
+    await tester.pumpAndSettle();
+    expect(find.text('1 notes selected'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.push_pin_outlined));
+    await tester.tap(find.byIcon(Icons.delete));
+    await tester.pumpAndSettle();
+    expect(find.text('PINNED'), findsNothing);
+    expect(find.text('OTHERS'), findsNothing);
+    expect(find.byType(NoteCard), findsNothing);
   });
 
   testWidgets('Mobile searchbar doesnt show tune', (WidgetTester tester) async {

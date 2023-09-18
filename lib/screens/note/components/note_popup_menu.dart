@@ -7,15 +7,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/Note.dart';
 
 class NotePopupMenu extends ConsumerStatefulWidget {
-  const NotePopupMenu({
-    Key? key,
-    required this.note,
-    this.onAddAttachment,
-    this.onShare,
-    this.backlinksOption = true,
-    this.deleteOption = true,
-    this.shareOption = false,
-  }) : super(key: key);
+  const NotePopupMenu(
+      {Key? key,
+      required this.note,
+      this.onAddAttachment,
+      this.onShare,
+      this.backlinksOption = true,
+      this.deleteOption = true,
+      this.shareOption = false,
+      this.onDelete})
+      : super(key: key);
 
   final Note? note;
   final Function(String, Uint8List?)? onAddAttachment;
@@ -23,6 +24,7 @@ class NotePopupMenu extends ConsumerStatefulWidget {
   final bool backlinksOption;
   final bool deleteOption;
   final bool shareOption;
+  final VoidCallback? onDelete;
 
   @override
   ConsumerState<NotePopupMenu> createState() => _NotePopupMenuState();
@@ -113,6 +115,7 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
             ),
             onTap: () async {
               if (await noteUtils.handleDeleteNote(context, [note])) {
+                widget.onDelete?.call();
                 noteHistory.goBack(context);
               }
             },

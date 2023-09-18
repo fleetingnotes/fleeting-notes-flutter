@@ -39,6 +39,7 @@ class Settings {
     "plugin-slash-commands": List,
     "speech-to-text-locale": String,
     "historical-searches": List<String>,
+    "pinned-notes": List<String>,
   };
 
   Settings() {

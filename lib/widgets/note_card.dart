@@ -8,17 +8,17 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/Note.dart';
 
 class NoteCard extends StatefulWidget {
-  const NoteCard({
-    Key? key,
-    required this.note,
-    this.onSelect,
-    this.onTap,
-    this.sQuery,
-    this.isActive = false,
-    this.isSelected = false,
-    this.expanded = false,
-    this.maxLines,
-  }) : super(key: key);
+  const NoteCard(
+      {Key? key,
+      required this.note,
+      this.onSelect,
+      this.onTap,
+      this.sQuery,
+      this.isActive = false,
+      this.isSelected = false,
+      this.expanded = false,
+      this.maxLines})
+      : super(key: key);
 
   final bool isActive;
   final bool isSelected;

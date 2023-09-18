@@ -280,4 +280,34 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(PickImageOptions), findsOneWidget);
   });
+
+  testWidgets('Pin a note updates list of notes', (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'Test pin note!', closeDialog: true);
+    expect(find.byType(NoteCard), findsOneWidget);
+    await tester.tap(find.text('Test pin note!', findRichText: true));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.push_pin_outlined));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.push_pin), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    expect(find.text('PINNED'), findsOneWidget);
+    expect(find.byType(NoteCard), findsOneWidget);
+  });
+
+  testWidgets('Delete note pinned should delete from list the pinned note',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await addNote(tester, content: 'Test delete note!', closeDialog: true);
+    await tester.tap(find.text('Test delete note!', findRichText: true));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.push_pin_outlined));
+    await tester.pumpAndSettle();
+    expect(find.text('PINNED'), findsOneWidget);
+    expect(find.byType(NoteCard), findsOneWidget);
+    await deleteCurrentNote(tester);
+    expect(find.text('PINNED'), findsNothing);
+    expect(find.byType(NoteCard), findsNothing);
+  });
 }

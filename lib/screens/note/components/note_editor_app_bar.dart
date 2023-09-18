@@ -20,6 +20,8 @@ class NoteEditorAppBar extends ConsumerWidget {
     this.contentController,
     this.titleController,
     this.isMarkdownPreviewSelected = false,
+    this.onPinNote,
+    this.isNotePinned = false,
   });
 
   final Note? note;
@@ -31,6 +33,8 @@ class NoteEditorAppBar extends ConsumerWidget {
   final TextEditingController? contentController;
   final TextEditingController? titleController;
   final bool isMarkdownPreviewSelected;
+  final VoidCallback? onPinNote;
+  final bool isNotePinned;
 
   void _onShare(BuildContext context) async {
     String content = contentController?.text ?? "";
@@ -74,6 +78,11 @@ class NoteEditorAppBar extends ConsumerWidget {
               margin: const EdgeInsets.only(right: 8),
             ),
           IconButton(
+              onPressed: onPinNote,
+              icon: (isNotePinned)
+                  ? const Icon(Icons.push_pin)
+                  : const Icon(Icons.push_pin_outlined)),
+          IconButton(
             onPressed: onPreview,
             icon: (isMarkdownPreviewSelected)
                 ? const Icon(Icons.edit)
@@ -89,6 +98,11 @@ class NoteEditorAppBar extends ConsumerWidget {
               await noteUtils.onAddAttachment(context, n, fn, fb,
                   controller: contentController);
               noteLoadingNotifier.update((_) => false);
+            },
+            onDelete: () {
+              if (isNotePinned) {
+                onPinNote?.call();
+              }
             },
             onShare: () => _onShare(context),
           ),

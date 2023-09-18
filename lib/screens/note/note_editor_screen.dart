@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:collection/collection.dart';
 
 import '../../models/Note.dart';
+import '../../models/pinned_notes_manager.dart';
 import '../../models/search_query.dart';
 import '../../models/text_part_style_definition.dart';
 import '../../models/text_part_style_definitions.dart';
@@ -49,6 +50,16 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   SearchQuery backlinksSq = SearchQuery();
   List<String> checkedItems = [];
   List<String> uncheckedItems = [];
+  late PinnedNotesManager pinnedNotesManager;
+  bool isNotePinned = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final db = ref.read(dbProvider);
+    pinnedNotesManager = PinnedNotesManager(db.settings);
+    isNotePinned = pinnedNotesManager.isNotePinned(widget.noteId);
+  }
 
   Future<void> initNoteScreen(NoteHistory? noteHistory) async {
     if (!mounted || !GoRouter.of(context).location.startsWith('/note/')) return;
@@ -240,6 +251,18 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     });
   }
 
+  void onPinNote() {
+    pinnedNotesManager.toggleNotePinned(widget.noteId);
+    setState(() {
+      isNotePinned = pinnedNotesManager.isNotePinned(widget.noteId);
+    });
+    final searchQuery = ref.read(searchProvider) ?? SearchQuery();
+    final notifier = ref.read(searchProvider.notifier);
+    notifier.updateSearch(searchQuery.copyWith(
+      query: "",
+    ));
+  }
+
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
     styles: TextPartStyleDefinitions(definitionList: [
@@ -294,6 +317,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                     note: renderNote,
                     onClose: onClose,
                     onPreview: onPreview,
+                    isNotePinned: isNotePinned,
+                    onPinNote: onPinNote,
                     isMarkdownPreviewSelected: previewEnabled,
                     onBacklinks: (backlinks.isEmpty)
                         ? null
