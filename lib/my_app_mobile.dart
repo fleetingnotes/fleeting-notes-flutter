@@ -92,6 +92,9 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
         if (noteExists) {
           router.goNamed('note', params: {'id': note.id});
         } else {
+          // Before open a new note, save the unsaved note if exists
+          final noteUtils = ref.read(noteUtilsProvider);
+          noteUtils.setUnsavedNote(context, null, saveUnsaved: true);
           router.goNamed('home', queryParams: {
             'title': note.title,
             'content': note.content,
