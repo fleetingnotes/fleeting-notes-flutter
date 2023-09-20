@@ -168,6 +168,17 @@ void main() {
     expect(contentFieldHasFocus(tester), isTrue);
   });
 
+  testWidgets('Existing note has not focus if content is not empty',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester);
+    await modifyCurrentNote(tester, content: 'init note');
+    await tester.pumpAndSettle();
+
+    expect(titleFieldHasFocus(tester), isFalse);
+    expect(contentFieldHasFocus(tester), isFalse);
+  });
+
   testWidgets('Changing orientation maintains unsaved note',
       (WidgetTester tester) async {
     var mocks = await fnPumpWidget(tester, const MyApp());
