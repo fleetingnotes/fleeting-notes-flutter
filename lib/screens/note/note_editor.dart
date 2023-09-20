@@ -424,7 +424,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                   TitleField(
                       controller: titleController,
                       onChanged: onChanged,
-                      autofocus: autoFocusTitle,
+                      autofocus:
+                          autoFocusTitle && contentController.text.isEmpty,
                       textDirection: textDirection),
                   ExcludeFocusTraversal(
                     child: SourceContainer(
@@ -455,7 +456,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       onChanged: onChanged,
                       onPop: () => noteUtils.onPopNote(context, widget.note.id),
                       onCommandRun: onCommandRun,
-                      autofocus: !autoFocusTitle,
+                      autofocus:
+                          !autoFocusTitle && contentController.text.isEmpty,
                       textDirection: textDirection,
                     ),
                 ],
