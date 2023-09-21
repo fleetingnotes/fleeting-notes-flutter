@@ -540,24 +540,30 @@ class _ContentFieldState extends ConsumerState<ContentField> {
                 ]),
             child: Actions(
               actions: getTextFieldActions(),
-              child: TextField(
-                focusNode: contentFocusNode,
-                textCapitalization: TextCapitalization.sentences,
-                autofocus: widget.autofocus,
-                controller: widget.controller,
-                undoController: undoController,
-                keyboardType: TextInputType.multiline,
-                minLines: 10,
-                maxLines: null,
-                style: Theme.of(context).textTheme.bodyMedium,
-                decoration: const InputDecoration(
-                  hintText: "Start writing your thoughts...",
-                  border: InputBorder.none,
-                ),
-                onChanged: (text) => _onContentChanged(text),
-                onTap: () => _onContentTap(),
-                textDirection: widget.textDirection,
-              ),
+              child: Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        focusNode: contentFocusNode,
+                        textCapitalization: TextCapitalization.sentences,
+                        autofocus: widget.autofocus,
+                        controller: widget.controller,
+                        undoController: undoController,
+                        keyboardType: TextInputType.multiline,
+                        minLines: 10,
+                        maxLines: null,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        decoration: const InputDecoration(
+                          hintText: "Start writing your thoughts...",
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (text) => _onContentChanged(text),
+                        onTap: () => _onContentTap(),
+                        textDirection: widget.textDirection,
+                      )
+                    ],
+                  )),
             ),
           ),
         );
