@@ -391,6 +391,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     final db = ref.watch(dbProvider);
     bool autoFocusTitle =
         db.settings.get('auto-focus-title', defaultValue: true);
+    bool hasEmptyFields =
+        widget.note.title.isEmpty && widget.note.content.isEmpty;
     TextDirection textDirection =
         db.settings.get('right-to-left', defaultValue: false)
             ? TextDirection.rtl
@@ -424,7 +426,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                   TitleField(
                       controller: titleController,
                       onChanged: onChanged,
-                      autofocus: autoFocusTitle,
+                      autofocus: autoFocusTitle && hasEmptyFields,
                       textDirection: textDirection),
                   ExcludeFocusTraversal(
                     child: SourceContainer(
@@ -455,7 +457,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       onChanged: onChanged,
                       onPop: () => noteUtils.onPopNote(context, widget.note.id),
                       onCommandRun: onCommandRun,
-                      autofocus: !autoFocusTitle,
+                      autofocus: !autoFocusTitle && hasEmptyFields,
                       textDirection: textDirection,
                     ),
                 ],
