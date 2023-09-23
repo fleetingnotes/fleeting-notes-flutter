@@ -89,6 +89,9 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
     super.initState();
     void goToNote(Note note, {bool noteExists = false}) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
+        // Before open a new note, save the unsaved note if exists
+        final noteUtils = ref.read(noteUtilsProvider);
+        noteUtils.setUnsavedNote(context, null, saveUnsaved: true);
         if (noteExists) {
           router.goNamed('note', params: {'id': note.id});
         } else {
