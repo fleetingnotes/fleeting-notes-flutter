@@ -168,11 +168,20 @@ void main() {
     expect(contentFieldHasFocus(tester), isTrue);
   });
 
-  testWidgets('Existing note has not focus if content is not empty',
+  testWidgets('Existing note has no focus if content is filled',
       (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await goToNewNote(tester);
-    await modifyCurrentNote(tester, content: 'init note');
+    await goToNewNote(tester, content: 'init note');
+    await tester.pumpAndSettle();
+
+    expect(titleFieldHasFocus(tester), isFalse);
+    expect(contentFieldHasFocus(tester), isFalse);
+  });
+
+  testWidgets('Existing note has no focus if title is filled',
+      (WidgetTester tester) async {
+    await fnPumpWidget(tester, const MyApp());
+    await goToNewNote(tester, title: 'init note');
     await tester.pumpAndSettle();
 
     expect(titleFieldHasFocus(tester), isFalse);
