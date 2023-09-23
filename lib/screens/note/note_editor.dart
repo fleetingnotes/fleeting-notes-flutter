@@ -409,7 +409,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
       child: KeyboardVisibilityBuilder(builder: (context, kbVisible) {
         return Padding(
           padding:
-              (kbVisible) ? const EdgeInsets.only(bottom: 36) : EdgeInsets.zero,
+              (kbVisible) ? const EdgeInsets.only(bottom: 52) : EdgeInsets.zero,
           child: SingleChildScrollView(
             child: Padding(
               padding: widget.padding ?? EdgeInsets.zero,
