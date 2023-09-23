@@ -2,31 +2,27 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>generateAppStoreInformation</key>
-	<false/>
+	<key>destination</key>
+	<string>export</string>
+	<key>installerSigningCertificate</key>
+	<string>3rd Party Mac Developer Installer</string>
 	<key>manageAppVersionAndBuildNumber</key>
 	<true/>
 	<key>method</key>
 	<string>app-store</string>
 	<key>provisioningProfiles</key>
-    <dict>
-        <key>com.fleetingnotes.webextension</key>
-        <string>web_ext</string>
-        <key>com.fleetingnotes.webextension.Extension</key>
-        <string>web_ext_ext</string>
-    </dict>
-  <key>installerSigningCertificate</key>
-  <string>Mac Installer Distribution</string>
+	<dict>
+		<key>com.fleetingnotes.webextension</key>
+		<string>web_ext</string>
+		<key>com.fleetingnotes.webextension.Extension</key>
+		<string>web_ext_ext</string>
+	</dict>
 	<key>signingCertificate</key>
-  <string>Apple Distribution</string>
+	<string>E5A9B680650FD73EB56908E34372DD80F7A39611</string>
 	<key>signingStyle</key>
 	<string>manual</string>
-	<key>stripSwiftSymbols</key>
-	<true/>
 	<key>teamID</key>
 	<string>4MLDMH9QYL</string>
-	<key>uploadBitcode</key>
-	<false/>
 	<key>uploadSymbols</key>
 	<true/>
 </dict>
