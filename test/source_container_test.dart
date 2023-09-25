@@ -1,6 +1,8 @@
 import 'package:fleeting_notes_flutter/models/url_metadata.dart';
 import 'package:fleeting_notes_flutter/my_app.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/SourceField/source_preview.dart';
+import 'package:fleeting_notes_flutter/screens/note/components/ContentField/content_field.dart';
+import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/screens/note/note_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -31,7 +33,9 @@ void main() {
     await fnPumpWidget(tester, const MyApp(), supabase: mockSupabase);
     await goToNewNote(tester);
     await tester.enterText(
-        find.bySemanticsLabel('Source'), 'https://test.test');
+        find.descendant(
+            of: find.byType(ContentField), matching: find.byType(TextField)),
+        'https://test.test');
     await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(
         find.descendant(

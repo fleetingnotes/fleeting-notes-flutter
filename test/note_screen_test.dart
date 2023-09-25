@@ -31,13 +31,17 @@ void main() {
     expect(find.byType(NoteEditorBottomAppBar), findsNothing);
   });
 
+// TODO Fix and figure out why its bugged ;-;
   testWidgets('Changing titles updates backlinks', (WidgetTester tester) async {
     await fnPumpWidget(tester, const MyApp());
-    await addNote(tester, content: '[[link]]', closeDialog: true);
+    await addNote(tester, title: 'hey', content: '[[link]]', closeDialog: true);
     await addNote(tester, title: 'link', closeDialog: true);
     await tester.tap(find.text('link', findRichText: true));
     await tester.pumpAndSettle();
     await modifyCurrentNote(tester, title: 'hello world', closeDialog: true);
+    await tester.tap(find.text('link', findRichText: true));
+
+    print(getContentFieldText(tester));
     expect(
         find.descendant(
           of: find.byType(NoteCard),
@@ -226,46 +230,72 @@ void main() {
 
   group("Sharing note with same source", () {
     testWidgets('Opens prev note', (WidgetTester tester) async {
+// issue is that source as is, is dependent on clicking into the source field to
+//input sources, now I gott make sure that the source is inserted into the
+// content field and then searched and found without deleting the existing
+// content and the source is added in the beginning. I will need to make sure that
+// the sources are URLS that can be functionally used.
+// I have to make sure that the content field will function additively
+// If the link is in the content dont add it into the content again, if it is not add
+// make function addSourceToContent
+//
       await fnPumpWidget(tester, const MyApp());
       await addNote(tester,
-          content: 'hello world', source: 'source', closeDialog: true);
+          content: 'hello world',
+          source: 'https://test.test',
+          closeDialog: true);
       await goToNewNote(tester,
-          source: 'source', content: '', addQueryParams: true);
+          source: 'https://test.test', content: '', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
-      expect(getContentFieldText(tester) == 'hello world', isTrue);
+      expect(getContentFieldText(tester) == 'https://test.test\nhello world',
+          isTrue);
     });
     testWidgets('Appends content with same source',
         (WidgetTester tester) async {
       await fnPumpWidget(tester, const MyApp());
       await addNote(tester,
-          content: 'hello world', source: 'source', closeDialog: true);
+          content: 'hello world',
+          source: 'https://test.test',
+          closeDialog: true);
       await goToNewNote(tester,
-          source: 'source', content: 'pp', addQueryParams: true);
+          source: 'https://test.test', content: 'pp', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
-      expect(getContentFieldText(tester) == 'hello world\npp', isTrue);
+      expect(
+          getContentFieldText(tester) == 'https://test.test\nhello world\npp',
+          isTrue);
     });
     testWidgets('Appends content with other note open',
         (WidgetTester tester) async {
       await fnPumpWidget(tester, const MyApp());
       await addNote(tester,
-          content: 'hello world', source: 'source', closeDialog: true);
+          content: 'hello world',
+          source: 'https://test.test',
+          closeDialog: true);
       await addNote(tester,
-          content: 'open note', source: 'smthin else', closeDialog: false);
+          content: 'open note',
+          source: 'https://test2.test',
+          closeDialog: false);
       await goToNewNote(tester,
-          source: 'source', content: 'pp', addQueryParams: true);
+          source: 'https://test.test', content: 'pp', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
-      expect(getContentFieldText(tester) == 'hello world\npp', isTrue);
+      expect(
+          getContentFieldText(tester) == 'https://test.test\nhello world\npp',
+          isTrue);
     });
     testWidgets('Appends content with same note open',
         (WidgetTester tester) async {
       var mocks = await fnPumpWidget(tester, const MyApp());
       await addNote(tester,
-          content: 'hello world', source: 'source', closeDialog: false);
+          content: 'hello world',
+          source: 'https://test.test',
+          closeDialog: false);
       await goToNewNote(tester,
-          source: 'source', content: 'pp', addQueryParams: true);
+          source: 'https://test.test', content: 'pp', addQueryParams: true);
       expect(find.byType(NoteEditor), findsOneWidget);
       expect(mocks.settings.get('unsaved-note'), isNotNull);
-      expect(getContentFieldText(tester) == 'hello world\npp', isTrue);
+      expect(
+          getContentFieldText(tester) == 'https://test.test\nhello world\npp',
+          isTrue);
     });
   });
 
