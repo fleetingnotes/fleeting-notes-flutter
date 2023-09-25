@@ -234,54 +234,74 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
       loadNotes();
     });
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: selectedNotes.isEmpty
-              ? Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: CustomSearchBar(
-                          onMenu: db.openDrawer,
-                          controller: queryController,
-                          focusNode: widget.searchFocusNode,
-                        ),
-                      ),
-                    ),
-                    if (widget.addNote != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: FilledButton(
-                          onPressed: widget.addNote,
-                          onLongPress: widget.recordNote,
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              children: [
-                                Icon(Icons.add),
-                                SizedBox(width: 8),
-                                Text('New note'),
-                              ],
-                            ),
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: selectedNotes.isEmpty
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: CustomSearchBar(
+                            onMenu: db.openDrawer,
+                            controller: queryController,
+                            focusNode: widget.searchFocusNode,
                           ),
                         ),
-                      )
-                  ],
-                )
-              : ModifyNotesAppBar(
-                  selectedNotes: selectedNotes,
-                  clearNotes: clearNotes,
-                  deleteNotes: deleteNotes,
-                  onToggleNotesPinned: onToggleNotesPinned),
+                      ),
+                      if (widget.addNote != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: FilledButton(
+                            onPressed: widget.addNote,
+                            onLongPress: widget.recordNote,
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.add),
+                                  SizedBox(width: 8),
+                                  Text('New note'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                    ],
+                  )
+                : ModifyNotesAppBar(
+                    selectedNotes: selectedNotes,
+                    clearNotes: clearNotes,
+                    deleteNotes: deleteNotes,
+                    onToggleNotesPinned: onToggleNotesPinned),
+          ),
         ),
-        if (pinnedNotes.isNotEmpty) const CustomTitleRow(title: "PINNED"),
-        if (pinnedNotes.isNotEmpty) Expanded(child: getSearchList(pinnedNotes)),
+        if (pinnedNotes.isNotEmpty)
+          const SliverToBoxAdapter(
+            child: CustomTitleRow(title: "PINNED"),
+          ),
+        if (pinnedNotes.isNotEmpty)
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                getSearchList(pinnedNotes),
+              ],
+            ),
+          ),
         if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
-          const CustomTitleRow(title: "OTHERS"),
-        Expanded(child: getSearchList(notes)),
+          const SliverToBoxAdapter(
+            child: CustomTitleRow(title: "OTHERS"),
+          ),
+        SliverList(
+          delegate: SliverChildListDelegate(
+            [
+              getSearchList(notes),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -345,6 +365,8 @@ class NoteGrid extends StatelessWidget {
       child: (crossAxisCount == 1 && childAspectRatio == null)
           ? ListView.builder(
               key: const PageStorageKey('ListOfNotes'),
+              physics: const NeverScrollableScrollPhysics(),
+              // shrinkWrap: true,
               padding: padding,
               controller: controller,
               itemCount: notes.length,
@@ -361,9 +383,10 @@ class NoteGrid extends StatelessWidget {
               ),
             )
           : GridView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               key: const PageStorageKey('ListOfNotes'),
               padding: padding,
+              shrinkWrap: true,
               controller: controller,
               itemCount: notes.length,
               itemBuilder: (context, index) => NoteCard(
