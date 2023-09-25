@@ -293,6 +293,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
           const SliverToBoxAdapter(
+            child: SizedBox(height: 44.0),
+          ),
+        if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
+          const SliverToBoxAdapter(
             child: CustomTitleRow(title: "OTHERS"),
           ),
         SliverList(
