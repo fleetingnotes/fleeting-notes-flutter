@@ -44,7 +44,7 @@ jobs:
         echo "keyPassword=$KEYSTORE_KEY_PASSWORD" >> key.properties
     - uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.10.4'
+        flutter-version: '3.13.5'
         cache: true
         channel: 'stable'
     - run: flutter doctor -v

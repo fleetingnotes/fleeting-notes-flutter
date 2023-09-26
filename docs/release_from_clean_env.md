@@ -1,9 +1,9 @@
 ## Get web builds from file
-1. Install flutter 3.10.4
+1. Install flutter 3.13.5
 ```
 apt-get update
 apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev curl file git unzip xz-utils zip
-curl https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.10.4-stable.tar.xz --output flutter_linux.tar.xz
+curl https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.5-stable.tar.xz --output flutter_linux.tar.xz
 tar xf flutter_linux.tar.xz 
 export PATH="`pwd`/flutter/bin:$PATH"
 ```
