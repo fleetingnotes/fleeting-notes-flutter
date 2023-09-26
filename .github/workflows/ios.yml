@@ -81,7 +81,7 @@ jobs:
         cp $WEB_EXT_EXT_PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
     - uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.10.4'
+        flutter-version: '3.13.5'
         cache: true
         channel: 'stable'
     - run: flutter doctor -v
