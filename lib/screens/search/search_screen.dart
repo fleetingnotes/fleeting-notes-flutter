@@ -234,78 +234,81 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
       loadNotes();
     });
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: selectedNotes.isEmpty
-                ? Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: CustomSearchBar(
-                            onMenu: db.openDrawer,
-                            controller: queryController,
-                            focusNode: widget.searchFocusNode,
-                          ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: selectedNotes.isEmpty
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: CustomSearchBar(
+                          onMenu: db.openDrawer,
+                          controller: queryController,
+                          focusNode: widget.searchFocusNode,
                         ),
                       ),
-                      if (widget.addNote != null)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: FilledButton(
-                            onPressed: widget.addNote,
-                            onLongPress: widget.recordNote,
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.add),
-                                  SizedBox(width: 8),
-                                  Text('New note'),
-                                ],
-                              ),
+                    ),
+                    if (widget.addNote != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: FilledButton(
+                          onPressed: widget.addNote,
+                          onLongPress: widget.recordNote,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.add),
+                                SizedBox(width: 8),
+                                Text('New note'),
+                              ],
                             ),
                           ),
-                        )
-                    ],
-                  )
-                : ModifyNotesAppBar(
-                    selectedNotes: selectedNotes,
-                    clearNotes: clearNotes,
-                    deleteNotes: deleteNotes,
-                    onToggleNotesPinned: onToggleNotesPinned),
-          ),
+                        ),
+                      )
+                  ],
+                )
+              : ModifyNotesAppBar(
+                  selectedNotes: selectedNotes,
+                  clearNotes: clearNotes,
+                  deleteNotes: deleteNotes,
+                  onToggleNotesPinned: onToggleNotesPinned),
         ),
-        if (pinnedNotes.isNotEmpty)
-          const SliverToBoxAdapter(
-            child: CustomTitleRow(title: "PINNED"),
-          ),
-        if (pinnedNotes.isNotEmpty)
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                getSearchList(pinnedNotes),
-              ],
+        Expanded(
+            child: CustomScrollView(
+          slivers: [
+            if (pinnedNotes.isNotEmpty)
+              const SliverToBoxAdapter(
+                child: CustomTitleRow(title: "PINNED"),
+              ),
+            if (pinnedNotes.isNotEmpty)
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    getSearchList(pinnedNotes),
+                  ],
+                ),
+              ),
+            if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 44.0),
+              ),
+            if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
+              const SliverToBoxAdapter(
+                child: CustomTitleRow(title: "OTHERS"),
+              ),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  getSearchList(notes),
+                ],
+              ),
             ),
-          ),
-        if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 44.0),
-          ),
-        if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
-          const SliverToBoxAdapter(
-            child: CustomTitleRow(title: "OTHERS"),
-          ),
-        SliverList(
-          delegate: SliverChildListDelegate(
-            [
-              getSearchList(notes),
-            ],
-          ),
-        ),
+          ],
+        )),
       ],
     );
   }
