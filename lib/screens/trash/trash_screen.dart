@@ -28,19 +28,19 @@ class _TrashScreenState extends ConsumerState<TrashScreen> {
   @override
   Widget build(BuildContext context) {
     final banner = MaterialBanner(
-      content: Text(
-        "Deleted Notes",
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
-      actions: [
-        TextButton(
+        leading: TextButton(
           onPressed: () {
             context.goNamed('home');
           },
-          child: const Text('Go Back'),
+          child: Text('Go Back'),
         ),
-      ],
-    );
+        content: Text(
+          "Deleted Notes",
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        actions: const [
+          Visibility(child: Text("As if required"), visible: false),
+        ]);
 
     final searchScreen = SearchScreen(
         searchFocusNode: searchFocusNode,
