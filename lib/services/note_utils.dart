@@ -187,7 +187,8 @@ class NoteUtils {
           filename: newFileName, fileBytes: bytes);
       if (newNote != null) {
         if (controller != null) {
-          db.insertTextAtSelection(controller, "[[${newNote.title}]]");
+          // Changed Media attachment formatting
+          db.insertTextAtSelection(controller, "![](${newNote.title})");
         } else {
           var dbNote = await db.getNoteById(note.id);
           if (dbNote != null) {

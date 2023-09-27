@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:fleeting_notes_flutter/models/search_query.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:flutter/material.dart';
@@ -95,6 +96,12 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
         if (noteExists) {
           router.goNamed('note', params: {'id': note.id});
         } else {
+          // if (note.content == '') {
+          //   note.content = note.source;
+          //   print('note.content: ${note.content}');
+          // }
+          // String content =
+          // note.source + ' ' + note.content; //+ '/n' + note.content;
           router.goNamed('home', queryParams: {
             'title': note.title,
             'content': note.content,
@@ -158,7 +165,8 @@ class _MyAppState extends base_app.MyAppState<MyApp> {
     void handleMedia(List<SharedMediaFile> files) {
       if (files.isEmpty) return;
       String mediaSource = files.first.path;
-      goToNote(Note.empty(source: mediaSource));
+      // Gotta handle media attachments TODO
+      goToNote(Note.empty(content: mediaSource));
     }
 
     if (Platform.isAndroid) {

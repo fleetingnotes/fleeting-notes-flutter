@@ -25,6 +25,7 @@ import 'mocks/mock_database.dart';
 import 'mocks/mock_local_file_sync.dart';
 import 'mocks/mock_settings.dart';
 import 'mocks/mock_supabase.dart';
+import 'note_screen_test.dart';
 
 class FNMocks {
   MockDatabase db;
@@ -111,8 +112,22 @@ Future<void> addNote(WidgetTester tester,
     bool closeDialog = false}) async {
   await tester.tap(find.byIcon(Icons.add));
   await tester.pumpAndSettle();
+  print('here');
   await modifyCurrentNote(tester,
       title: title, content: content, source: source, closeDialog: closeDialog);
+}
+
+bool checkSourceInContent(content, source) {
+  RegExp r = RegExp(Note.urlRegex, multiLine: true);
+
+  var matches = r.allMatches(content);
+  var url = matches.firstOrNull?.group(0);
+
+  if (url == source) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 Future<void> modifyCurrentNote(
@@ -135,7 +150,17 @@ Future<void> modifyCurrentNote(
         content);
   }
   if (source != null) {
-    await tester.enterText(find.bySemanticsLabel('Source'), source);
+    if (content == null) {
+      print(getContentFieldText(tester));
+    } else {
+      var currentText = getContentFieldText(tester);
+      var content2 = source + '\n' + currentText!;
+
+      await tester.enterText(
+          find.descendant(
+              of: find.byType(ContentField), matching: find.byType(TextField)),
+          content2);
+    }
   }
   await tester.pumpAndSettle(
       const Duration(seconds: 1)); // Wait for animation to finish

@@ -56,6 +56,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   Note currNote = Note.empty();
   bool hasNewChanges = false;
   bool isNoteShareable = false;
+  bool showSourceContainer = true;
   Timer? saveTimer;
   DateTime modifiedAt = DateTime(2000);
   DateTime? savedAt;
@@ -73,7 +74,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteLoading.update((_) => true);
     final db = ref.read(dbProvider);
     var sourceUrl = await db.uploadAttachment(fileBytes: attachment);
-    sourceController.text = sourceUrl;
+    contentController.text =
+        '[]($sourceUrl)' + ' \n\n' + contentController.text;
     noteLoading.update((_) => false);
     onChanged();
   }
@@ -222,6 +224,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     bool isNoteDiff = unsavedNote.content != contentController.text ||
         unsavedNote.title != titleController.text ||
         unsavedNote.source != sourceController.text;
+    updateLink();
     if (isNoteDiff) {
       noteUtils.cachedNote = getNote();
       storeUnsavedNote();
@@ -234,6 +237,12 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         hasNewChanges = false;
       });
     }
+  }
+
+  void toggleSourceContainerVisibility() {
+    setState(() {
+      showSourceContainer = !showSourceContainer; // toggle the value
+    });
   }
 
   void handleNoteEvent(NoteEvent e) {
@@ -332,6 +341,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     }
 
     initSourceMetadata(currNote.sourceMetadata);
+    updateLink();
   }
 
   void onCommandRun(String alias) async {
@@ -385,6 +395,27 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
         .replaceAll(RegExp(r"- \[x\] ?(\n|$)"), "- [x]\n");
   }
 
+  void updateLink() {
+    RegExp r = RegExp(Note.urlRegex, multiLine: true);
+
+    var matches = r.allMatches(contentController.text);
+    var url = matches.firstOrNull?.group(0);
+    print("sourcecontrol Text ${sourceController.text}");
+    print("url: $url");
+    print("content: ${contentController.text}");
+    if (url == null) {
+      if (sourceController.text == '') {
+        showSourceContainer = false;
+      } else {
+        showSourceContainer = true;
+      }
+    } else {
+      sourceController.text =
+          url; // Adjust this if you're using a different group for the URL match.
+      showSourceContainer = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
@@ -398,6 +429,8 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
             ? TextDirection.rtl
             : TextDirection.ltr;
     initCurrNote();
+    // print(showSourceContainer);
+    // print(sourceController.text);
     return Actions(
       actions: <Type, Action<Intent>>{
         SaveIntent: CallbackAction(onInvoke: (Intent intent) {
@@ -418,7 +451,7 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
-                children: [
+                children: <Widget>[
                   Text(widget.note.getShortDateTimeStr(),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color:
@@ -429,13 +462,15 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
                       autofocus: autoFocusTitle && hasEmptyFields,
                       textDirection: textDirection),
                   ExcludeFocusTraversal(
+                      child: Visibility(
+                    visible: showSourceContainer,
                     child: SourceContainer(
                         controller: sourceController,
                         metadata: sourceMetadata,
                         onChanged: onChanged,
                         onClearSource: onClearSource,
                         textDirection: textDirection),
-                  ),
+                  )),
                   const Divider(),
                   if (widget.previewEnabled && !widget.checkListEnabled)
                     Markdown(

@@ -92,7 +92,8 @@ class _ContentFieldState extends ConsumerState<ContentField> {
     try {
       Note? newNote = await db.addAttachmentToNewNote(fileBytes: fileBytes);
       if (newNote != null) {
-        db.insertTextAtSelection(widget.controller, "[[${newNote.title}]]");
+        // ask if we want to add the attachment to the current note
+        db.insertTextAtSelection(widget.controller, "![](${newNote.title})");
         widget.onChanged?.call();
       }
     } on FleetingNotesException catch (e) {
