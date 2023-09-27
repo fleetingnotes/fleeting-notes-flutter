@@ -99,7 +99,8 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
     overlay.insert(overlayEntry);
   }
 
-  List<Widget> getToolbarButtons(ToolbarState toolbarState) {
+  List<Widget> getToolbarButtons(
+      ToolbarState toolbarState, BuildContext context) {
     final editButtons = [
       KeyboardButton(
         child: const Icon(Icons.undo, size: 20),
@@ -112,6 +113,13 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
         child: const Icon(Icons.redo, size: 20),
         onPressed: () {
           undoController.redo();
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        child: const Icon(Icons.calendar_month, size: 20),
+        onPressed: () {
+          shortcuts.toggleDatePicker(context);
           onContentChanged?.call(controller.text);
         },
       ),
@@ -217,7 +225,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
             child: ListView(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
-              children: getToolbarButtons(toolbarState),
+              children: getToolbarButtons(toolbarState, context),
             ),
           ),
           const VerticalDivider(width: 5),
