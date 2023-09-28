@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fleeting_notes_flutter/models/note_history.dart';
 import 'package:fleeting_notes_flutter/screens/note/components/note_editor_bottom_app_bar.dart';
 import 'package:fleeting_notes_flutter/screens/note/stylable_textfield_controller.dart';
@@ -263,6 +264,22 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     ));
   }
 
+  Future<void> onAddAttachment(
+    BuildContext context,
+    Note? n,
+    String fn,
+    Uint8List? fb,
+    TextEditingController contentController,
+  ) async {
+    final noteUtils = ref.watch(noteUtilsProvider);
+    if (n == null) return;
+    final noteLoadingNotifier = ref.read(noteLoadingProvider.notifier);
+    noteLoadingNotifier.update((_) => true);
+    await noteUtils.onAddAttachment(context, n, fn, fb,
+        controller: contentController);
+    noteLoadingNotifier.update((_) => false);
+  }
+
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = StyleableTextFieldController(
     styles: TextPartStyleDefinitions(definitionList: [
@@ -332,21 +349,28 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
                         ? const SizedBox(
                             height: 100,
                             child: Center(child: CircularProgressIndicator()))
-                        : NoteEditor(
-                            note: renderNote,
-                            titleController: titleController,
-                            contentController: contentController,
-                            sourceController: sourceController,
-                            autofocus: autofocus,
-                            previewEnabled: previewEnabled,
-                            padding: const EdgeInsets.only(
-                                left: 24, right: 24, bottom: 16),
-                            attachment: widget.attachment,
-                            checkedItems: checkedItems,
-                            uncheckedItems: uncheckedItems,
-                            checkListEnabled: checkedItems.isNotEmpty ||
-                                uncheckedItems.isNotEmpty ||
-                                checkListEnabled,
+                        : DropTarget(
+                            onDragDone: (details) => setState(() async {
+                              final file = details.files.first;
+                              onAddAttachment(context, renderNote, file.name,
+                                  await file.readAsBytes(), contentController);
+                            }),
+                            child: NoteEditor(
+                              note: renderNote,
+                              titleController: titleController,
+                              contentController: contentController,
+                              sourceController: sourceController,
+                              autofocus: autofocus,
+                              previewEnabled: previewEnabled,
+                              padding: const EdgeInsets.only(
+                                  left: 24, right: 24, bottom: 16),
+                              attachment: widget.attachment,
+                              checkedItems: checkedItems,
+                              uncheckedItems: uncheckedItems,
+                              checkListEnabled: checkedItems.isNotEmpty ||
+                                  uncheckedItems.isNotEmpty ||
+                                  checkListEnabled,
+                            ),
                           ),
                   ),
                   if (bottomAppBarVisible)
