@@ -34,7 +34,7 @@ class NoteUtils {
 
   Future<void> handleCopyLink(BuildContext context, String noteId) async {
     Clipboard.setData(ClipboardData(
-        text: p.join("https://my.fleetingnotes.app/", "note/${noteId}")));
+        text: p.join("https://my.fleetingnotes.app/", "note/$noteId")));
     showSnackbar(context, 'URL copied to clipboard');
   }
 
