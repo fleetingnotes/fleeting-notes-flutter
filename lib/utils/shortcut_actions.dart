@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/utils/toolbar.dart';
 import 'package:intl/intl.dart';
@@ -44,8 +45,7 @@ class ShortcutActions {
     });
   }
 
-// TODO: Make a call to the settings and set the date format
-  void toggleDatePicker(context) {
+  void toggleDatePicker(context, Settings settings) {
     // Open the Flutter date picker
     showDatePicker(
       context: context,
@@ -55,7 +55,8 @@ class ShortcutActions {
     ).then((selectedDate) {
       if (selectedDate != null) {
         // Format the selected date as a string
-        String formattedDate = DateFormat.yMd().format(selectedDate);
+        String formattedDate =
+            DateFormat(settings.get('date-format')).format(selectedDate);
         // Insert the selected date into the text field
         action(formattedDate, '');
       }
