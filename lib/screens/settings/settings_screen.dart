@@ -5,6 +5,7 @@ import 'package:fleeting_notes_flutter/screens/settings/components/plugin_comman
 import 'package:fleeting_notes_flutter/screens/settings/components/settings_item_slider.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/settings_item_switch.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/settings_title.dart';
+import 'package:fleeting_notes_flutter/screens/settings/toolbar_settings.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
 import 'package:fleeting_notes_flutter/widgets/info_card.dart';
 import 'package:flutter/foundation.dart';
@@ -261,7 +262,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final db = ref.watch(dbProvider);
+    final db = ref.read(dbProvider);
     return ScaffoldMessenger(
       child: Scaffold(
         appBar: AppBar(
@@ -366,6 +367,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             defaultValue: false,
                             description:
                                 "Enable right to left in text when creating new note"),
+                        const ToolbarSettings(),
                         const SizedBox(height: 24),
                         const LegalLinks(),
                       ],

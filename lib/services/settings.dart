@@ -20,6 +20,7 @@ class Settings {
     'dark-mode': bool,
     'text-scale-factor': double,
     'first-time-open': bool,
+    'date-format': String,
     'unsaved-note': Note,
     'append-same-source': bool,
     'search-is-list-view': bool,
