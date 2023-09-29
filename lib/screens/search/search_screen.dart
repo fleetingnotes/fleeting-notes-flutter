@@ -277,11 +277,38 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   deleteNotes: deleteNotes,
                   onToggleNotesPinned: onToggleNotesPinned),
         ),
-        if (pinnedNotes.isNotEmpty) const CustomTitleRow(title: "PINNED"),
-        if (pinnedNotes.isNotEmpty) Expanded(child: getSearchList(pinnedNotes)),
-        if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
-          const CustomTitleRow(title: "OTHERS"),
-        Expanded(child: getSearchList(notes)),
+        Expanded(
+            child: CustomScrollView(
+          slivers: [
+            if (pinnedNotes.isNotEmpty)
+              const SliverToBoxAdapter(
+                child: CustomTitleRow(title: "PINNED"),
+              ),
+            if (pinnedNotes.isNotEmpty)
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    getSearchList(pinnedNotes),
+                  ],
+                ),
+              ),
+            if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 44.0),
+              ),
+            if (pinnedNotes.isNotEmpty && notes.isNotEmpty)
+              const SliverToBoxAdapter(
+                child: CustomTitleRow(title: "OTHERS"),
+              ),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  getSearchList(notes),
+                ],
+              ),
+            ),
+          ],
+        )),
       ],
     );
   }
@@ -345,6 +372,8 @@ class NoteGrid extends StatelessWidget {
       child: (crossAxisCount == 1 && childAspectRatio == null)
           ? ListView.builder(
               key: const PageStorageKey('ListOfNotes'),
+              physics: const NeverScrollableScrollPhysics(),
+              // shrinkWrap: true,
               padding: padding,
               controller: controller,
               itemCount: notes.length,
@@ -361,9 +390,10 @@ class NoteGrid extends StatelessWidget {
               ),
             )
           : GridView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               key: const PageStorageKey('ListOfNotes'),
               padding: padding,
+              shrinkWrap: true,
               controller: controller,
               itemCount: notes.length,
               itemBuilder: (context, index) => NoteCard(
