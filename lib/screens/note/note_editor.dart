@@ -378,6 +378,28 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
     noteLoading.update((_) => false);
   }
 
+  ThemeData _updateFontSize(ThemeData originalTheme, double scaleFactor) {
+    return originalTheme.copyWith(
+      textTheme: originalTheme.textTheme.copyWith(
+        bodyLarge: originalTheme.textTheme.bodyLarge?.copyWith(
+            fontSize: (originalTheme.textTheme.bodyLarge?.fontSize ?? 14) *
+                scaleFactor),
+        bodyMedium: originalTheme.textTheme.bodyMedium?.copyWith(
+            fontSize: (originalTheme.textTheme.bodyMedium?.fontSize ?? 13) *
+                scaleFactor),
+        bodySmall: originalTheme.textTheme.bodySmall?.copyWith(
+            fontSize: (originalTheme.textTheme.bodySmall?.fontSize ?? 12) *
+                scaleFactor),
+        titleLarge: originalTheme.textTheme.titleLarge?.copyWith(
+            fontSize: (originalTheme.textTheme.titleLarge?.fontSize ?? 20) *
+                scaleFactor),
+        titleSmall: originalTheme.textTheme.titleSmall?.copyWith(
+            fontSize: (originalTheme.textTheme.titleSmall?.fontSize ?? 16) *
+                scaleFactor),
+      ),
+    );
+  }
+
   // TODO: fix work around (https://github.com/fleetingnotes/fleeting-notes-flutter/pull/906)
   String get replacedText {
     return contentController.text
@@ -389,83 +411,95 @@ class _NoteEditorState extends ConsumerState<NoteEditor> {
   Widget build(BuildContext context) {
     final noteUtils = ref.watch(noteUtilsProvider);
     final db = ref.watch(dbProvider);
+    final settings = ref.watch(settingsProvider);
+    final textScale = settings.get('text-scale-factor') ?? 1.0;
+    TextStyle updatedStyle = const TextStyle();
+    double newFontSize = (updatedStyle.fontSize ?? 1.0) * textScale;
+    updatedStyle = updatedStyle.copyWith(fontSize: newFontSize);
     bool autoFocusTitle =
         db.settings.get('auto-focus-title', defaultValue: true);
     bool hasEmptyFields =
         widget.note.title.isEmpty && widget.note.content.isEmpty;
+
     TextDirection textDirection =
         db.settings.get('right-to-left', defaultValue: false)
             ? TextDirection.rtl
             : TextDirection.ltr;
     initCurrNote();
-    return Actions(
-      actions: <Type, Action<Intent>>{
-        SaveIntent: CallbackAction(onInvoke: (Intent intent) {
-          if (db.settings.get('unsaved-note') != null) {
-            saveTimer?.cancel();
-            _saveNote();
-          }
-          return null;
-        }),
-      },
-      child: KeyboardVisibilityBuilder(builder: (context, kbVisible) {
-        return Padding(
-          padding:
-              (kbVisible) ? const EdgeInsets.only(bottom: 52) : EdgeInsets.zero,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: widget.padding ?? EdgeInsets.zero,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(widget.note.getShortDateTimeStr(),
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant)),
-                  TitleField(
-                      controller: titleController,
-                      onChanged: onChanged,
-                      autofocus: autoFocusTitle && hasEmptyFields,
-                      textDirection: textDirection),
-                  ExcludeFocusTraversal(
-                    child: SourceContainer(
-                        controller: sourceController,
-                        metadata: sourceMetadata,
+    return Theme(
+      data: _updateFontSize(Theme.of(context), textScale),
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          SaveIntent: CallbackAction(onInvoke: (Intent intent) {
+            if (db.settings.get('unsaved-note') != null) {
+              saveTimer?.cancel();
+              _saveNote();
+            }
+            return null;
+          }),
+        },
+        child: KeyboardVisibilityBuilder(builder: (context, kbVisible) {
+          return Padding(
+            padding: (kbVisible)
+                ? const EdgeInsets.only(bottom: 52)
+                : EdgeInsets.zero,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: widget.padding ?? EdgeInsets.zero,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(widget.note.getShortDateTimeStr(),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant)),
+                    TitleField(
+                        controller: titleController,
                         onChanged: onChanged,
-                        onClearSource: onClearSource,
+                        autofocus: autoFocusTitle && hasEmptyFields,
                         textDirection: textDirection),
-                  ),
-                  const Divider(),
-                  if (widget.previewEnabled && !widget.checkListEnabled)
-                    Markdown(
-                      data: replacedText,
-                      shrinkWrap: true,
-                      physics: const ClampingScrollPhysics(),
-                      padding: const EdgeInsets.only(top: 8),
+                    ExcludeFocusTraversal(
+                      child: SourceContainer(
+                          controller: sourceController,
+                          metadata: sourceMetadata,
+                          onChanged: onChanged,
+                          onClearSource: onClearSource,
+                          textDirection: textDirection),
                     ),
-                  if (widget.checkListEnabled)
-                    ChecklistField(
-                      checkedItems: widget.checkedItems ?? [],
-                      controller: contentController,
-                      uncheckedItems: widget.uncheckedItems ?? [],
-                      onChanged: onChanged,
-                    ),
-                  if (!widget.previewEnabled && !widget.checkListEnabled)
-                    ContentField(
-                      controller: contentController,
-                      onChanged: onChanged,
-                      onPop: () => noteUtils.onPopNote(context, widget.note.id),
-                      onCommandRun: onCommandRun,
-                      autofocus: !autoFocusTitle && hasEmptyFields,
-                      textDirection: textDirection,
-                    ),
-                ],
+                    const Divider(),
+                    if (widget.previewEnabled && !widget.checkListEnabled)
+                      Markdown(
+                        data: replacedText,
+                        shrinkWrap: true,
+                        physics: const ClampingScrollPhysics(),
+                        padding: const EdgeInsets.only(top: 8),
+                      ),
+                    if (widget.checkListEnabled)
+                      ChecklistField(
+                        checkedItems: widget.checkedItems ?? [],
+                        controller: contentController,
+                        uncheckedItems: widget.uncheckedItems ?? [],
+                        onChanged: onChanged,
+                      ),
+                    if (!widget.previewEnabled && !widget.checkListEnabled)
+                      ContentField(
+                        controller: contentController,
+                        onChanged: onChanged,
+                        onPop: () =>
+                            noteUtils.onPopNote(context, widget.note.id),
+                        onCommandRun: onCommandRun,
+                        autofocus: !autoFocusTitle && hasEmptyFields,
+                        textDirection: textDirection,
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
