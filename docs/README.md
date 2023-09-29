@@ -1,7 +1,7 @@
 # Fleeting Notes
 Fleeting Notes is like Apple Notes but with better integration to other apps
 
-docs: https://www.fleetingnotes.app/docs/contributing/start-here
+docs: https://docs.fleetingnotes.app/contributing/flutter-application
 
 ## How-Tos
 - [How to Build Web Extensions for Dev](build_web_extension_for_dev.md)
@@ -11,3 +11,5 @@ docs: https://www.fleetingnotes.app/docs/contributing/start-here
 - [How to Update App Name](update_app_name.md)
 - [How to Update Logo](update_logo.md)
 
+## Helpful links
+- https://codewithandrea.com/articles/flutter-state-management-riverpod/
