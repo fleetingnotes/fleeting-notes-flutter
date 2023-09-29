@@ -32,6 +32,12 @@ class NoteUtils {
     showSnackbar(context, 'URL copied to clipboard');
   }
 
+  Future<void> handleCopyLink(BuildContext context, String noteId) async {
+    Clipboard.setData(ClipboardData(
+        text: p.join("https://my.fleetingnotes.app/", "note/$noteId")));
+    showSnackbar(context, 'URL copied to clipboard');
+  }
+
   Future<bool> handleDeleteNote(BuildContext context, List<Note> notes) async {
     final db = ref.read(dbProvider);
     try {

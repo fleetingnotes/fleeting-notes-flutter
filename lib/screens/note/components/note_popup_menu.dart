@@ -106,6 +106,14 @@ class _NotePopupMenuState extends ConsumerState<NotePopupMenu> {
           ),
           onTap: widget.onShare,
         ),
+        PopupMenuItem(
+          child: const ListTile(
+            title: Text("Copy Link"),
+            leading: Icon(Icons.link),
+            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0),
+          ),
+          onTap: () => noteUtils.handleCopyLink(context, note.id),
+        ),
         if (widget.deleteOption)
           PopupMenuItem(
             child: const ListTile(
