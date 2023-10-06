@@ -476,7 +476,7 @@
 				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Matthew Wong (4MLDMH9QYL)";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "3rd Party Mac Developer Application: Matthew Wong (4MLDMH9QYL)";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 74;
+				CURRENT_PROJECT_VERSION = 75;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = 4MLDMH9QYL;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -490,7 +490,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 0.11.1;
+				MARKETING_VERSION = 0.11.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -512,7 +512,7 @@
 				CODE_SIGN_IDENTITY = "3rd Party Mac Developer Application: Matthew Wong (4MLDMH9QYL)";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "3rd Party Mac Developer Application: Matthew Wong (4MLDMH9QYL)";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 74;
+				CURRENT_PROJECT_VERSION = 75;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = 4MLDMH9QYL;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -526,7 +526,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 0.11.1;
+				MARKETING_VERSION = 0.11.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -552,7 +552,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 74;
+				CURRENT_PROJECT_VERSION = 75;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = 4MLDMH9QYL;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -568,7 +568,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 0.11.1;
+				MARKETING_VERSION = 0.11.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -595,7 +595,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "3rd Party Mac Developer Application: Matthew Wong (4MLDMH9QYL)";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 74;
+				CURRENT_PROJECT_VERSION = 75;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = 4MLDMH9QYL;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -611,7 +611,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 0.11.1;
+				MARKETING_VERSION = 0.11.2;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
