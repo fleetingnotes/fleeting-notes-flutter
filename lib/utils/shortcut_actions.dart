@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/utils/toolbar.dart';
+import 'package:intl/intl.dart';
 
 class ShortcutActions {
   late String prevText;
@@ -40,6 +41,23 @@ class ShortcutActions {
         return line.replaceFirst('- ', '');
       }
       return '- ' + line;
+    });
+  }
+
+  void toggleDatePicker(context, String dateFormat) {
+    // Open the Flutter date picker
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    ).then((selectedDate) {
+      if (selectedDate != null) {
+        // Format the selected date as a string
+        String formattedDate = DateFormat(dateFormat).format(selectedDate);
+        // Insert the selected date into the text field
+        action(formattedDate, '');
+      }
     });
   }
 

@@ -44,7 +44,6 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
     final toolbarProviderState = ref.read(toolbarProvider.notifier);
     final RenderBox toolbarBox = context.findRenderObject() as RenderBox;
     final toolbarPosition = toolbarBox.localToGlobal(Offset.zero);
-
     final overlay = Overlay.of(context);
     const double menuHeight = 180;
     const double menuWidth = 200;
@@ -99,7 +98,8 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
     overlay.insert(overlayEntry);
   }
 
-  List<Widget> getToolbarButtons(ToolbarState toolbarState) {
+  List<Widget> getToolbarButtons(
+      ToolbarState toolbarState, BuildContext context, WidgetRef ref) {
     final editButtons = [
       KeyboardButton(
         child: const Icon(Icons.undo, size: 20),
@@ -112,6 +112,15 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
         child: const Icon(Icons.redo, size: 20),
         onPressed: () {
           undoController.redo();
+          onContentChanged?.call(controller.text);
+        },
+      ),
+      KeyboardButton(
+        child: const Icon(Icons.calendar_month, size: 20),
+        onPressed: () {
+          final settings = ref.read(settingsProvider);
+          String dateFormat = settings.get('date-format');
+          shortcuts.toggleDatePicker(context, dateFormat);
           onContentChanged?.call(controller.text);
         },
       ),
@@ -217,7 +226,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
             child: ListView(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
-              children: getToolbarButtons(toolbarState),
+              children: getToolbarButtons(toolbarState, context, ref),
             ),
           ),
           const VerticalDivider(width: 5),
