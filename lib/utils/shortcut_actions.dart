@@ -1,4 +1,3 @@
-import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:fleeting_notes_flutter/utils/toolbar.dart';
 import 'package:intl/intl.dart';
@@ -45,7 +44,7 @@ class ShortcutActions {
     });
   }
 
-  void toggleDatePicker(context, Settings settings) {
+  void toggleDatePicker(context, String dateFormat) {
     // Open the Flutter date picker
     showDatePicker(
       context: context,
@@ -55,8 +54,7 @@ class ShortcutActions {
     ).then((selectedDate) {
       if (selectedDate != null) {
         // Format the selected date as a string
-        String formattedDate =
-            DateFormat(settings.get('date-format')).format(selectedDate);
+        String formattedDate = DateFormat(dateFormat).format(selectedDate);
         // Insert the selected date into the text field
         action(formattedDate, '');
       }

@@ -262,7 +262,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final db = ref.read(dbProvider);
+    final db = ref.watch(dbProvider);
     return ScaffoldMessenger(
       child: Scaffold(
         appBar: AppBar(

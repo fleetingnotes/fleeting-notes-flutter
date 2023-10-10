@@ -1,6 +1,5 @@
 import 'package:fleeting_notes_flutter/screens/note/components/ContentField/keyboard_button.dart';
 import 'package:fleeting_notes_flutter/services/providers.dart';
-import 'package:fleeting_notes_flutter/services/settings.dart';
 import 'package:fleeting_notes_flutter/utils/shortcut_actions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,7 +99,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
   }
 
   List<Widget> getToolbarButtons(
-      ToolbarState toolbarState, BuildContext context, Settings settings) {
+      ToolbarState toolbarState, BuildContext context, WidgetRef ref) {
     final editButtons = [
       KeyboardButton(
         child: const Icon(Icons.undo, size: 20),
@@ -119,7 +118,9 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
       KeyboardButton(
         child: const Icon(Icons.calendar_month, size: 20),
         onPressed: () {
-          shortcuts.toggleDatePicker(context, settings);
+          final settings = ref.read(settingsProvider);
+          String dateFormat = settings.get('date-format');
+          shortcuts.toggleDatePicker(context, dateFormat);
           onContentChanged?.call(controller.text);
         },
       ),
@@ -211,8 +212,6 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   build(BuildContext context, WidgetRef ref) {
     final toolbarState = ref.watch(toolbarProvider);
-    final settings = ref.read(settingsProvider);
-
     return SizedBox(
       height: preferredSize.height,
       width: MediaQuery.of(context).size.width,
@@ -227,7 +226,7 @@ class TextFieldToolbar extends ConsumerWidget implements PreferredSizeWidget {
             child: ListView(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
-              children: getToolbarButtons(toolbarState, context, settings),
+              children: getToolbarButtons(toolbarState, context, ref),
             ),
           ),
           const VerticalDivider(width: 5),

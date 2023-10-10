@@ -56,7 +56,7 @@ class _ToolbarSettingsState extends ConsumerState<ToolbarSettings> {
                 }
                 currentDateformat = _isDateFormatValid(value);
                 if (currentDateformat != 'null') {
-                  ref.read(settingsProvider).set('date-format', value);
+                  ref.watch(settingsProvider).set('date-format', value);
                 }
               });
             },
