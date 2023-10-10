@@ -71,6 +71,31 @@ struct NoteListWidgetExtensionEntryView : View {
         Link(destination: URL(string: "fleetingNotesWidget://home&homeWidget")!) {
             ZStack(alignment: .bottomTrailing) {
                 VStack(alignment: .leading) {
+                    // TODO: Make sure box is same height as text
+                    HStack(alignment: .top,spacing: 10){
+                        Text("Notes 2")
+                            .font(.title)
+                            .padding(3)
+
+                        Spacer() // This will push the text to the left and the button to the right
+
+                        Link(destination: URL(string: "fleetingNotesWidget://note?homeWidget")!) {
+                            Button(action: {
+                                // action here
+                            }) {
+                                Image(systemName: "plus")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 15, height: 15)
+                                    .padding(5)
+                            }
+                            .background(Color.accentColor)
+                            .foregroundColor(Color.white)
+                            .cornerRadius(2)
+                            .padding(5)
+                            .frame(alignment: .bottomTrailing)
+                        } 
+                    }
                     ForEach(Array(entry.notes.prefix(5))) { note in
                         Link(destination: URL(string: "fleetingNotesWidget://note?id=\(note.id)&homeWidget")!) {
                             VStack(alignment: .leading) {
@@ -102,22 +127,7 @@ struct NoteListWidgetExtensionEntryView : View {
                 .padding(5)
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
                 .background(Color(UIColor.systemBackground))
-                Link(destination: URL(string: "fleetingNotesWidget://note?homeWidget")!) {
-                    Button(action: {
-                        // action here
-                    }) {
-                        Image(systemName: "plus")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 15, height: 15)
-                            .padding(15)
-                    }
-                    .background(Color.accentColor)
-                    .foregroundColor(Color.white)
-                    .cornerRadius(10)
-                    .padding(5)
-                    .frame(alignment: .bottomTrailing)
-                }
+
                 
             }
         }
