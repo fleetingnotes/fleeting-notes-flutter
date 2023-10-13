@@ -1,3 +1,4 @@
+import 'package:fleeting_notes_flutter/screens/settings/components/click_button_with_delay.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/delete_account_widget.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/setting_item.dart';
 import 'package:fleeting_notes_flutter/screens/settings/components/update_phone_widget.dart';
@@ -45,8 +46,8 @@ class _AccountState extends ConsumerState<Account> {
           name: 'Force Sync',
           description: 'Sync notes from the cloud to the device',
           actions: [
-            ElevatedButton(
-                onPressed: widget.onForceSync, child: const Text('Force sync'))
+            ClickButtonWithDelay(
+                onPressed: widget.onForceSync, buttonText: 'Force Sync')
           ],
         ),
         SettingsItem(
