@@ -124,7 +124,7 @@ void main() {
     resizeToMobile(tester);
     await fnPumpWidget(tester, const MyApp());
     await tester.enterText(
-        find.bySemanticsLabel('Search Notes'), 'hello world');
+        find.bySemanticsLabel('Search Notes'), 'test');
     await tester.pump();
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pump();
@@ -149,7 +149,7 @@ void main() {
   testWidgets('Search bar input has text direction ltr by default',
       (tester) async {
     await fnPumpWidget(tester, const MyApp());
-    expect(tester.widget<TextField>(find.byType(TextField)).textDirection,
+    expect(tester.widget<Directionality>(find.byType(Directionality)).textDirection,
         TextDirection.ltr);
   });
 
@@ -157,9 +157,8 @@ void main() {
       (WidgetTester tester) async {
     var mocks = await fnPumpWidget(tester, const MyApp());
     await mocks.db.settings.set('right-to-left', true);
-
-    expect(tester.widget<TextField>(find.byType(TextField)).textDirection,
-        TextDirection.ltr);
+    expect(tester.widget<Directionality>(find.byType(Directionality)).textDirection,
+        TextDirection.rtl);
   });
 
   testWidgets('When search by dialog has all unchecked boxes, then no notes',
